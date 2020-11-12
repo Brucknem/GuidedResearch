@@ -1,0 +1,6 @@
+<launch>
+    <group ns="data">
+        <node pkg="rosbag" type="play" name="s40" output="screen" args="--clock -l -r 1 /home/brucknem/bagfiles/providentia/2020-08-26-11-29-19.bag"/>
+        <node pkg="rosbag" type="play" name="s50" output="screen" args="--clock -l -r 1 /home/brucknem/bagfiles/providentia/2020-08-26-11-29-20.bag"/>
+    </group>
+</launch>

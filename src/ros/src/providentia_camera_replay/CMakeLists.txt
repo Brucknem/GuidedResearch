@@ -14,6 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
 )
 
+catkin_python_setup()
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -161,7 +163,8 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  scripts/opencv_replay.py
+  src/opencv_replay.py
+  src/opencv_visualization.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -197,11 +200,11 @@ catkin_install_python(PROGRAMS
 ## Testing ##
 #############
 
-## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_providentia_camera_replay.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
+## Add gtest based cpp visualization target and link libraries
+# catkin_add_gtest(${PROJECT_NAME}-visualization visualization/test_providentia_camera_replay.cpp)
+# if(TARGET ${PROJECT_NAME}-visualization)
+#   target_link_libraries(${PROJECT_NAME}-visualization ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)
+# catkin_add_nosetests(visualization)

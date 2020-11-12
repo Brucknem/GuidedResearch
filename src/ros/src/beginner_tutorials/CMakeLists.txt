@@ -198,11 +198,11 @@ catkin_install_python(PROGRAMS
 ## Testing ##
 #############
 
-## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_beginner_tutorials.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
+## Add gtest based cpp visualization target and link libraries
+# catkin_add_gtest(${PROJECT_NAME}-visualization visualization/test_beginner_tutorials.cpp)
+# if(TARGET ${PROJECT_NAME}-visualization)
+#   target_link_libraries(${PROJECT_NAME}-visualization ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)
+# catkin_add_nosetests(visualization)
