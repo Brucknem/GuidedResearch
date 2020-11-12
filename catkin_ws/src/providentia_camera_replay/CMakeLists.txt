@@ -163,9 +163,9 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  src/opencv_replay.py
-  src/opencv_visualization.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    scripts/multistream_replay.py
+    scripts/opencv_convert.py
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 ## Mark executables for installation
