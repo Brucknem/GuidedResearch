@@ -1,0 +1,16 @@
+<launch>
+    <group ns="s50">
+        <node pkg="providentia_camera_replay" name="far" type="opencv_replay.py" output="screen" args="/s50/s/cam/far/image_raw 0 20 860 600"/>
+        <node pkg="providentia_camera_replay" name="near" type="opencv_replay.py" output="screen" args="/s50/s/cam/near/image_raw 0 690 860 600"/>
+    </group>
+
+    <group ns="s40">
+        <node pkg="providentia_camera_replay" name="far" type="opencv_replay.py" output="screen" args="/s40/n/cam/far/image_raw 860 20 860 600"/>
+        <node pkg="providentia_camera_replay" name="near" type="opencv_replay.py" output="screen" args="/s40/n/cam/near/image_raw 860 690 860 600"/>
+    </group>
+
+    <group ns="data">
+        <node pkg="rosbag" type="play" name="s40" output="screen" args="--clock -l -r 1 /home/brucknem/bagfiles/providentia/2020-08-26-11-29-19.bag"/>
+        <node pkg="rosbag" type="play" name="s50" output="screen" args="--clock -l -r 1 /home/brucknem/bagfiles/providentia/2020-08-26-11-29-20.bag"/>
+    </group>
+</launch>
