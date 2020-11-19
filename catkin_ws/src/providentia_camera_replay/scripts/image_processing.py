@@ -5,7 +5,12 @@ import cv2
 import numpy as np
 
 
-def resize_images(images, size):
+def calculate_new_size(image, scale):
+    rows, columns = image.shape[0:2]
+    return int(columns * scale), int(rows * scale)
+
+
+def resize_images(images, scale):
     """
     Resizes the given images to the given size.
 
@@ -17,9 +22,9 @@ def resize_images(images, size):
         list|dict
     """
     if type(images) is dict:
-        return dict(map(lambda kv: (kv[0], cv2.resize(kv[1], size)), images.iteritems()))
+        return dict(map(lambda kv: (kv[0], cv2.resize(kv[1], calculate_new_size(kv[1], scale))), images.iteritems()))
     elif type(images) is list:
-        return list(map(lambda image: cv2.resize(image, size), images))
+        return list(map(lambda image: cv2.resize(image, calculate_new_size(image, scale)), images))
     else:
         return images
 

@@ -30,10 +30,10 @@ def main(args):
         args: list
     """
     args = rospy.myargv(args)
-    size = (int(args[1]), int(args[2]))
+    scale = float(args[1])
 
     layout_entries = []
-    for i in range(3, len(args), 3):
+    for i in range(2, len(args), 3):
         layout_entries.append(LayoutEntry(*args[i:i + 3]))
 
     rospy.on_shutdown(shutdown_signal_hook)
@@ -47,7 +47,7 @@ def main(args):
     try:
         while not rospy.is_shutdown():
             images = ros_stream_to_open_cv_converter.get_images()
-            images = resize_images(images, size)
+            images = resize_images(images, scale)
             images = add_topic_mark(images)
             render_image = layout_images(images, layout_entries)
             cv2.imshow(window_name, render_image)
