@@ -15,6 +15,7 @@ TOOLTIPS = [
     ("index", "$index"),
     ("(x,y)", "($x, $y)"),
 ]
+tools="pan,wheel_zoom,box_zoom,reset,hover,save"
 
 def generate_plot(filename):
     df = pd.read_csv(filename)
@@ -27,7 +28,7 @@ def generate_plot(filename):
 
     title = filename.split('/')[-1]
 
-    fig = figure(title=title, tooltips=TOOLTIPS, tools="pan,wheel_zoom,box_zoom,reset,hover", active_drag="pan")
+    fig = figure(title=title, tooltips=TOOLTIPS, tools=tools, active_drag="pan")
 
     for index, column in enumerate(value_columns):
         fig.line('Milliseconds', column, source=cds, color=colors[index], legend_label=column)
@@ -63,7 +64,7 @@ if __name__ == '__main__':
     data_folder = os.path.expanduser(sys.argv[1])
     output_filename = os.path.expanduser(sys.argv[2])
     if '.' in output_filename:
-        output_filename = output_filename.split('.')
+        output_filename = output_filename.split('.')[0]
     output_filename += '.html'
 
     plots_per_line = 3
