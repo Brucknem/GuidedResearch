@@ -18,13 +18,16 @@ TOOLTIPS = [
 
 def generate_plot(filename):
     df = pd.read_csv(filename)
+    df['Milliseconds'] = df['Milliseconds'] / 1000.0
     cds = ColumnDataSource(df)
 
     value_columns = list(df.columns)
     del value_columns[0]
     del value_columns[0]
 
-    fig = figure(title=filename, tooltips=TOOLTIPS, tools="pan,wheel_zoom,box_zoom,reset,hover", active_drag="pan")
+    title = filename.split('/')[-1]
+
+    fig = figure(title=title, tooltips=TOOLTIPS, tools="pan,wheel_zoom,box_zoom,reset,hover", active_drag="pan")
 
     for index, column in enumerate(value_columns):
         fig.line('Milliseconds', column, source=cds, color=colors[index], legend_label=column)
@@ -68,3 +71,6 @@ if __name__ == '__main__':
         plots_per_line = int(sys.argv[3])
 
     generate_plots(data_folder, output_filename, plots_per_line)
+    
+    sys.exit(0)
+
