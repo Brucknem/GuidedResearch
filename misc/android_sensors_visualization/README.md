@@ -1,6 +1,13 @@
 ### Setup ### 
 
-Run the setup.sh script:
+1. Install the Android App [Sensor Record](https://play.google.com/store/apps/details?id=de.martingolpashin.sensor_record&hl=gsw&gl=US)
+2. Open it and record some data.
+3. Send the data to your PC running an \*nix based OS 
+4. Extract the zipped data folder including the recorded .csv files
+
+***
+
+5. Run the setup.sh script:
 
 ```bash setup.sh```
 
