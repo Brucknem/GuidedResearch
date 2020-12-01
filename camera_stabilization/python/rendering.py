@@ -18,7 +18,7 @@ def add_text(frame, text, color='white'):
 
     is_gpu = is_gpu_frame(frame)
     result = to_cpu_frame(frame)
-    cv.putText(result, text, (10, 40), cv.FONT_HERSHEY_SIMPLEX, 1.2, color, 2, cv.LINE_AA)
+    cv.putText(result, text, (10, 40), cv.FONT_HERSHEY_SIMPLEX, 1, color, 1, cv.LINE_AA)
 
     if is_gpu:
         result = to_gpu_frame(result)

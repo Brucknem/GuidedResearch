@@ -50,6 +50,7 @@ if __name__ == '__main__':
             result = frame
 
         result = cv.cuda.addWeighted(to_gpu_frame(previous_frame), alpha, to_gpu_frame(result), 1 - alpha, 0)
+        result = add_text(result, '{}/{}'.format(i, cap.num_frames))
         for roi, color in zip(optical_flow_rois, optical_flow_roi_colors):
             result = add_circle(result, roi, color)
             value = optical_flow.get_flow_value(roi[1], roi[0]).values()
