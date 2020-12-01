@@ -5,6 +5,7 @@ from os import listdir
 from os.path import isfile, join
 import numpy as np
 
+
 def read_files_in_path(path: str, file_ending: str = '.png'):
     """
     Read all files with the given ending in the given path
@@ -18,6 +19,8 @@ def read_files_in_path(path: str, file_ending: str = '.png'):
 
     files = []
     for f in listdir(path):
+        if not f.endswith(file_ending):
+            continue
         file_path = join(path, f)
         if isfile(file_path):
             files.append(file_path)
@@ -25,28 +28,43 @@ def read_files_in_path(path: str, file_ending: str = '.png'):
     return files
 
 
-class VideoCapture:
+class ImageBasedVideoCapture:
+    """
+    OpenCV video capture mock to stream image files like a video stream from disk
     """
 
-    """
-
-    def __init__(self, path: str, file_ending: str = '.png', frame_rate: int = 25, max_loaded_frames: int = 400):
+    def __init__(self, path: str, file_ending: str = '.png', frame_rate: int = 25, max_loaded_frames: int = 400,
+                 loop: bool = True):
         """
         constructor
 
-        :param path:
-        :param file_ending:
+        :param path: The path to the directory containing the image files
+        :param file_ending: The file ending of the images to load
+        :param frame_rate: The framerate of the video stream
+        :param max_loaded_frames: The maximum number of frames that can be in the frame buffer
+        :param loop: Loop when the last image is read
         """
         self.path = path
         self.file_names = read_files_in_path(path, file_ending)
         self.frames = {}
         self.num_frames = len(self.file_names)
         self.frame_index = 0
-        self.frame_rate = frame_rate
-        self.sleep_duration = 1.0 / frame_rate
+        # self.frame_rate = frame_rate
+        # self.sleep_duration = 1.0 / frame_rate
         self.max_loaded_frames = max_loaded_frames
+        self.loop = loop
 
     def read(self):
+        """
+        Reads the next frame from the list of images
+
+        :return: True and image if frame loaded successfully, False and None else
+        """
+        if self.loop:
+            self.frame_index %= self.num_frames
+        elif self.frame_index >= self.num_frames:
+            return False, None
+
         while len(self.frames) >= self.max_loaded_frames:
             del self.frames[list(self.frames.keys())[np.random.randint(0, len(self.frames))]]
 
@@ -56,11 +74,13 @@ class VideoCapture:
             self.frames[current_frame].upload(cv.imread(current_frame))
 
         current_frame = self.frames[current_frame]
-
-        self.frame_index = (self.frame_index + 1) % self.num_frames
+        self.frame_index = self.frame_index + 1
         return True, current_frame
 
     def get_frames(self):
+        """
+        Getter for the frames
+        """
         return self.frames
 
     def __str__(self):

@@ -25,6 +25,21 @@ def add_text(frame, text, color='white'):
     return result
 
 
+def add_circle(frame, center: tuple, color='white', **kwargs):
+    if type(color) is str:
+        color = colors.to_rgb(color)
+    color = color_to_255_rgb(color)
+    color.reverse()
+
+    is_gpu = is_gpu_frame(frame)
+    result = to_cpu_frame(frame)
+    cv.circle(result, center, 10, color, **kwargs)
+
+    if is_gpu:
+        result = to_gpu_frame(result)
+    return result
+
+
 def resize_frame(frame: object, columns: float, rows: float):
     is_gpu = is_gpu_frame(frame)
     cpu_frame = to_cpu_frame(frame)
@@ -47,9 +62,10 @@ class Renderer:
             self.cuda_stream = cv.cuda_Stream()
 
         self.window_name = 'Camera Visualization'
+        # cv.namedWindow(self.window_name, flags=cv.WINDOW_GUI_EXPANDED | cv.WINDOW_AUTOSIZE)
 
     def render(self, frame: object):
         render_frame = to_cpu_frame(frame)
         cv.imshow(self.window_name, render_frame)
-
+        return not (cv.waitKey(1) & 0xFF == ord('q'))
 

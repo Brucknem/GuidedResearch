@@ -40,6 +40,7 @@ def generate_plot(filename):
 def generate_plots(data_folder, output_filename, plots_per_line):
     csv_files = [join(data_folder, f) for f in listdir(data_folder) if isfile(join(data_folder, f))]
     csv_files = [f for f in csv_files if f.endswith('.csv')]
+    csv_files.sort()
 
     output_file(output_filename)
     plots = []

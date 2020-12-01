@@ -1,5 +1,4 @@
 import cv2 as cv
-import numpy as np
 from cuda_utils import to_gpu_frame, to_cpu_frame
 
 
@@ -64,6 +63,7 @@ class MOGAlgorithm(Algorithm):
     """
 
     """
+
     def __init__(self, learning_rate: float = 0.1, **kwargs):
         Algorithm.__init__(self, 'MOG', cv.cuda.createBackgroundSubtractorMOG(**kwargs), True, learning_rate)
 
@@ -75,5 +75,6 @@ class MOG2Algorithm(Algorithm):
     In Pattern Recognition, 2004. ICPR 2004.
     Proceedings of the 17th International Conference on, volume 2, pages 28–31. IEEE, 2004.
     """
+
     def __init__(self, learning_rate: float = 0.1, **kwargs):
         Algorithm.__init__(self, 'MOG2', cv.cuda.createBackgroundSubtractorMOG2(**kwargs), True, learning_rate)
