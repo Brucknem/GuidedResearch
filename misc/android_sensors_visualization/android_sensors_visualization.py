@@ -26,13 +26,14 @@ def generate_plot(filename):
     value_columns = list(df.columns)
     del value_columns[0]
     del value_columns[0]
+    value_columns.sort()
 
     title = filename.split('/')[-1]
 
     fig = figure(title=title, tooltips=TOOLTIPS, tools=tools, active_drag="pan")
 
     for index, column in enumerate(value_columns):
-        fig.line('Milliseconds', column, source=cds, color=colors[index], legend_label=column)
+        fig.line('Milliseconds', column, source=cds, color=colors[index], alpha=.8, legend_label=column)
     fig.legend.click_policy="hide"
 
     return fig
