@@ -15,20 +15,15 @@ if __name__ == '__main__':
     cuda_stream = cv.cuda_Stream()
     renderer = Renderer(cuda_stream)
 
-    teknomo_fernandez = TeknomoFernandez(levels=6, threads=24, history=100)
+    teknomo_fernandez = TeknomoFernandez(levels=6, history=200, verbose=False)
     scale_factor = 2
 
-    i = 0
     while True:
         ret, frame = cap.read()
         if not ret:
             break
 
         teknomo_fernandez.append(frame)
-
-        if i % 50 == 0:
-            teknomo_fernandez.calculate()
-        i += 1
         result = teknomo_fernandez.get_background()
 
         size = frame.size()

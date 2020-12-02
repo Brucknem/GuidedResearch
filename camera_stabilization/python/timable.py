@@ -31,6 +31,8 @@ class ITimable(ABC):
         for i in range(1, len(self.timestamps)):
             timings += ITimable.line_format.format(self.name, self.timestamps[i][0],
                                                    self.timestamps[i][1] - self.timestamps[i - 1][1])
+        timings += ITimable.line_format.format(self.name, 'total',
+                                               self.timestamps[-1][1] - self.timestamps[0][1])
         if reset:
             self.clear_timestamps()
         return timings
