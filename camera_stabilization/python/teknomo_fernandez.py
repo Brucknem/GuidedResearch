@@ -1,9 +1,12 @@
 import numpy as np
-import cv2
+import cv2 as cv
 from threading import Thread
 
+from cuda_utils import to_cpu_frame, multiply_scalar, to_3_channel_rgb
+from rendering import resize_frame, scale_frame
 from timable import ITimable
 from utils import FixedSizeList
+from filters import *
 
 
 class TeknomoFernandez(ITimable, FixedSizeList):
@@ -43,9 +46,9 @@ class TeknomoFernandez(ITimable, FixedSizeList):
         :return: img3 * (img1 ^ img2) + img1 * img2
         """
         if use_gpu:
-            model = cv2.cuda.bitwise_or(
-                cv2.cuda.bitwise_and(self[indices[2]], (cv2.cuda.bitwise_xor(self[indices[0]], self[indices[1]]))),
-                cv2.cuda.bitwise_and(self[indices[0]], self[indices[1]]))
+            model = cv.cuda.bitwise_or(
+                cv.cuda.bitwise_and(self[indices[2]], (cv.cuda.bitwise_xor(self[indices[0]], self[indices[1]]))),
+                cv.cuda.bitwise_and(self[indices[0]], self[indices[1]]))
         else:
             model = self[indices[2]] * (self[indices[0]] ^ self[indices[1]]) + self[indices[0]] * self[indices[1]]
         return model
@@ -57,15 +60,15 @@ class TeknomoFernandez(ITimable, FixedSizeList):
         :return: img3 * (img1 ^ img2) + img1 * img2
         """
         if use_gpu:
-            model = cv2.cuda.bitwise_or(cv2.cuda.bitwise_and(self.background_calculation_buffer[indices[2]], (
-                cv2.cuda.bitwise_xor(self.background_calculation_buffer[indices[0]],
-                                     self.background_calculation_buffer[indices[1]]))),
-                                       cv2.cuda.bitwise_and(self.background_calculation_buffer[indices[0]],
-                                                            self.background_calculation_buffer[indices[1]]))
+            model = cv.cuda.bitwise_or(cv.cuda.bitwise_and(self.background_calculation_buffer[indices[2]], (
+                cv.cuda.bitwise_xor(self.background_calculation_buffer[indices[0]],
+                                    self.background_calculation_buffer[indices[1]]))),
+                                       cv.cuda.bitwise_and(self.background_calculation_buffer[indices[0]],
+                                                           self.background_calculation_buffer[indices[1]]))
         else:
             model = self.background_calculation_buffer[indices[2]] * (
-                self.background_calculation_buffer[indices[0]] ^ self.background_calculation_buffer[indices[1]]) + \
-               self.background_calculation_buffer[indices[0]] * self.background_calculation_buffer[indices[1]]
+                    self.background_calculation_buffer[indices[0]] ^ self.background_calculation_buffer[indices[1]]) + \
+                    self.background_calculation_buffer[indices[0]] * self.background_calculation_buffer[indices[1]]
         return model
 
     def get_background(self):
@@ -130,24 +133,34 @@ class TeknomoFernandez(ITimable, FixedSizeList):
     def calculate_teknomo_fernandez_segmentation(self, kernel=np.ones((5, 5), np.uint8), diameter=9,
                                                  sigma_color=75, sigma_space=75, dilate_iterations=(3, 3),
                                                  bitmask_threshold=0.5):
-        current_frame = self[-1]
-        self.calculate_async()
-        background = self.get_background()
+        scale_factor = 1
+        background = scale_frame(self.get_background(), scale_factor)
+        current_frame = to_cpu_frame(scale_frame(self[-1], scale_factor))
 
-        foreground_bitmask = cv2.dilate(
-            cv2.bilateralFilter(
-                cv2.morphologyEx(current_frame - background, cv2.MORPH_OPEN, kernel)
-                , diameter, sigma_color, sigma_space)
-            , kernel, iterations=dilate_iterations[0])
+        foreground_bitmask = current_frame - to_cpu_frame(background)
+        foreground_bitmask = CudaOpenFilter().apply(foreground_bitmask)
+        foreground_bitmask = CudaBilateralFilter().apply(foreground_bitmask)
+        foreground_bitmask = CudaDilateFilter().apply(foreground_bitmask)
+        foreground_bitmask = WhereFilter(100, 0, 255).apply(foreground_bitmask)
+        foreground_bitmask = CudaOpenFilter().apply(foreground_bitmask)
+        foreground_bitmask = to_3_channel_rgb(foreground_bitmask)
 
-        foreground_bitmask = np.sum(foreground_bitmask / 3, axis=2, dtype=np.float32) / 255.
-        foreground_bitmask = np.where(foreground_bitmask < bitmask_threshold, 0.0, 1.0)
+        # current_frame = cv.cvtColor(current_frame, cv.COLOR_RGB2GRAY)
+        # background = cv.cvtColor(background, cv.COLOR_RGB2GRAY)
+        #
+        # foreground_bitmask = current_frame - background
+        # foreground_bitmask = np.where(foreground_bitmask < 50, 0, 255)
+        # foreground = current_frame * (foreground_bitmask / 255.)
+        # background_bitmask = ~foreground_bitmask
+        # # background = current_frame * (background_bitmask / 255.)
+        # foreground = current_frame * foreground_bitmask
 
-        foreground_bitmask = cv2.dilate(foreground_bitmask, kernel, iterations=dilate_iterations[1])[..., None]
-        foreground_bitmask = foreground_bitmask
+        scale = to_gpu_frame(self[-1]).size()
+        foreground_bitmask = to_cpu_frame(resize_frame(foreground_bitmask, scale[0], scale[1]))
 
-        foreground = current_frame * foreground_bitmask / 255.0
+        foreground = (to_cpu_frame(self[-1]) * foreground_bitmask / 255.0) * 255
         background_bitmask = (~np.array(foreground_bitmask, dtype=np.bool)).astype(np.float32)
-        background = current_frame * background_bitmask / 255.0
+        background = to_cpu_frame(self[-1]) * background_bitmask / 255.0
 
-        return foreground, foreground_bitmask, background, background_bitmask
+        return [np.array(to_cpu_frame(x), dtype=np.uint8) for x in
+                [foreground, foreground_bitmask, background, background_bitmask]]

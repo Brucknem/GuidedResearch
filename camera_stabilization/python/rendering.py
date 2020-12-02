@@ -50,8 +50,8 @@ def resize_frame(frame: object, columns: float, rows: float):
 
 
 def scale_frame(frame: object, scale_factor: float):
-    shape = to_cpu_frame(frame).shape() / scale_factor
-    return resize_frame(frame, shape[0], shape[1])
+    shape = to_cpu_frame(frame).shape
+    return resize_frame(frame, shape[0] / scale_factor, shape[1] / scale_factor)
 
 
 class Renderer:
@@ -68,4 +68,3 @@ class Renderer:
         render_frame = to_cpu_frame(frame)
         cv.imshow(self.window_name, render_frame)
         return not (cv.waitKey(1) & 0xFF == ord('q'))
-

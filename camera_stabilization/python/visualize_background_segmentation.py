@@ -19,8 +19,8 @@ if __name__ == '__main__':
     filters = [
         # cv.cuda.createMorphologyFilter(cv.MORPH_OPEN, 0, cv.getStructuringElement(cv.MORPH_RECT, (3, 3)), iterations=2),
         # cv.cuda.createMorphologyFilter(cv.MORPH_ERODE, 0, cv.getStructuringElement(cv.MORPH_RECT, (5, 5)), iterations=1),
-        # cv.cuda.createMorphologyFilter(cv.MORPH_OPEN, 0, cv.getStructuringElement(cv.MORPH_ELLIPSE
-        #                                                                           , (5, 5)), iterations=1),
+        cv.cuda.createMorphologyFilter(cv.MORPH_OPEN, 0, cv.getStructuringElement(cv.MORPH_ELLIPSE
+                                                                                  , (5, 5)), iterations=1),
         # cv.cuda.createMorphologyFilter(cv.MORPH_DILATE, 0, cv.getStructuringElement(cv.MORPH_RECT, (5, 5)), iterations=9),
     ]
 
