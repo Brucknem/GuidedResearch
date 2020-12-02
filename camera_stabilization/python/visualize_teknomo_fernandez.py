@@ -24,7 +24,7 @@ if __name__ == '__main__':
         if not ret:
             break
 
-        teknomo_fernandez.add_frame(frame)
+        teknomo_fernandez.append(frame)
 
         if i % 50 == 0:
             teknomo_fernandez.calculate()

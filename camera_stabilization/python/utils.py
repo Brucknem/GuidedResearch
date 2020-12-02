@@ -8,7 +8,7 @@ class FixedSizeDataStructure(ABC):
     Abstract base class for all fixed size data structures.
     """
 
-    def __init__(self, max_num_elements, remove_random):
+    def __init__(self, max_num_elements: int, remove_random: bool):
         """
         constructor
 
