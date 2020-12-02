@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 
 from cuda_utils import invert, multiply, to_3_channel_rgb, multiply_scalar
-from image_segmentation import *
+from teknomo_fernandez import *
 from filesystem_image_provider import ImageBasedVideoCapture
 from rendering import Renderer, add_text, resize_frame, add_circle
 from background_segmentation import *

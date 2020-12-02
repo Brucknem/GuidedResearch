@@ -4,6 +4,7 @@ from time import sleep
 from os import listdir
 from os.path import isfile, join
 import numpy as np
+from utils import FixedSizeOrderedDict
 
 
 def read_files_in_path(path: str, file_ending: str = '.png'):
@@ -33,7 +34,7 @@ class ImageBasedVideoCapture:
     OpenCV video capture mock to stream image files like a video stream from disk
     """
 
-    def __init__(self, path: str, file_ending: str = '.png', frame_rate: int = 25, max_loaded_frames: int = 400,
+    def __init__(self, path: str, file_ending: str = '.png', frame_rate: int = 25, max_loaded_frames: int = 10,
                  loop: bool = True):
         """
         constructor
@@ -46,7 +47,7 @@ class ImageBasedVideoCapture:
         """
         self.path = path
         self.file_names = read_files_in_path(path, file_ending)
-        self.frames = {}
+        self.frames = FixedSizeOrderedDict(max_num_elements=max_loaded_frames, remove_random=True)
         self.num_frames = len(self.file_names)
         self.frame_index = 0
         # self.frame_rate = frame_rate
@@ -64,9 +65,6 @@ class ImageBasedVideoCapture:
             self.frame_index %= self.num_frames
         elif self.frame_index >= self.num_frames:
             return False, None
-
-        while len(self.frames) >= self.max_loaded_frames:
-            del self.frames[list(self.frames.keys())[np.random.randint(0, len(self.frames))]]
 
         current_frame = self.file_names[self.frame_index]
         if current_frame not in self.frames:
