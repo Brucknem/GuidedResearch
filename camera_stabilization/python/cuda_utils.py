@@ -105,3 +105,12 @@ def to_cpu_frame(frame: object):
     if not is_gpu_frame(frame):
         return frame
     return frame.download()
+
+
+def subtract(frame0, frame1, absolute=True):
+    _frame0 = np.array(to_cpu_frame(frame0), dtype=float)
+    _frame1 = np.array(to_cpu_frame(frame1), dtype=float)
+    if absolute:
+        result = np.abs(_frame0 - frame1)
+    result = np.array(result, dtype=np.uint8)
+    return result

@@ -71,7 +71,7 @@ class DenseOpticalFlow:
             return None
 
         next = cv.cuda.cvtColor(to_gpu_frame(frame), cv.COLOR_BGR2GRAY)
-        self.gpu_flow = self.optical_flow.calc(to_gpu_frame(self.previous_frame), next, self.gpu_flow)
+        self.gpu_flow = self.optical_flow.calc(to_gpu_frame(self.previous_frame), next, self.gpu_flow, stream=DenseOpticalFlow.cuda_stream)
         self.flow = to_cpu_frame(self.gpu_flow)
         self.previous_frame = next
         return self.flow_to_bgr()

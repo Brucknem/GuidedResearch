@@ -2,6 +2,7 @@ import cv2 as cv
 from matplotlib import colors
 
 from cuda_utils import to_cpu_frame, is_gpu_frame, to_gpu_frame
+from timable import ITimable
 
 
 def color_to_255_rgb(color: list):
@@ -11,14 +12,14 @@ def color_to_255_rgb(color: list):
     return color
 
 
-def add_text(frame, text, color='white'):
+def add_text(frame, text, color='white', position: tuple = (10, 40)):
     if type(color) is str:
         color = colors.to_rgb(color)
     color = color_to_255_rgb(color)
 
     is_gpu = is_gpu_frame(frame)
     result = to_cpu_frame(frame)
-    cv.putText(result, text, (10, 40), cv.FONT_HERSHEY_SIMPLEX, 1, color, 1, cv.LINE_AA)
+    cv.putText(result, text, position, cv.FONT_HERSHEY_SIMPLEX, 1, color, 1, cv.LINE_AA)
 
     if is_gpu:
         result = to_gpu_frame(result)
@@ -54,17 +55,20 @@ def scale_frame(frame: object, scale_factor: float):
     return resize_frame(frame, shape[0] / scale_factor, shape[1] / scale_factor)
 
 
-class Renderer:
+class Renderer(ITimable):
     def __init__(self, cuda_stream: object = None):
+        super().__init__('Renderer')
         if cuda_stream is not None:
             self.cuda_stream = cuda_stream
         else:
             self.cuda_stream = cv.cuda_Stream()
 
         self.window_name = 'Camera Visualization'
-        # cv.namedWindow(self.window_name, flags=cv.WINDOW_GUI_EXPANDED | cv.WINDOW_AUTOSIZE)
 
     def render(self, frame: object):
+        self.add_timestamp()
+        duration = self.get_latest_duration()
         render_frame = to_cpu_frame(frame)
+        render_frame = add_text(render_frame, '{0:.2f} ms ({1:.2f} fps)'.format(duration, 1. / duration))
         cv.imshow(self.window_name, render_frame)
         return not (cv.waitKey(1) & 0xFF == ord('q'))

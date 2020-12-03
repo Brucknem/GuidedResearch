@@ -2,11 +2,12 @@ import numpy as np
 import cv2 as cv
 from threading import Thread
 
-from cuda_utils import to_cpu_frame, multiply_scalar, to_3_channel_rgb
+from cuda_utils import to_cpu_frame, multiply_scalar, to_3_channel_rgb, subtract
 from rendering import resize_frame, scale_frame
 from timable import ITimable
 from utils import FixedSizeList
 from filters import *
+from matplotlib import pyplot as plt
 
 
 class TeknomoFernandez(ITimable, FixedSizeList):
@@ -17,7 +18,7 @@ class TeknomoFernandez(ITimable, FixedSizeList):
     """
 
     def __init__(self, levels: int = 6, history: int = 200, random_history: bool = True,
-                 verbose: bool = False):
+                 verbose: bool = False, use_gpu: bool = True):
         """
         constructor
 
@@ -34,18 +35,22 @@ class TeknomoFernandez(ITimable, FixedSizeList):
         self.backgrounds = []
         self.verbose = verbose
         self.recalculation_allowed = True
+        self.use_gpu = use_gpu
 
     def append(self, value: any) -> None:
-        super().append(value)
+        if self.use_gpu:
+            super().append(to_gpu_frame(value))
+        else:
+            super().append(to_cpu_frame(value))
         self.calculate_async()
 
-    def calculate_background_image_on_history(self, indices, use_gpu: bool = True):
+    def calculate_background_image_on_history(self, indices: np.ndarray):
         """
         Calculates the background image based on the Teknomo-Fernandez algorithm over the image history.
 
         :return: img3 * (img1 ^ img2) + img1 * img2
         """
-        if use_gpu:
+        if self.use_gpu:
             model = cv.cuda.bitwise_or(
                 cv.cuda.bitwise_and(self[indices[2]], (cv.cuda.bitwise_xor(self[indices[0]], self[indices[1]]))),
                 cv.cuda.bitwise_and(self[indices[0]], self[indices[1]]))
@@ -53,13 +58,13 @@ class TeknomoFernandez(ITimable, FixedSizeList):
             model = self[indices[2]] * (self[indices[0]] ^ self[indices[1]]) + self[indices[0]] * self[indices[1]]
         return model
 
-    def calculate_background_image_on_background_buffer(self, indices, use_gpu: bool = True):
+    def calculate_background_image_on_background_buffer(self, indices: np.ndarray):
         """
         Calculates the background image based on the Teknomo-Fernandez algorithm over the image history.
 
         :return: img3 * (img1 ^ img2) + img1 * img2
         """
-        if use_gpu:
+        if self.use_gpu:
             model = cv.cuda.bitwise_or(cv.cuda.bitwise_and(self.background_calculation_buffer[indices[2]], (
                 cv.cuda.bitwise_xor(self.background_calculation_buffer[indices[0]],
                                     self.background_calculation_buffer[indices[1]]))),
@@ -100,13 +105,13 @@ class TeknomoFernandez(ITimable, FixedSizeList):
             return
 
         self.recalculation_allowed = False
-        self.add_timestamp('start')
         self.reset_buffers()
 
+        self.clear_timestamps()
         indices = [np.random.randint(low=0, high=(len(self) - 1), size=3) for _ in range(3 ** (self.levels - 1))]
         self.background_calculation_buffer = [self.calculate_background_image_on_history(index) for index in indices]
         self.backgrounds_buffer.append(self.background_calculation_buffer[-1])
-        self.add_timestamp('level 1')
+        # self.add_timestamp('level 1')
 
         for i in range(2, self.levels + 1):
             indices = [[3 * j, 3 * j + 1, 3 * j + 2] for j in range(3 ** (self.levels - i))]
@@ -114,10 +119,11 @@ class TeknomoFernandez(ITimable, FixedSizeList):
             for x in range(len(results)):
                 self.background_calculation_buffer[x] = results[x]
             self.backgrounds_buffer.append(self.background_calculation_buffer[0])
-            self.add_timestamp('level {}'.format(i))
+            # self.add_timestamp('level {}'.format(i))
 
         if self.verbose:
-            print(self.durations_to_str(reset=True))
+            print(self.to_str())
+        # self.clear_timestamps()
         self.backgrounds = self.backgrounds_buffer
         self.recalculation_allowed = True
 
@@ -129,6 +135,34 @@ class TeknomoFernandez(ITimable, FixedSizeList):
         if not self.recalculation_allowed:
             return
         Thread(target=self.calculation).start()
+
+    def testing(self):
+        self.clear_timestamps()
+        background = to_cpu_frame(self.get_background())
+        frame = to_cpu_frame(self[-1])
+        difference = subtract(frame, background, absolute=True)
+        self.add_timestamp('difference')
+        difference = cv.cvtColor(difference, cv.COLOR_RGB2GRAY)
+        self.add_timestamp('convert')
+        threshold = 80
+
+        # hist = cv.calcHist([difference], [0], None, [256], [0, 256])
+        # hist_mean = np.mean(hist)
+        # threshold = 255
+        # for index, h in enumerate(hist):
+        #     if h[0] > hist_mean * 2:
+        #         if index < threshold:
+        #             threshold = index
+
+        rel, difference = cv.threshold(difference, threshold, 255, cv.THRESH_BINARY)
+        self.add_timestamp('threshold')
+        foreground_bitmask = np.zeros_like(frame)
+        for i in range(3):
+            foreground_bitmask[:,:,i] = difference
+        self.add_timestamp('extend')
+        print(self.to_str(reset=True))
+        return foreground_bitmask
+
 
     def calculate_teknomo_fernandez_segmentation(self, kernel=np.ones((5, 5), np.uint8), diameter=9,
                                                  sigma_color=75, sigma_space=75, dilate_iterations=(3, 3),

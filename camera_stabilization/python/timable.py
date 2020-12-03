@@ -1,38 +1,52 @@
 from abc import ABC
+from collections import OrderedDict
 from datetime import datetime
 
 
-class ITimable(ABC):
+class ITimable:
     line_format = "[{}] {}: {}\n"
 
     def __init__(self, name: str = None):
-        self.timestamps = []
+        self.timestamps = OrderedDict()
+        self.add_timestamp('construction')
         if name:
             self.name = name
         else:
             self.name = 'Unnamed'
 
+        self.sequence_num = 0
+
     def clear_timestamps(self):
-        self.timestamps = []
+        self.timestamps = OrderedDict()
+        self.add_timestamp('construction')
 
-    def add_timestamp(self, name: str):
-        self.timestamps.append((name, datetime.now()))
+    def add_timestamp(self, name: str = None):
+        self.timestamps[datetime.now()] = name
 
-    def timestamps_to_str(self, reset=False):
+    def get_durations(self):
+        times = list(self.timestamps.keys())
+        names = list(self.timestamps.values())
+        return {names[i]: (times[i] - times[i - 1]).total_seconds() for i in range(1, len(times))}
+
+    def get_latest_duration(self):
+        durations = self.get_durations()
+        if len(durations) <= 0:
+            return -1
+        return durations[list(durations.keys())[-1]]
+
+    def get_timestamps(self):
+        times = list(self.timestamps.keys())
+        names = list(self.timestamps.values())
+        return {names[i]: times[i] for i in range(1, len(times))}
+
+    def to_str(self, durations = True, reset = True):
+        if durations:
+            values = self.get_durations()
+        else:
+            values = self.get_timestamps()
         timings = ""
-        for timestamp in self.timestamps:
-            timings += ITimable.line_format.format(self.name, timestamp[0], timestamp[1])
-        if reset:
-            self.clear_timestamps()
-        return timings
-
-    def durations_to_str(self, reset=False):
-        timings = ""
-        for i in range(1, len(self.timestamps)):
-            timings += ITimable.line_format.format(self.name, self.timestamps[i][0],
-                                                   self.timestamps[i][1] - self.timestamps[i - 1][1])
-        timings += ITimable.line_format.format(self.name, 'total',
-                                               self.timestamps[-1][1] - self.timestamps[0][1])
+        for timestamp in values.items():
+            timings += ITimable.line_format.format(self.name, timestamp[1], timestamp[0])
         if reset:
             self.clear_timestamps()
         return timings

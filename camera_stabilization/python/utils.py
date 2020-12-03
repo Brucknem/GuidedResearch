@@ -94,6 +94,16 @@ class FixedSizeOrderedDict(FixedSizeDataStructure, OrderedDict):
         return self
 
 
+class FixedSizeSortedDict(FixedSizeOrderedDict):
+    def __init__(self, max_num_elements: int = 0, remove_random: bool = False, *args, **kwargs):
+        super().__init__(max_num_elements, remove_random, *args, **kwargs)
+
+    def __setitem__(self, key, value):
+        super().__setitem__(key, value)
+        self = sorted(self)
+
+
+
 class FixedSizeList(FixedSizeDataStructure, list):
     """
     A list with a (possibly) fixed size
