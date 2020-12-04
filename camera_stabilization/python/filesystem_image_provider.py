@@ -7,7 +7,7 @@ import cv2 as cv
 from os import listdir
 from os.path import isfile, join
 
-from cuda_utils import to_cpu_frame
+from frame_utils import to_cpu_frame, Frame
 from timable import ITimable
 from utils import FixedSizeOrderedDict, FixedSizeSortedDict
 from pathlib import Path
@@ -46,15 +46,14 @@ class ImageWriter:
         self.prefix = prefix
         self.suffix = suffix
 
-    def write(self, frame: object, name: str = None):
-        _frame = to_cpu_frame(frame)
+    def write(self, frame: Frame, name: str = None):
         filename = self.base_path
         if name is not None:
             filename = os.path.join(filename, name)
         else:
             filename = os.path.join(filename, '{}{}.{}'.format(self.prefix, self.sequence_num, self.suffix))
             self.sequence_num += 1
-        Thread(target=cv.imwrite, args=(filename, _frame)).start()
+        Thread(target=cv.imwrite, args=(filename, frame.cpu())).start()
 
 
 class ImageBasedVideoCapture(FixedSizeSortedDict, ITimable):

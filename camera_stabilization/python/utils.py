@@ -103,7 +103,6 @@ class FixedSizeSortedDict(FixedSizeOrderedDict):
         self = sorted(self)
 
 
-
 class FixedSizeList(FixedSizeDataStructure, list):
     """
     A list with a (possibly) fixed size

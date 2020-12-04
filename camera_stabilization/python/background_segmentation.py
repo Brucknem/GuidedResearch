@@ -1,5 +1,5 @@
 import cv2 as cv
-from cuda_utils import to_gpu_frame, to_cpu_frame
+from frame_utils import to_gpu_frame, to_cpu_frame, Frame
 
 
 class Algorithm:
@@ -24,7 +24,7 @@ class Algorithm:
         self.algorithm = algorithm
         self.is_gpu_algorithm = is_gpu_algorithm
 
-    def apply(self, frame: object):
+    def apply(self, frame: Frame):
         """
         Applies the algorithm to the given frame.
 
@@ -34,29 +34,27 @@ class Algorithm:
         if self.is_gpu_algorithm:
             result = self.apply_gpu(frame)
         else:
-            result = self.apply_cpu()
+            result = self.apply_cpu(frame)
 
         return result
 
-    def apply_gpu(self, frame: object):
+    def apply_gpu(self, frame: Frame):
         """
         Applies the algorithm to the frame using the GPU.
 
         :param frame: The frame to process
         :return: The resulting frame
         """
-        gpu_frame = to_gpu_frame(frame)
-        return self.algorithm.apply(gpu_frame, self.learning_rate, Algorithm.cuda_stream)
+        return self.algorithm.apply(frame.gpu(), self.learning_rate, Algorithm.cuda_stream)
 
-    def apply_cpu(self, frame: object):
+    def apply_cpu(self, frame: Frame):
         """
         Applies the algorithm to the frame using the CPU.
 
         :param frame: The frame to process
         :return: The resulting frame
         """
-        cpu_frame = to_cpu_frame(frame)
-        return self.algorithm.apply(cpu_frame)
+        return self.algorithm.apply(frame.cpu())
 
 
 class MOGAlgorithm(Algorithm):

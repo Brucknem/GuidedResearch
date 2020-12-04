@@ -1,74 +1,77 @@
 import cv2 as cv
-from matplotlib import colors
 
-from cuda_utils import to_cpu_frame, is_gpu_frame, to_gpu_frame
+from frame_utils import Frame
 from timable import ITimable
+import numpy as np
 
 
-def color_to_255_rgb(color: list):
-    upper_bound = max(color)
-    if upper_bound <= 1:
-        color = [int(c * 255) for c in color]
-    return color
+def layout(frames: list, positions: list) -> Frame:
+    """
+    Creates a frame that has the given frames at the given positions.
 
+    :param frames: The frames to merge
+    :param positions: The pixel position at which to place the top left pixel of the frames
+    :return: The final merged frame
+    """
+    num_frames, num_positions = len(frames), len(positions)
+    if num_frames == 0:
+        return Frame.empty()
+    if num_frames > num_positions:
+        raise ValueError(
+            'More frames than positions given. Frames: {} - Positions: {}'.format(num_frames, num_positions))
 
-def add_text(frame, text, color='white', position: tuple = (10, 40)):
-    if type(color) is str:
-        color = colors.to_rgb(color)
-    color = color_to_255_rgb(color)
+    positions = positions[:num_frames]
+    num_rows = 0
+    num_columns = 0
 
-    is_gpu = is_gpu_frame(frame)
-    result = to_cpu_frame(frame)
-    cv.putText(result, text, position, cv.FONT_HERSHEY_SIMPLEX, 1, color, 1, cv.LINE_AA)
+    for frame, position in zip(frames, positions):
+        size = frame.size()
+        end_pixel = position[0] + size[0]
+        if end_pixel > num_rows:
+            num_rows = end_pixel
+        end_pixel = position[1] + size[1]
+        if end_pixel > num_columns:
+            num_columns = end_pixel
 
-    if is_gpu:
-        result = to_gpu_frame(result)
-    return result
+    result = np.ones_like(np.ndarray([int(num_rows), int(num_columns), 3]), dtype=np.uint8) * 127
 
+    for frame, position in zip(frames, positions):
+        size = frame.size()
+        start_row = int(position[0])
+        start_column = int(position[1])
+        result[start_row:start_row + size[0], start_column: start_column + size[1], :] = frame.cpu()
 
-def add_circle(frame, center: tuple, color='white', **kwargs):
-    if type(color) is str:
-        color = colors.to_rgb(color)
-    color = color_to_255_rgb(color)
-    color.reverse()
-
-    is_gpu = is_gpu_frame(frame)
-    result = to_cpu_frame(frame)
-    cv.circle(result, center, 10, color, **kwargs)
-
-    if is_gpu:
-        result = to_gpu_frame(result)
-    return result
-
-
-def resize_frame(frame: object, columns: float, rows: float):
-    is_gpu = is_gpu_frame(frame)
-    cpu_frame = to_cpu_frame(frame)
-    result = cv.resize(cpu_frame, (int(columns), int(rows)))
-    if is_gpu:
-        result = to_gpu_frame(result)
-    return result
-
-
-def scale_frame(frame: object, scale_factor: float):
-    shape = to_cpu_frame(frame).shape
-    return resize_frame(frame, shape[0] / scale_factor, shape[1] / scale_factor)
+    return Frame(result)
 
 
 class Renderer(ITimable):
-    def __init__(self, cuda_stream: object = None):
+    """
+    A renderer for frames.
+    """
+    def __init__(self, window_name: str = 'Camera Visualization'):
+        """
+        constructor
+
+        :param window_name: The name of the OpenCV window.
+        """
         super().__init__('Renderer')
-        if cuda_stream is not None:
-            self.cuda_stream = cuda_stream
-        else:
-            self.cuda_stream = cv.cuda_Stream()
+        self.window_name = window_name
 
-        self.window_name = 'Camera Visualization'
+    def render(self, frames: list or Frame, positions: list = None) -> bool:
+        """
+        Renders the given frame/frames. Layouts the frames to the given positions if specified.
+        The frames are sized
 
-    def render(self, frame: object):
+        :param frames:
+        :param positions:
+        :return:
+        """
         self.add_timestamp()
         duration = self.get_latest_duration()
-        render_frame = to_cpu_frame(frame)
-        render_frame = add_text(render_frame, '{0:.2f} ms ({1:.2f} fps)'.format(duration, 1. / duration))
-        cv.imshow(self.window_name, render_frame)
+        if type(frames) is list:
+            render_frame = layout(frames, positions)
+        else:
+            render_frame = frames
+        render_frame.add_text('{0:.2f} ms ({1:.2f} fps)'.format(duration, 1. / duration))
+        cv.imshow(self.window_name, render_frame.cpu())
         return not (cv.waitKey(1) & 0xFF == ord('q'))

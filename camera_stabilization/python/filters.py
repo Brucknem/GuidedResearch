@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import cv2 as cv
 import numpy as np
 
-from cuda_utils import to_gpu_frame, to_cpu_frame
+from frame_utils import to_gpu_frame, to_cpu_frame, Frame
 
 SHAPE = 'shape'
 KSIZE = 'ksize'
@@ -16,26 +16,12 @@ class Filter(ABC):
         pass
 
 
-class GrayScale(Filter):
-    def apply(self, frame):
-        try:
-            return cv.cvtColor(to_cpu_frame(frame), cv.COLOR_BGR2GRAY)
-        except:
-            return to_cpu_frame(frame)
-
-
 class WhereFilter(Filter):
-    def __init__(self, threshold: float, min: float, max: float):
-        self.grayscale = GrayScale()
+    def __init__(self, threshold: int):
         self.threshold = threshold
-        self.min = min
-        self.max = max
 
-    def apply(self, frame):
-        _frame = self.grayscale.apply(frame)
-        whered = np.where(_frame < self.threshold, self.min, self.max)
-        return np.array(whered, dtype=np.uint8)
-
+    def apply(self, frame: Frame) -> Frame:
+        return frame.threshold(self.threshold)
 
 
 class CudaFilter(ABC):
@@ -56,13 +42,11 @@ class CudaMorphologyFilter(MorphologyFilter, CudaFilter):
 
         self.structuring_element = cv.getStructuringElement(shape, kernel_size)
         self.filter = cv.cuda.createMorphologyFilter(op, src_type, self.structuring_element, iterations=iterations)
-        self.grayscale = GrayScale()
 
-    def apply(self, frame):
-        _frame = to_gpu_frame(self.grayscale.apply(frame))
-        result = _frame.clone()
-        self.filter.apply(_frame, result, CudaFilter.cuda_stream)
-        return result
+    def apply(self, frame: Frame) -> Frame:
+        result = cv.cuda_GpuMat()
+        result = self.filter.apply(frame.gpu(grayscale=True), result, CudaFilter.cuda_stream)
+        return Frame(result)
 
 
 class CudaOpenFilter(CudaMorphologyFilter):
@@ -91,6 +75,6 @@ class CudaBilateralFilter(CudaFilter):
         self.sigma_color = kwargs.get('sigma_color', 75)
         self.sigma_space = kwargs.get('sigma_space', 75)
 
-    def apply(self, frame):
-        return cv.cuda.bilateralFilter(to_gpu_frame(frame), self.diameter, self.sigma_color, self.sigma_space,
+    def apply(self, frame: Frame):
+        return cv.cuda.bilateralFilter(frame.gpu(), self.diameter, self.sigma_color, self.sigma_space,
                                        stream=CudaFilter.cuda_stream)

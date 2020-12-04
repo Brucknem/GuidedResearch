@@ -1,11 +1,10 @@
 import cv2 as cv
 import numpy as np
 
-from cuda_utils import invert, multiply, to_3_channel_rgb, multiply_scalar
 from teknomo_fernandez import *
 from filesystem_image_provider import ImageBasedVideoCapture
 from optical_flow import DenseOpticalFlow
-from rendering import Renderer, add_text, resize_frame, add_circle
+from rendering import Renderer
 from background_segmentation import *
 import pandas as pd
 
@@ -15,7 +14,7 @@ if __name__ == '__main__':
     cap = ImageBasedVideoCapture('/mnt/nextcloud/tum/Master/5. Semester/Guided Research/videos/s40_n_cam_far/stamp', loop=False)
     cuda_stream = cv.cuda_Stream()
 
-    renderer = Renderer(cuda_stream)
+    renderer = Renderer()
     optical_flow = DenseOpticalFlow()
 
     alpha = 0.2
@@ -38,43 +37,38 @@ if __name__ == '__main__':
         ret, frame = cap.read()
         if not ret:
             break
-        size = list(np.array(to_gpu_frame(frame).size()) / scale_factor)
+
+        frame = Frame(frame)
+        size = frame.size()
 
         if previous_frame is None:
-            previous_frame = frame
+            previous_frame = frame.clone()
 
-        frame = resize_frame(frame, *size)
+        frame.resize(size)
 
         result = None
-        # result = calculate_algorithms(frame, algorithms, filters)
         # result = optical_flow.apply_cpu(frame)
         result = optical_flow.apply_gpu(frame)
+        result.resize(size)
 
-        if result is None:
-            result = frame
-
-        size = list(np.array(size) * scale_factor)
-        result = resize_frame(result, *size)
-        frame = resize_frame(frame, *size)
-
-        result = cv.cuda.addWeighted(to_gpu_frame(previous_frame), alpha, to_gpu_frame(result), 1 - alpha, 0)
-        result = add_text(result, '{}/{}'.format(i, cap.num_frames), position=(10, 80))
+        result.blend(previous_frame, 0.2)
+        result.add_text('{}/{}'.format(i, cap.num_frames), position=(10, 80))
         for roi, color in zip(optical_flow_rois, optical_flow_roi_colors):
-            result = add_circle(result, roi, color)
-        #     value = optical_flow.get_flow_value(roi[1], roi[0]).values()
-        #     value = pd.DataFrame([[*([i * 1000] * 2), *value]], columns=columns)
-        #     optical_flow_roi_dataframes[roi] = optical_flow_roi_dataframes[roi].append(
-        #         value
-        #     )
-        #
-        # value = optical_flow.get_flow_means().values()
-        # value = pd.DataFrame([[*([i * 1000] * 2), *value]], columns=columns)
-        # optical_flow_roi_dataframes[mean_key] = optical_flow_roi_dataframes[mean_key].append(
-        #     value
-        # )
-        # for roi, df in optical_flow_roi_dataframes.items():
-        #     filename = 'optical_flows/{}_{}.csv'.format(*roi)
-        #     df.to_csv(filename, index=False)
+            result.add_circle(roi, color)
+            value = optical_flow.get_flow_value(roi[1], roi[0]).values()
+            value = pd.DataFrame([[*([i * 1000] * 2), *value]], columns=columns)
+            optical_flow_roi_dataframes[roi] = optical_flow_roi_dataframes[roi].append(
+                value
+            )
+
+        value = optical_flow.get_flow_means().values()
+        value = pd.DataFrame([[*([i * 1000] * 2), *value]], columns=columns)
+        optical_flow_roi_dataframes[mean_key] = optical_flow_roi_dataframes[mean_key].append(
+            value
+        )
+        for roi, df in optical_flow_roi_dataframes.items():
+            filename = 'optical_flows/{}_{}.csv'.format(*roi)
+            df.to_csv(filename, index=False)
 
         if not renderer.render(result):
             break
