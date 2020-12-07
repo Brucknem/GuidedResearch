@@ -11,30 +11,61 @@ from os import listdir
 from os.path import isfile, join
 import sys
 
-colors = ['red', 'blue', 'green', 'yellow', 'violet', 'black', 'magenta', 'cyan']
+from bokeh.palettes import viridis, magma, linear_palette
+
+from utils import get_maxima, get_frequencies
+
+TIMESTAMP = 'Timestamp'
+
+MILLISECONDS = 'Milliseconds'
+
 TOOLTIPS = [
     ("index", "$index"),
     ("(x,y)", "($x, $y)"),
 ]
-tools="pan,wheel_zoom,box_zoom,reset,hover,save"
+tools = "pan,wheel_zoom,box_zoom,reset,hover,save"
+
+
+def get_frequencies_renderable(maxima: list, milliseconds: list, interval: int = -1):
+    frequencies = get_frequencies(maxima, milliseconds, interval)
+    frequency_x = np.array(list(frequencies.keys())) / 1000
+    return frequency_x, list(frequencies.values())
+
 
 def generate_plot(filename):
     df = pd.read_csv(filename)
-    df['Milliseconds'] = df['Milliseconds'] / 1000.0
+    milliseconds = list(df[MILLISECONDS])
+    df[MILLISECONDS] = df[MILLISECONDS] / 1000
+    value_columns = list(df.columns)
+    try:
+        del value_columns[value_columns.index(MILLISECONDS)]
+        del value_columns[value_columns.index(TIMESTAMP)]
+    except:
+        pass
+
+    value_columns.sort()
     cds = ColumnDataSource(df)
 
-    value_columns = list(df.columns)
-    del value_columns[0]
-    del value_columns[0]
-    value_columns.sort()
+    # colors = linear_palette(('#FF0000', '#0000FF'), len(value_columns))
+    colors = viridis(len(value_columns))
 
     title = filename.split('/')[-1]
-
-    fig = figure(title=title, tooltips=TOOLTIPS, tools=tools, active_drag="pan")
+    fig = figure(title=title, tooltips=TOOLTIPS, tools=tools, active_drag="pan", plot_width=1920, plot_height=1200)
 
     for index, column in enumerate(value_columns):
-        fig.line('Milliseconds', column, source=cds, color=colors[index], alpha=.8, legend_label=column)
-    fig.legend.click_policy="hide"
+        fig.line(MILLISECONDS, column, source=cds, color=colors[index], alpha=.8, legend_label=column)
+        maxima = get_maxima(df[column], threshold=0.10)
+        fig.circle(df[MILLISECONDS], maxima, color=colors[index], alpha=.8, legend_label=column)
+
+        frequencies_x, frequencies_y = get_frequencies_renderable(maxima, milliseconds)
+        fig.step(frequencies_x, frequencies_y, color=colors[index], alpha=.6, line_dash='dotted', mode="after",
+                 legend_label='{} [Hz (avg.)]'.format(column))
+
+        frequencies_x, frequencies_y = get_frequencies_renderable(maxima, milliseconds, 1000)
+        fig.step(frequencies_x, frequencies_y, color=colors[index], alpha=.6, line_dash='dashdot', mode="after",
+                 legend_label='{} [Hz (1s)]'.format(column))
+
+    fig.legend.click_policy = "hide"
 
     return fig
 
@@ -77,7 +108,6 @@ Usage:   python {}  input_dir   output  [plots_per_line]
                             <= 0    - One output file is generated per plot
 '''.format(os.path.basename(__file__))
 
-
 if __name__ == '__main__':
     if len(sys.argv) < 3 or len(sys.argv) > 4:
         print(help_text)
@@ -95,4 +125,3 @@ if __name__ == '__main__':
     generate_plots(data_folder, output_filename, plots_per_line)
 
     sys.exit(0)
-

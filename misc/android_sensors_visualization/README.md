@@ -23,4 +23,4 @@ This installs a python virtualenv that is used to run the script
 
 ### Small test ###
 
-```python android_sensors_visualization.py test_data jitter_visualization 3```
+```python android_sensors_visualization.py tests/test_data jitter_visualization 3```
