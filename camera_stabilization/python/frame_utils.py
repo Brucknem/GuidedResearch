@@ -220,11 +220,11 @@ class Frame:
         color = color_to_255_bgr(color)
         return self.set(cv.putText(self.cpu(), text, position, cv.FONT_HERSHEY_SIMPLEX, 1, color, 1, cv.LINE_AA))
 
-    def add_circle(self, center: tuple, color='white', **kwargs):
+    def add_circle(self, center: tuple or np.ndarray, color='white', **kwargs):
         if type(color) is str:
             color = colors.to_rgb(color)
         color = color_to_255_bgr(color)
-        return self.set(cv.circle(self.cpu(), center, 10, color, **kwargs))
+        return self.set(cv.circle(self.cpu(), tuple(center), 10, color, **kwargs))
 
     def merge(self, other: any or None, position: int = 1):
         other.resize(self.size())

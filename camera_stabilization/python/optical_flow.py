@@ -74,7 +74,7 @@ class DenseOpticalFlow:
         self.previous_frame = frame.clone()
         return self.flow_to_bgr()
 
-    def get_flow_value(self, row: int, column: int) -> dict:
+    def get_flow_value(self, row: int or float, column: int or float) -> dict:
         """
         Getter for a the magnitude and angle at a specific pixel location in the optical flow image
 
@@ -83,6 +83,8 @@ class DenseOpticalFlow:
         :return: The magnitude and angle at the pixel location
         """
         values = (np.NaN, np.NaN)
+        row = int(row)
+        column = int(column)
         if self.flow is not None:
             values = self.flow[row, column]
         return dict(zip(DenseOpticalFlow.flow_columns, values))
