@@ -1,5 +1,5 @@
 from src.teknomo_fernandez import *
-from src.filesystem_image_provider import ImageBasedVideoCapture
+from src.image_providers import ImageBasedVideoCapture
 from src.rendering import Renderer
 from src.background_segmentation import *
 

@@ -1,8 +1,14 @@
+import sys
+
+import cv2 as cv
 import random
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-import numpy as np
-from scipy.signal import argrelextrema
+
+
+def shutdown_signal_handler(sig, frame):
+    cv.destroyAllWindows()
+    sys.exit(0)
 
 
 class FixedSizeDataStructure(ABC):

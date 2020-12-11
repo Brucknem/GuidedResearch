@@ -57,7 +57,7 @@ class Renderer(ITimable):
         super().__init__('Renderer')
         self.window_name = window_name
 
-    def render(self, frames: list or Frame, positions: list = None) -> bool:
+    def render(self, frames: list or Frame, positions: list = None, fps_color: str = 'white') -> bool:
         """
         Renders the given frame/frames. Layouts the frames to the given positions if specified.
         The frames are sized
@@ -72,6 +72,6 @@ class Renderer(ITimable):
             render_frame = layout(frames, positions)
         else:
             render_frame = frames
-        render_frame.add_text('{0:.2f} ms ({1:.2f} fps)'.format(duration, 1. / duration))
+        render_frame.add_text('{0:.2f} ms ({1:.2f} fps)'.format(duration, 1. / duration), color=fps_color)
         cv.imshow(self.window_name, render_frame.cpu())
         return not (cv.waitKey(1) & 0xFF == ord('q'))

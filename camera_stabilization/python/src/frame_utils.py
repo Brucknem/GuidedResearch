@@ -340,3 +340,4 @@ class Frame:
         return self.set(
             cv.cuda.addWeighted(self.gpu(), own_alpha, other.gpu(), 1 - alpha, 0)
         )
+

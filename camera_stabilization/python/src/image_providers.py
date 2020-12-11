@@ -1,4 +1,3 @@
-import os
 from threading import Thread
 from time import sleep
 
@@ -9,8 +8,6 @@ from os.path import isfile, join
 from src.frame_utils import Frame
 from src.timable import ITimable
 from src.utils import FixedSizeSortedDict
-from pathlib import Path
-import shutil
 
 
 def read_files_in_path(path: str, file_ending: str = '.png'):
@@ -35,24 +32,8 @@ def read_files_in_path(path: str, file_ending: str = '.png'):
     return files
 
 
-class ImageWriter:
-    def __init__(self, base_path, suffix: str = 'png', prefix: str = 'img_', remove_if_exists: bool = True):
-        self.base_path = os.path.expanduser(base_path)
-        if remove_if_exists:
-            shutil.rmtree(self.base_path, ignore_errors=True)
-        Path(self.base_path).mkdir(parents=True, exist_ok=True)
-        self.sequence_num = 0
-        self.prefix = prefix
-        self.suffix = suffix
-
-    def write(self, frame: Frame, name: str = None):
-        filename = self.base_path
-        if name is not None:
-            filename = os.path.join(filename, name)
-        else:
-            filename = os.path.join(filename, '{}{}.{}'.format(self.prefix, self.sequence_num, self.suffix))
-            self.sequence_num += 1
-        Thread(target=cv.imwrite, args=(filename, frame.cpu())).start()
+def load_frame_from_disk(file_name: str) -> Frame:
+    return Frame(cv.imread(file_name))
 
 
 class ImageBasedVideoCapture(FixedSizeSortedDict, ITimable):

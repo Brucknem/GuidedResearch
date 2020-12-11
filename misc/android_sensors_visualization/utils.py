@@ -17,6 +17,7 @@ def get_maxima(values: list or np.ndarray, threshold: float = 0) -> list:
     """
     Returns all local maxima of the given list.
     """
+    values = list(values)
     indices = get_maxima_indices(values)
 
     if len(indices) == 0:

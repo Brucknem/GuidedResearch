@@ -8,7 +8,7 @@ class DenseOpticalFlow:
     Dense Optical flow based on the farneback algorithm
     """
     cuda_stream = cv.cuda_Stream()
-    flow_columns = ['Magnitude', 'Angle']
+    flow_columns = ['Magnitude [px]', 'Angle [Rad.]']
 
     def __init__(self):
         """
@@ -19,6 +19,8 @@ class DenseOpticalFlow:
         self.optical_flow = cv.cuda.FarnebackOpticalFlow_create()
         self._gpu_flow = cv.cuda_GpuMat()
         self.flow = None
+        self.mag = None
+        self.ang = None
 
     def initialize(self, frame: Frame):
         """
@@ -37,8 +39,12 @@ class DenseOpticalFlow:
         :return: The BGR image
         """
         mag, ang = cv.cartToPolar(self.flow[..., 0], self.flow[..., 1])
-        self.hsv[..., 0] = ang * 180 / np.pi / 2
-        self.hsv[..., 2] = cv.normalize(mag, None, 0, 255, cv.NORM_MINMAX)
+        self.mag = mag
+        self.ang = ang
+        mag = cv.normalize(mag, None, 0, 255, cv.NORM_MINMAX)
+        ang = ang * 180 / np.pi / 2
+        self.hsv[..., 0] = ang
+        self.hsv[..., 2] = mag
         return Frame(cv.cvtColor(self.hsv, cv.COLOR_HSV2BGR))
 
     def apply_cpu(self, frame: Frame) -> Frame:
@@ -86,7 +92,7 @@ class DenseOpticalFlow:
         row = int(row)
         column = int(column)
         if self.flow is not None:
-            values = self.flow[row, column]
+            values = [self.mag[row, column], self.ang[row, column]]
         return dict(zip(DenseOpticalFlow.flow_columns, values))
 
     def get_flow_means(self):

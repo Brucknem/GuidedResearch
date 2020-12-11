@@ -2,7 +2,9 @@ import os
 
 from src.rendering import Renderer
 from src.teknomo_fernandez import *
-from src.filesystem_image_provider import ImageBasedVideoCapture, ImageWriter
+from src.image_providers import ImageBasedVideoCapture
+from src.image_writer import ImageWriter
+
 from src.frame_utils import Frame
 import cv2 as cv
 
