@@ -1,137 +1,78 @@
+import os
+import sys
+
 import cv2 as cv
 import numpy as np
-from src.filters import CudaScharrFilter, CudaSobelFilter
 from src.frame_utils import Frame
-from src.landmark_detection import detect_road_markings, FILTER_TYPES
-from src.rendering import Renderer
-from src.image_providers import load_frame_from_disk
+from src.image_providers import ImageBasedVideoCapture, SingleFrameVideoCapture
+from src.landmark_detection import detect_road_markings, FilterType
+from src.rendering import Renderer, layout
 import signal
 from src.utils import shutdown_signal_handler
-
-
-def filter_by_area(contours: list, threshold_area: int = 100):
-    filtered_contours = []
-    for cnt in contours:
-        filtered_contour = []
-        for c in cnt:
-            area = cv.contourArea(c)
-            if area > threshold_area:
-                filtered_contour.append(c)
-        filtered_contours.append(filtered_contour)
-    return filtered_contours
-
-
-def filter_by_minAreaRect(contours: list):
-    filtered_contours = []
-    for cnt in contours:
-        filtered_contour = []
-        for c in cnt:
-            if cv.isContourConvex(c):
-                filtered_contour.append(c)
-
-        filtered_contours.append(filtered_contour)
-    return filtered_contours
-
-
-def filter_by_rect(contours: list):
-    filtered_contours = []
-    for cnt in contours:
-        filtered_contour = []
-        for c in cnt:
-            peri = cv.arcLength(c, True)
-            approx = cv.approxPolyDP(c, 0.04 * peri, True)
-            length = len(approx)
-            if length == 4:
-                filtered_contour.append(approx)
-        filtered_contours.append(filtered_contour)
-    return filtered_contours
-
-
-def get_centroids(contours: list):
-    moments = []
-    for cnt in contours:
-        filtered_contour = []
-        for c in cnt:
-            moment = cv.moments(c)
-            cx = int(moment['m10'] / moment['m00'])
-            cy = int(moment['m01'] / moment['m00'])
-            filtered_contour.append(np.array([cx, cy]))
-        moments.append(filtered_contour)
-    return moments
-
-
-def filter_by_centroids(contours, centroids, frame, threshold):
-    filtered_contours = []
-
-    for contour in zip(contours, centroids):
-        inner_contours = []
-        for c in zip(contour[0], contour[1]):
-            centroid = c[1]
-            pixel = frame[centroid[1], centroid[0]]
-            if pixel > threshold:
-                inner_contours.append(c[0])
-        filtered_contours.append(inner_contours)
-    return filtered_contours
+from src.image_writer import ImageWriter
 
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, shutdown_signal_handler)
     renderer = Renderer()
 
-    image_path = '/mnt/local_data/providentia/test_recordings/images/s40_n_cam_far/stamp/1598434182.074549135.png'
-    frame = load_frame_from_disk(image_path)
+    base_path = '/mnt/local_data/providentia/test_recordings/images/s40_n_cam_far/'
+    # image_path = os.path.join(base_path, 'stamp', '1598434182.074549135.png')
+    image_path = os.path.join(base_path, 'stamp', '1598434218.634034981.png')
 
-    size = frame.size()
-    original_frame = cv.imread(image_path)
-    frame = cv.cvtColor(original_frame, cv.COLOR_BGR2GRAY)
+    # base_path = '/mnt/local_data/providentia/test_recordings/images/s40_n_cam_far/cutout/raw'
+    # image_path = os.path.join(base_path, 'white_markings_with_shadow.png')
+    # image_path = os.path.join(base_path, 'white_markings_with_shadow.png')
+    image_writer = ImageWriter(os.path.join(base_path, 'landmarks'))
+
+    # cap = ImageBasedVideoCapture(os.path.join(base_path, 'stamp'), loop=False, max_loaded_frames=0, frame_rate=25)
+    cap = SingleFrameVideoCapture(image_path)
 
     scale = 1
-    delta = 0
-    ddepth = cv.CV_16S
-    order = 1
-    ksize = 3
 
-    original_frame = Frame(original_frame)
-    threshold_frame = Frame(frame)
-    frame = Frame(cv.Canny(frame, 50, 200, None, 3))
+    filter_types = list(FilterType)
+    # filter_types = [FilterType.NONE]
 
-    scharr_filter = CudaScharrFilter(ddepth=ddepth, order=order)
-    sobel_filter = CudaSobelFilter(ddepth=ddepth, order=order, ksize=ksize, scale=scale, delta=delta)
-
+    written = False
+    i = 0
     while True:
-        if frame is not None:
-            frame = original_frame.resize(size).cpu()
-            results, contours = detect_road_markings(frame)
-            results = [Frame(result) for result in results]
-        else:
-            frame = frame.resize(size)
-            scharr = scharr_filter.apply(frame)
-            sobel = sobel_filter.apply(frame)
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-            results = [
-                scharr,
-                # sobel,
-            ]
+        frame = Frame(frame).clone()
+        size = frame.size()
 
-            results = [cv.threshold(result.cpu(grayscale=True), 100, 255, 0)[1] for result in results]
-            contours = [cv.findContours(result, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0] for result in results]
-            filtered_contours = contours
-            filtered_contours = filter_by_rect(contours)
-            filtered_contours = filter_by_area(filtered_contours, 50)
-            filtered_contours = filter_by_minAreaRect(filtered_contours)
-            #
-            # centroids = get_centroids(filtered_contours)
-            #
-            # filtered_contours = filter_by_centroids(filtered_contours, centroids, threshold_frame.cpu(grayscale=True),
-            #                                         200)
+        results = []
+        positions = []
+        for filter_type in filter_types:
+            new_results, contours = detect_road_markings(frame.cpu(), filter_type)
+            results += [Frame(np.array(result[1])).add_text(result[0], color='cyan', thickness=2) for result in
+                        new_results.items()]
+            positions += [np.array([results[0].size()[0] * filter_type.value, results[0].size()[1] * i]) for i in
+                          range(len(new_results))]
 
-            results = [Frame(cv.drawContours(result[0].cpu(), result[1], -1, (0, 255, 0), 2)) for result in
-                       zip([threshold_frame] * len(filtered_contours), filtered_contours)]
+            if not written:
+                filter_type_image_writer = ImageWriter(
+                    os.path.join(image_writer.base_path, filter_type.name))
+                i = 0
+                for result in new_results.items():
+                    filter_type_image_writer.write(Frame(result[1]), name='{:04d}_{}.png'.format(i, result[0]))
+                    i += 1
 
-            results = [result.resize(size) for result in results]
-            # results = [Frame(result) for result in results]
+        # results = [results[0], results[-1]]
 
-        positions = [(0, results[0].size()[1] * i) for i in range(len(results))]
+        if not written:
+            layouted = layout(results, positions)
+            image_writer.write(layouted, name='all.png')
+
+        results = [result.resize(size / scale) for result in results]
+        positions = [position / scale for position in positions]
+
+        results[0].add_text('{}/{}'.format(i % cap.get_num_frames(), cap.get_num_frames()), position=(10, 80))
+        i += 1
 
         if not renderer.render(results, positions, 'red'):
             break
+
+        written = cap.get_num_frames() == 1

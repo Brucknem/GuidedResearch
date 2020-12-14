@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from threading import Thread
 from time import sleep
 
@@ -36,7 +37,28 @@ def load_frame_from_disk(file_name: str) -> Frame:
     return Frame(cv.imread(file_name))
 
 
-class ImageBasedVideoCapture(FixedSizeSortedDict, ITimable):
+class VideoCapture(ABC):
+    @abstractmethod
+    def read(self):
+        pass
+
+    @abstractmethod
+    def get_num_frames(self):
+        pass
+
+
+class SingleFrameVideoCapture(VideoCapture):
+    def __init__(self, filename):
+        self.frame = cv.imread(filename)
+
+    def read(self):
+        return True, self.frame
+
+    def get_num_frames(self):
+        return 1
+
+
+class ImageBasedVideoCapture(FixedSizeSortedDict, ITimable, VideoCapture):
     """
     OpenCV video capture mock to stream image files like a video stream from disk
     """
@@ -67,6 +89,9 @@ class ImageBasedVideoCapture(FixedSizeSortedDict, ITimable):
 
         # self.load_frames()
         self.load_thread = self.new_load_thread()
+
+    def get_num_frames(self):
+        return self.num_frames
 
     def new_load_thread(self):
         thread = Thread(target=self.load_frames)

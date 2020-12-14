@@ -248,12 +248,17 @@ class Frame:
             columns = size_or_rows[1]
             size_or_rows = size_or_rows[0]
 
+        if self.size()[1] == int(columns) and self.size()[0] == int(size_or_rows):
+            return self
+
         return self.set(cv.resize(self.cpu(), (int(columns), int(size_or_rows))))
 
-    def add_text(self, text, color: str or tuple or np.ndarray = 'white', position: tuple = (10, 40)):
+    def add_text(self, text, color: str or tuple or np.ndarray = 'white', position: tuple = (10, 40),
+                 thickness: int = 1):
         """
         Adds text to the frame.
 
+        :param thickness:
         :param text: The text to add
         :param color: The color of the text
         :param position: The position of the text relative to the left upper corner
@@ -263,7 +268,8 @@ class Frame:
         if type(color) is str:
             color = colors.to_rgb(color)
         color = color_to_255_bgr(color)
-        return self.set(cv.putText(self.cpu(), text, position, cv.FONT_HERSHEY_SIMPLEX, 1, color, 1, cv.LINE_AA))
+        return self.set(
+            cv.putText(self.cpu(), text, position, cv.FONT_HERSHEY_SIMPLEX, 1, color, thickness, cv.LINE_AA))
 
     def add_circle(self, center: tuple or np.ndarray, color='white', **kwargs):
         """
@@ -340,4 +346,3 @@ class Frame:
         return self.set(
             cv.cuda.addWeighted(self.gpu(), own_alpha, other.gpu(), 1 - alpha, 0)
         )
-

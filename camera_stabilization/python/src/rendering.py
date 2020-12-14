@@ -1,6 +1,7 @@
 import cv2 as cv
 
 from src.frame_utils import Frame
+from src.image_writer import ImageWriter
 from src.timable import ITimable
 import numpy as np
 
@@ -48,7 +49,8 @@ class Renderer(ITimable):
     """
     A renderer for frames.
     """
-    def __init__(self, window_name: str = 'Camera Visualization'):
+
+    def __init__(self, window_name: str = 'Camera Visualization', image_writer: ImageWriter = None):
         """
         constructor
 
@@ -56,12 +58,16 @@ class Renderer(ITimable):
         """
         super().__init__('Renderer')
         self.window_name = window_name
+        self.image_writer = image_writer
 
-    def render(self, frames: list or Frame, positions: list = None, fps_color: str = 'white') -> bool:
+    def render(self, frames: list or Frame, positions: list = None, fps_color: str = 'white',
+               write: bool = False) -> bool:
         """
         Renders the given frame/frames. Layouts the frames to the given positions if specified.
         The frames are sized
 
+        :param write:
+        :param fps_color:
         :param frames:
         :param positions:
         :return:
@@ -72,6 +78,11 @@ class Renderer(ITimable):
             render_frame = layout(frames, positions)
         else:
             render_frame = frames
-        render_frame.add_text('{0:.2f} ms ({1:.2f} fps)'.format(duration, 1. / duration), color=fps_color)
+
+        if self.image_writer and write:
+            self.image_writer.write(render_frame)
+
+        if fps_color:
+            render_frame.add_text('{0:.2f} ms ({1:.2f} fps)'.format(duration, 1. / duration), color=fps_color)
         cv.imshow(self.window_name, render_frame.cpu())
         return not (cv.waitKey(1) & 0xFF == ord('q'))
