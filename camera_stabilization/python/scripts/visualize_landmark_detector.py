@@ -30,8 +30,16 @@ if __name__ == '__main__':
 
     scale = 1
 
-    filter_types = list(FilterType)
-    # filter_types = [FilterType.NONE]
+    filter_types = [
+        # FilterType.NONE,
+        FilterType.SOBEL,
+        FilterType.SCHARR,
+        FilterType.LAPLACIAN,
+        # FilterType.AVERAGING,
+        # FilterType.GAUSSIAN_BLUR,
+        # FilterType.MEDIAN_BLUR,
+        # FilterType.BILATERAL_BLUR,
+    ]
 
     written = False
     i = 0
@@ -45,20 +53,21 @@ if __name__ == '__main__':
 
         results = []
         positions = []
+        row = 0
         for filter_type in filter_types:
             new_results, contours = detect_road_markings(frame.cpu(), filter_type)
             results += [Frame(np.array(result[1])).add_text(result[0], color='cyan', thickness=2) for result in
                         new_results.items()]
-            positions += [np.array([results[0].size()[0] * filter_type.value, results[0].size()[1] * i]) for i in
+            positions += [np.array([results[0].size()[0] * row, results[0].size()[1] * i]) for i in
                           range(len(new_results))]
-
+            row += 1
             if not written:
                 filter_type_image_writer = ImageWriter(
                     os.path.join(image_writer.base_path, filter_type.name))
-                i = 0
+                x = 0
                 for result in new_results.items():
-                    filter_type_image_writer.write(Frame(result[1]), name='{:04d}_{}.png'.format(i, result[0]))
-                    i += 1
+                    filter_type_image_writer.write(Frame(result[1]), name='{:04d}_{}.png'.format(x, result[0]))
+                    x += 1
 
         # results = [results[0], results[-1]]
 
@@ -69,6 +78,7 @@ if __name__ == '__main__':
         results = [result.resize(size / scale) for result in results]
         positions = [position / scale for position in positions]
 
+        print(positions)
         results[0].add_text('{}/{}'.format(i % cap.get_num_frames(), cap.get_num_frames()), position=(10, 80))
         i += 1
 

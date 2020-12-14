@@ -83,6 +83,6 @@ class Renderer(ITimable):
             self.image_writer.write(render_frame)
 
         if fps_color:
-            render_frame.add_text('{0:.2f} ms ({1:.2f} fps)'.format(duration, 1. / duration), color=fps_color)
+            render_frame.add_text('{0:.2f} s ({1:.2f} fps)'.format(duration, 1. / duration), color=fps_color)
         cv.imshow(self.window_name, render_frame.cpu())
         return not (cv.waitKey(1) & 0xFF == ord('q'))

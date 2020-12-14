@@ -36,7 +36,7 @@ def is_centroid_white(contour: np.ndarray, frame: np.ndarray):
     cx = int(moment['m10'] / moment['m00'])
     cy = int(moment['m01'] / moment['m00'])
     # TODO try different
-    threshold = 80
+    threshold = 150
     pixel = frame[cy, cx]
     return pixel > threshold
 
@@ -118,67 +118,26 @@ def detect_road_markings(frame: np.ndarray, filter_type: FilterType = FilterType
         grayscale = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     else:
         grayscale = np.array(frame)
-    # results['grayscale'] = np.array(grayscale)
-    blurred = grayscale
-
-    # TODO try different
-    gamma = 0.5
-    gamma_adjusted = adjust_gamma(grayscale, gamma)
-    results['gamma adjusted ({})'.format(gamma)] = gamma_adjusted
-    colored_image = gamma_adjusted
+    results['grayscale'] = np.array(grayscale)
     #
-
-    hls_frame = cv.cvtColor(frame, cv.COLOR_RGB2HLS)
-
+    # # TODO try different
+    # gamma = 0.5
+    # gamma_adjusted = adjust_gamma(grayscale, gamma)
+    # results['gamma adjusted ({})'.format(gamma)] = gamma_adjusted
+    #
+    # hls_frame = cv.cvtColor(frame, cv.COLOR_RGB2HLS)
+    # results['hls'] = hls_frame
+    #
+    # white_mask = cv.inRange(hls_frame, np.array([0, 200, 0], dtype=np.uint8), np.array([200, 255, 255], dtype=np.uint8))
+    # results['white markings'] = white_mask
     # yellow_mask = cv.inRange(hls_frame, np.array([10, 0, 100], dtype=np.uint8), np.array([40, 255, 255], dtype=np.uint8))
-
-    white_mask = cv.inRange(hls_frame, np.array([0, 200, 0], dtype=np.uint8), np.array([200, 255, 255], dtype=np.uint8))
-    results['white markings'] = white_mask
-
-    results['hls'] = hls_frame
-
-    white_mask_shadow_hls = cv.inRange(hls_frame, np.array([0, 87, 0], dtype=np.uint8),
-                                       np.array([50, 110, 200], dtype=np.uint8))
-    results['white markings (shadow - hls)'] = white_mask_shadow_hls
-    # white_mask_shadow_hls_erode = cv.erode(white_mask_shadow_hls, (5,5),iterations=15)
-    # results['white markings (shadow - erode)'] = white_mask_shadow_hls_erode
-
-    # white_mask_shadow_hls_close = cv.morphologyEx(white_mask_shadow_hls_erode, cv.MORPH_CLOSE, np.ones((15,15),np.uint8))
-    # results['white markings (shadow - close)'] = white_mask_shadow_hls_close
-
-    mask = cv.bitwise_or(white_mask, white_mask_shadow_hls)
-    results['white markings (total - hls)'] = mask
-
-    # # -----Converting image to LAB Color model-----------------------------------
-    # lab_frame = cv.cvtColor(frame, cv.COLOR_BGR2LAB)
-    # results['lab'] = lab_frame
-    # white_mask_shadow_lab = cv.inRange(lab_frame, np.array([80, 0, 0], dtype=np.uint8),
-    #                                    np.array([130, 255, 255], dtype=np.uint8))
-    # results['white markings (shadow - lab)'] = white_mask_shadow_lab
-    #
-    # # -----Converting image to LAB Color model-----------------------------------
-    # hsv_frame = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
-    # results['hsv'] = hsv_frame
-    # white_mask_shadow_hsv = cv.inRange(hsv_frame, np.array([0, 0, 90], dtype=np.uint8),
-    #                                    np.array([255, 255, 140], dtype=np.uint8))
-    # results['white markings (shadow - hsv)'] = white_mask_shadow_hsv
-    # mask = cv.bitwise_or(white_mask, white_mask_shadow_hsv)
-    # results['white markings (total - hsv)'] = mask
-
-    # return results, []
-
     # results['yellow markings'] = yellow_mask
     #
-    # mask = cv.bitwise_or(yellow_mask, white_mask)
-    # # results['total markings'] = mask
-    # colored_image = cv.bitwise_and(gamma_adjusted, gamma_adjusted, mask=mask)
-    # results['masked'] = colored_image
-
-    # blurred = cv.GaussianBlur(colored_image, (7,7), 0)
-    # results['blurred'] = blurred
+    # markings = cv.bitwise_or(white_mask, yellow_mask)
+    # results['markings'] = markings
 
     # TODO Try different
-    canny = cv.Canny(mask, threshold1=50, threshold2=200, edges=None, apertureSize=3)
+    canny = cv.Canny(grayscale, threshold1=50, threshold2=200, edges=None, apertureSize=3)
     results['canny'] = canny
 
     filtered = canny
@@ -188,7 +147,7 @@ def detect_road_markings(frame: np.ndarray, filter_type: FilterType = FilterType
     results['filtered ({})'.format(filter_type.name)] = filtered
 
     canny_stacked = np.stack((canny,) * 3, axis=2)
-    contours, hierarchy = cv.findContours(filtered, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(filtered, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     contours_drawn = cv.drawContours(canny_stacked.copy(), contours, -1, (0, 0, 255), 2)
     results['contours (raw)'] = contours_drawn
 
