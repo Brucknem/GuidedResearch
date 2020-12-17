@@ -10,7 +10,7 @@ from src.rendering import Renderer, layout
 from src.background_segmentation import *
 
 if __name__ == '__main__':
-    bridge = 's50_s'
+    bridge = 's40_n'
     near_or_far = 'far'
     base_path = '/mnt/local_data/providentia/test_recordings/images/{}_cam_{}'.format(bridge, near_or_far)
     # base_path = '/mnt/local_data/providentia/on_site/2020_12_08/images/{}_cam_{}'.format(bridge, near_or_far)
