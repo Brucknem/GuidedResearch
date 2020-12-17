@@ -20,8 +20,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ac0b06c4-5130-412c-b89e-72993601ff7e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../misc/android_sensors_visualization/android_sensors_visualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/../misc/android_sensors_visualization/android_sensors_visualization.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../misc/android_sensors_visualization/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/../misc/android_sensors_visualization/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/python/scripts/blob_detection.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/python/scripts/test_harris_corner.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/python/scripts/test_shi_tomasi.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/python/scripts/visualize_feature_detectors.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/python/scripts/visualize_landmark_detector_and_teknomo_fernandez_background.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/python/src/feature_detection.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/python/src/feature_matching.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/scripts/visualize_landmark_detector.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/scripts/visualize_landmark_detector.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/scripts/visualize_optical_flow.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/scripts/visualize_optical_flow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/scripts/visualize_teknomo_fernandez.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/scripts/visualize_teknomo_fernandez.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/src/landmark_detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/src/landmark_detection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/src/optical_flow.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/src/optical_flow.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,6 +118,7 @@
       <updated>1606760889979</updated>
       <workItem from="1606760896813" duration="65000" />
       <workItem from="1607519985760" duration="74000" />
+      <workItem from="1608141287759" duration="17000" />
     </task>
     <servers />
   </component>
@@ -124,28 +135,29 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="413" y="377" key="FileChooserDialogImpl" timestamp="1607520057520">
+    <state x="412" y="349" width="426" height="483" key="FileChooserDialogImpl" timestamp="1608141302872">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
-    <state x="413" y="377" key="FileChooserDialogImpl/0.0.2560.1440@0.0.2560.1440" timestamp="1607520057520" />
-    <state width="1224" height="403" key="GridCell.Tab.0.bottom" timestamp="1607520058972">
+    <state x="412" y="349" width="426" height="483" key="FileChooserDialogImpl/0.0.2560.1440@0.0.2560.1440" timestamp="1608141302872" />
+    <state width="2514" height="406" key="GridCell.Tab.0.bottom" timestamp="1608141303711">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
-    <state width="1224" height="403" key="GridCell.Tab.0.bottom/0.0.2560.1440@0.0.2560.1440" timestamp="1607520058972" />
-    <state width="1224" height="403" key="GridCell.Tab.0.center" timestamp="1607520058972">
+    <state width="2514" height="406" key="GridCell.Tab.0.bottom/0.0.2560.1440@0.0.2560.1440" timestamp="1608141303711" />
+    <state width="2514" height="406" key="GridCell.Tab.0.center" timestamp="1608141303711">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
-    <state width="1224" height="403" key="GridCell.Tab.0.center/0.0.2560.1440@0.0.2560.1440" timestamp="1607520058972" />
-    <state width="1224" height="403" key="GridCell.Tab.0.left" timestamp="1607520058972">
+    <state width="2514" height="406" key="GridCell.Tab.0.center/0.0.2560.1440@0.0.2560.1440" timestamp="1608141303711" />
+    <state width="2514" height="406" key="GridCell.Tab.0.left" timestamp="1608141303711">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
-    <state width="1224" height="403" key="GridCell.Tab.0.left/0.0.2560.1440@0.0.2560.1440" timestamp="1607520058972" />
-    <state width="1224" height="403" key="GridCell.Tab.0.right" timestamp="1607520058972">
+    <state width="2514" height="406" key="GridCell.Tab.0.left/0.0.2560.1440@0.0.2560.1440" timestamp="1608141303711" />
+    <state width="2514" height="406" key="GridCell.Tab.0.right" timestamp="1608141303711">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
-    <state width="1224" height="403" key="GridCell.Tab.0.right/0.0.2560.1440@0.0.2560.1440" timestamp="1607520058972" />
+    <state width="2514" height="406" key="GridCell.Tab.0.right/0.0.2560.1440@0.0.2560.1440" timestamp="1608141303711" />
     <state x="1392" y="325" key="SettingsEditor" timestamp="1607520025909">
       <screen x="0" y="0" width="2560" height="1440" />
     </state>
@@ -160,6 +172,6 @@
     <state x="1004" y="582" width="542" height="215" key="vcs.readOnlyHandler.ReadOnlyStatusDialog/0.0.2560.1440@0.0.2560.1440" timestamp="1606760944487" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/camera_stabilization$visualize_optical_flow.coverage" NAME="visualize_optical_flow Coverage Results" MODIFIED="1607520008955" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python/scripts" />
+    <SUITE FILE_PATH="coverage/camera_stabilization$visualize_optical_flow.coverage" NAME="visualize_optical_flow Coverage Results" MODIFIED="1608141287909" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python/scripts" />
   </component>
 </project>

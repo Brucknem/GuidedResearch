@@ -8,7 +8,7 @@ class DenseOpticalFlow:
     Dense Optical flow based on the farneback algorithm
     """
     cuda_stream = cv.cuda_Stream()
-    flow_columns = ['Magnitude [px]', 'Angle [Rad.]']
+    flow_columns = ['mag', 'ang']
 
     def __init__(self):
         """
@@ -47,6 +47,12 @@ class DenseOpticalFlow:
         self.hsv[..., 2] = mag
         return Frame(cv.cvtColor(self.hsv, cv.COLOR_HSV2BGR))
 
+    def get_movement_mask(self) -> Frame:
+        if self.mag is None:
+            return Frame.empty()
+        ret, threshold = cv.threshold(self.mag, 3, 255, cv.THRESH_BINARY)
+        return Frame(threshold)
+
     def apply_cpu(self, frame: Frame) -> Frame:
         """
         Applies the CPU version of the dense optical flow algorithm
@@ -62,13 +68,17 @@ class DenseOpticalFlow:
         self.previous_frame = frame
         return self.flow_to_bgr()
 
-    def apply_gpu(self, frame: Frame) -> Frame:
+    def apply_gpu(self, frame: Frame, previous_frame: Frame = None) -> Frame:
         """
         Applies the GPU version of the dense optical flow algorithm
 
+        :param previous_frame:
         :param frame: The frame to calculate the optical flow.
         :return: The dense optical flow as BGR image
         """
+        if previous_frame is not None:
+            self.initialize(previous_frame)
+
         if self.previous_frame is None:
             self.initialize(frame)
             return Frame.empty_like(frame.shape())
@@ -103,5 +113,16 @@ class DenseOpticalFlow:
         """
         values = (np.NaN, np.NaN)
         if self.flow is not None:
-            values = [np.nanmean(self.flow[:, :, x]) for x in range(self.flow.shape[2])]
+            values = [np.nanmean(x) for x in [self.mag, self.ang]]
+        return dict(zip(DenseOpticalFlow.flow_columns, values))
+
+    def get_flow_medians(self):
+        """
+        Getter for the mean of the magnitude and angle of the dense optical flow
+
+        :return: The mean magnitude and angle of the dense optical flow
+        """
+        values = (np.NaN, np.NaN)
+        if self.flow is not None:
+            values = [np.nanmedian(x) for x in [self.mag, self.ang]]
         return dict(zip(DenseOpticalFlow.flow_columns, values))

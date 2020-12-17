@@ -13,13 +13,14 @@ if __name__ == '__main__':
 
     bridge = 's50_s'
     near_or_far = 'far'
-    # base_path = '/mnt/local_data/providentia/test_recordings/images/{}_cam_{}'.format(bridge, near_or_far)
-    base_path = '/mnt/local_data/providentia/on_site/2020_12_08/images/{}_cam_{}'.format(bridge, near_or_far)
+    base_path = '/mnt/local_data/providentia/test_recordings/images/{}_cam_{}'.format(bridge, near_or_far)
+    # base_path = '/mnt/local_data/providentia/on_site/2020_12_08/images/{}_cam_{}'.format(bridge, near_or_far)
 
-    # cap = ImageBasedVideoCapture(os.path.join(base_path, 'stamp'), loop=False, max_loaded_frames=0, frame_rate=25)
-    cap = ImageBasedVideoCapture(os.path.join(base_path, 'image_raw'), file_ending='.bmp', loop=False, max_loaded_frames=0, frame_rate=25)
+    cap = ImageBasedVideoCapture(os.path.join(base_path, 'stamp'), loop=False, max_loaded_frames=0, frame_rate=25)
+    # cap = ImageBasedVideoCapture(os.path.join(base_path, 'image_raw'), file_ending='.bmp', loop=False, max_loaded_frames=0, frame_rate=25)
     image_writer = ImageWriter(os.path.join(base_path, 'optical_flow/images'))
     dataframeWriter = DataframeWriter(os.path.join(base_path, 'optical_flow/values'))
+    teknomo_fernandez = TeknomoFernandez(levels=6, history=200, verbose=False)
 
     print('Open: ' + os.path.join(base_path, 'optical_flow/'))
 
@@ -56,7 +57,7 @@ if __name__ == '__main__':
 
     optical_flow_roi_colors = ['red', 'white', 'yellow', 'green']
 
-    scale_factor = 1
+    scale_factor = 2
 
     i = 1
     while True:
@@ -71,9 +72,12 @@ if __name__ == '__main__':
             previous_frame = frame.clone()
 
         frame.resize(size / scale_factor)
+        teknomo_fernandez.append(frame)
+        background = teknomo_fernandez.get_background()
 
         # result = optical_flow.apply_cpu(frame)
         result = optical_flow.apply_gpu(frame)
+        # result = optical_flow.apply_gpu(frame, background)
         result.resize(size)
         frame.resize(size)
 
@@ -88,7 +92,15 @@ if __name__ == '__main__':
 
         result.add_text('{}/{}'.format(i, cap.num_frames), position=(10, 80))
 
-        if not renderer.render(result):
+        results = [
+            result,
+            background,
+            optical_flow.get_movement_mask()
+        ]
+        results = [result.resize(size / scale_factor) for result in results]
+        positions = [(0, results[0].size()[1] * i) for i in range(len(results))]
+
+        if not renderer.render(results, positions):
             break
 
         previous_frame = frame

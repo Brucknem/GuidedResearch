@@ -7,6 +7,7 @@ from src.image_writer import ImageWriter
 
 from src.frame_utils import Frame
 import cv2 as cv
+from src.feature_matching import flann
 
 if __name__ == '__main__':
     np.random.seed(0)
@@ -20,8 +21,7 @@ if __name__ == '__main__':
 
     only_background = True
     teknomo_fernandez = TeknomoFernandez(levels=6, history=200, verbose=False)
-    scale_factor = 1.2
-    test_position = tuple([200, 540])
+    scale_factor = 2
 
     while True:
         ret, frame = cap.read()
@@ -31,33 +31,36 @@ if __name__ == '__main__':
         frame = Frame(frame)
 
         teknomo_fernandez.append(frame)
-        result = teknomo_fernandez.get_background()
-        size = frame.size() / scale_factor
-
-        frame.resize(size)
+        background = teknomo_fernandez.get_background()
+        size = frame.size()
 
         if only_background:
             for i in range(0):
-                result = cv.cuda.bilateralFilter(result.gpu(), 9, 75, 75)
-            result.resize(size / 2)
+                background = cv.cuda.bilateralFilter(background.gpu(), 9, 75, 75)
+            # result.resize(size / 2)
 
             # background_writer.write(result)
-            difference = teknomo_fernandez.testing()
-            difference.resize(size / 2)
+            # difference = teknomo_fernandez.testing()
+            # difference.resize(size / 2)
             # difference_writer.write(difference)
 
-            result = [
-                frame,
-                result,
-                difference
+            flann_result = Frame(flann(frame.cpu(), background.cpu()))
+            flann_size = np.array([size[0], size[1] * 2])
+
+            results = [
+                frame.resize(size / scale_factor),
+                background.resize(size / scale_factor),
+                flann_result.resize(flann_size / scale_factor)
             ]
             positions = [
                 (0, 0),
                 (0, size[1]),
-                ((size / 2)[0], size[1])
+                (size[0], 0)
             ]
         else:
             foreground, foreground_bitmask, background, background_bitmask = teknomo_fernandez.calculate_teknomo_fernandez_segmentation()
 
-        if not renderer.render(result, positions):
+        # results = [result.resize(size / scale_factor) for result in results]
+        positions = [np.array(position) / scale_factor for position in positions]
+        if not renderer.render(results, positions):
             break

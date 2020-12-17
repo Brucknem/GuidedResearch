@@ -13,7 +13,6 @@ from src.teknomo_fernandez import TeknomoFernandez
 from src.utils import shutdown_signal_handler
 from src.image_writer import ImageWriter
 
-
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, shutdown_signal_handler)
     renderer = Renderer()
@@ -29,19 +28,9 @@ if __name__ == '__main__':
 
     cap = ImageBasedVideoCapture(os.path.join(base_path, 'stamp'), loop=False, max_loaded_frames=0, frame_rate=25)
     # cap = SingleFrameVideoCapture(image_path)
+    teknomo_fernandez = TeknomoFernandez(levels=6, history=200, verbose=False)
 
-    scale = 1.5
-
-    filter_types = [
-        # FilterType.NONE,
-        # FilterType.SOBEL,
-        # FilterType.SCHARR,
-        FilterType.LAPLACIAN,
-        # FilterType.AVERAGING,
-        # FilterType.GAUSSIAN_BLUR,
-        # FilterType.MEDIAN_BLUR,
-        # FilterType.BILATERAL_BLUR,
-    ]
+    scale = 2
 
     written = False
     i = 0
@@ -54,25 +43,18 @@ if __name__ == '__main__':
         frame = Frame(frame).clone()
         size = frame.size()
 
-        results = []
-        positions = []
-        row = 0
-        for filter_type in filter_types:
-            new_results, contours = detect_road_markings(frame.cpu(), filter_type)
-            results += [Frame(np.array(result[1])).add_text(result[0], color='cyan', thickness=2) for result in
-                        new_results.items()]
-            positions += [np.array([results[0].size()[0] * row, results[0].size()[1] * i]) for i in
-                          range(len(new_results))]
-            row += 1
-            if not written:
-                filter_type_image_writer = ImageWriter(
-                    os.path.join(image_writer.base_path, filter_type.name))
-                x = 0
-                for result in new_results.items():
-                    filter_type_image_writer.write(Frame(result[1]), name='{:04d}_{}.png'.format(x, result[0]))
-                    x += 1
+        teknomo_fernandez.append(frame)
+        background = teknomo_fernandez.get_background()
 
+        results, contours = detect_road_markings(frame.cpu(), filter_type=FilterType.LAPLACIAN)
+        results = [Frame(result[1]) for result in results.items()]
         results = [results[0], results[-1]]
+        positions = [np.array([0, results[0].size()[1] * i]) for i in range(len(results))]
+
+        background_results, contours = detect_road_markings(background.cpu(), filter_type=FilterType.LAPLACIAN)
+        background_results = [Frame(result[1]) for result in background_results.items()]
+        results += [background_results[0], background_results[-1]]
+        positions += [np.array([results[0].size()[0], results[0].size()[1] * i]) for i in range(len(results))]
 
         if not written:
             layouted = layout(results, positions)

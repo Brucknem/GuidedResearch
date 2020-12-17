@@ -17,13 +17,14 @@ class FilterType(Enum):
 
 
 def is_rectangle(contour: np.ndarray):
+    # return 3 <= len(contour) <= 5
     return len(contour) == 4
 
 
 def is_large_enough(contour: np.ndarray):
     area = cv.contourArea(contour)
     # TODO try different
-    threshold = 50
+    threshold = 5
     return area > threshold
 
 
@@ -36,7 +37,7 @@ def is_centroid_white(contour: np.ndarray, frame: np.ndarray):
     cx = int(moment['m10'] / moment['m00'])
     cy = int(moment['m01'] / moment['m00'])
     # TODO try different
-    threshold = 150
+    threshold = 200
     pixel = frame[cy, cx]
     return pixel > threshold
 
@@ -65,7 +66,7 @@ def filter_contours(contours: list, frame: np.ndarray):
             dropout['white'] += 1
             continue
 
-        wanted_contours.append(contour)
+        wanted_contours.append(approximate_polygon)
     # print(dropout)
     return wanted_contours
 
