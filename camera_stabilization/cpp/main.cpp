@@ -20,19 +20,19 @@ void detectORBKeypoints(cv::Mat frame, cv::Ptr<cv::cuda::Feature2DAsync> detecto
     detector->detectAndComputeAsync(frame_gpu, cv::noArray(), keypoints, descriptors, false, cudaStream);
 }
 
-std::vector<cv::Mat> orb_bf(cv::Mat img1, cv::Mat img2, cv::Ptr<cv::cuda::Feature2DAsync> detector, cv::Ptr<cv::cuda::DescriptorMatcher> matcher)
+std::vector<cv::Mat> orb_bf(cv::Mat frame, cv::Mat referenceFrame, cv::Ptr<cv::cuda::Feature2DAsync> detector, cv::Ptr<cv::cuda::DescriptorMatcher> matcher)
 {
     cv::cuda::Stream cudaStream1, cudaStream2;
-    cv::cvtColor(img1, img1, cv::COLOR_BGR2GRAY);
-    cv::cvtColor(img2, img2, cv::COLOR_BGR2GRAY);
+    cv::cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
+    cv::cvtColor(referenceFrame, referenceFrame, cv::COLOR_BGR2GRAY);
 
     cv::cuda::GpuMat keys1, keys2;                // this holds the keys detected
     cv::cuda::GpuMat desc1, desc2;                // this holds the descriptors for the detected keypoints
     std::vector<cv::KeyPoint> cpuKeys1, cpuKeys2; // holds keypoints downloaded from gpu
-    detectORBKeypoints(img1, detector, cudaStream1, keys1, desc1);
+    detectORBKeypoints(frame, detector, cudaStream1, keys1, desc1);
     cudaStream1.waitForCompletion();
     detector->convert(keys1, cpuKeys1); // download keys to cpu if needed for anything...like displaying or whatever
-    detectORBKeypoints(img2, detector, cudaStream2, keys2, desc2);
+    detectORBKeypoints(referenceFrame, detector, cudaStream2, keys2, desc2);
     cudaStream2.waitForCompletion();
     detector->convert(keys2, cpuKeys2); // download keys to cpu if needed for anything...like displaying or whatever
 
@@ -58,7 +58,7 @@ std::vector<cv::Mat> orb_bf(cv::Mat img1, cv::Mat img2, cv::Ptr<cv::cuda::Featur
 
     //-- Draw matches
     cv::Mat img_matches;
-    drawMatches(img1, cpuKeys1, img2, cpuKeys2, good_matches, img_matches, cv::Scalar::all(-1),
+    drawMatches(frame, cpuKeys1, referenceFrame, cpuKeys2, good_matches, img_matches, cv::Scalar::all(-1),
                 cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
     std::vector<cv::Mat> results{img_matches};
 
@@ -77,27 +77,21 @@ std::vector<cv::Mat> orb_bf(cv::Mat img1, cv::Mat img2, cv::Ptr<cv::cuda::Featur
     return results;
 }
 
-std::vector<cv::Mat> surf_bf(cv::Mat img1, cv::Mat img2, cv::Ptr<cv::cuda::SURF_CUDA> detector, cv::Ptr<cv::cuda::DescriptorMatcher> matcher)
+std::vector<cv::Mat> surf_bf(cv::Mat frame, cv::cuda::GpuMat referenceFrame, cv::cuda::GpuMat mask, cv::Ptr<cv::cuda::SURF_CUDA> detector, cv::Ptr<cv::cuda::DescriptorMatcher> matcher)
 {
     cv::cuda::Stream cudaStream1;
 
-    cv::cvtColor(img1, img1, cv::COLOR_BGR2GRAY);
-    cv::cvtColor(img2, img2, cv::COLOR_BGR2GRAY);
+    cv::cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
 
-    cv::cuda::GpuMat img1_gpu, img2_gpu; // this holds the keys detected
-    img1_gpu.upload(img1);
-    img2_gpu.upload(img2);
-    cv::cuda::GpuMat mask_gpu;
-
-    cv::Mat mask(img1.size(), CV_8UC1, cv::Scalar(1));
-    mask_gpu.upload(mask);
+    cv::cuda::GpuMat img1_gpu, mask_gpu; // this holds the keys detected
+    img1_gpu.upload(frame);
 
     cv::cuda::GpuMat keys1, keys2;                // this holds the keys detected
     cv::cuda::GpuMat desc1, desc2;                // this holds the descriptors for the detected keypoints
     std::vector<cv::KeyPoint> cpuKeys1, cpuKeys2; // holds keypoints downloaded from gpu
     detector->detectWithDescriptors(img1_gpu, mask_gpu, keys1, desc1, false);
     detector->downloadKeypoints(keys1, cpuKeys1); // download keys to cpu if needed for anything...like displaying or whatever
-    detector->detectWithDescriptors(img2_gpu, mask_gpu, keys2, desc2, false);
+    detector->detectWithDescriptors(referenceFrame, mask_gpu, keys2, desc2, false);
     detector->downloadKeypoints(keys2, cpuKeys2); // download keys to cpu if needed for anything...like displaying or whatever
 
     // cv::Mat cpuDesc1(desc1), cpuDesc2(desc2);
@@ -139,10 +133,10 @@ std::vector<cv::Mat> surf_bf(cv::Mat img1, cv::Mat img2, cv::Ptr<cv::cuda::SURF_
 
     //-- Draw matches
     cv::Mat img_matches;
-    drawMatches(img1, cpuKeys1, img2, cpuKeys2, good_matches, img_matches, cv::Scalar::all(-1),
+    drawMatches(frame, cpuKeys1, cv::Mat(referenceFrame), cpuKeys2, good_matches, img_matches, cv::Scalar::all(-1),
                 cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
     std::vector<cv::Mat> results{img_matches};
-    // std::vector<cv::Mat> results{img1};
+    // std::vector<cv::Mat> results{frame};
 
     //-- Localize the object
     std::vector<cv::Point2f> obj;
@@ -162,6 +156,7 @@ std::vector<cv::Mat> surf_bf(cv::Mat img1, cv::Mat img2, cv::Ptr<cv::cuda::SURF_
 int main(int argc, char const *argv[])
 {
     cv::cuda::Stream cudaStream;
+    // cv::VideoCapture cap("/mnt/local_data/providentia/test_recordings/videos/s40_n_far_image_raw.mp4");
     cv::VideoCapture cap("/mnt/local_data/providentia/test_recordings/videos/s50_s_far_image_raw.mp4");
     if (!cap.isOpened()) // if not success, exit program
     {
@@ -171,8 +166,9 @@ int main(int argc, char const *argv[])
     cap.set(cv::CAP_PROP_FPS, 25);
 
     cv::Mat frame;
-    cv::Mat keyframe;
-    bool isKeyframeSet = false;
+    cv::cuda::GpuMat referenceFrame, mask;
+    mask.upload(cv::Mat(frame.size(), CV_8UC1, cv::Scalar(1)));
+    bool isReferenceFrameSet = false;
 
     std::string windowName = "Dynamic Camera Stabilization";
     cv::namedWindow(windowName, cv::WINDOW_AUTOSIZE);
@@ -188,20 +184,23 @@ int main(int argc, char const *argv[])
     double calculationScaleFactor = 1;
     double renderingScaleFactor = 0.65;
 
+
     while (true)
     {
         cap >> frame;
         cv::Mat originalFrame = frame.clone();
         cv::resize(frame, frame, cv::Size(), calculationScaleFactor, calculationScaleFactor);
 
-        if (!isKeyframeSet)
+        if (!isReferenceFrameSet)
         {
-            keyframe = frame.clone();
-            isKeyframeSet = true;
+            cv::Mat cpu_referenceFrame = frame.clone();
+            cv::cvtColor(cpu_referenceFrame, cpu_referenceFrame, cv::COLOR_BGR2GRAY);
+            referenceFrame.upload(cpu_referenceFrame);
+            isReferenceFrameSet = true;
         }
 
-        // std::vector<cv::Mat> flannResult = orb_bf(frame, keyframe, orb, orb_matcher);
-        std::vector<cv::Mat> flannResult = surf_bf(frame, keyframe, surf, surf_matcher);
+        // std::vector<cv::Mat> flannResult = orb_bf(frame, referenceFrame, orb, orb_matcher);
+        std::vector<cv::Mat> flannResult = surf_bf(frame, referenceFrame, mask, surf, surf_matcher);
 
         cv::Mat stabilized;
         cv::Mat H = flannResult[1];
