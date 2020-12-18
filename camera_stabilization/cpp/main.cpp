@@ -12,6 +12,8 @@
 #include "opencv2/xfeatures2d/cuda.hpp"
 #include <opencv2/cudafeatures2d.hpp>
 #include "opencv2/calib3d.hpp"
+#include <chrono>
+#include <thread>
 
 void detectORBKeypoints(cv::Mat frame, cv::Ptr<cv::cuda::Feature2DAsync> detector, cv::cuda::Stream cudaStream, cv::cuda::GpuMat &keypoints, cv::cuda::GpuMat &descriptors)
 {
@@ -77,7 +79,7 @@ std::vector<cv::Mat> orb_bf(cv::Mat frame, cv::Mat referenceFrame, cv::Ptr<cv::c
     return results;
 }
 
-std::vector<cv::Mat> surf_bf(cv::Mat frame, cv::cuda::GpuMat referenceFrame, cv::cuda::GpuMat mask, cv::Ptr<cv::cuda::SURF_CUDA> detector, cv::Ptr<cv::cuda::DescriptorMatcher> matcher)
+std::vector<cv::Mat> surf_bf(cv::Mat& frame, const cv::cuda::GpuMat& referenceFrame, const cv::cuda::GpuMat& mask, const cv::Ptr<cv::cuda::SURF_CUDA>& detector, const cv::Ptr<cv::cuda::DescriptorMatcher>& matcher)
 {
     cv::cuda::Stream cudaStream1;
 
@@ -184,9 +186,9 @@ int main(int argc, char const *argv[])
     double calculationScaleFactor = 1;
     double renderingScaleFactor = 0.65;
 
-
     while (true)
     {
+        std::chrono::milliseconds start = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
         cap >> frame;
         cv::Mat originalFrame = frame.clone();
         cv::resize(frame, frame, cv::Size(), calculationScaleFactor, calculationScaleFactor);
@@ -214,6 +216,11 @@ int main(int argc, char const *argv[])
         cv::Mat flannMatching = flannResult[0];
         cv::resize(flannMatching, flannMatching, cv::Size(), renderingScaleFactor, renderingScaleFactor);
 
+
+        std::chrono::milliseconds end = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+        auto difference = end - start; 
+
+        cv::putText(stabilized, std::to_string(1000.0 / difference.count()), cv::Point(10, 30), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(0,0,250), 1, 8);
         cv::imshow(windowName, stabilized);
         cv::imshow(matchingWindowName, flannMatching);
         if ((char)cv::waitKey(1) == 27)
