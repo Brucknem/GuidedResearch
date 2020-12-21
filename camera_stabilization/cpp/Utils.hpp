@@ -14,6 +14,9 @@
 
 namespace providentia {
     namespace utils {
+        /**
+         * Class to record timestamps and measure durations of algorithm steps.
+         */
         class TimeMeasurable {
         private:
             std::string name;
@@ -21,16 +24,29 @@ namespace providentia {
             std::vector<std::pair<std::string, long>> durations;
             std::chrono::milliseconds previous{};
 
-        public:
-            explicit TimeMeasurable(std::string name = "Unnamed") : name(std::move(name)) {
-                clear();
-            }
+            /**
+             * Gets the current unix timestamp in milliseconds since 01.01.1970.
 
+             * @return The total milliseconds since 01.01.1970.
+             */
             static std::chrono::milliseconds now() {
                 return std::chrono::duration_cast<std::chrono::milliseconds>(
                         std::chrono::system_clock::now().time_since_epoch());
             }
 
+        public:
+            /**
+             * Constructor
+             *
+             * @param name The print name of the instance.
+             */
+            explicit TimeMeasurable(std::string name = "Unnamed") : name(std::move(name)) {
+                clear();
+            }
+
+            /**
+             * Clears the buffers and adds a start timestamp.
+             */
             void clear() {
                 timestamps.clear();
                 durations.clear();
@@ -38,6 +54,11 @@ namespace providentia {
                 addTimestamp("Start");
             }
 
+            /**
+             * Adds a timestamp.
+             *
+             * @param measurementName The name of the measurement.
+             */
             void addTimestamp(const std::string &measurementName = "Unnamed") {
                 auto now = providentia::utils::TimeMeasurable::now();
                 timestamps.emplace_back(measurementName, now);
@@ -45,10 +66,20 @@ namespace providentia {
                 previous = providentia::utils::TimeMeasurable::now();
             }
 
+            /**
+             * Gets the total milliseconds duration from the last clear to the latest added timestamp.
+
+             * @return The total milliseconds.
+             */
             long getTotalMilliseconds() {
                 return (timestamps[timestamps.size() - 1].second - timestamps[0].second).count();
             }
 
+            /**
+             * Converts the durations between the steps into a readable format.
+             *
+             * @return The formatted durations.
+             */
             std::string durations_str() {
                 std::stringstream ss;
 

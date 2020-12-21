@@ -28,6 +28,10 @@
 namespace providentia {
     namespace calibration {
         namespace dynamic {
+
+            /**
+             * Base class for the dynamic calibration algorithms.
+             */
             class DynamicCalibrator {
             protected:
                 bool isReferenceFrameSet = false;
@@ -51,15 +55,46 @@ namespace providentia {
                 providentia::utils::TimeMeasurable timer;
                 int verbosity;
 
+                /**
+                 * Constructor.
+                 *
+                 * @param verbosity The verbosity of the time measuring. <br>
+                 *          0: No measuring. <br>
+                 *          1: Measuring only start to end. <br>
+                 *          2: Measuring every step of the algorithm. <br>
+                 */
                 explicit DynamicCalibrator(int verbosity = 0) : verbosity(verbosity) {}
 
+                /**
+                 * Detects the keypoints and descriptors in the reference frame.
+                 */
+                void detectKeyframe() {
+                    setMask();
+                    detector->detectWithDescriptors(referenceFrame, mask, referenceKeypoints, referenceDescriptors,
+                                                    false);
+                    isReferenceFrameSet = true;
+                }
+
             public:
+
+                /**
+                 * Adds a timestamp to the time measuring instance. Only adds a timestamp if the verbosity requirement is met.
+                 *
+                 * @param name The name of the last algorithmic step.
+                 * @param minVerbosity The minimum verbosity needed to add a timestamp.
+                 */
                 void addTimestamp(const std::string &name, int minVerbosity) {
                     if (verbosity >= minVerbosity) {
                         timer.addTimestamp(name);
                     }
                 }
 
+                /**
+                 * Converts the given frame to grayscale.
+                 *
+                 * @param input The frame to convert.
+                 * @param output The frame to write the grayscale frame to.
+                 */
                 void convertToGrayscale(const cv::cuda::GpuMat &input, cv::cuda::GpuMat &output) {
                     if (input.channels() == 3) {
                         cv::cuda::cvtColor(input, output, cv::COLOR_BGR2GRAY);
@@ -72,22 +107,30 @@ namespace providentia {
                     addTimestamp("converted frame to grayscale", 2);
                 }
 
+                /**
+                 * Has the reference frame been set.
+                 *
+                 * @return true if set, false else.
+                 */
                 bool hasReferenceFrame() const {
                     return isReferenceFrameSet;
                 }
 
-                void detectKeyframe() {
-                    mask.upload(fullMask_cpu);
-                    detector->detectWithDescriptors(referenceFrame, mask, referenceKeypoints, referenceDescriptors,
-                                                    false);
-                    isReferenceFrameSet = true;
-                }
-
+                /**
+                 * Sets the reference frame.
+                 *
+                 * @param _referenceFrame A CPU frame.
+                 */
                 void setReferenceFrame(const cv::cuda::GpuMat &_referenceFrame) {
                     convertToGrayscale(_referenceFrame, referenceFrame);
                     detectKeyframe();
                 }
 
+                /**
+                 * Sets the reference frame.
+                 *
+                 * @param _referenceFrame A GPU frame.
+                 */
                 void setReferenceFrame(const cv::Mat &_referenceFrame) {
                     cv::Mat grayscale;
                     if (_referenceFrame.channels() == 3) {
@@ -101,6 +144,12 @@ namespace providentia {
                     detectKeyframe();
                 }
 
+                /**
+                 * Appends streams to the buffer so that there are at least the requested amount of streams available.
+                 *
+                 * @param amount The number of needed cuda streams.
+                 * @return The cuda streams.
+                 */
                 std::vector<cv::cuda::Stream> requestCudaStreams(int amount) {
                     while (cudaStreams.size() < amount) {
                         cudaStreams.emplace_back();
@@ -108,12 +157,18 @@ namespace providentia {
                     return cudaStreams;
                 }
 
+                /**
+                 * Detects keypoints and descriptors in the latest frame.
+                 */
                 void detect() {
                     convertToGrayscale(latestFrame, latestFrame);
                     detector->detectWithDescriptors(latestFrame, mask, latestKeypoints, latestDescriptors, false);
                     addTimestamp("detected descriptors", 2);
                 }
 
+                /**
+                 * Matches the descriptors of the latest and reference frame.
+                 */
                 void match() {
                     detect();
                     cv::cuda::Stream stream = requestCudaStreams(1)[0];
@@ -123,6 +178,9 @@ namespace providentia {
                     addTimestamp("matched knn features", 2);
                 }
 
+                /**
+                 * Finds the homography between the latest and reference frame.
+                 */
                 void findHomography() {
                     match();
                     matcher->knnMatchConvert(knnMatches, knnMatches_cpu);
@@ -162,14 +220,28 @@ namespace providentia {
                     addTimestamp("found homography", 2);
                 }
 
+                /**
+                 * Sets the detection mask to a mask keeping all pixels.
+                 */
                 void setMask() {
                     setMask(fullMask_cpu);
                 }
 
+                /**
+                 * Sets the given mask.
+                 *
+                 * @param _mask A binary mask indicating the pixels to exclude during detection.
+                 */
                 void setMask(const cv::Mat &_mask) {
                     mask.upload(_mask);
                 }
 
+                /**
+                 * Stabilizes the given frame using a reference frame.
+                 *
+                 * @param _frame The frame to stabilize.
+                 * @return The stabilized frame.
+                 */
                 cv::Mat stabilize(const cv::Mat &_frame) {
                     timer.clear();
                     latestFrame.upload(_frame);
@@ -185,13 +257,34 @@ namespace providentia {
                     return stabilizedFrame_cpu;
                 }
 
+                /**
+                 * Gets the total runtime of the stabilization algorithm.
+                 * @return
+                 */
                 long getRuntime() {
                     return timer.getTotalMilliseconds();
                 }
             };
 
+            /**
+             * Dynamic calibration using SURF features and a Brute Force matching algorithm.
+             */
             class SurfBFDynamicCalibrator : public DynamicCalibrator {
             public:
+                /**
+                 * Constructor.
+                 *
+                 * @param hessian Threshold for hessian keypoint detector used in SURF.
+                 * @param norm The norm used in the matcher. One of cv::NORM_L1, cv::NORM_L2.
+                 * @param verbosity The verbosity of the time measuring.
+                 * @param _nOctaves Number of pyramid octaves the keypoint detector will use.
+                 * @param _nOctaveLayers Number of octave layers within each octave.
+                 * @param _extended Extended descriptor flag (true - use extended 128-element descriptors; false - use
+                 *                  64-element descriptors).
+                 * @param _keypointsRatio
+                 * @param _upright Up-right or rotated features flag (true - do not compute orientation of features;
+                 *                  false - compute orientation).
+                 */
                 explicit SurfBFDynamicCalibrator(int hessian = 1000, int norm = cv::NORM_L2, int verbosity = 0,
                                                  int _nOctaves = 4,
                                                  int _nOctaveLayers = 2, bool _extended = false,
