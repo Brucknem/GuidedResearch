@@ -8,6 +8,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/videoio.hpp"
+#include <utility>
 #include <opencv2/video.hpp>
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/cudaimgproc.hpp"
@@ -32,9 +33,8 @@ namespace providentia {
             /**
              * Base class for the dynamic calibration algorithms.
              */
-            class DynamicCalibrator {
+            class DynamicCalibrator : public providentia::utils::TimeMeasurable {
             protected:
-                bool isReferenceFrameSet = false;
                 cv::cuda::GpuMat latestFrame, latestColorFrame, referenceFrame, stabilizedFrame;
                 cv::cuda::GpuMat latestKeypoints, referenceKeypoints;
                 std::vector<cv::KeyPoint> latestKeypoints_cpu, referenceKeypoints_cpu;
@@ -51,9 +51,8 @@ namespace providentia {
                 std::vector<cv::Point2f> referenceMatchedPoints;
                 cv::Mat homography;
                 cv::Mat stabilizedFrame_cpu;
-                const cv::Mat fullMask_cpu = cv::Mat(referenceFrame.size(), CV_8UC1, cv::Scalar(1));
-                providentia::utils::TimeMeasurable timer;
-                int verbosity;
+                cv::Mat fullMask_cpu;
+
 
                 /**
                  * Constructor.
@@ -63,31 +62,21 @@ namespace providentia {
                  *          1: Measuring only start to end. <br>
                  *          2: Measuring every step of the algorithm. <br>
                  */
-                explicit DynamicCalibrator(int verbosity = 0) : verbosity(verbosity) {}
+                explicit DynamicCalibrator(std::string name = "Dynamic Calibrator", int verbosity = 0)
+                        : providentia::utils::TimeMeasurable(std::move(name),
+                                                             verbosity) {}
 
                 /**
                  * Detects the keypoints and descriptors in the reference frame.
                  */
                 void detectKeyframe() {
+                    fullMask_cpu = cv::Mat::ones(referenceFrame.size(), CV_8UC1);
                     setMask();
                     detector->detectWithDescriptors(referenceFrame, mask, referenceKeypoints, referenceDescriptors,
                                                     false);
-                    isReferenceFrameSet = true;
                 }
 
             public:
-
-                /**
-                 * Adds a timestamp to the time measuring instance. Only adds a timestamp if the verbosity requirement is met.
-                 *
-                 * @param name The name of the last algorithmic step.
-                 * @param minVerbosity The minimum verbosity needed to add a timestamp.
-                 */
-                void addTimestamp(const std::string &name, int minVerbosity) {
-                    if (verbosity >= minVerbosity) {
-                        timer.addTimestamp(name);
-                    }
-                }
 
                 /**
                  * Converts the given frame to grayscale.
@@ -103,7 +92,6 @@ namespace providentia {
                     } else {
                         throw std::invalid_argument("Given cv::Mat is has neighter 1 or 3 channels.");
                     }
-                    if (verbosity > 2) {}
                     addTimestamp("converted frame to grayscale", 2);
                 }
 
@@ -113,7 +101,7 @@ namespace providentia {
                  * @return true if set, false else.
                  */
                 bool hasReferenceFrame() const {
-                    return isReferenceFrameSet;
+                    return !referenceFrame.empty();
                 }
 
                 /**
@@ -243,7 +231,7 @@ namespace providentia {
                  * @return The stabilized frame.
                  */
                 cv::Mat stabilize(const cv::Mat &_frame) {
-                    timer.clear();
+                    clear();
                     latestFrame.upload(_frame);
                     latestColorFrame.upload(_frame);
                     addTimestamp("current frame uploaded", 2);
@@ -255,14 +243,6 @@ namespace providentia {
                     stabilizedFrame.download(stabilizedFrame_cpu);
                     addTimestamp("downloaded stabilized frame", 1);
                     return stabilizedFrame_cpu;
-                }
-
-                /**
-                 * Gets the total runtime of the stabilization algorithm.
-                 * @return
-                 */
-                long getRuntime() {
-                    return timer.getTotalMilliseconds();
                 }
             };
 
@@ -289,8 +269,7 @@ namespace providentia {
                                                  int _nOctaves = 4,
                                                  int _nOctaveLayers = 2, bool _extended = false,
                                                  float _keypointsRatio = 0.01f,
-                                                 bool _upright = false) : DynamicCalibrator(verbosity) {
-                    timer = providentia::utils::TimeMeasurable("Surf BF");
+                                                 bool _upright = false) : DynamicCalibrator("Surf BF", verbosity) {
                     detector = cv::cuda::SURF_CUDA::create(hessian, _nOctaves, _nOctaveLayers, _extended,
                                                            _keypointsRatio, _upright);
                     matcher = cv::cuda::DescriptorMatcher::createBFMatcher(norm);

@@ -23,6 +23,7 @@ namespace providentia {
             std::vector<std::pair<std::string, std::chrono::milliseconds>> timestamps;
             std::vector<std::pair<std::string, long>> durations;
             std::chrono::milliseconds previous{};
+            int verbosity;
 
             /**
              * Gets the current unix timestamp in milliseconds since 01.01.1970.
@@ -40,7 +41,8 @@ namespace providentia {
              *
              * @param name The print name of the instance.
              */
-            explicit TimeMeasurable(std::string name = "Unnamed") : name(std::move(name)) {
+            explicit TimeMeasurable(std::string name = "Unnamed", int verbosity = 0) : name(std::move(name)),
+                                                                                       verbosity(verbosity) {
                 clear();
             }
 
@@ -59,7 +61,10 @@ namespace providentia {
              *
              * @param measurementName The name of the measurement.
              */
-            void addTimestamp(const std::string &measurementName = "Unnamed") {
+            void addTimestamp(const std::string &measurementName = "Unnamed", int minVerbosity = 0) {
+                if (verbosity < minVerbosity) {
+                    return;
+                }
                 auto now = providentia::utils::TimeMeasurable::now();
                 timestamps.emplace_back(measurementName, now);
                 durations.emplace_back(std::make_pair(measurementName, (now - previous).count()));
@@ -84,7 +89,7 @@ namespace providentia {
                 std::stringstream ss;
 
                 for (const auto &duration : durations) {
-                    ss << "[" << name << "] " << duration.second << ": " << duration.first << std::endl;
+                    ss << "[" << name << "] " << duration.second << "ms : " << duration.first << std::endl;
                 }
 
                 return ss.str();

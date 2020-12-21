@@ -16,6 +16,18 @@
 #include <thread>
 
 #include "DynamicCalibration.hpp"
+#include "OpticalFlow.h"
+
+std::string durationInfo(const std::string &name, long milliseconds) {
+    std::stringstream ss;
+    ss << name << "- Duration: " << milliseconds << "ms - FPS: " << 1000. / milliseconds;
+    return ss.str();
+}
+
+void addText(cv::Mat &frame, std::string text, int x, int y) {
+    cv::putText(frame, text, cv::Point(x, y),
+                cv::FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar(255, 255, 0), 2, cv::FONT_HERSHEY_SIMPLEX);
+}
 
 int main(int argc, char const *argv[]) {
     cv::cuda::Stream cudaStream;
@@ -32,7 +44,10 @@ int main(int argc, char const *argv[]) {
 
     cv::Mat frame;
     providentia::calibration::dynamic::SurfBFDynamicCalibrator calibrator(1000, cv::NORM_L2, 1);
-    int padding = 0;
+    providentia::opticalflow::DenseOpticalFlow opticalFlow_original(2);
+    providentia::opticalflow::DenseOpticalFlow opticalFlow_stabilized(2);
+
+    int padding = 10;
 
     std::string windowName = "Dynamic Camera Stabilization";
     cv::namedWindow(windowName, cv::WINDOW_AUTOSIZE);
@@ -42,16 +57,13 @@ int main(int argc, char const *argv[]) {
 
 
     double calculationScaleFactor = 1;
-    double renderingScaleFactor = 0.65;
-
-    std::stringstream frameText;
+    double renderingScaleFactor = 0.5;
 
     while (true) {
         cap >> frame;
         if (frame.empty()) {
             break;
         }
-        frameText.str(std::string());
         cv::Mat originalFrame = frame.clone();
         cv::resize(frame, frame, cv::Size(), calculationScaleFactor, calculationScaleFactor);
 
@@ -60,25 +72,34 @@ int main(int argc, char const *argv[]) {
         }
 
         cv::Mat stabilized = calibrator.stabilize(frame);
-
         stabilized = cv::Mat(stabilized,
                              cv::Rect(padding, padding, stabilized.cols - 2 * padding, stabilized.rows - 2 * padding));
         originalFrame = cv::Mat(originalFrame, cv::Rect(padding, padding, originalFrame.cols - 2 * padding,
                                                         originalFrame.rows - 2 * padding));
-        cv::hconcat(std::vector<cv::Mat>{originalFrame, stabilized}, stabilized);
-        cv::resize(stabilized, stabilized, cv::Size(), renderingScaleFactor, renderingScaleFactor);
 
-//        cv::Mat flannMatching = flannResult[0];
-//        cv::resize(flannMatching, flannMatching, cv::Size(), renderingScaleFactor, renderingScaleFactor);
+        cv::Mat colorFrames;
+        cv::hconcat(std::vector<cv::Mat>{originalFrame, stabilized}, colorFrames);
+        stabilized = opticalFlow_stabilized.calculate(stabilized);
+        originalFrame = opticalFlow_original.calculate(originalFrame);
 
-        long duration = 0;
-        duration += calibrator.getRuntime();
-        double fps = 1000.0 / duration;
+        cv::Mat opticalFlowFrames;
+        cv::hconcat(std::vector<cv::Mat>{originalFrame, stabilized}, opticalFlowFrames);
 
-        frameText << "Duration: " << duration << "ms - FPS: " << fps;
-        cv::putText(stabilized, frameText.str(), cv::Point(10, 30),
-                    cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(0, 0, 250), 1, 8);
-        cv::imshow(windowName, stabilized);
+        cv::Mat finalFrame;
+        cv::vconcat(std::vector<cv::Mat>{colorFrames, opticalFlowFrames}, finalFrame);
+        cv::resize(finalFrame, finalFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
+
+        addText(finalFrame, durationInfo("Calibration", calibrator.getTotalMilliseconds()), 10, 30);
+        addText(finalFrame, durationInfo("Optical Flow (original)", opticalFlow_original.getTotalMilliseconds()), 10,
+                60);
+        addText(finalFrame, durationInfo("Optical Flow (stabilized)", opticalFlow_stabilized.getTotalMilliseconds()),
+                10, 90);
+        addText(finalFrame, durationInfo("Total",
+                                         calibrator.getTotalMilliseconds() +
+                                         opticalFlow_original.getTotalMilliseconds() +
+                                         opticalFlow_stabilized.getTotalMilliseconds()), 10, 120);
+
+        cv::imshow(windowName, finalFrame);
         // cv::imshow(matchingWindowName, flannMatching);
 
         if ((char) cv::waitKey(1) == 27) {
