@@ -11,7 +11,7 @@ from os import listdir
 from os.path import isfile, join
 import sys
 
-from bokeh.palettes import viridis, magma, linear_palette
+from bokeh.palettes import viridis, magma, linear_palette, mpl
 
 from utils import get_maxima, get_frequencies
 
@@ -62,16 +62,16 @@ def generate_plot(filename):
         del value_columns[value_columns.index(TIMESTAMP)]
     except:
         pass
-
     value_columns.sort()
 
-    colors = linear_palette(('#962626', '#a818a8', '#1b1ba8', '#AAAAAA', '#168080', '#168c16'), len(value_columns))
+    #colors = linear_palette(('#962626', '#a818a8', '#1b1ba8', '#AAAAAA', '#168080', '#168c16'), len(value_columns))
     # colors = linear_palette(('#A7226E', '#F26B38', '#EC2049',  '#45ADA8', '#2F9599', '#F7DB4F'), len(value_columns))
-    # colors = magma(len(value_columns))
+    colors = magma(len(value_columns))
 
     title = filename.split('/')[-1]
-    width = 800
-    height = 600
+    scale = 2
+    width = 800 * scale
+    height = 600 * scale
     fig = figure(title=title, tooltips=TOOLTIPS, tools=tools, active_drag="pan", plot_width=width, plot_height=height)
 
     milliseconds_x_axis = list(df[MILLISECONDS])
@@ -96,7 +96,9 @@ def generate_plot(filename):
         #          legend_label='{} [1/s (1s)]'.format(column))
 
     fig.legend.click_policy = "hide"
-
+    # fig.legend.label_text_font_size = "8px"
+    # fig.legend.glyph_height = 1
+    # fig.legend.glyph_width = 1
     return fig
 
 

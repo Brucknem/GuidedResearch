@@ -12,7 +12,7 @@ add_subdirectory(lib/CameraStabilization)
 add_subdirectory(lib/ImageUtils)
 
 # add the executable
-add_executable(DynamicStabilization_Testing
+add_executable(Main
         main.cpp
         DynamicCalibration.hpp
         Utils.hpp
@@ -20,5 +20,17 @@ add_executable(DynamicStabilization_Testing
         BackgroundSegmentation.h
         )
 
-target_link_libraries(DynamicStabilization_Testing PUBLIC CameraStabilization ImageUtils ${OpenCV_LIBS})
-target_include_directories(DynamicStabilization_Testing PUBLIC "${PROJECT_BINARY_DIR}")
+target_link_libraries(Main PUBLIC CameraStabilization ImageUtils ${OpenCV_LIBS})
+target_include_directories(Main PUBLIC "${PROJECT_BINARY_DIR}")
+
+# add the executable
+add_executable(CompareScaleFactors
+        compare_scale_factors.cpp
+        DynamicCalibration.hpp
+        Utils.hpp
+        OpticalFlow.h
+        BackgroundSegmentation.h
+        )
+
+target_link_libraries(CompareScaleFactors PUBLIC CameraStabilization ImageUtils ${OpenCV_LIBS})
+target_include_directories(CompareScaleFactors PUBLIC "${PROJECT_BINARY_DIR}")

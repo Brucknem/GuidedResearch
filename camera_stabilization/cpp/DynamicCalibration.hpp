@@ -52,6 +52,9 @@ namespace providentia {
                 std::vector<cv::Point2f> referenceMatchedPoints;
                 cv::Mat homography;
 
+                cv::Size size;
+                cv::Size originalSize;
+                cv::cuda::GpuMat resizeBuffer;
 
                 /**
                  * Detects the keypoints and descriptors in the reference frame.
@@ -71,15 +74,10 @@ namespace providentia {
 
                 /**
                      * Constructor.
-                     *
-                     * @param verbosity The verbosity of the time measuring. <br>
-                     *          0: No measuring. <br>
-                     *          1: Measuring only start to end. <br>
-                     *          3: Measuring every step of the algorithm. <br>
                      */
-                explicit DynamicCalibrator(std::string name, int verbosity)
-                        : providentia::utils::TimeMeasurable(std::move(name),
-                                                             verbosity) {}
+                explicit DynamicCalibrator() {
+                    setNameAndVerbosity("Dynamic Calibrator", 0);
+                }
 
             public:
 
@@ -90,8 +88,34 @@ namespace providentia {
                  */
                 void setReferenceFrame(const cv::cuda::GpuMat &_referenceFrame) {
                     convertToGrayscale(_referenceFrame, referenceFrame);
+                    cv::cuda::resize(referenceFrame, referenceFrame, size);
                     // addTimestamp("reference frame set", 3);
                     detectKeyframe();
+                }
+
+
+                virtual void setScaleFactor(int width, int height) {
+                    setScaleFactor(cv::Size(width, height));
+                }
+
+                virtual void setScaleFactor(cv::Size _size) {
+                    if (_size.height == size.height && _size.width == size.width) {
+                        return;
+                    }
+                    size = std::move(_size);
+                    if (!latestFrame.empty()) {
+                        cv::cuda::resize(latestFrame, latestFrame, size);
+                        cv::cuda::resize(latestColorFrame, latestColorFrame, size);
+                    }
+                    if (!latestMask.empty()) {
+                        cv::cuda::resize(latestMask, latestMask, size);
+                    }
+                    if (!referenceFrame.empty()) {
+                        cv::cuda::resize(referenceFrame, referenceFrame, size);
+                    }
+                    if (!referenceMask.empty()) {
+                        cv::cuda::resize(referenceMask, referenceMask, size);
+                    }
                 }
 
                 cv::Mat getHomography() {
@@ -118,7 +142,6 @@ namespace providentia {
                     return stabilizedFrame;
                 }
 
-
                 /**
                  * Sets the detection latestMask to a latestMask keeping all pixels.
                  */
@@ -144,10 +167,20 @@ namespace providentia {
                     latestMask = _mask;
                 }
 
+                virtual void resize(const cv::cuda::GpuMat &_frame) {
+                    if (size.empty()) {
+                        size = _frame.size();
+                    }
+                    if (latestFrame.empty() || latestFrame.size() != _frame.size()) {
+                        cv::cuda::resize(_frame, latestFrame, size);
+                    } else {
+                        latestFrame = _frame;
+                    }
+                }
 
                 void setLatestFrame(const cv::cuda::GpuMat &_frame) {
-                    latestFrame = _frame;
-                    latestColorFrame = _frame.clone();
+                    resize(_frame);
+                    latestColorFrame = latestFrame.clone();
                     if (latestMask.empty()) {
                         setMask();
                     }
@@ -278,14 +311,21 @@ namespace providentia {
                 }
 
                 cv::Mat draw() {
+                    cv::Mat drawFrame;
                     if (getReferenceFrame().empty()) {
-                        return cv::Mat(latestFrame);
+                        drawFrame = cv::Mat(latestFrame);
+                    } else {
+                        drawMatches(cv::Mat(getLatestFrame()), latestKeypoints_cpu, cv::Mat(getReferenceFrame()),
+                                    referenceKeypoints_cpu,
+                                    goodMatches, drawFrame, cv::Scalar::all(-1),
+                                    cv::Scalar::all(-1), std::vector<char>(),
+                                    cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
                     }
-                    cv::Mat img_matches;
-                    drawMatches(getLatestFrame(), latestKeypoints_cpu, getReferenceFrame(), referenceKeypoints_cpu,
-                                goodMatches, img_matches, cv::Scalar::all(-1),
-                                cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
-                    return img_matches;
+                    cv::imshow("test", drawFrame);
+                    while ((char) cv::waitKey(1) == 27) {
+                        break;
+                    }
+                    return drawFrame;
                 }
 
                 /**
@@ -295,11 +335,13 @@ namespace providentia {
                  * @return The stabilized frame.
                  */
                 virtual void stabilize(const cv::cuda::GpuMat &_frame) {
+                    clear();
                     setLatestFrame(_frame);
                     if (!hasReferenceFrame()) {
-                        setReferenceFrame(_frame);
+                        setReferenceFrame(latestFrame);
+                        clear();
                         if (!hasReferenceFrame()) {
-                            stabilizedFrame = _frame;
+                            stabilizedFrame = latestFrame;
                             return;
                         }
                     }
@@ -309,41 +351,52 @@ namespace providentia {
                                               cv::INTER_LINEAR);
 //                                              cv::INTER_CUBIC);
 //                                              cv::INTER_NEAREST);
-                    // addTimestamp("warped frame", 0);
+                    addTimestamp("warped frame", 0);
                 }
             };
 
             class ExtendedDynamicCalibrator : public virtual DynamicCalibrator {
             private:
-                cv::cuda::GpuMat frame;
-                cv::cuda::GpuMat resizeBuffer;
                 std::shared_ptr<DynamicCalibrator> initialGuessCalibrator;
                 double scaleFactor = 0.5;
 
                 providentia::segmentation::MOG2 initialGuessBackgroundSegmentation;
                 cv::cuda::GpuMat initialBackgroundMask;
+                cv::cuda::GpuMat initialStabilized;
+                cv::cuda::GpuMat initialWarpedFrame;
+
                 int warmup = 50;
                 int frameNumber = 0;
 
             protected:
-                explicit ExtendedDynamicCalibrator(const DynamicCalibrator &_initialGuessCalibrator,
-                                                   const std::string &name = "Extended Dynamic Calibrator",
-                                                   int verbosity = 0) : DynamicCalibrator(name, verbosity),
-                                                                        providentia::utils::TimeMeasurable(
-                                                                                name, verbosity) {
+                explicit ExtendedDynamicCalibrator(const DynamicCalibrator &_initialGuessCalibrator) {
                     initialGuessCalibrator = std::make_shared<DynamicCalibrator>(_initialGuessCalibrator);
+                    setNameAndVerbosity("Extended Dynamic Calibrator", 0);
                 }
 
             public:
+                void setScaleFactor(int width, int height) override {
+                    setScaleFactor(cv::Size(width, height));
+                }
+
+                void setScaleFactor(cv::Size _size) override {
+                    DynamicCalibrator::setScaleFactor(_size);
+                    initialGuessCalibrator->setScaleFactor(size.width * scaleFactor, size.height * scaleFactor);
+                }
+
                 void stabilize(const cv::cuda::GpuMat &_frame) override {
                     clear();
+
+                    resize(_frame);
+                    initialGuessCalibrator->setScaleFactor(size.width * scaleFactor, size.height * scaleFactor);
+
                     // Downsample
-                    cv::cuda::resize(_frame, resizeBuffer, cv::Size(), scaleFactor, scaleFactor);
+//                    cv::cuda::resize(latestFrame, resizeBuffer, latestFrame.size(), scaleFactor, scaleFactor);
                     // addTimestamp("warped frame", 2);
 
                     // Stabilize downsampled for initial homography guess
-                    initialGuessCalibrator->stabilize(resizeBuffer);
-                    cv::cuda::GpuMat initialStabilized = initialGuessCalibrator->getStabilizedFrame();
+                    initialGuessCalibrator->stabilize(_frame);
+                    initialStabilized = initialGuessCalibrator->getStabilizedFrame();
                     // addTimestamp("Initial stabilization", 1);
 
                     // Use initial guess for background segmentation
@@ -352,7 +405,7 @@ namespace providentia {
 
                     // Resize segmentation to original size
                     initialBackgroundMask.upload(initialGuessBackgroundSegmentation.getBackgroundMask());
-                    cv::cuda::resize(initialBackgroundMask, initialBackgroundMask, _frame.size());
+                    cv::cuda::resize(initialBackgroundMask, initialBackgroundMask, latestFrame.size());
                     // addTimestamp("Resize Background segmentation", 2);
 
                     // Set segmentation mask
@@ -360,9 +413,8 @@ namespace providentia {
                     // addTimestamp("Set Background mask", 2);
 
                     // Warp original frame using the initial guess homography
-                    cv::cuda::GpuMat initialWarpedFrame;
-                    cv::cuda::warpPerspective(_frame, initialWarpedFrame, initialGuessCalibrator->getHomography(),
-                                              _frame.size(),
+                    cv::cuda::warpPerspective(latestFrame, initialWarpedFrame, initialGuessCalibrator->getHomography(),
+                                              latestFrame.size(),
                                               cv::INTER_LINEAR);
                     // addTimestamp("Warp original frame", 2);
 
@@ -406,7 +458,6 @@ namespace providentia {
                  *
                  * @param hessian Threshold for hessian keypoint detector used in SURF.
                  * @param norm The norm used in the matcher. One of cv::NORM_L1, cv::NORM_L2.
-                 * @param verbosity The verbosity of the time measuring.
                  * @param _nOctaves Number of pyramid octaves the keypoint detector will use.
                  * @param _nOctaveLayers Number of octave layers within each octave.
                  * @param _extended Extended descriptor flag (true - use extended 128-element descriptors; false - use
@@ -415,17 +466,15 @@ namespace providentia {
                  * @param _upright Up-right or rotated features flag (true - do not compute orientation of features;
                  *                  false - compute orientation).
                  */
-                explicit SurfBFDynamicCalibrator(int hessian = 1000, int norm = cv::NORM_L2, int verbosity = 0,
-                                                 std::string name = "Surf BF",
+                explicit SurfBFDynamicCalibrator(int hessian = 1000, int norm = cv::NORM_L2,
                                                  int _nOctaves = 4,
                                                  int _nOctaveLayers = 2, bool _extended = false,
                                                  float _keypointsRatio = 0.01f,
-                                                 bool _upright = false) : DynamicCalibrator(std::move(name), verbosity),
-                                                                          providentia::utils::TimeMeasurable(
-                                                                                  std::move(name), verbosity) {
+                                                 bool _upright = false) {
                     detector = cv::cuda::SURF_CUDA::create(hessian, _nOctaves, _nOctaveLayers, _extended,
                                                            _keypointsRatio, _upright);
                     matcher = cv::cuda::DescriptorMatcher::createBFMatcher(norm);
+                    setNameAndVerbosity("SURF BF", 0);
                 }
             };
 
@@ -446,16 +495,16 @@ namespace providentia {
                  * @param _upright Up-right or rotated features flag (true - do not compute orientation of features;
                  *                  false - compute orientation).
                  */
-                explicit ExtendedSurfBFDynamicCalibrator(int hessian = 1000, int norm = cv::NORM_L2, int verbosity = 0,
-                                                         const std::string &name = "Extended Surf BF",
+                explicit ExtendedSurfBFDynamicCalibrator(int hessian = 1000,
+                                                         int norm = cv::NORM_L2,
                                                          int _nOctaves = 4,
                                                          int _nOctaveLayers = 2, bool _extended = false,
                                                          float _keypointsRatio = 0.01f,
                                                          bool _upright = false) : ExtendedDynamicCalibrator(
-                        SurfBFDynamicCalibrator(), name, verbosity), SurfBFDynamicCalibrator(
-                        hessian, norm, verbosity, name, _nOctaves, _nOctaveLayers, _extended, _keypointsRatio,
-                        _upright), DynamicCalibrator(name, verbosity), providentia::utils::TimeMeasurable(name,
-                                                                                                          verbosity) {
+                        SurfBFDynamicCalibrator()), SurfBFDynamicCalibrator(
+                        hessian, norm, _nOctaves, _nOctaveLayers, _extended, _keypointsRatio,
+                        _upright) {
+                    setNameAndVerbosity("Extended SURF BF", 0);
                 }
 
             };
@@ -484,8 +533,9 @@ namespace providentia {
                 }
 
             protected:
-                TwoPassDynamicCalibrator(std::string name = "Extended Dynamic Calibrator", int verbosity = 0)
-                        : DynamicCalibrator(std::move(name), verbosity) {}
+                explicit TwoPassDynamicCalibrator() {
+                    setNameAndVerbosity("Two Pass Dynamic Calibrator", 0);
+                }
 
             public:
                 providentia::segmentation::MOG2 latestBackgroundSegmentation;

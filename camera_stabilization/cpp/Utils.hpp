@@ -11,6 +11,7 @@
 #include <utility>
 #include <map>
 #include <chrono>
+#include <cstdarg>
 
 namespace providentia {
     namespace utils {
@@ -35,6 +36,19 @@ namespace providentia {
             explicit TimeMeasurable(std::string name = "Unnamed", int verbosity = 0) : name(std::move(name)),
                                                                                        verbosity(verbosity) {
                 clear();
+            }
+
+            void setName(std::string _name) {
+                name = std::move(_name);
+            }
+
+            void setVerbosity(int _verbosity) {
+                verbosity = _verbosity;
+            }
+
+            void setNameAndVerbosity(std::string _name, int _verbosity) {
+                setName(std::move(_name));
+                setVerbosity(verbosity);
             }
 
             /**
@@ -95,6 +109,68 @@ namespace providentia {
 
                 return ss.str();
             }
+        };
+
+        std::string durationInfo(const std::string &name, long milliseconds) {
+            std::stringstream ss;
+            ss << name << "- Duration: " << milliseconds << "ms - FPS: " << 1000. / milliseconds;
+            return ss.str();
+        }
+
+        void addText(cv::Mat &frame, const std::string &text, int x, int y) {
+            cv::putText(frame, text, cv::Point(x, y),
+                        cv::FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar(255, 255, 0), 2, cv::FONT_HERSHEY_SIMPLEX);
+        }
+
+        cv::Mat pad(const cv::Mat &frame, int padding) {
+            return cv::Mat(frame,
+                           cv::Rect(padding, padding, frame.cols - 2 * padding, frame.rows - 2 * padding));
+        }
+
+        class CsvWriter {
+        private:
+            std::ofstream fileStream;
+            std::stringstream currentLine;
+            bool write;
+
+        public:
+            explicit CsvWriter(const std::string &path, bool _write = true) : write(_write) {
+                if (!write) {
+                    return;
+                }
+                fileStream.open(path);
+                fileStream.close();
+                fileStream.open(path, std::ios_base::app); // append instead of overwrite
+            }
+
+            ~CsvWriter() {
+                if (!write) {
+                    return;
+                }
+                fileStream.close();
+            }
+
+            void newLine() {
+                if (!write) {
+                    return;
+                }
+                std::string line = currentLine.str();
+                currentLine.str("");
+                line.pop_back();
+                fileStream << line << std::endl;
+            }
+
+            template<typename Arg, typename... Args>
+            void append(Arg &&arg, Args &&... args) {
+                if (!write) {
+                    return;
+                }
+                currentLine << std::forward<Arg>(arg);
+                using expander = int[];
+                (void) expander{0, (void(currentLine << ',' << std::forward<Args>(args)), 0)...};
+                currentLine << ",";
+            }
+
         };
     }
 }

@@ -83,7 +83,7 @@ namespace providentia {
 
                 hsv.convertTo(hsv8, CV_8U, 255.0);
                 cvtColor(hsv8, bgr, cv::COLOR_HSV2BGR);
-                addTimestamp("Conversion to BGR", 1);
+                addTimestamp("Conversion to BGR", 0);
 
                 previousFrame = currentFrame;
                 return bgr;
