@@ -77,13 +77,19 @@ def generate_plot(filename):
     milliseconds_x_axis = list(df[MILLISECONDS])
 
     for index, column in enumerate(value_columns):
-        fig.line(milliseconds_x_axis, list(df[column]), color=colors[index], alpha=.8, legend_label=column)
-        maxima = get_maxima(df[column], threshold=0.00)
-        fig.circle(milliseconds_x_axis, maxima, color=colors[index], alpha=.4, legend_label=column)
+        values = list(df[column])
+        fig.line(milliseconds_x_axis, values, color=colors[index], alpha=.8, legend_label=column)
+        # maxima = get_maxima(df[column], threshold=0.00)
+        # fig.circle(milliseconds_x_axis, maxima, color=colors[index], alpha=.4, legend_label=column)
 
-        frequencies_x, frequencies_y = get_frequencies_renderable(maxima, milliseconds)
-        fig.step(frequencies_x, frequencies_y, color=colors[index], alpha=.7, line_dash='dotted', mode="after",
-                 legend_label='{} [1/s (avg.)]'.format(column))
+        average = sum(values) / len(values)
+        average = [average] * len(milliseconds_x_axis)
+        fig.line(milliseconds_x_axis, average, color=colors[index], alpha=1, line_dash='dotted',
+                 legend_label='{} (avg.)'.format(column))
+
+        # frequencies_x, frequencies_y = get_frequencies_renderable(maxima, milliseconds)
+        # fig.step(frequencies_x, frequencies_y, color=colors[index], alpha=.7, line_dash='dotted', mode="after",
+        #          legend_label='{} [1/s (avg.)]'.format(column))
         #
         # frequencies_x, frequencies_y = get_frequencies_renderable(maxima, milliseconds, 1000)
         # fig.step(frequencies_x, frequencies_y, color=colors[index], alpha=.7, line_dash='dashdot', mode="after",

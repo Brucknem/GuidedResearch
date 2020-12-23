@@ -18,7 +18,6 @@
 
 #include "DynamicCalibration.hpp"
 #include "OpticalFlow.h"
-#include "BackgroundSegmentation.h"
 
 std::string durationInfo(const std::string &name, long milliseconds) {
     std::stringstream ss;
@@ -29,11 +28,6 @@ std::string durationInfo(const std::string &name, long milliseconds) {
 void addText(cv::Mat &frame, std::string text, int x, int y) {
     cv::putText(frame, text, cv::Point(x, y),
                 cv::FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar(255, 255, 0), 2, cv::FONT_HERSHEY_SIMPLEX);
-}
-
-cv::Mat pad(const cv::Mat &frame, int padding) {
-    return cv::Mat(frame,
-                   cv::Rect(padding, padding, frame.cols - 2 * padding, frame.rows - 2 * padding));
 }
 
 int main(int argc, char const *argv[]) {
@@ -49,19 +43,34 @@ int main(int argc, char const *argv[]) {
         return -1;
     }
 
+    std::string magnitudeCsvName = basePath + filename + "_opticalflow.csv";
+    std::ofstream magnitudeCsv;
+    magnitudeCsv.open(magnitudeCsvName);
+    magnitudeCsv << "Timestamp,Milliseconds,Original [px],Stabilized [px]" << std::endl;
+    magnitudeCsv.close();
+    magnitudeCsv.open(magnitudeCsvName, std::ios_base::app); // append instead of overwrite
+
     cv::Mat frame;
-    providentia::calibration::dynamic::ExtendedSurfBFDynamicCalibrator calibrator(
-            1000, cv::NORM_L2, 0
-    );
+    providentia::calibration::dynamic::SurfBFDynamicCalibrator calibrator(1000, cv::NORM_L2, 1);
+    providentia::opticalflow::DenseOpticalFlow opticalFlow_original(2);
+    providentia::opticalflow::DenseOpticalFlow opticalFlow_stabilized(2);
 
     int padding = 10;
 
     std::string windowName = "Dynamic Camera Stabilization";
     cv::namedWindow(windowName, cv::WINDOW_AUTOSIZE);
+//
+//    std::string matchingWindowName = "Matching Camera Stabilization";
+//    cv::namedWindow(matchingWindowName, cv::WINDOW_AUTOSIZE);
+
 
     double calculationScaleFactor = 1;
-    double renderingScaleFactor = 0.5;
-    renderingScaleFactor /= calculationScaleFactor;
+    double renderingScaleFactor = 0.65;
+
+
+    cv::Ptr<cv::BackgroundSubtractor> backgroundSubtractor_original = cv::createBackgroundSubtractorMOG2();
+    cv::Ptr<cv::BackgroundSubtractor> backgroundSubtractor_stabilized = cv::createBackgroundSubtractorMOG2();
+    cv::Mat foregroundMask_original, foregroundMask_stabilized;
 
     auto start = providentia::utils::TimeMeasurable::now().count();
 
@@ -75,44 +84,46 @@ int main(int argc, char const *argv[]) {
         cv::cuda::GpuMat gpu_frame;
         gpu_frame.upload(frame);
 
-        calibrator.stabilize(gpu_frame);
-        cv::Mat stabilized = cv::Mat(calibrator.getStabilizedFrame());
-
-        stabilized = pad(stabilized, padding);
-        std::cout << calibrator.durations_str() << std::endl;
+        v::Mat stabilized = ccalibrator.stabilize(gpu_frame);
+        stabilized = cv::Mat(stabilized,
+                             cv::Rect(padding, padding, stabilized.cols - 2 * padding, stabilized.rows - 2 * padding));
         originalFrame = cv::Mat(originalFrame, cv::Rect(padding, padding, originalFrame.cols - 2 * padding,
                                                         originalFrame.rows - 2 * padding));
-        cv::Mat finalFrame;
+
+        backgroundSubtractor_stabilized->apply(stabilized, foregroundMask_stabilized);
+        backgroundSubtractor_original->apply(originalFrame, foregroundMask_original);
 
         cv::Mat colorFrames;
         cv::hconcat(std::vector<cv::Mat>{originalFrame, stabilized}, colorFrames);
-
-        cv::Mat calibratorFrames;
-        cv::Mat referenceFrame = cv::Mat(calibrator.getReferenceFrame());
-        cv::cvtColor(referenceFrame, referenceFrame, cv::COLOR_GRAY2BGR);
-        cv::hconcat(std::vector<cv::Mat>{stabilized, pad(referenceFrame, padding)},
-                    calibratorFrames);
-        cv::Mat calibratorMasks;
-        cv::hconcat(std::vector<cv::Mat>{pad(cv::Mat(calibrator.getLatestMask()), padding),
-                                         pad(cv::Mat(calibrator.getReferenceMask()), padding)},
-                    calibratorMasks);
-        cv::cvtColor(calibratorMasks, calibratorMasks, cv::COLOR_GRAY2BGR);
+        stabilized = opticalFlow_stabilized.calculate(stabilized);
+        originalFrame = opticalFlow_original.calculate(originalFrame);
 
         auto now = providentia::utils::TimeMeasurable::now().count();
 //        magnitudeCsv << now << "," << now - start << "," << opticalFlow_original.getMagnitudeMean() << ","
 //                     << opticalFlow_stabilized.getMagnitudeMean() << std::endl;
 
-        cv::vconcat(std::vector<cv::Mat>{calibratorFrames, calibratorMasks}, finalFrame);
-//        cv::vconcat(std::vector<cv::Mat>{colorFrames,}, finalFrame);
+        cv::Mat opticalFlowFrames;
+        cv::hconcat(std::vector<cv::Mat>{originalFrame, stabilized}, opticalFlowFrames);
 
-//        finalFrame = calibrator.draw();
+        cv::Mat backgroundFrames;
+        cv::hconcat(std::vector<cv::Mat>{foregroundMask_original, foregroundMask_stabilized}, backgroundFrames);
+        cv::cvtColor(backgroundFrames, backgroundFrames, cv::COLOR_GRAY2BGR);
 
+        cv::Mat finalFrame;
+        cv::vconcat(std::vector<cv::Mat>{colorFrames, opticalFlowFrames, backgroundFrames}, finalFrame);
+
+        finalFrame = backgroundFrames;
         cv::resize(finalFrame, finalFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
 
         addText(finalFrame, durationInfo("Calibration", calibrator.getTotalMilliseconds()), 10, 30);
+        addText(finalFrame, durationInfo("Optical Flow (original)", opticalFlow_original.getTotalMilliseconds()), 10,
+                60);
+        addText(finalFrame, durationInfo("Optical Flow (stabilized)", opticalFlow_stabilized.getTotalMilliseconds()),
+                10, 90);
         addText(finalFrame, durationInfo("Total",
-                                         calibrator.getTotalMilliseconds()), 10, 120);
-
+                                         calibrator.getTotalMilliseconds() +
+                                         opticalFlow_original.getTotalMilliseconds() +
+                                         opticalFlow_stabilized.getTotalMilliseconds()), 10, 120);
 
         cv::imshow(windowName, finalFrame);
         // cv::imshow(matchingWindowName, flannMatching);
@@ -122,6 +133,7 @@ int main(int argc, char const *argv[]) {
         }
     }
 
+    magnitudeCsv.close();
     cap.release();
     cv::destroyAllWindows();
 

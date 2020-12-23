@@ -25,15 +25,6 @@ namespace providentia {
             std::chrono::milliseconds previous{};
             int verbosity;
 
-            /**
-             * Gets the current unix timestamp in milliseconds since 01.01.1970.
-
-             * @return The total milliseconds since 01.01.1970.
-             */
-            static std::chrono::milliseconds now() {
-                return std::chrono::duration_cast<std::chrono::milliseconds>(
-                        std::chrono::system_clock::now().time_since_epoch());
-            }
 
         public:
             /**
@@ -44,6 +35,16 @@ namespace providentia {
             explicit TimeMeasurable(std::string name = "Unnamed", int verbosity = 0) : name(std::move(name)),
                                                                                        verbosity(verbosity) {
                 clear();
+            }
+
+            /**
+             * Gets the current unix timestamp in milliseconds since 01.01.1970.
+
+             * @return The total milliseconds since 01.01.1970.
+             */
+            static std::chrono::milliseconds now() {
+                return std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::system_clock::now().time_since_epoch());
             }
 
             /**

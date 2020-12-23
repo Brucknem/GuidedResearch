@@ -28,7 +28,7 @@ namespace providentia {
         class DenseOpticalFlow : public providentia::utils::TimeMeasurable {
         private:
             cv::cuda::GpuMat currentFrame, previousFrame, denseOpticalFlow;
-            cv::Mat hsv, denseOpticalFlow_cpu;
+            cv::Mat hsv, denseOpticalFlow_cpu, magnitude, angle;
             std::vector<cv::Mat> flowParts{3};
             cv::Mat magnitudes, angles;
             cv::Ptr<cv::cuda::FarnebackOpticalFlow> farnbackOpticalFlow;
@@ -68,6 +68,8 @@ namespace providentia {
 
                 cv::cartToPolar(flowParts[0], flowParts[1], flowParts[0], flowParts[1], true);
                 addTimestamp("To polar coordinates", 2);
+                magnitude = flowParts[0];
+                angle = flowParts[1];
                 normalize(flowParts[0], flowParts[2], 0.0f, 1.0f, cv::NORM_MINMAX);
                 addTimestamp("Normalized magnitude", 2);
                 flowParts[1] *= ((1.f / 360.f) * (180.f / 255.f));
@@ -85,6 +87,14 @@ namespace providentia {
 
                 previousFrame = currentFrame;
                 return bgr;
+            }
+
+            double getMagnitudeMean() {
+                return cv::mean(magnitude)[0];
+            }
+
+            double getAngleMean() {
+                return cv::mean(angle)[0];
             }
         };
     }
