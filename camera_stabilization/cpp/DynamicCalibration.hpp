@@ -36,7 +36,7 @@ namespace providentia {
              */
             class DynamicCalibrator : public virtual providentia::utils::TimeMeasurable {
             protected:
-                cv::cuda::GpuMat latestFrame, latestColorFrame, referenceFrame, stabilizedFrame;
+                cv::cuda::GpuMat latestFrame, latestColorFrame, referenceFrame, stabilizedFrame, stabilizedFrameScaled;
                 cv::cuda::GpuMat latestKeypoints, referenceKeypoints;
                 std::vector<cv::KeyPoint> latestKeypoints_cpu, referenceKeypoints_cpu;
                 cv::cuda::GpuMat latestDescriptors, referenceDescriptors;
@@ -53,8 +53,9 @@ namespace providentia {
                 cv::Mat homography;
 
                 cv::Size size;
-                cv::Size originalSize;
-                cv::cuda::GpuMat resizeBuffer;
+
+                bool withBackground = false;
+                segmentation::MOG2 backgroundSegmentation;
 
                 /**
                  * Detects the keypoints and descriptors in the reference frame.
@@ -69,7 +70,9 @@ namespace providentia {
                 }
 
                 virtual void setReferenceMask() {
-                    referenceMask.upload(cv::Mat::ones(referenceFrame.size(), CV_8UC1) * 255);
+                    if (referenceMask.empty()) {
+                        referenceMask.upload(cv::Mat::ones(referenceFrame.size(), CV_8UC1) * 255);
+                    }
                 }
 
                 /**
@@ -77,6 +80,13 @@ namespace providentia {
                      */
                 explicit DynamicCalibrator() {
                     setNameAndVerbosity("Dynamic Calibrator", 0);
+                }
+
+                /**
+                     * Constructor.
+                     */
+                explicit DynamicCalibrator(bool _withBackground) : DynamicCalibrator() {
+                    withBackground = _withBackground;
                 }
 
             public:
@@ -181,6 +191,9 @@ namespace providentia {
                 void setLatestFrame(const cv::cuda::GpuMat &_frame) {
                     resize(_frame);
                     latestColorFrame = latestFrame.clone();
+                    if (!backgroundSegmentation.empty()) {
+                        cv::cuda::resize(backgroundSegmentation.getBackgroundMaskGpu(), latestMask, latestFrame.size());
+                    }
                     if (latestMask.empty()) {
                         setMask();
                     }
@@ -336,7 +349,26 @@ namespace providentia {
                  */
                 virtual void stabilize(const cv::cuda::GpuMat &_frame) {
                     clear();
+
+                    int referenceMaskCount = 0;
+                    if (!referenceMask.empty()) {
+                        referenceMaskCount = cv::cuda::countNonZero(referenceMask);
+                    }
                     setLatestFrame(_frame);
+
+                    int latestMaskCount = 0;
+                    if (!latestMask.empty()) {
+                        latestMaskCount = cv::cuda::countNonZero(latestMask);
+                    }
+
+                    if (withBackground && (!stabilizedFrame.empty() &&
+                                           (referenceMaskCount == 0 ||
+                                            referenceMaskCount == latestFrame.rows * latestFrame.cols ||
+                                            latestMaskCount > referenceMaskCount))) {
+                        referenceMask = latestMask.clone();
+                        setReferenceFrame(stabilizedFrame);
+                    }
+
                     if (!hasReferenceFrame()) {
                         setReferenceFrame(latestFrame);
                         clear();
@@ -345,12 +377,20 @@ namespace providentia {
                             return;
                         }
                     }
+
                     // addTimestamp("current frame set", 3);
                     findHomography();
                     cv::cuda::warpPerspective(latestColorFrame, stabilizedFrame, homography, latestColorFrame.size(),
                                               cv::INTER_LINEAR);
 //                                              cv::INTER_CUBIC);
 //                                              cv::INTER_NEAREST);
+                    if (withBackground) {
+                        cv::Size preSize = stabilizedFrame.size();
+                        double scaleFactor = 1.0;
+                        cv::cuda::resize(stabilizedFrame, stabilizedFrameScaled,
+                                         cv::Size(preSize.width * scaleFactor, preSize.height * scaleFactor));
+                        backgroundSegmentation.apply(stabilizedFrameScaled);
+                    }
                     addTimestamp("warped frame", 0);
                 }
             };
@@ -369,7 +409,8 @@ namespace providentia {
                 int frameNumber = 0;
 
             protected:
-                explicit ExtendedDynamicCalibrator(const DynamicCalibrator &_initialGuessCalibrator) {
+                explicit ExtendedDynamicCalibrator(const DynamicCalibrator &_initialGuessCalibrator,
+                                                   bool withBackground = false) : DynamicCalibrator(withBackground) {
                     initialGuessCalibrator = std::make_shared<DynamicCalibrator>(_initialGuessCalibrator);
                     setNameAndVerbosity("Extended Dynamic Calibrator", 0);
                 }
@@ -467,10 +508,11 @@ namespace providentia {
                  *                  false - compute orientation).
                  */
                 explicit SurfBFDynamicCalibrator(int hessian = 1000, int norm = cv::NORM_L2,
+                                                 bool withBackground = false,
                                                  int _nOctaves = 4,
                                                  int _nOctaveLayers = 2, bool _extended = false,
                                                  float _keypointsRatio = 0.01f,
-                                                 bool _upright = false) {
+                                                 bool _upright = false) : DynamicCalibrator(withBackground) {
                     detector = cv::cuda::SURF_CUDA::create(hessian, _nOctaves, _nOctaveLayers, _extended,
                                                            _keypointsRatio, _upright);
                     matcher = cv::cuda::DescriptorMatcher::createBFMatcher(norm);

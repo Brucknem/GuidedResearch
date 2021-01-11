@@ -12,6 +12,7 @@
 #include <map>
 #include <chrono>
 #include <cstdarg>
+#include <fstream>
 
 namespace providentia {
     namespace utils {

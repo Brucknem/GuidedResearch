@@ -36,7 +36,7 @@ int main(int argc, char const *argv[]) {
 
     cv::Mat frame;
 //    providentia::calibration::dynamic::ExtendedSurfBFDynamicCalibrator calibrator_extended(1000, cv::NORM_L2);
-    providentia::calibration::dynamic::SurfBFDynamicCalibrator calibrator(1000, cv::NORM_L2);
+    providentia::calibration::dynamic::SurfBFDynamicCalibrator calibrator(1000, cv::NORM_L2, true);
 
     int padding = 10;
 
@@ -62,14 +62,18 @@ int main(int argc, char const *argv[]) {
         cv::Mat referenceFrame = cv::Mat(calibrator.getReferenceFrame());
         cv::cvtColor(referenceFrame, referenceFrame, cv::COLOR_GRAY2BGR);
 
-        cv::resize(stabilized, stabilized, cv::Size(), renderingScaleFactor, renderingScaleFactor);
-        cv::resize(referenceFrame, referenceFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
-
-        stabilized = providentia::utils::pad(stabilized, padding);
-        referenceFrame = providentia::utils::pad(referenceFrame, padding);
-
         cv::Mat finalFrame;
-        cv::hconcat(std::vector<cv::Mat>{stabilized, referenceFrame}, finalFrame);
+        cv::Mat colorFrames;
+        cv::hconcat(std::vector<cv::Mat>{stabilized, referenceFrame}, colorFrames);
+
+        cv::Mat masks;
+        cv::hconcat(std::vector<cv::Mat>{cv::Mat(calibrator.getLatestMask()), cv::Mat(calibrator.getReferenceMask())},
+                    masks);
+        cv::cvtColor(masks, masks, cv::COLOR_GRAY2BGR);
+
+
+        cv::vconcat(std::vector<cv::Mat>{colorFrames, masks}, finalFrame);
+        cv::resize(finalFrame, finalFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
 
         providentia::utils::addText(finalFrame,
                                     providentia::utils::durationInfo("Calibration", calibrator.getTotalMilliseconds()),

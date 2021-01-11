@@ -72,6 +72,8 @@ namespace providentia {
 
             cv::cuda::Stream stream;
             cv::cuda::GpuMat foregroundMask_gpu;
+            cv::cuda::GpuMat backgroundMask_gpu;
+            cv::cuda::GpuMat fullBackground;
             bool foregroundNeedsReset = true;
 
             std::vector<cv::Ptr<cv::cuda::Filter>> filters;
@@ -101,6 +103,24 @@ namespace providentia {
                     getForegroundMask();
                 }
                 return BackgroundSegmentation::getBackgroundMask();
+            }
+
+            cv::cuda::GpuMat getForegroundMaskGpu() {
+                stream.waitForCompletion();
+                return foregroundMask_gpu;
+            }
+
+            cv::cuda::GpuMat getBackgroundMaskGpu() {
+                if (fullBackground.empty() || fullBackground.size() != foregroundMask_gpu.size()) {
+                    fullBackground.upload(cv::Mat::ones(foregroundMask_gpu.size(), foregroundMask_gpu.type()) * 255);
+                }
+                cv::cuda::subtract(fullBackground, foregroundMask_gpu, backgroundMask_gpu);
+                stream.waitForCompletion();
+                return backgroundMask_gpu;
+            }
+
+            bool empty() {
+                return foregroundMask_gpu.empty();
             }
 
             void postProcess() override {

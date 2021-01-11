@@ -1,20 +1,11 @@
 #include <stdio.h>
 #include <iostream>
 #include "lib/CameraStabilization/CameraStabilization.hpp"
-#include "lib/ImageUtils/ImageUtils.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/videoio.hpp"
-#include <opencv2/video.hpp>
 #include "opencv2/imgcodecs.hpp"
-#include "opencv2/features2d.hpp"
-#include "opencv2/xfeatures2d.hpp"
 #include "opencv2/xfeatures2d/cuda.hpp"
-#include <opencv2/cudafeatures2d.hpp>
-#include "opencv2/calib3d.hpp"
-#include <chrono>
-#include <thread>
-#include <fstream>
 
 #include "DynamicCalibration.hpp"
 #include "OpticalFlow.h"
@@ -38,15 +29,15 @@ int main(int argc, char const *argv[]) {
 
     cv::Size originalSize{1920, 1200};
     std::vector<double> scaleFactors;
-    std::vector<providentia::calibration::dynamic::ExtendedSurfBFDynamicCalibrator> calibrators;
+    std::vector<providentia::calibration::dynamic::SurfBFDynamicCalibrator> calibrators;
     std::vector<providentia::opticalflow::DenseOpticalFlow> opticalFlows;
     opticalFlows.emplace_back();
-    for (int i = 5; i <= 15; i += 1) {
+    for (int i = 5; i <= 10; i += 1) {
 //    {
 //        int i = 10;
         double scaleFactor = i / 10.0;
         scaleFactors.emplace_back(scaleFactor);
-        calibrators.emplace_back(1000, cv::NORM_L2);
+        calibrators.emplace_back(1000, cv::NORM_L2, true);
         calibrators[calibrators.size() - 1].setScaleFactor(
                 cv::Size(originalSize.width * scaleFactor, originalSize.height * scaleFactor));
         opticalFlows.emplace_back();
@@ -62,9 +53,11 @@ int main(int argc, char const *argv[]) {
     renderingScaleFactor /= calculationScaleFactor;
 
     bool writeOpticalFlow = true;
-    providentia::utils::CsvWriter magnitudeCsv(basePath + filename + "_opticalflow_extended_surf.csv",
+    std::string middleSuffix = "testing";
+    providentia::utils::CsvWriter magnitudeCsv(basePath + filename + "_opticalflow_" + middleSuffix + ".csv",
                                                writeOpticalFlow);
-    providentia::utils::CsvWriter durationCsv(basePath + filename + "_durations_extended_surf.csv", writeOpticalFlow);
+    providentia::utils::CsvWriter durationCsv(basePath + filename + "_durations_" + middleSuffix + ".csv",
+                                              writeOpticalFlow);
 
     magnitudeCsv.append("Timestamp", "Milliseconds", "<Original> Opt. Flow [px]");
     durationCsv.append("Timestamp", "Milliseconds", "<Original> Frame Time [ms]");
@@ -91,6 +84,8 @@ int main(int argc, char const *argv[]) {
         auto now = providentia::utils::TimeMeasurable::now().count();
         long duration = 0;
         std::vector<cv::Mat> colorFrames{providentia::utils::pad(originalFrame, padding)};
+        std::vector<cv::Mat> backgroundMasks{
+                providentia::utils::pad(cv::Mat::ones(originalFrame.size(), CV_8UC1) * 255, padding)};
         durationCsv.append(now, now - start);
         durationCsv.append(0);
         for (int i = 0; i < calibrators.size(); i++) {
@@ -104,6 +99,7 @@ int main(int argc, char const *argv[]) {
             durationCsv.append(currentDuration);
             providentia::utils::addText(currentFrame, std::to_string(currentDuration) + " ms", 10, 60);
             colorFrames.emplace_back(currentFrame);
+            backgroundMasks.emplace_back(providentia::utils::pad(cv::Mat(calibrators[i].getLatestMask()), padding));
         }
         durationCsv.newLine();
 
@@ -132,16 +128,23 @@ int main(int argc, char const *argv[]) {
         }
 
         for (auto &frame : opticalFlowFrames) {
-            cv::resize(frame, frame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
+            cv::resize(frame, frame, colorFrames[0].size());
+        }
+        for (auto &frame : backgroundMasks) {
+            cv::resize(frame, frame, colorFrames[0].size());
+            cv::cvtColor(frame, frame, cv::COLOR_GRAY2BGR);
         }
 
         cv::Mat colorFramesMerged;
         cv::hconcat(colorFrames, colorFramesMerged);
+        cv::Mat backgroundMasksFramesMerged;
+        cv::hconcat(backgroundMasks, backgroundMasksFramesMerged);
         cv::Mat opticalFlowFramesMerged;
         cv::hconcat(opticalFlowFrames, opticalFlowFramesMerged);
 
         cv::Mat finalFrame;
-        cv::vconcat(std::vector<cv::Mat>{colorFramesMerged, opticalFlowFramesMerged}, finalFrame);
+        cv::vconcat(std::vector<cv::Mat>{colorFramesMerged, backgroundMasksFramesMerged, opticalFlowFramesMerged},
+                    finalFrame);
 
 //        cv::resize(finalFrame, finalFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
         cv::imshow(windowName, finalFrame);
