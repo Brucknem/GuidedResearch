@@ -50,9 +50,9 @@ add_subdirectory(lib)
 add_executable(Main
         main.cpp
         DynamicCalibration.hpp
-        Utils.hpp
-        OpticalFlow.h
-        BackgroundSegmentation.h
+        lib/Utils.hpp
+        lib/OpticalFlow.h
+        lib/BackgroundSegmentation.h
         )
 
 target_link_libraries(Main PUBLIC libCameraStabilization CameraStabilization ImageUtils ${OpenCV_LIBS})
@@ -62,9 +62,9 @@ target_include_directories(Main PUBLIC "${PROJECT_BINARY_DIR}")
 add_executable(CompareScaleFactors
         compare_scale_factors.cpp
         DynamicCalibration.hpp
-        Utils.hpp
-        OpticalFlow.h
-        BackgroundSegmentation.h
+        lib/Utils.hpp
+        lib/OpticalFlow.h
+        lib/BackgroundSegmentation.h
         )
 
 target_link_libraries(CompareScaleFactors PUBLIC libCameraStabilization CameraStabilization ImageUtils ${OpenCV_LIBS})
@@ -74,9 +74,9 @@ target_include_directories(CompareScaleFactors PUBLIC "${PROJECT_BINARY_DIR}")
 add_executable(VisualizeKeyframeUpdate
         visualize_keyframe_update.cpp
         DynamicCalibration.hpp
-        Utils.hpp
-        OpticalFlow.h
-        BackgroundSegmentation.h
+        lib/Utils.hpp
+        lib/OpticalFlow.h
+        lib/BackgroundSegmentation.h
         )
 
 target_link_libraries(VisualizeKeyframeUpdate PUBLIC libCameraStabilization CameraStabilization ImageUtils ${OpenCV_LIBS})
@@ -86,9 +86,9 @@ target_include_directories(VisualizeKeyframeUpdate PUBLIC "${PROJECT_BINARY_DIR}
 add_executable(VisualizeFeatureMatching
         visualize_feature_matching.cpp
         DynamicCalibration.hpp
-        Utils.hpp
-        OpticalFlow.h
-        BackgroundSegmentation.h
+        lib/Utils.hpp
+        lib/OpticalFlow.h
+        lib/BackgroundSegmentation.h
         )
 
 target_link_libraries(VisualizeFeatureMatching PUBLIC libCameraStabilization CameraStabilization ImageUtils ${OpenCV_LIBS})

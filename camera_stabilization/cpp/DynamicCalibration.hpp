@@ -58,7 +58,7 @@ namespace providentia {
                 segmentation::MOG2 backgroundSegmentation;
 
                 /**
-                 * Detects the keypoints and descriptors in the reference frame.
+                 * Detects the keypointsGPU and descriptorsGPU in the reference frame.
                  */
                 void detectKeyframe() {
                     setReferenceMask();
@@ -258,16 +258,16 @@ namespace providentia {
                 }
 
                 /**
-                 * Detects keypoints and descriptors in the latest frame.
+                 * Detects keypointsGPU and descriptorsGPU in the latest frame.
                  */
                 void detect() {
                     convertToGrayscale(latestFrame, latestFrame);
                     detector->detectWithDescriptors(latestFrame, latestMask, latestKeypoints, latestDescriptors, false);
-                    // addTimestamp("detected descriptors", 3);
+                    // addTimestamp("detected descriptorsGPU", 3);
                 }
 
                 /**
-                 * Matches the descriptors of the latest and reference frame.
+                 * Matches the descriptorsGPU of the latest and reference frame.
                  */
                 void match() {
                     detect();
@@ -303,13 +303,13 @@ namespace providentia {
 
                     detector->downloadKeypoints(latestKeypoints, latestKeypoints_cpu);
                     detector->downloadKeypoints(referenceKeypoints, referenceKeypoints_cpu);
-                    // addTimestamp("downloaded keypoints", 3);
+                    // addTimestamp("downloaded keypointsGPU", 3);
 
                     //-- Localize the object
                     latestMatchedPoints.clear();
                     referenceMatchedPoints.clear();
                     for (auto &goodMatch : goodMatches) {
-                        //-- Get the keypoints from the good matches
+                        //-- Get the keypointsGPU from the good matches
                         latestMatchedPoints.push_back(latestKeypoints_cpu[goodMatch.queryIdx].pt);
                         referenceMatchedPoints.push_back(referenceKeypoints_cpu[goodMatch.trainIdx].pt);
                     }
@@ -505,8 +505,8 @@ namespace providentia {
                  * @param norm The norm used in the matcher. One of cv::NORM_L1, cv::NORM_L2.
                  * @param _nOctaves Number of pyramid octaves the keypoint detector will use.
                  * @param _nOctaveLayers Number of octave layers within each octave.
-                 * @param _extended Extended descriptor flag (true - use extended 128-element descriptors; false - use
-                 *                  64-element descriptors).
+                 * @param _extended Extended descriptor flag (true - use extended 128-element descriptorsGPU; false - use
+                 *                  64-element descriptorsGPU).
                  * @param _keypointsRatio
                  * @param _upright Up-right or rotated features flag (true - do not compute orientation of features;
                  *                  false - compute orientation).
@@ -535,8 +535,8 @@ namespace providentia {
                  * @param verbosity The verbosity of the time measuring.
                  * @param _nOctaves Number of pyramid octaves the keypoint detector will use.
                  * @param _nOctaveLayers Number of octave layers within each octave.
-                 * @param _extended Extended descriptor flag (true - use extended 128-element descriptors; false - use
-                 *                  64-element descriptors).
+                 * @param _extended Extended descriptor flag (true - use extended 128-element descriptorsGPU; false - use
+                 *                  64-element descriptorsGPU).
                  * @param _keypointsRatio
                  * @param _upright Up-right or rotated features flag (true - do not compute orientation of features;
                  *                  false - compute orientation).

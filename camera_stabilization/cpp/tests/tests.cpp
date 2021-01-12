@@ -3,6 +3,8 @@
 //
 #include "gtest/gtest.h"
 #include "FeatureDetection.hpp"
+#include "FeatureMatching.hpp"
+#include <iostream>
 
 TEST(SurfFeatureDetectorTest, testBasicFunctionality) {
     cv::theRNG().state = 123456789;
@@ -29,7 +31,31 @@ TEST(SurfFeatureDetectorTest, testBasicFunctionality) {
     EXPECT_NEAR(keypoints[keypointsSize - 1].pt.x, 1895.82421875, 0.01);
     EXPECT_NEAR(keypoints[keypointsSize - 1].pt.y, 1051.9869384765625, 0.01);
 
-//    cv::drawKeypoints(testImg, keypoints, testImg);
-//    cv::imshow("Test", testImg);
+//    cv::imshow("Detected features", detector.draw());
+//    cv::waitKey(1);
+}
+
+TEST(BruteForceFeatureMatcherTest, testBasicFunctionality) {
+    cv::theRNG().state = 123456789;
+
+    std::shared_ptr<providentia::features::SurfFeatureDetector> detector = std::make_shared<providentia::features::SurfFeatureDetector>(
+            1000);
+    cv::Mat testImg = cv::imread("tests/feature_detection_test_image.png");
+    cv::cuda::GpuMat testImg_gpu;
+    testImg_gpu.upload(testImg);
+
+    detector->detect(testImg_gpu);
+
+    providentia::features::BruteForceFeatureMatcher matcher(cv::NORM_L2);
+    matcher.match(detector, detector);
+
+    std::vector<cv::DMatch> goodMatches = matcher.getGoodMatches();
+
+    for (const auto &goodMatch : goodMatches) {
+        ASSERT_EQ(goodMatch.distance, 0);
+        ASSERT_EQ(goodMatch.trainIdx, goodMatch.queryIdx);
+    }
+
+//    cv::imshow("Matched features", matcher.draw());
 //    cv::waitKey(1);
 }
