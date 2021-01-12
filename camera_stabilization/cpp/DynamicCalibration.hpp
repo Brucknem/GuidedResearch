@@ -34,7 +34,7 @@ namespace providentia {
             /**
              * Base class for the dynamic calibration algorithms.
              */
-            class DynamicCalibrator : public virtual providentia::utils::TimeMeasurable {
+            class DynamicCalibratorBase : public virtual providentia::utils::TimeMeasurable {
             protected:
                 cv::cuda::GpuMat latestFrame, latestColorFrame, referenceFrame, stabilizedFrame, stabilizedFrameScaled;
                 cv::cuda::GpuMat latestKeypoints, referenceKeypoints;
@@ -78,14 +78,14 @@ namespace providentia {
                 /**
                      * Constructor.
                      */
-                explicit DynamicCalibrator() {
+                explicit DynamicStabilizerBase() {
                     setNameAndVerbosity("Dynamic Calibrator", 0);
                 }
 
                 /**
                      * Constructor.
                      */
-                explicit DynamicCalibrator(bool _withBackground) : DynamicCalibrator() {
+                explicit DynamicStabilizerBase(bool _withBackground) : DynamicStabilizerBase() {
                     withBackground = _withBackground;
                 }
 
@@ -399,9 +399,9 @@ namespace providentia {
                 }
             };
 
-            class ExtendedDynamicCalibrator : public virtual DynamicCalibrator {
+            class ExtendedDynamicCalibrator : public virtual DynamicStabilizerBase {
             private:
-                std::shared_ptr<DynamicCalibrator> initialGuessCalibrator;
+                std::shared_ptr<DynamicStabilizerBase> initialGuessCalibrator;
                 double scaleFactor = 0.5;
 
                 providentia::segmentation::MOG2 initialGuessBackgroundSegmentation;
@@ -413,9 +413,10 @@ namespace providentia {
                 int frameNumber = 0;
 
             protected:
-                explicit ExtendedDynamicCalibrator(const DynamicCalibrator &_initialGuessCalibrator,
-                                                   bool withBackground = false) : DynamicCalibrator(withBackground) {
-                    initialGuessCalibrator = std::make_shared<DynamicCalibrator>(_initialGuessCalibrator);
+                explicit ExtendedDynamicCalibrator(const DynamicStabilizerBase &_initialGuessCalibrator,
+                                                   bool withBackground = false) : DynamicStabilizerBase(
+                        withBackground) {
+                    initialGuessCalibrator = std::make_shared<DynamicStabilizerBase>(_initialGuessCalibrator);
                     setNameAndVerbosity("Extended Dynamic Calibrator", 0);
                 }
 
@@ -425,7 +426,7 @@ namespace providentia {
                 }
 
                 void setScaleFactor(cv::Size _size) override {
-                    DynamicCalibrator::setScaleFactor(_size);
+                    DynamicStabilizerBase::setScaleFactor(_size);
                     initialGuessCalibrator->setScaleFactor(size.width * scaleFactor, size.height * scaleFactor);
                 }
 
@@ -470,7 +471,7 @@ namespace providentia {
                     }
 
                     // Stabilize
-                    DynamicCalibrator::stabilize(initialWarpedFrame);
+                    DynamicStabilizerBase::stabilize(initialWarpedFrame);
                     // addTimestamp("Stabilization", 2);
 
                     // Update reference frame
@@ -496,7 +497,7 @@ namespace providentia {
             /**
              * Dynamic calibration using SURF features and a Brute Force matching algorithm.
              */
-            class SurfBFDynamicCalibrator : public virtual DynamicCalibrator {
+            class SurfBFDynamicCalibrator : public virtual DynamicStabilizerBase {
             public:
                 /**
                  * Constructor.
@@ -516,7 +517,7 @@ namespace providentia {
                                                  int _nOctaves = 4,
                                                  int _nOctaveLayers = 2, bool _extended = false,
                                                  float _keypointsRatio = 0.01f,
-                                                 bool _upright = false) : DynamicCalibrator(withBackground) {
+                                                 bool _upright = false) : DynamicStabilizerBase(withBackground) {
                     detector = cv::cuda::SURF_CUDA::create(hessian, _nOctaves, _nOctaveLayers, _extended,
                                                            _keypointsRatio, _upright);
                     matcher = cv::cuda::DescriptorMatcher::createBFMatcher(norm);
@@ -556,7 +557,7 @@ namespace providentia {
             };
 
 
-            class TwoPassDynamicCalibrator : public DynamicCalibrator {
+            class TwoPassDynamicCalibrator : public DynamicStabilizerBase {
             private:
                 int frameNumber = 0;
                 int warmUp = 50;
@@ -591,7 +592,7 @@ namespace providentia {
                     if (latestBackgroundSegmentation.getForegroundMask().empty()) {
                         latestBackgroundSegmentation.apply(_frame);
                     }
-                    DynamicCalibrator::stabilize(_frame);
+                    DynamicStabilizerBase::stabilize(_frame);
                     // addTimestamp("First pass", 2);
                     latestBackgroundSegmentation.apply(stabilizedFrame);
                     // addTimestamp("Segmentation", 2);
@@ -601,7 +602,7 @@ namespace providentia {
                     // addTimestamp("Update Frame Mask", 2);
 
 //                    // addTimestamp("Updated reference frame", 3);
-                    DynamicCalibrator::stabilize(stabilizedFrame);
+                    DynamicStabilizerBase::stabilize(stabilizedFrame);
                     // addTimestamp("Second pass", 2);
                 }
             };
