@@ -20,6 +20,7 @@
 #include "OpticalFlow.h"
 #include "BackgroundSegmentation.h"
 #include "Utils.hpp"
+#include "lib/FeatureDetection.hpp"
 
 int main(int argc, char const *argv[]) {
     cv::cuda::Stream cudaStream;
