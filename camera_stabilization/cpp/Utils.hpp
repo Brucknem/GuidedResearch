@@ -171,9 +171,7 @@ namespace providentia {
                 (void) expander{0, (void(currentLine << ',' << std::forward<Args>(args)), 0)...};
                 currentLine << ",";
             }
-
         };
     }
 }
-
 #endif //DYNAMICSTABILIZATION_UTILS_HPP

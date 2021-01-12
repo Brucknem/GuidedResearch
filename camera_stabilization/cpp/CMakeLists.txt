@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # set the project name
-project(DynamicStabilization)
+project(CameraStabilization C CXX)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
 # packages
@@ -11,6 +11,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 # library
 add_subdirectory(lib/CameraStabilization)
 add_subdirectory(lib/ImageUtils)
+add_subdirectory(lib)
 
 # add the Main testing
 add_executable(Main
@@ -36,7 +37,7 @@ add_executable(CompareScaleFactors
 target_link_libraries(CompareScaleFactors PUBLIC CameraStabilization ImageUtils ${OpenCV_LIBS})
 target_include_directories(CompareScaleFactors PUBLIC "${PROJECT_BINARY_DIR}")
 
-# add the CompareScaleFactors
+# add the VisualizeKeyframeUpdate
 add_executable(VisualizeKeyframeUpdate
         visualize_keyframe_update.cpp
         DynamicCalibration.hpp
@@ -47,3 +48,28 @@ add_executable(VisualizeKeyframeUpdate
 
 target_link_libraries(VisualizeKeyframeUpdate PUBLIC CameraStabilization ImageUtils ${OpenCV_LIBS})
 target_include_directories(VisualizeKeyframeUpdate PUBLIC "${PROJECT_BINARY_DIR}")
+
+# add the VisualizeKeyframeUpdate
+add_executable(VisualizeFeatureMatching
+        visualize_feature_matching.cpp
+        DynamicCalibration.hpp
+        Utils.hpp
+        OpticalFlow.h
+        BackgroundSegmentation.h
+        )
+
+target_link_libraries(VisualizeFeatureMatching PUBLIC CameraStabilization ImageUtils ${OpenCV_LIBS})
+target_include_directories(VisualizeFeatureMatching PUBLIC "${PROJECT_BINARY_DIR}")
+
+########################################################################################################################
+### TESTING ###
+########################################################################################################################
+enable_testing()
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+
+add_executable(Tests tests/tests.cpp)
+target_link_libraries(Tests PUBLIC libCameraStabilization ${GTEST_BOTH_LIBRARIES} ${OpenCV_LIBS})
+target_include_directories(Tests PUBLIC "${PROJECT_BINARY_DIR}")
+
+add_test(AllTestsInFoo Tests)

@@ -275,6 +275,9 @@ namespace providentia {
                     matcher->knnMatchAsync(latestDescriptors, referenceDescriptors, knnMatches, 2, cv::noArray(),
                                            stream); // find matches
                     // addTimestamp("matched knn features", 3);
+                    matcher->knnMatchConvert(knnMatches, knnMatches_cpu);
+                    waitForCompletion();
+                    // addTimestamp("moved matches to cpu", 3);
                 }
 
                 void waitForCompletion() {
@@ -288,9 +291,6 @@ namespace providentia {
                  */
                 void findHomography() {
                     match();
-                    waitForCompletion();
-                    matcher->knnMatchConvert(knnMatches, knnMatches_cpu);
-                    // addTimestamp("moved matches to cpu", 3);
 
                     //-- Filter matches using the Lowe's ratio test
                     goodMatches.clear();
@@ -323,7 +323,7 @@ namespace providentia {
                     // addTimestamp("found homography", 3);
                 }
 
-                cv::Mat draw() {
+                cv::Mat draw(double renderingScaleFactor = 1.0) {
                     cv::Mat drawFrame;
                     if (getReferenceFrame().empty()) {
                         drawFrame = cv::Mat(latestFrame);
@@ -334,6 +334,7 @@ namespace providentia {
                                     cv::Scalar::all(-1), std::vector<char>(),
                                     cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
                     }
+                    cv::resize(drawFrame, drawFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
                     cv::imshow("test", drawFrame);
                     while ((char) cv::waitKey(1) == 27) {
                         break;
@@ -348,6 +349,11 @@ namespace providentia {
                  * @return The stabilized frame.
                  */
                 virtual void stabilize(const cv::cuda::GpuMat &_frame) {
+                    stabilize(_frame, cv::INTER_LINEAR);
+                }
+
+                virtual void stabilize(const cv::cuda::GpuMat &_frame,
+                                       cv::InterpolationFlags findHomographyInterpolationAlgorithm) {
                     clear();
 
                     int referenceMaskCount = 0;
@@ -382,8 +388,6 @@ namespace providentia {
                     findHomography();
                     cv::cuda::warpPerspective(latestColorFrame, stabilizedFrame, homography, latestColorFrame.size(),
                                               cv::INTER_LINEAR);
-//                                              cv::INTER_CUBIC);
-//                                              cv::INTER_NEAREST);
                     if (withBackground) {
                         cv::Size preSize = stabilizedFrame.size();
                         double scaleFactor = 1.0;

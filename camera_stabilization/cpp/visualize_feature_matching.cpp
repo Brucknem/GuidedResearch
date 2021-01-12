@@ -57,7 +57,9 @@ int main(int argc, char const *argv[]) {
         cv::cuda::GpuMat gpu_frame;
         gpu_frame.upload(frame);
 
-        calibrator.stabilize(gpu_frame);
+//        calibrator.stabilize(gpu_frame, cv::INTER_LINEAR);
+        calibrator.stabilize(gpu_frame, cv::INTER_CUBIC);
+//        calibrator.stabilize(gpu_frame, cv::INTER_NEAREST);
         cv::Mat stabilized = cv::Mat(calibrator.getStabilizedFrame());
 
         cv::resize(stabilized, stabilized, cv::Size(), renderingScaleFactor, renderingScaleFactor);
@@ -76,8 +78,9 @@ int main(int argc, char const *argv[]) {
                                                                                  calibrator.getTotalMilliseconds()), 10,
                                     60);
 
-        calibrator.draw(renderingScaleFactor);
+
         cv::imshow(windowName, finalFrame);
+        calibrator.draw(renderingScaleFactor);
 
         if ((char) cv::waitKey(1) == 27) {
             break;

@@ -32,7 +32,7 @@ int main(int argc, char const *argv[]) {
     std::vector<providentia::calibration::dynamic::SurfBFDynamicCalibrator> calibrators;
     std::vector<providentia::opticalflow::DenseOpticalFlow> opticalFlows;
     opticalFlows.emplace_back();
-    for (int i = 5; i <= 10; i += 1) {
+    for (int i = 10; i <= 10; i += 1) {
 //    {
 //        int i = 10;
         double scaleFactor = i / 10.0;
