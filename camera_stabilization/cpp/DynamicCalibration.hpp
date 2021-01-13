@@ -25,7 +25,7 @@
 #include <exception>
 #include <stdexcept>
 #include "Utils.hpp"
-#include "BackgroundSegmentation.h"
+#include "BackgroundSegmentationDeprecated.h"
 
 namespace providentia {
     namespace calibration {

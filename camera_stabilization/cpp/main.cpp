@@ -18,7 +18,7 @@
 
 #include "DynamicCalibration.hpp"
 #include "OpticalFlow.h"
-#include "BackgroundSegmentation.h"
+#include "BackgroundSegmentationDeprecated.h"
 #include "Utils.hpp"
 #include "lib/FeatureDetection.hpp"
 

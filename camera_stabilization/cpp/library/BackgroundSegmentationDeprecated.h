@@ -3,8 +3,6 @@
 //
 #include <stdio.h>
 #include <iostream>
-#include "CameraStabilization/CameraStabilization.hpp"
-#include "ImageUtils/ImageUtils.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/videoio.hpp"
@@ -28,7 +26,7 @@
 namespace providentia {
     namespace segmentation {
 
-        class BackgroundSegmentation {
+        class BackgroundSegmentationDeprecated {
         protected:
             cv::Ptr<cv::BackgroundSubtractor> algorithm;
             cv::Mat foregroundMask;
@@ -36,8 +34,9 @@ namespace providentia {
             bool backgroundNeedsReset = true;
 
         public:
-            explicit BackgroundSegmentation(cv::Ptr<cv::BackgroundSubtractor> _algorithm) : algorithm(std::move(
-                    _algorithm)) {}
+            explicit BackgroundSegmentationDeprecated(cv::Ptr<cv::BackgroundSubtractor> _algorithm) : algorithm(
+                    std::move(
+                            _algorithm)) {}
 
             virtual void apply(const cv::Mat &frame) {
                 algorithm->apply(frame, foregroundMask);
@@ -64,10 +63,10 @@ namespace providentia {
             virtual void postProcess() = 0;
         };
 
-        class CudaBackgroundSegmentation : public BackgroundSegmentation {
+        class CudaBackgroundSegmentation : public BackgroundSegmentationDeprecated {
         protected:
             explicit CudaBackgroundSegmentation(const cv::Ptr<cv::BackgroundSubtractorMOG2> &_algorithm)
-                    : BackgroundSegmentation(
+                    : BackgroundSegmentationDeprecated(
                     _algorithm) {}
 
             cv::cuda::Stream stream;
@@ -95,14 +94,14 @@ namespace providentia {
                     foregroundNeedsReset = false;
                     backgroundNeedsReset = true;
                 }
-                return BackgroundSegmentation::getForegroundMask();
+                return BackgroundSegmentationDeprecated::getForegroundMask();
             }
 
             cv::Mat getBackgroundMask() override {
                 if (foregroundNeedsReset) {
                     getForegroundMask();
                 }
-                return BackgroundSegmentation::getBackgroundMask();
+                return BackgroundSegmentationDeprecated::getBackgroundMask();
             }
 
             cv::cuda::GpuMat getForegroundMaskGpu() {

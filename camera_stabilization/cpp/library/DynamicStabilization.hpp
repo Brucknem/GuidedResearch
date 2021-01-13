@@ -24,7 +24,7 @@
 #include <thread>
 #include <exception>
 #include <stdexcept>
-#include "BackgroundSegmentation.h"
+#include "BackgroundSegmentationDeprecated.h"
 #include "FeatureDetection.hpp"
 #include "FeatureMatching.hpp"
 

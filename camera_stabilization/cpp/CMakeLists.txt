@@ -42,8 +42,6 @@ find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 # library
-add_subdirectory(library/CameraStabilization)
-add_subdirectory(library/ImageUtils)
 add_subdirectory(library)
 
 # add the Main testing
@@ -52,10 +50,10 @@ add_executable(Main
         DynamicCalibration.hpp
         library/Utils.hpp
         library/OpticalFlow.h
-        library/BackgroundSegmentation.h
+        library/BackgroundSegmentationDeprecated.h
         )
 
-target_link_libraries(Main PUBLIC libCameraStabilization CameraStabilization ImageUtils ${OpenCV_LIBS})
+target_link_libraries(Main PUBLIC libCameraStabilization ${OpenCV_LIBS})
 target_include_directories(Main PUBLIC "${PROJECT_BINARY_DIR}")
 
 # add the CompareScaleFactors
@@ -64,10 +62,10 @@ add_executable(CompareScaleFactors
         DynamicCalibration.hpp
         library/Utils.hpp
         library/OpticalFlow.h
-        library/BackgroundSegmentation.h
+        library/BackgroundSegmentationDeprecated.h
         )
 
-target_link_libraries(CompareScaleFactors PUBLIC libCameraStabilization CameraStabilization ImageUtils ${OpenCV_LIBS})
+target_link_libraries(CompareScaleFactors PUBLIC libCameraStabilization ${OpenCV_LIBS})
 target_include_directories(CompareScaleFactors PUBLIC "${PROJECT_BINARY_DIR}")
 
 # add the VisualizeKeyframeUpdate
@@ -76,10 +74,10 @@ add_executable(VisualizeKeyframeUpdate
         DynamicCalibration.hpp
         library/Utils.hpp
         library/OpticalFlow.h
-        library/BackgroundSegmentation.h
+        library/BackgroundSegmentationDeprecated.h
         )
 
-target_link_libraries(VisualizeKeyframeUpdate PUBLIC libCameraStabilization CameraStabilization ImageUtils ${OpenCV_LIBS})
+target_link_libraries(VisualizeKeyframeUpdate PUBLIC libCameraStabilization ${OpenCV_LIBS})
 target_include_directories(VisualizeKeyframeUpdate PUBLIC "${PROJECT_BINARY_DIR}")
 
 # add the VisualizeKeyframeUpdate
@@ -88,10 +86,10 @@ add_executable(VisualizeFeatureMatching
         DynamicCalibration.hpp
         library/Utils.hpp
         library/OpticalFlow.h
-        library/BackgroundSegmentation.h
+        library/BackgroundSegmentationDeprecated.h
         )
 
-target_link_libraries(VisualizeFeatureMatching PUBLIC libCameraStabilization CameraStabilization ImageUtils ${OpenCV_LIBS})
+target_link_libraries(VisualizeFeatureMatching PUBLIC libCameraStabilization ${OpenCV_LIBS})
 target_include_directories(VisualizeFeatureMatching PUBLIC "${PROJECT_BINARY_DIR}")
 
 ########################################################################################################################
