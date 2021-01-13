@@ -2,19 +2,24 @@
 // Created by brucknem on 12.01.21.
 //
 #include <opencv2/cudaimgproc.hpp>
+#include <utility>
 #include "FeatureDetection.hpp"
 
 #pragma region Getters_Setters{
 
-void providentia::features::FeatureDetectorBase::setCurrentMask() {
+void providentia::features::FeatureDetectorBase::setCurrentMask(cv::Size _size) {
+    cv::Size size = std::move(_size);
+    if (size.empty()) {
+        size = frame.size();
+    }
     if (useLatestMask) {
         if (latestMask.empty()) {
-            latestMask.upload(cv::Mat::ones(frame.size(), CV_8UC1) * 255);
+            latestMask.upload(cv::Mat::ones(size, CV_8UC1) * 255);
         }
         currentMask = latestMask;
     } else {
-        if (noMask.empty() || noMask.size() != frame.size()) {
-            noMask.upload(cv::Mat::ones(frame.size(), CV_8UC1) * 255);
+        if (noMask.empty() || noMask.size() != size) {
+            noMask.upload(cv::Mat::ones(size, CV_8UC1) * 255);
         }
         currentMask = noMask;
     }
@@ -61,6 +66,11 @@ bool providentia::features::FeatureDetectorBase::isEmpty() {
 
 providentia::features::FeatureDetectorBase::FeatureDetectorBase() : providentia::utils::TimeMeasurable(
         "FeatureDetectorBase", 1) {}
+
+const cv::cuda::GpuMat &providentia::features::FeatureDetectorBase::getCurrentMask(cv::Size _size) {
+    setCurrentMask(std::move(_size));
+    return currentMask;
+}
 
 #pragma endregion FeatureDetectorBase
 

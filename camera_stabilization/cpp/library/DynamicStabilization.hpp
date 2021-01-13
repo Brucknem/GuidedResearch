@@ -7,6 +7,7 @@
 #include "BackgroundSegmentation.hpp"
 #include "FeatureDetection.hpp"
 #include "FeatureMatching.hpp"
+#include "FrameWarping.h"
 
 namespace providentia {
     namespace stabilization {
@@ -14,7 +15,18 @@ namespace providentia {
         /**
          * Base class for the dynamic calibration algorithms.
          */
-        class DynamicStabilizerBase {
+        class DynamicStabilizerBase : public providentia::utils::TimeMeasurable {
+        private:
+            /**
+             * The warmup iterations before the keyframe may be updated.
+             */
+            int warmUp = 50;
+
+            /**
+             * The current iteration
+             */
+            int currentIteration = 0;
+
         protected:
             /**
              * Feature detectors for the current frame and reference frame.
@@ -27,22 +39,59 @@ namespace providentia {
             std::shared_ptr<providentia::features::FeatureMatcherBase> matcher;
 
             /**
-             * The found homography between the frame and reference frame.
-             * Minimizer for the reprojection error between the frames.
+             * Warps the frame based on the given matches.
              */
-            cv::Mat homography;
+            std::shared_ptr<providentia::stabilization::FrameWarper> warper;
+
+        protected:
 
             /**
-             * The current frame warped by the found homography and with minimal reprojection error to the reference frame.
+             * Generates the foreground background masks.
              */
-            cv::cuda::GpuMat stabilizedFrame;
+            std::shared_ptr<providentia::segmentation::BackgroundSegmentorBase> segmentor;
+
+            /**
+             * @constructor
+             */
+            DynamicStabilizerBase();
 
         public:
             /**
-             * @get
-             * @return The current frame stabilized with the found homography.
+             * @get The warper used to align the frame with the reference frame.
+             */
+            const std::shared_ptr<providentia::stabilization::FrameWarper> &getWarper() const;
+
+            /**
+             * @get The background segmentor used to mask the frames.
+             */
+            const std::shared_ptr<providentia::segmentation::BackgroundSegmentorBase> &getSegmentor() const;
+
+            /**
+             * @get The feature detector for the current frame.
+             */
+            const std::shared_ptr<providentia::features::FeatureDetectorBase> &getFrameFeatureDetector() const;
+
+            /**
+             * @get The matcher used for matching the frame and reference frame.
+             */
+            const std::shared_ptr<providentia::features::FeatureMatcherBase> &getMatcher() const;
+
+            /**
+             * @get The current frame stabilized with the found homography.
              */
             const cv::cuda::GpuMat &getStabilizedFrame() const;
+
+            /**
+             * @get
+             * @return The reference frame.
+             */
+            const cv::cuda::GpuMat &getReferenceframe() const;
+
+            /**
+             * @get
+             * @return The reference frame mask.
+             */
+            const cv::cuda::GpuMat &getReferenceframeMask() const;
 
             /**
              * @get
@@ -60,6 +109,17 @@ namespace providentia {
              * @param _frame The frame to stabilize.
              */
             void stabilize(const cv::cuda::GpuMat &_frame);
+
+            /**
+             * Draws the original and the stabilized frame aside.
+             */
+            cv::Mat draw();
+
+            /**
+             * Updates the keyframe.
+             */
+            void updateKeyframe();
+
         };
 
         /**

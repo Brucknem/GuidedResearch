@@ -25,9 +25,6 @@ namespace providentia {
                 ASSERT_EQ(goodMatch.distance, 0);
                 ASSERT_EQ(goodMatch.trainIdx, goodMatch.queryIdx);
             }
-
-//    cv::imshow("Matched features", matcher.draw());
-//    cv::waitKey(1);
         }
     }
 }

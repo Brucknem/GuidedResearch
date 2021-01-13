@@ -22,7 +22,7 @@ namespace providentia {
                     if (row == column) {
                         value -= 1;
                     }
-                    ASSERT_EQ(value, 0);
+                    EXPECT_NEAR(value, 0, 10e-5);
                 }
             }
 
@@ -45,12 +45,8 @@ namespace providentia {
                 }
             }
 
-            EXPECT_NEAR(homography.at<double>(0, 2) - testHomography.at<double>(0, 2), 0, 0.1);
             EXPECT_NEAR(homography.at<double>(0, 2) - testHomography.at<double>(0, 2), 0, 0.2);
-
-//    cv::imshow("Warped", warpedTestImg);
-//    cv::imshow("Stabilized", cv::Mat(stabilizer.getStabilizedFrame()));
-//    cv::waitKey(1);
+            EXPECT_NEAR(homography.at<double>(0, 2) - testHomography.at<double>(0, 2), 0, 0.2);
         }
     }
 }

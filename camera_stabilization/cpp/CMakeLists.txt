@@ -69,12 +69,25 @@ add_executable(VisualizeFeatureMatching runnables/VisualizeFeatureMatching.cpp)
 target_link_libraries(VisualizeFeatureMatching PUBLIC libCameraStabilization libRunnables ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeFeatureMatching PUBLIC "${PROJECT_BINARY_DIR}")
 
+add_executable(VisualizeBackgroundSegmentation runnables/VisualizeBackgroundSegmentation.cpp)
+target_link_libraries(VisualizeBackgroundSegmentation PUBLIC libCameraStabilization libRunnables ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_include_directories(VisualizeBackgroundSegmentation PUBLIC "${PROJECT_BINARY_DIR}")
+
+add_executable(VisualizeDynamicStabilization runnables/VisualizeDynamicStabilization.cpp)
+target_link_libraries(VisualizeDynamicStabilization PUBLIC libCameraStabilization libRunnables ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_include_directories(VisualizeDynamicStabilization PUBLIC "${PROJECT_BINARY_DIR}")
+
 ########################################################################################################################
 ### TESTING ###
 ########################################################################################################################
 enable_testing()
 
-add_executable(Tests tests/TestBase.cpp tests/FeatureDetectorTests.cpp tests/FeatureMatcherTests.cpp tests/StabilizerTests.cpp)
+add_executable(Tests tests/TestBase.cpp
+        tests/FeatureDetectorTests.cpp
+        tests/FeatureMatcherTests.cpp
+        tests/StabilizerTests.cpp
+        tests/BackgroundSubtractorTests.cpp
+        )
 target_link_libraries(Tests PUBLIC libCameraStabilization gtest_main ${OpenCV_LIBS})
 target_include_directories(Tests PUBLIC tests "${PROJECT_BINARY_DIR}")
 

@@ -25,8 +25,14 @@ void providentia::features::FeatureMatcherBase::match(const std::shared_ptr<Feat
     //-- Localize the object
     frameMatchedPoints.clear();
     referenceMatchedPoints.clear();
-    auto keypointsFrameCPU = frameFeatureDetector->getKeypointsCPU();
-    auto keypointsReferenceFrameCPU = referenceFeatureDetector->getKeypointsCPU();
+    const std::vector<cv::KeyPoint> &keypointsFrameCPU = frameFeatureDetector->getKeypointsCPU();
+    const std::vector<cv::KeyPoint> &keypointsReferenceFrameCPU = referenceFeatureDetector->getKeypointsCPU();
+
+    if (keypointsFrameCPU.empty() || keypointsReferenceFrameCPU.empty()) {
+        addTimestamp("Matching finished", 0);
+        return;
+    }
+
     for (auto &goodMatch : goodMatches) {
         //-- Get the keypointsGPU from the good matches
         frameMatchedPoints.push_back(keypointsFrameCPU[goodMatch.queryIdx].pt);

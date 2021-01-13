@@ -29,9 +29,6 @@ namespace providentia {
 
             EXPECT_NEAR(keypoints[keypointsSize - 1].pt.x, 1895.82421875, 0.01);
             EXPECT_NEAR(keypoints[keypointsSize - 1].pt.y, 1051.9869384765625, 0.01);
-
-//    cv::imshow("Detected features", detector.draw());
-//    cv::waitKey(1);
         }
     }
 }

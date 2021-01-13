@@ -64,7 +64,7 @@ namespace providentia {
              * Sets the current mask from the latest or an empty mask based on the useLatestMask flag.
              * @see FeatureDetectorBase#useLatestMask
              */
-            void setCurrentMask();
+            void setCurrentMask(cv::Size _size = cv::Size());
 
             /**
              * @constructor
@@ -72,6 +72,12 @@ namespace providentia {
             FeatureDetectorBase();
 
         public:
+
+            /**
+             * @get Gets the current mask from the latest or an empty mask based on the useLatestMask flag.
+             */
+            const cv::cuda::GpuMat &getCurrentMask(cv::Size _size = cv::Size());
+
             /**
              * @get
              */

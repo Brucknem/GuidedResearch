@@ -8,10 +8,11 @@
 #include <opencv2/cudabgsegm.hpp>
 #include "opencv2/opencv.hpp"
 #include "opencv2/cudafilters.hpp"
+#include "Utils.hpp"
 
 namespace providentia {
     namespace segmentation {
-        class BackgroundSegmentorBase {
+        class BackgroundSegmentorBase : public providentia::utils::TimeMeasurable {
         private:
 
             /**
@@ -20,8 +21,21 @@ namespace providentia {
              */
             cv::cuda::GpuMat all255Mask;
 
+
         protected:
+            /**
+             * The size used for background calculation.
+             */
+            cv::Size calculationSize;
+            /**
+             * A CUDA stream used for async calculations.
+             */
             cv::cuda::Stream stream;
+
+            /**
+             * The frame used during calculations.
+             */
+            cv::cuda::GpuMat frame;
 
             /**
              * The fore- and background masks.
@@ -38,12 +52,22 @@ namespace providentia {
              *
              * @param _frame The new frame to apply the algorithm to.
              */
-            virtual void specificApply(const cv::cuda::GpuMat &_frame) = 0;
+            virtual void specificApply() = 0;
 
             /**
              * Additional postprocessing steps on the raw background segmentation result of the algorithm.
              */
-            virtual void postProcess();
+            void postProcess();
+
+            /**
+             * @constructor
+             */
+            explicit BackgroundSegmentorBase(cv::Size calculationSize = cv::Size());
+
+            /**
+             * Add optional filters to the postprocessing step.
+             */
+            virtual void addFilters();
 
         public:
             /**
@@ -51,21 +75,31 @@ namespace providentia {
              *
              * @param _frame The new frame to apply.
              */
-            void apply(const cv::cuda::GpuMat &_frame);
+            virtual void segment(const cv::cuda::GpuMat &_frame);
+
+            /**
+             * Clears the masks to all background.
+             */
+            void clearMasks(const cv::Size &_size = cv::Size());
 
             /**
              * @get
              *
              * @return The background mask.
              */
-            const cv::cuda::GpuMat &getBackgroundMask() const;
+            const cv::cuda::GpuMat &getBackgroundMask(const cv::Size &_size = cv::Size());
 
             /**
              * @get
              *
              * @return The foreground mask.
              */
-            const cv::cuda::GpuMat &getForegroundMask() const;
+            const cv::cuda::GpuMat &getForegroundMask(const cv::Size &_size = cv::Size());
+
+            /**
+             * Draws the foreground and background masks aside.
+             */
+            cv::Mat draw() const;
         };
 
         class MOG2BackgroundSegmentor : public BackgroundSegmentorBase {
@@ -73,10 +107,13 @@ namespace providentia {
             cv::Ptr<cv::cuda::BackgroundSubtractorMOG2> algorithm;
 
         protected:
-            void specificApply(const cv::cuda::GpuMat &_frame) override;
+            void specificApply() override;
+
+            void addFilters() override;
 
         public:
-            explicit MOG2BackgroundSegmentor(int history = 500, double varThreshold = 16,
+            explicit MOG2BackgroundSegmentor(cv::Size _calculationSize = cv::Size(), int history = 500,
+                                             double varThreshold = 16,
                                              bool detectShadows = false);
         };
     }

@@ -6,8 +6,7 @@
 #include "RunnablesCommons.hpp"
 
 /**
- * Setup to visualize the feature detection.
- * Adds some detectors, runs them and renders the results.
+ * Setup to visualize the feature matching.
  */
 class Setup : public providentia::runnables::BaseSetup {
 private:
