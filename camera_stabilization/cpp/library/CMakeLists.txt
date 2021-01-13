@@ -2,7 +2,9 @@
 add_library(libCameraStabilization
         FeatureDetection.cpp
         DynamicStabilization.cpp
-        FeatureMatching.cpp FeatureMatching.hpp BackgroundSegmentation.cpp BackgroundSegmentation.hpp)
+        FeatureMatching.cpp
+        BackgroundSegmentation.cpp
+        BackgroundSegmentation.hpp)
 
 target_include_directories(libCameraStabilization
         INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}

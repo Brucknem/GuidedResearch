@@ -1,6 +1,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 #include "DynamicStabilization.hpp"
+#include <opencv2/cudawarping.hpp>
 
 #pragma region DynamicStabilizerBase
 

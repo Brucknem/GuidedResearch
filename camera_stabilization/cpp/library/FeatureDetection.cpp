@@ -25,9 +25,11 @@ void providentia::features::FeatureDetectorBase::setCurrentMask() {
 #pragma region FeatureDetectorBase
 
 void providentia::features::FeatureDetectorBase::detect(const cv::cuda::GpuMat &_frame) {
+    clear();
     originalFrame = _frame.clone();
     cv::cuda::cvtColor(_frame, frame, cv::COLOR_BGR2GRAY);
     specificDetect();
+    addTimestamp("Detection finished", 0);
 }
 
 void providentia::features::FeatureDetectorBase::detect(const cv::cuda::GpuMat &_frame, bool _useLatestMask) {
@@ -57,6 +59,9 @@ bool providentia::features::FeatureDetectorBase::isEmpty() {
     return keypointsGPU.empty();
 }
 
+providentia::features::FeatureDetectorBase::FeatureDetectorBase() : providentia::utils::TimeMeasurable(
+        "FeatureDetectorBase", 1) {}
+
 #pragma endregion FeatureDetectorBase
 
 #pragma region SurfFeatureDetector
@@ -66,6 +71,7 @@ providentia::features::SurfFeatureDetector::SurfFeatureDetector(double _hessianT
                                                                 float _keypointsRatio, bool _upright) {
     detector = cv::cuda::SURF_CUDA::create(_hessianThreshold, _nOctaves, _nOctaveLayers, _extended,
                                            _keypointsRatio, _upright);
+    setName(typeid(*this).name());
 }
 
 void providentia::features::SurfFeatureDetector::specificDetect() {

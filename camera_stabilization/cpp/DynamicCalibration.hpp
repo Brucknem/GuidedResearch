@@ -25,7 +25,6 @@
 #include <exception>
 #include <stdexcept>
 #include "Utils.hpp"
-#include "BackgroundSegmentationDeprecated.h"
 
 namespace providentia {
     namespace calibration {
@@ -245,7 +244,7 @@ namespace providentia {
 //                }
 
                 /**
-                 * Appends streams to the buffer so that there are at least the requested amount of streams available.
+                 * Appends streams to the bufferGPU so that there are at least the requested amount of streams available.
                  *
                  * @param amount The number of needed cuda streams.
                  * @return The cuda streams.

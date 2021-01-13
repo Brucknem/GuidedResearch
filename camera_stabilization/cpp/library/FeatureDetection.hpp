@@ -8,6 +8,7 @@
 
 #include <opencv2/opencv.hpp>
 #include "opencv2/xfeatures2d/cuda.hpp"
+#include "Utils.hpp"
 
 namespace providentia {
     namespace features {
@@ -15,8 +16,9 @@ namespace providentia {
         /**
          * Base class for all feature detectors.
          */
-        class FeatureDetectorBase {
+        class FeatureDetectorBase : public providentia::utils::TimeMeasurable {
         protected:
+
             /**
              * Flag if the latest mask should be used.
              */
@@ -32,8 +34,6 @@ namespace providentia {
              */
             cv::cuda::GpuMat originalFrame;
 
-        protected:
-
             /**
              * The masks used during processing.
              */
@@ -43,8 +43,6 @@ namespace providentia {
              * The feature descriptorsGPU.
              */
             cv::cuda::GpuMat descriptorsGPU;
-
-        protected:
 
             /**
              * The feature keypointsGPU.
@@ -67,6 +65,11 @@ namespace providentia {
              * @see FeatureDetectorBase#useLatestMask
              */
             void setCurrentMask();
+
+            /**
+             * @constructor
+             */
+            FeatureDetectorBase();
 
         public:
             /**

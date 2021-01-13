@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <iostream>
-#include "lib/CameraStabilization/CameraStabilization.hpp"
-#include "lib/ImageUtils/ImageUtils.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/videoio.hpp"
@@ -18,7 +16,6 @@
 
 #include "DynamicCalibration.hpp"
 #include "OpticalFlow.h"
-#include "BackgroundSegmentationDeprecated.h"
 #include "Utils.hpp"
 
 int main(int argc, char const *argv[]) {

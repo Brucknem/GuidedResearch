@@ -8,6 +8,7 @@
 
 void providentia::features::FeatureMatcherBase::match(const std::shared_ptr<FeatureDetectorBase> &_frameFeatureDetector,
                                                       const std::shared_ptr<FeatureDetectorBase> &_referenceFeatureDetector) {
+    clear();
     frameFeatureDetector = _frameFeatureDetector;
     referenceFeatureDetector = _referenceFeatureDetector;
 
@@ -31,6 +32,7 @@ void providentia::features::FeatureMatcherBase::match(const std::shared_ptr<Feat
         frameMatchedPoints.push_back(keypointsFrameCPU[goodMatch.queryIdx].pt);
         referenceMatchedPoints.push_back(keypointsReferenceFrameCPU[goodMatch.trainIdx].pt);
     }
+    addTimestamp("Matching finished", 0);
 }
 
 cv::Mat providentia::features::FeatureMatcherBase::draw() {
@@ -54,6 +56,11 @@ const std::vector<cv::Point2f> &providentia::features::FeatureMatcherBase::getRe
     return referenceMatchedPoints;
 }
 
+providentia::features::FeatureMatcherBase::FeatureMatcherBase(float _goodMatchRatioThreshold)
+        : providentia::utils::TimeMeasurable("FeatureMatcherBase", 1), goodMatchRatioThreshold(
+        _goodMatchRatioThreshold) {
+}
+
 #pragma endregion FeatureMatchingBase
 
 #pragma region BruteForceFeatureMatching
@@ -62,6 +69,7 @@ providentia::features::BruteForceFeatureMatcher::BruteForceFeatureMatcher(cv::No
                                                                           float _goodMatchRatioThreshold)
         : FeatureMatcherBase(_goodMatchRatioThreshold) {
     matcher = cv::cuda::DescriptorMatcher::createBFMatcher(norm);
+    setName(typeid(*this).name());
 }
 
 

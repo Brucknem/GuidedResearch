@@ -34,7 +34,7 @@ namespace providentia {
              *
              * @param name The print name of the instance.
              */
-            explicit TimeMeasurable(std::string name = "Unnamed", int verbosity = 0) : name(std::move(name)),
+            explicit TimeMeasurable(std::string name = "Unnamed", int verbosity = 1) : name(std::move(name)),
                                                                                        verbosity(verbosity) {
                 clear();
             }
@@ -111,22 +111,6 @@ namespace providentia {
                 return ss.str();
             }
         };
-
-        std::string durationInfo(const std::string &name, long milliseconds) {
-            std::stringstream ss;
-            ss << name << "- Duration: " << milliseconds << "ms - FPS: " << 1000. / milliseconds;
-            return ss.str();
-        }
-
-        void addText(cv::Mat &frame, const std::string &text, int x, int y) {
-            cv::putText(frame, text, cv::Point(x, y),
-                        cv::FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar(255, 255, 0), 2, cv::FONT_HERSHEY_SIMPLEX);
-        }
-
-        cv::Mat pad(const cv::Mat &frame, int padding) {
-            return cv::Mat(frame,
-                           cv::Rect(padding, padding, frame.cols - 2 * padding, frame.rows - 2 * padding));
-        }
 
         class CsvWriter {
         private:

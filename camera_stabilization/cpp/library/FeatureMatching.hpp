@@ -16,7 +16,7 @@ namespace providentia {
         /**
          * Base class for all feature matchers.
          */
-        class FeatureMatcherBase {
+        class FeatureMatcherBase : public providentia::utils::TimeMeasurable {
         protected:
 
             /**
@@ -30,14 +30,10 @@ namespace providentia {
              */
             std::vector<cv::DMatch> goodMatches;
 
-        protected:
-
             /**
              * The matched points of the frame and reference frame.
              */
             std::vector<cv::Point2f> frameMatchedPoints, referenceMatchedPoints;
-
-        protected:
 
             /**
              * The ratio threshold of good matches for the Lowe's ratio test.
@@ -65,8 +61,7 @@ namespace providentia {
              *
              * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
              */
-            explicit FeatureMatcherBase(float _goodMatchRatioThreshold = 0.75f) : goodMatchRatioThreshold(
-                    _goodMatchRatioThreshold) {};
+            explicit FeatureMatcherBase(float _goodMatchRatioThreshold = 0.75f);
 
             /**
              * @get

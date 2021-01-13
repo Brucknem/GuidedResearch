@@ -5,9 +5,9 @@
 #ifndef CAMERASTABILIZATION_BACKGROUNDSEGMENTATION_HPP
 #define CAMERASTABILIZATION_BACKGROUNDSEGMENTATION_HPP
 
+#include <opencv2/cudabgsegm.hpp>
 #include "opencv2/opencv.hpp"
 #include "opencv2/cudafilters.hpp"
-#include "BackgroundSegmentationDeprecated.h"
 
 namespace providentia {
     namespace segmentation {
