@@ -112,4 +112,27 @@ void providentia::features::ORBFeatureDetector::specificDetect() {
     detector->detectAndComputeAsync(frame, currentMask, keypointsGPU, descriptorsGPU, false);
     detector->convert(keypointsGPU, keypointsCPU);
 }
+
 #pragma endregion ORBFeatureDetector
+
+#pragma region FastFeatureDetector
+
+providentia::features::FastFeatureDetector::FastFeatureDetector(int threshold, bool nonmaxSuppression, int type,
+                                                                int max_npoints, bool orientationNormalized,
+                                                                bool scaleNormalized, float patternScale, int nOctaves,
+                                                                const std::vector<int> &selectedPairs) {
+    detector = cv::cuda::FastFeatureDetector::create(threshold, nonmaxSuppression, type, max_npoints);
+    descriptor = cv::xfeatures2d::FREAK::create();
+    setName(typeid(*this).name());
+}
+
+void providentia::features::FastFeatureDetector::specificDetect() {
+    detector->detectAsync(frame, currentMask, keypointsGPU);
+    std::cout << keypointsGPU.size() << std::endl;
+    detector->convert(keypointsGPU, keypointsCPU);
+    std::cout << keypointsCPU.size() << std::endl;
+    descriptor->compute(cv::Mat(frame), keypointsCPU, descriptorsGPU);
+    std::cout << descriptorsGPU.size() << std::endl;
+}
+
+#pragma endregion FastFeatureDetector

@@ -23,6 +23,9 @@ public:
         detectors.emplace_back(std::make_pair(new providentia::features::ORBFeatureDetector(), 1.0));
 //        detectors.emplace_back(std::make_pair(new providentia::features::ORBFeatureDetector(), 0.75));
 //        detectors.emplace_back(std::make_pair(new providentia::features::ORBFeatureDetector(), 0.5));
+        detectors.emplace_back(std::make_pair(new providentia::features::FastFeatureDetector(), 1.0));
+//        detectors.emplace_back(std::make_pair(new providentia::features::FastFeatureDetector(), 0.75));
+//        detectors.emplace_back(std::make_pair(new providentia::features::FastFeatureDetector(), 0.5));
     }
 
     void specificMainLoop() override {

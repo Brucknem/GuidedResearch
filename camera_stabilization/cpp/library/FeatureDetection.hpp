@@ -11,6 +11,7 @@
 #include <opencv2/cudafeatures2d.hpp>
 
 #include "Utils.hpp"
+#include "OpticalFlow.h"
 
 namespace providentia {
     namespace features {
@@ -42,9 +43,14 @@ namespace providentia {
             cv::cuda::GpuMat latestMask, noMask, currentMask;
 
             /**
-             * The feature descriptorsGPU.
+             * The GPU feature descriptors.
              */
             cv::cuda::GpuMat descriptorsGPU;
+
+            /**
+             * The CPU feature descriptors.
+             */
+            cv::cuda::GpuMat descriptorsCPU;
 
             /**
              * The GPU feature keypoints.
@@ -175,8 +181,7 @@ namespace providentia {
          */
         class ORBFeatureDetector : public FeatureDetectorBase {
         private:
-
-/**
+            /**
              * The CUDA ORB detector used to detect keypoints and descriptors.
              */
             cv::Ptr<cv::cuda::ORB> detector;
@@ -200,7 +205,37 @@ namespace providentia {
                                         bool blurForDescriptor = false);
 
             void specificDetect() override;
+        };
 
+        /**
+         * Wrapper for the CUDA SURF feature detector.
+         */
+        class FastFeatureDetector : public FeatureDetectorBase {
+        private:
+            /**
+             * The CUDA FastFeature detector used to detect keypoints and descriptors.
+             */
+            cv::Ptr<cv::cuda::FastFeatureDetector> detector;
+            cv::Ptr<cv::xfeatures2d::FREAK> descriptor;
+
+        public:
+
+            /**
+             * @constructor
+             *
+             * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
+             */
+            explicit FastFeatureDetector(int threshold = 10,
+                                         bool nonmaxSuppression = true,
+                                         int type = cv::FastFeatureDetector::TYPE_9_16,
+                                         int max_npoints = 5000,
+                                         bool orientationNormalized = true,
+                                         bool scaleNormalized = true,
+                                         float patternScale = 22.0f,
+                                         int nOctaves = 4,
+                                         const std::vector<int> &selectedPairs = std::vector<int>());
+
+            void specificDetect() override;
         };
     }
 }
