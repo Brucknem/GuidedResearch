@@ -1,71 +1,95 @@
 cmake_minimum_required(VERSION 3.10)
 
-# set the project name
+########################################################################################################################
+### Google Test ###
+########################################################################################################################
+
+# Download and unpack googletest at configure time
+configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download)
+if (result)
+    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+endif ()
+execute_process(COMMAND ${CMAKE_COMMAND} --build .
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download)
+if (result)
+    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+endif ()
+
+# Prevent overriding the parent project's compiler/linker
+# settings on Windows
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+# Add googletest directly to our build. This defines
+# the gtest and gtest_main targets.
+add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
+        ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
+        EXCLUDE_FROM_ALL)
+
+# The gtest/gtest_main targets carry header search path
+# dependencies automatically when using CMake 2.8.11 or
+# later. Otherwise we have to add them here ourselves.
+if (CMAKE_VERSION VERSION_LESS 2.8.11)
+    include_directories("${gtest_SOURCE_DIR}/include")
+endif ()
+
+
+########################################################################################################################
+### Project definition ###
+########################################################################################################################
 project(CameraStabilization C CXX)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
-# packages
+########################################################################################################################
+### Packages ###
+########################################################################################################################
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
+find_package(Boost REQUIRED COMPONENTS program_options)
+include_directories(${Boost_INCLUDE_DIRS})
 
-# add the Main testing
-add_executable(Main
-        main.cpp
-        DynamicCalibration.hpp
-        Utils.hpp
-        OpticalFlow.h
-        BackgroundSegmentation.h
-        )
+########################################################################################################################
+### Own libraries ###
+########################################################################################################################
+add_subdirectory(library)
+add_subdirectory(runnables)
 
-target_link_libraries(Main PUBLIC ${OpenCV_LIBS})
-target_include_directories(Main PUBLIC "${PROJECT_BINARY_DIR}")
+########################################################################################################################
+### Executables ###
+########################################################################################################################
+add_executable(VisualizeFeatureDetection runnables/VisualizeFeatureDetection.cpp)
+target_link_libraries(VisualizeFeatureDetection PUBLIC libCameraStabilization libRunnables ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_include_directories(VisualizeFeatureDetection PUBLIC "${PROJECT_BINARY_DIR}")
 
-# add the CompareScaleFactors
-add_executable(CompareScaleFactors
-        compare_scale_factors.cpp
-        DynamicCalibration.hpp
-        Utils.hpp
-        OpticalFlow.h
-        BackgroundSegmentation.h
-        )
-
-target_link_libraries(CompareScaleFactors PUBLIC ${OpenCV_LIBS})
-target_include_directories(CompareScaleFactors PUBLIC "${PROJECT_BINARY_DIR}")
-
-# add the VisualizeKeyframeUpdate
-add_executable(VisualizeKeyframeUpdate
-        visualize_keyframe_update.cpp
-        DynamicCalibration.hpp
-        Utils.hpp
-        OpticalFlow.h
-        BackgroundSegmentation.h
-        )
-
-target_link_libraries(VisualizeKeyframeUpdate PUBLIC ${OpenCV_LIBS})
-target_include_directories(VisualizeKeyframeUpdate PUBLIC "${PROJECT_BINARY_DIR}")
-
-# add the VisualizeKeyframeUpdate
-add_executable(VisualizeFeatureMatching
-        visualize_feature_matching.cpp
-        DynamicCalibration.hpp
-        Utils.hpp
-        OpticalFlow.h
-        BackgroundSegmentation.h
-        )
-
-target_link_libraries(VisualizeFeatureMatching PUBLIC ${OpenCV_LIBS})
+add_executable(VisualizeFeatureMatching runnables/VisualizeFeatureMatching.cpp)
+target_link_libraries(VisualizeFeatureMatching PUBLIC libCameraStabilization libRunnables ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeFeatureMatching PUBLIC "${PROJECT_BINARY_DIR}")
+
+add_executable(VisualizeBackgroundSegmentation runnables/VisualizeBackgroundSegmentation.cpp)
+target_link_libraries(VisualizeBackgroundSegmentation PUBLIC libCameraStabilization libRunnables ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_include_directories(VisualizeBackgroundSegmentation PUBLIC "${PROJECT_BINARY_DIR}")
+
+add_executable(VisualizeDynamicStabilization runnables/VisualizeDynamicStabilization.cpp)
+target_link_libraries(VisualizeDynamicStabilization PUBLIC libCameraStabilization libRunnables ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_include_directories(VisualizeDynamicStabilization PUBLIC "${PROJECT_BINARY_DIR}")
 
 ########################################################################################################################
 ### TESTING ###
 ########################################################################################################################
 enable_testing()
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
 
-add_executable(Tests tests/tests.cpp)
-target_link_libraries(Tests PUBLIC libCameraStabilization ${GTEST_BOTH_LIBRARIES} ${OpenCV_LIBS})
-target_include_directories(Tests PUBLIC "${PROJECT_BINARY_DIR}")
+add_executable(Tests tests/TestBase.cpp
+        tests/FeatureDetectorTests.cpp
+        tests/FeatureMatcherTests.cpp
+        tests/StabilizerTests.cpp
+        tests/BackgroundSubtractorTests.cpp
+        )
+target_link_libraries(Tests PUBLIC libCameraStabilization gtest_main ${OpenCV_LIBS})
+target_include_directories(Tests PUBLIC tests "${PROJECT_BINARY_DIR}")
 
-add_test(AllTestsInFoo Tests)
+add_test(AllTests Tests)
+configure_file(tests/feature_detection_test_image.png tests/feature_detection_test_image.png COPYONLY)

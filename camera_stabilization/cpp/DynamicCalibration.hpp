@@ -25,7 +25,6 @@
 #include <exception>
 #include <stdexcept>
 #include "Utils.hpp"
-#include "BackgroundSegmentation.h"
 
 namespace providentia {
     namespace calibration {
@@ -34,7 +33,7 @@ namespace providentia {
             /**
              * Base class for the dynamic calibration algorithms.
              */
-            class DynamicCalibrator : public virtual providentia::utils::TimeMeasurable {
+            class DynamicCalibratorBase : public virtual providentia::utils::TimeMeasurable {
             protected:
                 cv::cuda::GpuMat latestFrame, latestColorFrame, referenceFrame, stabilizedFrame, stabilizedFrameScaled;
                 cv::cuda::GpuMat latestKeypoints, referenceKeypoints;
@@ -58,7 +57,7 @@ namespace providentia {
                 segmentation::MOG2 backgroundSegmentation;
 
                 /**
-                 * Detects the keypoints and descriptors in the reference frame.
+                 * Detects the keypointsGPU and descriptorsGPU in the reference frame.
                  */
                 void detectKeyframe() {
                     setReferenceMask();
@@ -78,14 +77,14 @@ namespace providentia {
                 /**
                      * Constructor.
                      */
-                explicit DynamicCalibrator() {
+                explicit DynamicStabilizerBase() {
                     setNameAndVerbosity("Dynamic Calibrator", 0);
                 }
 
                 /**
                      * Constructor.
                      */
-                explicit DynamicCalibrator(bool _withBackground) : DynamicCalibrator() {
+                explicit DynamicStabilizerBase(bool _withBackground) : DynamicStabilizerBase() {
                     withBackground = _withBackground;
                 }
 
@@ -245,7 +244,7 @@ namespace providentia {
 //                }
 
                 /**
-                 * Appends streams to the buffer so that there are at least the requested amount of streams available.
+                 * Appends streams to the bufferGPU so that there are at least the requested amount of streams available.
                  *
                  * @param amount The number of needed cuda streams.
                  * @return The cuda streams.
@@ -258,16 +257,16 @@ namespace providentia {
                 }
 
                 /**
-                 * Detects keypoints and descriptors in the latest frame.
+                 * Detects keypointsGPU and descriptorsGPU in the latest frame.
                  */
                 void detect() {
                     convertToGrayscale(latestFrame, latestFrame);
                     detector->detectWithDescriptors(latestFrame, latestMask, latestKeypoints, latestDescriptors, false);
-                    // addTimestamp("detected descriptors", 3);
+                    // addTimestamp("detected descriptorsGPU", 3);
                 }
 
                 /**
-                 * Matches the descriptors of the latest and reference frame.
+                 * Matches the descriptorsGPU of the latest and reference frame.
                  */
                 void match() {
                     detect();
@@ -303,13 +302,13 @@ namespace providentia {
 
                     detector->downloadKeypoints(latestKeypoints, latestKeypoints_cpu);
                     detector->downloadKeypoints(referenceKeypoints, referenceKeypoints_cpu);
-                    // addTimestamp("downloaded keypoints", 3);
+                    // addTimestamp("downloaded keypointsGPU", 3);
 
                     //-- Localize the object
                     latestMatchedPoints.clear();
                     referenceMatchedPoints.clear();
                     for (auto &goodMatch : goodMatches) {
-                        //-- Get the keypoints from the good matches
+                        //-- Get the keypointsGPU from the good matches
                         latestMatchedPoints.push_back(latestKeypoints_cpu[goodMatch.queryIdx].pt);
                         referenceMatchedPoints.push_back(referenceKeypoints_cpu[goodMatch.trainIdx].pt);
                     }
@@ -399,9 +398,9 @@ namespace providentia {
                 }
             };
 
-            class ExtendedDynamicCalibrator : public virtual DynamicCalibrator {
+            class ExtendedDynamicCalibrator : public virtual DynamicStabilizerBase {
             private:
-                std::shared_ptr<DynamicCalibrator> initialGuessCalibrator;
+                std::shared_ptr<DynamicStabilizerBase> initialGuessCalibrator;
                 double scaleFactor = 0.5;
 
                 providentia::segmentation::MOG2 initialGuessBackgroundSegmentation;
@@ -413,9 +412,10 @@ namespace providentia {
                 int frameNumber = 0;
 
             protected:
-                explicit ExtendedDynamicCalibrator(const DynamicCalibrator &_initialGuessCalibrator,
-                                                   bool withBackground = false) : DynamicCalibrator(withBackground) {
-                    initialGuessCalibrator = std::make_shared<DynamicCalibrator>(_initialGuessCalibrator);
+                explicit ExtendedDynamicCalibrator(const DynamicStabilizerBase &_initialGuessCalibrator,
+                                                   bool withBackground = false) : DynamicStabilizerBase(
+                        withBackground) {
+                    initialGuessCalibrator = std::make_shared<DynamicStabilizerBase>(_initialGuessCalibrator);
                     setNameAndVerbosity("Extended Dynamic Calibrator", 0);
                 }
 
@@ -425,7 +425,7 @@ namespace providentia {
                 }
 
                 void setScaleFactor(cv::Size _size) override {
-                    DynamicCalibrator::setScaleFactor(_size);
+                    DynamicStabilizerBase::setScaleFactor(_size);
                     initialGuessCalibrator->setScaleFactor(size.width * scaleFactor, size.height * scaleFactor);
                 }
 
@@ -470,7 +470,7 @@ namespace providentia {
                     }
 
                     // Stabilize
-                    DynamicCalibrator::stabilize(initialWarpedFrame);
+                    DynamicStabilizerBase::stabilize(initialWarpedFrame);
                     // addTimestamp("Stabilization", 2);
 
                     // Update reference frame
@@ -496,7 +496,7 @@ namespace providentia {
             /**
              * Dynamic calibration using SURF features and a Brute Force matching algorithm.
              */
-            class SurfBFDynamicCalibrator : public virtual DynamicCalibrator {
+            class SurfBFDynamicCalibrator : public virtual DynamicStabilizerBase {
             public:
                 /**
                  * Constructor.
@@ -505,8 +505,8 @@ namespace providentia {
                  * @param norm The norm used in the matcher. One of cv::NORM_L1, cv::NORM_L2.
                  * @param _nOctaves Number of pyramid octaves the keypoint detector will use.
                  * @param _nOctaveLayers Number of octave layers within each octave.
-                 * @param _extended Extended descriptor flag (true - use extended 128-element descriptors; false - use
-                 *                  64-element descriptors).
+                 * @param _extended Extended descriptor flag (true - use extended 128-element descriptorsGPU; false - use
+                 *                  64-element descriptorsGPU).
                  * @param _keypointsRatio
                  * @param _upright Up-right or rotated features flag (true - do not compute orientation of features;
                  *                  false - compute orientation).
@@ -516,7 +516,7 @@ namespace providentia {
                                                  int _nOctaves = 4,
                                                  int _nOctaveLayers = 2, bool _extended = false,
                                                  float _keypointsRatio = 0.01f,
-                                                 bool _upright = false) : DynamicCalibrator(withBackground) {
+                                                 bool _upright = false) : DynamicStabilizerBase(withBackground) {
                     detector = cv::cuda::SURF_CUDA::create(hessian, _nOctaves, _nOctaveLayers, _extended,
                                                            _keypointsRatio, _upright);
                     matcher = cv::cuda::DescriptorMatcher::createBFMatcher(norm);
@@ -535,8 +535,8 @@ namespace providentia {
                  * @param verbosity The verbosity of the time measuring.
                  * @param _nOctaves Number of pyramid octaves the keypoint detector will use.
                  * @param _nOctaveLayers Number of octave layers within each octave.
-                 * @param _extended Extended descriptor flag (true - use extended 128-element descriptors; false - use
-                 *                  64-element descriptors).
+                 * @param _extended Extended descriptor flag (true - use extended 128-element descriptorsGPU; false - use
+                 *                  64-element descriptorsGPU).
                  * @param _keypointsRatio
                  * @param _upright Up-right or rotated features flag (true - do not compute orientation of features;
                  *                  false - compute orientation).
@@ -556,7 +556,7 @@ namespace providentia {
             };
 
 
-            class TwoPassDynamicCalibrator : public DynamicCalibrator {
+            class TwoPassDynamicCalibrator : public DynamicStabilizerBase {
             private:
                 int frameNumber = 0;
                 int warmUp = 50;
@@ -591,7 +591,7 @@ namespace providentia {
                     if (latestBackgroundSegmentation.getForegroundMask().empty()) {
                         latestBackgroundSegmentation.apply(_frame);
                     }
-                    DynamicCalibrator::stabilize(_frame);
+                    DynamicStabilizerBase::stabilize(_frame);
                     // addTimestamp("First pass", 2);
                     latestBackgroundSegmentation.apply(stabilizedFrame);
                     // addTimestamp("Segmentation", 2);
@@ -601,7 +601,7 @@ namespace providentia {
                     // addTimestamp("Update Frame Mask", 2);
 
 //                    // addTimestamp("Updated reference frame", 3);
-                    DynamicCalibrator::stabilize(stabilizedFrame);
+                    DynamicStabilizerBase::stabilize(stabilizedFrame);
                     // addTimestamp("Second pass", 2);
                 }
             };
