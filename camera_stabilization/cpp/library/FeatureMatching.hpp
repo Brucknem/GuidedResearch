@@ -115,7 +115,7 @@ namespace providentia {
              * @param norm
              * @param _goodMatchRatioThreshold
              */
-            explicit BruteForceFeatureMatcher(cv::NormTypes norm, float _goodMatchRatioThreshold = 0.95f);
+            explicit BruteForceFeatureMatcher(cv::NormTypes norm, float _goodMatchRatioThreshold = 0.75f);
 
             void specificMatch() override;
         };

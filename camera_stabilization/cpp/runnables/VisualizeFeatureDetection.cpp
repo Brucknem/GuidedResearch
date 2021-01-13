@@ -3,7 +3,7 @@
 //
 #include <opencv2/cudawarping.hpp>
 #include "FeatureDetection.hpp"
-#include "RunnablesCommons.hpp"
+#include "Commons.hpp"
 
 /**
  * Setup to visualize the feature detection.
@@ -17,9 +17,12 @@ private:
 
 public:
     explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
-        detectors.emplace_back(std::make_pair(new providentia::features::SurfFeatureDetector(), 1.0));
-        detectors.emplace_back(std::make_pair(new providentia::features::SurfFeatureDetector(), 0.75));
-        detectors.emplace_back(std::make_pair(new providentia::features::SurfFeatureDetector(), 0.5));
+        detectors.emplace_back(std::make_pair(new providentia::features::SURFFeatureDetector(), 1.0));
+//        detectors.emplace_back(std::make_pair(new providentia::features::SURFFeatureDetector(), 0.75));
+//        detectors.emplace_back(std::make_pair(new providentia::features::SURFFeatureDetector(), 0.5));
+        detectors.emplace_back(std::make_pair(new providentia::features::ORBFeatureDetector(), 1.0));
+//        detectors.emplace_back(std::make_pair(new providentia::features::ORBFeatureDetector(), 0.75));
+//        detectors.emplace_back(std::make_pair(new providentia::features::ORBFeatureDetector(), 0.5));
     }
 
     void specificMainLoop() override {
@@ -30,7 +33,8 @@ public:
             bufferCPU = entry.first->draw();
             cv::resize(bufferCPU, bufferCPU, frameCPU.size());
             providentia::runnables::addRuntimeToFrame(bufferCPU,
-                                                      "SURF detection [" + std::to_string(entry.second) + "]",
+                                                      std::string(typeid(*entry.first).name()) + " [" +
+                                                      std::to_string(entry.second) + "]",
                                                       entry.first->getTotalMilliseconds(),
                                                       5, 20);
 
@@ -45,6 +49,7 @@ public:
 
 int main(int argc, char const *argv[]) {
     Setup setup(argc, argv);
+    setup.setRenderingScaleFactor(1);
     setup.mainLoop();
     return 0;
 }

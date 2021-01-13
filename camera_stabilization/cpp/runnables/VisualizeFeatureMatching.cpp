@@ -3,7 +3,7 @@
 //
 #include "FeatureDetection.hpp"
 #include "FeatureMatching.hpp"
-#include "RunnablesCommons.hpp"
+#include "Commons.hpp"
 
 /**
  * Setup to visualize the feature matching.
@@ -13,12 +13,12 @@ private:
     /**
      * The current frame feature detector applied in the main loop.
      */
-    std::shared_ptr<providentia::features::SurfFeatureDetector> frameDetector;
+    std::shared_ptr<providentia::features::SURFFeatureDetector> frameDetector;
 
     /**
      * The reference frame feature detector applied in the main loop.
      */
-    std::shared_ptr<providentia::features::SurfFeatureDetector> referenceFrameDetector;
+    std::shared_ptr<providentia::features::SURFFeatureDetector> referenceFrameDetector;
 
     /**
      * The matcher used to match the features.
@@ -27,8 +27,8 @@ private:
 
 public:
     explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
-        frameDetector = std::make_shared<providentia::features::SurfFeatureDetector>();
-        referenceFrameDetector = std::make_shared<providentia::features::SurfFeatureDetector>();
+        frameDetector = std::make_shared<providentia::features::SURFFeatureDetector>();
+        referenceFrameDetector = std::make_shared<providentia::features::SURFFeatureDetector>();
         matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_L2);
     }
 

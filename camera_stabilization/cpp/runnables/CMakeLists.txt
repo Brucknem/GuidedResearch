@@ -1,5 +1,5 @@
 # add the main library
-add_library(libRunnables RunnablesCommons.cpp)
+add_library(libRunnables Commons.cpp)
 
 target_include_directories(libRunnables
         INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}

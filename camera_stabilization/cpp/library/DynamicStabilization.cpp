@@ -95,10 +95,10 @@ providentia::stabilization::SURFBFDynamicStabilizer::SURFBFDynamicStabilizer(dou
                                                                              bool _extended,
                                                                              float _keypointsRatio,
                                                                              bool _upright) {
-    frameFeatureDetector = std::make_shared<providentia::features::SurfFeatureDetector>(_hessianThreshold, _nOctaves,
+    frameFeatureDetector = std::make_shared<providentia::features::SURFFeatureDetector>(_hessianThreshold, _nOctaves,
                                                                                         _nOctaveLayers, _extended,
                                                                                         _keypointsRatio, _upright);
-    referenceFeatureDetector = std::make_shared<providentia::features::SurfFeatureDetector>(_hessianThreshold,
+    referenceFeatureDetector = std::make_shared<providentia::features::SURFFeatureDetector>(_hessianThreshold,
                                                                                             _nOctaves, _nOctaveLayers,
                                                                                             _extended, _keypointsRatio,
                                                                                             _upright);
@@ -107,3 +107,25 @@ providentia::stabilization::SURFBFDynamicStabilizer::SURFBFDynamicStabilizer(dou
 }
 
 #pragma endregion SURFBFDynamicStabilizer
+
+#pragma region ORBBFDynamicStabilizer
+
+providentia::stabilization::ORBBFDynamicStabilizer::ORBBFDynamicStabilizer(int nfeatures, float scaleFactor,
+                                                                           int nlevels, int edgeThreshold,
+                                                                           int firstLevel, int WTA_K, int scoreType,
+                                                                           int patchSize, int fastThreshold,
+                                                                           bool blurForDescriptor) {
+    frameFeatureDetector = std::make_shared<providentia::features::ORBFeatureDetector>(nfeatures, scaleFactor,
+                                                                                       nlevels, edgeThreshold,
+                                                                                       firstLevel, WTA_K, scoreType,
+                                                                                       patchSize, fastThreshold,
+                                                                                       blurForDescriptor);
+    referenceFeatureDetector = std::make_shared<providentia::features::ORBFeatureDetector>(nfeatures, scaleFactor,
+                                                                                           nlevels, edgeThreshold,
+                                                                                           firstLevel, WTA_K, scoreType,
+                                                                                           patchSize, fastThreshold,
+                                                                                           blurForDescriptor);
+    matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_HAMMING);
+}
+
+#pragma endregion ORBBFDynamicStabilizer

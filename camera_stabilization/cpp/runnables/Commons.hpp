@@ -2,8 +2,8 @@
 // Created by brucknem on 13.01.21.
 //
 
-#ifndef CAMERASTABILIZATION_RUNNABLESCOMMONS_HPP
-#define CAMERASTABILIZATION_RUNNABLESCOMMONS_HPP
+#ifndef CAMERASTABILIZATION_COMMONS_HPP
+#define CAMERASTABILIZATION_COMMONS_HPP
 
 #include <stdexcept>
 #include "opencv2/opencv.hpp"
@@ -120,6 +120,8 @@ namespace providentia {
              */
             double renderingScaleFactor = 0.5;
 
+        protected:
+
             /**
              * The total duration of the algorithms.
              */
@@ -161,6 +163,15 @@ namespace providentia {
             void init();
 
         public:
+            /**
+             * @set
+             */
+            void setCalculationScaleFactor(double calculationScaleFactor);
+
+            /**
+             * @set
+             */
+            void setRenderingScaleFactor(double renderingScaleFactor);
 
             /**
              * @constructor Parses the given command line arguments and sets the field.
@@ -199,4 +210,4 @@ namespace providentia {
 }
 
 
-#endif //CAMERASTABILIZATION_RUNNABLESCOMMONS_HPP
+#endif //CAMERASTABILIZATION_COMMONS_HPP

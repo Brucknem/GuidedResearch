@@ -8,6 +8,8 @@
 
 #include <opencv2/opencv.hpp>
 #include "opencv2/xfeatures2d/cuda.hpp"
+#include <opencv2/cudafeatures2d.hpp>
+
 #include "Utils.hpp"
 
 namespace providentia {
@@ -45,10 +47,16 @@ namespace providentia {
             cv::cuda::GpuMat descriptorsGPU;
 
             /**
-             * The feature keypointsGPU.
+             * The GPU feature keypoints.
              */
             cv::cuda::GpuMat keypointsGPU;
+
+            /**
+             * The CPU feature keypoints.
+             */
             std::vector<cv::KeyPoint> keypointsCPU;
+
+        protected:
 
             /**
              * The frame with the features drawn into.
@@ -89,6 +97,11 @@ namespace providentia {
             const cv::cuda::GpuMat &getDescriptorsGPU() const;
 
             /**
+             * @get
+             */
+            const std::vector<cv::KeyPoint> &getKeypointsCPU() const;
+
+            /**
              * Flag if there is a frame and corresponding keypoints and descriptors present.
              *
              * @return true if a detection has been performed previously, false else.
@@ -97,14 +110,14 @@ namespace providentia {
 
             /**
              * Grayscales the given frame.
-             * Detects keypointsGPU and features using the subclass specific implementations.
+             * Detects keypoints and features using the subclass specific implementations.
              *
              * @param _frame The frame used for detection.
              */
             void detect(const cv::cuda::GpuMat &_frame);
 
             /**
-             * Detects keypointsGPU and features using the latest mask or without a mask.
+             * Detects keypoints and features using the latest mask or without a mask.
              *
              * @param _frame The frame used for detection.
              * @param _useLatestMask Flag whether or not to use the latest mask.
@@ -115,7 +128,7 @@ namespace providentia {
             void detect(const cv::cuda::GpuMat &_frame, bool _useLatestMask);
 
             /**
-             * Detects keypointsGPU and features using the given mask.
+             * Detects keypoints and features using the given mask.
              *
              * @param _frame The frame used for detection.
              * @param _mask The mask used for detection.
@@ -123,11 +136,6 @@ namespace providentia {
              * @see FeatureDetectorBase#detect(cv::cuda::GpuMat)
              */
             void detect(const cv::cuda::GpuMat &_frame, const cv::cuda::GpuMat &_mask);
-
-            /**
-             * Getter for the keypointsGPU on CPU.
-             */
-            virtual const std::vector<cv::KeyPoint> &getKeypointsCPU() = 0;
 
             /**
              * Draws the detected features.
@@ -140,7 +148,7 @@ namespace providentia {
         /**
          * Wrapper for the CUDA SURF feature detector.
          */
-        class SurfFeatureDetector : public FeatureDetectorBase {
+        class SURFFeatureDetector : public FeatureDetectorBase {
         private:
             /**
              * The CUDA SURF detector used to detect keypointsGPU and descriptorsGPU.
@@ -154,13 +162,45 @@ namespace providentia {
              *
              * @ref opencv2/xfeatures2d/cuda.hpp -> cv::cuda::SURF_CUDA::create
              */
-            explicit SurfFeatureDetector(double _hessianThreshold = 1000, int _nOctaves = 4,
+            explicit SURFFeatureDetector(double _hessianThreshold = 1000, int _nOctaves = 4,
                                          int _nOctaveLayers = 2, bool _extended = false, float _keypointsRatio = 0.01f,
                                          bool _upright = false);
 
             void specificDetect() override;
 
-            const std::vector<cv::KeyPoint> &getKeypointsCPU() override;
+        };
+
+        /**
+         * Wrapper for the CUDA SURF feature detector.
+         */
+        class ORBFeatureDetector : public FeatureDetectorBase {
+        private:
+
+/**
+             * The CUDA ORB detector used to detect keypoints and descriptors.
+             */
+            cv::Ptr<cv::cuda::ORB> detector;
+
+        public:
+
+            /**
+             * @constructor
+             *
+             * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::ORB::create
+             */
+            explicit ORBFeatureDetector(int nfeatures = 1e4,
+                                        float scaleFactor = 1.2f,
+                                        int nlevels = 8,
+                                        int edgeThreshold = 31,
+                                        int firstLevel = 0,
+                                        int WTA_K = 2,
+                                        int scoreType = cv::ORB::FAST_SCORE,
+                                        int patchSize = 31,
+                                        int fastThreshold = 20,
+                                        bool blurForDescriptor = false);
+
+            void specificDetect() override;
+
         };
     }
 }

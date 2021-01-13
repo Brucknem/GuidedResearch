@@ -12,7 +12,7 @@ namespace providentia {
         };
 
         TEST_F(FeatureMatcherTests, testBruteForceFeatureMatcherRuns) {
-            std::shared_ptr<providentia::features::SurfFeatureDetector> detector = std::make_shared<providentia::features::SurfFeatureDetector>(
+            std::shared_ptr<providentia::features::SURFFeatureDetector> detector = std::make_shared<providentia::features::SURFFeatureDetector>(
                     1000);
             detector->detect(testImgGPU);
 

@@ -2,7 +2,7 @@
 // Created by brucknem on 13.01.21.
 //
 #include "BackgroundSegmentation.hpp"
-#include "RunnablesCommons.hpp"
+#include "Commons.hpp"
 
 /**
  * Setup to visualize the background segmentation.

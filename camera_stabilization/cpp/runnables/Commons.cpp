@@ -3,7 +3,7 @@
 //
 
 #include "opencv2/opencv.hpp"
-#include "RunnablesCommons.hpp"
+#include "Commons.hpp"
 #include "boost/program_options.hpp"
 
 #pragma region Helpers
@@ -149,6 +149,14 @@ void providentia::runnables::BaseSetup::mainLoop() {
 
 void providentia::runnables::BaseSetup::specificAddMessages() {
     // Empty stub for optional override.
+}
+
+void providentia::runnables::BaseSetup::setCalculationScaleFactor(double calculationScaleFactor) {
+    BaseSetup::calculationScaleFactor = calculationScaleFactor;
+}
+
+void providentia::runnables::BaseSetup::setRenderingScaleFactor(double renderingScaleFactor) {
+    BaseSetup::renderingScaleFactor = renderingScaleFactor;
 }
 
 #pragma endregion RunnablesCommons

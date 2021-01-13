@@ -3,7 +3,7 @@
 //
 #include <opencv2/cudawarping.hpp>
 #include "DynamicStabilization.hpp"
-#include "RunnablesCommons.hpp"
+#include "Commons.hpp"
 
 /**
  * Setup to visualize the total stabilization algorithm.
@@ -13,11 +13,12 @@ private:
     /**
      * The matcher used to match the features.
      */
-    std::shared_ptr<providentia::stabilization::SURFBFDynamicStabilizer> stabilizer;
+    std::shared_ptr<providentia::stabilization::DynamicStabilizerBase> stabilizer;
     cv::Mat referenceMask, currentMask;
 public:
     explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
-        stabilizer = std::make_shared<providentia::stabilization::SURFBFDynamicStabilizer>();
+//        stabilizer = std::make_shared<providentia::stabilization::SURFBFDynamicStabilizer>();
+        stabilizer = std::make_shared<providentia::stabilization::ORBBFDynamicStabilizer>();
     }
 
     void specificMainLoop() override {

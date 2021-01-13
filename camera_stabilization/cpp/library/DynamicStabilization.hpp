@@ -131,12 +131,35 @@ namespace providentia {
             /**
              * @constructor
              *
-             * @ref providentia::features::SurfFeatureDetector
+             * @ref providentia::features::SURFFeatureDetector
              */
             explicit SURFBFDynamicStabilizer(double _hessianThreshold = 1000, int _nOctaves = 4,
                                              int _nOctaveLayers = 2, bool _extended = false,
                                              float _keypointsRatio = 0.01f,
                                              bool _upright = false);
+        };
+
+        /**
+         * ORB feature detection and Brute Force feature matching stabilization algorithm.
+         */
+        class ORBBFDynamicStabilizer : public DynamicStabilizerBase {
+        public:
+
+            /**
+             * @constructor
+             *
+             * @ref providentia::features::SURFFeatureDetector
+             */
+            explicit ORBBFDynamicStabilizer(int nfeatures = 1e4,
+                                            float scaleFactor = 1.2f,
+                                            int nlevels = 8,
+                                            int edgeThreshold = 31,
+                                            int firstLevel = 0,
+                                            int WTA_K = 2,
+                                            int scoreType = cv::ORB::FAST_SCORE,
+                                            int patchSize = 31,
+                                            int fastThreshold = 20,
+                                            bool blurForDescriptor = false);
         };
     }
 } // namespace providentia::calibration

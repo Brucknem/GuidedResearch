@@ -33,6 +33,7 @@ void providentia::features::FeatureDetectorBase::detect(const cv::cuda::GpuMat &
     clear();
     originalFrame = _frame.clone();
     cv::cuda::cvtColor(_frame, frame, cv::COLOR_BGR2GRAY);
+    setCurrentMask();
     specificDetect();
     addTimestamp("Detection finished", 0);
 }
@@ -72,11 +73,15 @@ const cv::cuda::GpuMat &providentia::features::FeatureDetectorBase::getCurrentMa
     return currentMask;
 }
 
+const std::vector<cv::KeyPoint> &providentia::features::FeatureDetectorBase::getKeypointsCPU() const {
+    return keypointsCPU;
+}
+
 #pragma endregion FeatureDetectorBase
 
-#pragma region SurfFeatureDetector
+#pragma region SURFFeatureDetector
 
-providentia::features::SurfFeatureDetector::SurfFeatureDetector(double _hessianThreshold, int _nOctaves,
+providentia::features::SURFFeatureDetector::SURFFeatureDetector(double _hessianThreshold, int _nOctaves,
                                                                 int _nOctaveLayers, bool _extended,
                                                                 float _keypointsRatio, bool _upright) {
     detector = cv::cuda::SURF_CUDA::create(_hessianThreshold, _nOctaves, _nOctaveLayers, _extended,
@@ -84,15 +89,27 @@ providentia::features::SurfFeatureDetector::SurfFeatureDetector(double _hessianT
     setName(typeid(*this).name());
 }
 
-void providentia::features::SurfFeatureDetector::specificDetect() {
-    setCurrentMask();
+void providentia::features::SURFFeatureDetector::specificDetect() {
     detector->detectWithDescriptors(frame, currentMask, keypointsGPU, descriptorsGPU, false);
-}
-
-const std::vector<cv::KeyPoint> &providentia::features::SurfFeatureDetector::getKeypointsCPU() {
     detector->downloadKeypoints(keypointsGPU, keypointsCPU);
-    return keypointsCPU;
 }
 
 
-#pragma endregion SurfFeatureDetector
+#pragma endregion SURFFeatureDetector
+
+#pragma region ORBFeatureDetector
+
+providentia::features::ORBFeatureDetector::ORBFeatureDetector(int nfeatures, float scaleFactor, int nlevels,
+                                                              int edgeThreshold, int firstLevel, int WTA_K,
+                                                              int scoreType, int patchSize, int fastThreshold,
+                                                              bool blurForDescriptor) {
+    detector = cv::cuda::ORB::create(nfeatures, scaleFactor, nlevels, edgeThreshold, firstLevel, WTA_K, scoreType,
+                                     patchSize, fastThreshold, blurForDescriptor);
+    setName(typeid(*this).name());
+}
+
+void providentia::features::ORBFeatureDetector::specificDetect() {
+    detector->detectAndComputeAsync(frame, currentMask, keypointsGPU, descriptorsGPU, false);
+    detector->convert(keypointsGPU, keypointsCPU);
+}
+#pragma endregion ORBFeatureDetector
