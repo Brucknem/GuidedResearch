@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <iostream>
-#include "lib/CameraStabilization/CameraStabilization.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/videoio.hpp"
@@ -143,7 +142,10 @@ int main(int argc, char const *argv[]) {
         cv::hconcat(opticalFlowFrames, opticalFlowFramesMerged);
 
         cv::Mat finalFrame;
-        cv::vconcat(std::vector<cv::Mat>{colorFramesMerged, backgroundMasksFramesMerged, opticalFlowFramesMerged},
+        cv::vconcat(std::vector<cv::Mat>{
+                            colorFramesMerged,
+//            backgroundMasksFramesMerged,
+                            opticalFlowFramesMerged},
                     finalFrame);
 
 //        cv::resize(finalFrame, finalFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);

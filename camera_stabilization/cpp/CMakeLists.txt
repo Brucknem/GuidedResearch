@@ -8,10 +8,6 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-# library
-add_subdirectory(lib/CameraStabilization)
-add_subdirectory(lib/ImageUtils)
-add_subdirectory(lib)
 
 # add the Main testing
 add_executable(Main
@@ -22,7 +18,7 @@ add_executable(Main
         BackgroundSegmentation.h
         )
 
-target_link_libraries(Main PUBLIC CameraStabilization ImageUtils ${OpenCV_LIBS})
+target_link_libraries(Main PUBLIC ${OpenCV_LIBS})
 target_include_directories(Main PUBLIC "${PROJECT_BINARY_DIR}")
 
 # add the CompareScaleFactors
@@ -34,7 +30,7 @@ add_executable(CompareScaleFactors
         BackgroundSegmentation.h
         )
 
-target_link_libraries(CompareScaleFactors PUBLIC CameraStabilization ImageUtils ${OpenCV_LIBS})
+target_link_libraries(CompareScaleFactors PUBLIC ${OpenCV_LIBS})
 target_include_directories(CompareScaleFactors PUBLIC "${PROJECT_BINARY_DIR}")
 
 # add the VisualizeKeyframeUpdate
@@ -46,7 +42,7 @@ add_executable(VisualizeKeyframeUpdate
         BackgroundSegmentation.h
         )
 
-target_link_libraries(VisualizeKeyframeUpdate PUBLIC CameraStabilization ImageUtils ${OpenCV_LIBS})
+target_link_libraries(VisualizeKeyframeUpdate PUBLIC ${OpenCV_LIBS})
 target_include_directories(VisualizeKeyframeUpdate PUBLIC "${PROJECT_BINARY_DIR}")
 
 # add the VisualizeKeyframeUpdate
@@ -58,7 +54,7 @@ add_executable(VisualizeFeatureMatching
         BackgroundSegmentation.h
         )
 
-target_link_libraries(VisualizeFeatureMatching PUBLIC CameraStabilization ImageUtils ${OpenCV_LIBS})
+target_link_libraries(VisualizeFeatureMatching PUBLIC ${OpenCV_LIBS})
 target_include_directories(VisualizeFeatureMatching PUBLIC "${PROJECT_BINARY_DIR}")
 
 ########################################################################################################################

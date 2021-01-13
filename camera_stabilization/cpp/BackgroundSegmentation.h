@@ -3,8 +3,6 @@
 //
 #include <stdio.h>
 #include <iostream>
-#include "lib/CameraStabilization/CameraStabilization.hpp"
-#include "lib/ImageUtils/ImageUtils.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/videoio.hpp"
