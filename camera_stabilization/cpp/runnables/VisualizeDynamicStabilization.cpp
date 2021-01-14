@@ -17,8 +17,9 @@ private:
     cv::Mat referenceMask, currentMask;
 public:
     explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
-//        stabilizer = std::make_shared<providentia::stabilization::SURFBFDynamicStabilizer>();
-        stabilizer = std::make_shared<providentia::stabilization::ORBBFDynamicStabilizer>();
+        stabilizer = std::make_shared<providentia::stabilization::SURFBFDynamicStabilizer>();
+//        stabilizer = std::make_shared<providentia::stabilization::ORBBFDynamicStabilizer>();
+//        stabilizer = std::make_shared<providentia::stabilization::FastFREAKBFDynamicStabilizer>();
     }
 
     void specificMainLoop() override {

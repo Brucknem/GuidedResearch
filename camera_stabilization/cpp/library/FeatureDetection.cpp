@@ -2,6 +2,7 @@
 // Created by brucknem on 12.01.21.
 //
 #include <opencv2/cudaimgproc.hpp>
+#include "opencv2/features2d.hpp"
 #include <utility>
 #include "FeatureDetection.hpp"
 
@@ -48,21 +49,8 @@ void providentia::features::FeatureDetectorBase::detect(const cv::cuda::GpuMat &
     detect(_frame, true);
 }
 
-cv::Mat providentia::features::FeatureDetectorBase::draw() {
-    cv::drawKeypoints(cv::Mat(originalFrame), getKeypointsCPU(), drawFrame);
-    return drawFrame;
-}
-
 const cv::cuda::GpuMat &providentia::features::FeatureDetectorBase::getOriginalFrame() const {
     return originalFrame;
-}
-
-const cv::cuda::GpuMat &providentia::features::FeatureDetectorBase::getDescriptorsGPU() const {
-    return descriptorsGPU;
-}
-
-bool providentia::features::FeatureDetectorBase::isEmpty() {
-    return keypointsGPU.empty();
 }
 
 providentia::features::FeatureDetectorBase::FeatureDetectorBase() : providentia::utils::TimeMeasurable(
@@ -73,8 +61,25 @@ const cv::cuda::GpuMat &providentia::features::FeatureDetectorBase::getCurrentMa
     return currentMask;
 }
 
-const std::vector<cv::KeyPoint> &providentia::features::FeatureDetectorBase::getKeypointsCPU() const {
+const std::vector<cv::KeyPoint> &providentia::features::FeatureDetectorBase::getKeypoints() const {
     return keypointsCPU;
+}
+
+bool providentia::features::FeatureDetectorBase::isEmpty() {
+    return keypointsCPU.empty();
+}
+
+cv::Mat providentia::features::FeatureDetectorBase::draw() {
+    cv::drawKeypoints(cv::Mat(originalFrame), keypointsCPU, drawFrame);
+    return drawFrame;
+}
+
+const cv::cuda::GpuMat &providentia::features::FeatureDetectorBase::getDescriptorsGPU() const {
+    return descriptorsGPU;
+}
+
+const cv::Mat &providentia::features::FeatureDetectorBase::getDescriptorsCPU() const {
+    return descriptorsCPU;
 }
 
 #pragma endregion FeatureDetectorBase
@@ -90,10 +95,10 @@ providentia::features::SURFFeatureDetector::SURFFeatureDetector(double _hessianT
 }
 
 void providentia::features::SURFFeatureDetector::specificDetect() {
-    detector->detectWithDescriptors(frame, currentMask, keypointsGPU, descriptorsGPU, false);
+    detector->detectWithDescriptors(frame, getCurrentMask(frame.size()), keypointsGPU, descriptorsGPU, false);
     detector->downloadKeypoints(keypointsGPU, keypointsCPU);
+    descriptorsGPU.download(descriptorsCPU);
 }
-
 
 #pragma endregion SURFFeatureDetector
 
@@ -109,30 +114,42 @@ providentia::features::ORBFeatureDetector::ORBFeatureDetector(int nfeatures, flo
 }
 
 void providentia::features::ORBFeatureDetector::specificDetect() {
-    detector->detectAndComputeAsync(frame, currentMask, keypointsGPU, descriptorsGPU, false);
+    detector->detectAndComputeAsync(frame, getCurrentMask(frame.size()), keypointsGPU, descriptorsGPU, false);
     detector->convert(keypointsGPU, keypointsCPU);
+    descriptorsGPU.download(descriptorsCPU);
 }
 
 #pragma endregion ORBFeatureDetector
 
 #pragma region FastFeatureDetector
 
-providentia::features::FastFeatureDetector::FastFeatureDetector(int threshold, bool nonmaxSuppression, int type,
-                                                                int max_npoints, bool orientationNormalized,
-                                                                bool scaleNormalized, float patternScale, int nOctaves,
-                                                                const std::vector<int> &selectedPairs) {
-    detector = cv::cuda::FastFeatureDetector::create(threshold, nonmaxSuppression, type, max_npoints);
-    descriptor = cv::xfeatures2d::FREAK::create();
+providentia::features::FastFREAKFeatureDetector::FastFREAKFeatureDetector(int threshold, bool nonmaxSuppression,
+                                                                          cv::FastFeatureDetector::DetectorType type,
+                                                                          int max_npoints, bool orientationNormalized,
+                                                                          bool scaleNormalized, float patternScale,
+                                                                          int nOctaves,
+                                                                          const std::vector<int> &selectedPairs) {
+    detector = cv::FastFeatureDetector::create(threshold, nonmaxSuppression, type);
+    descriptor = cv::xfeatures2d::FREAK::create(orientationNormalized, scaleNormalized, patternScale, nOctaves);
     setName(typeid(*this).name());
 }
 
-void providentia::features::FastFeatureDetector::specificDetect() {
-    detector->detectAsync(frame, currentMask, keypointsGPU);
-    std::cout << keypointsGPU.size() << std::endl;
-    detector->convert(keypointsGPU, keypointsCPU);
-    std::cout << keypointsCPU.size() << std::endl;
-    descriptor->compute(cv::Mat(frame), keypointsCPU, descriptorsGPU);
-    std::cout << descriptorsGPU.size() << std::endl;
+void providentia::features::FastFREAKFeatureDetector::specificDetect() {
+    detector->detect(cv::Mat(frame), keypointsCPU, cv::Mat(getCurrentMask(frame.size())));
+    descriptor->compute(cv::Mat(frame), keypointsCPU, descriptorsCPU);
 }
 
 #pragma endregion FastFeatureDetector
+
+providentia::features::SIFTFeatureDetector::SIFTFeatureDetector(int nfeatures, int nOctaveLayers,
+                                                                double contrastThreshold, double edgeThreshold,
+                                                                double sigma) {
+    detector = cv::SIFT::create(nfeatures, nOctaveLayers, contrastThreshold, edgeThreshold, sigma);
+    setName(typeid(*this).name());
+}
+
+void providentia::features::SIFTFeatureDetector::specificDetect() {
+    detector->detectAndCompute(cv::Mat(frame), cv::Mat(getCurrentMask()), keypointsCPU, descriptorsCPU);
+    descriptorsGPU.upload(descriptorsCPU);
+}
+

@@ -13,23 +13,34 @@ private:
     /**
      * The current frame feature detector applied in the main loop.
      */
-    std::shared_ptr<providentia::features::SURFFeatureDetector> frameDetector;
-
-    /**
-     * The reference frame feature detector applied in the main loop.
-     */
-    std::shared_ptr<providentia::features::SURFFeatureDetector> referenceFrameDetector;
+    std::shared_ptr<providentia::features::FeatureDetectorBase> frameDetector, referenceFrameDetector;
 
     /**
      * The matcher used to match the features.
      */
-    std::shared_ptr<providentia::features::BruteForceFeatureMatcher> matcher;
+    std::shared_ptr<providentia::features::FeatureMatcherBase> matcher;
 
 public:
     explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
-        frameDetector = std::make_shared<providentia::features::SURFFeatureDetector>();
-        referenceFrameDetector = std::make_shared<providentia::features::SURFFeatureDetector>();
+//        providentia::features::SIFTFeatureDetector detector(100);
+//        frameDetector = std::make_shared<providentia::features::SIFTFeatureDetector>(detector);
+//        referenceFrameDetector = std::make_shared<providentia::features::SIFTFeatureDetector>(detector);
+
+        providentia::features::SURFFeatureDetector detector;
+        frameDetector = std::make_shared<providentia::features::SURFFeatureDetector>(detector);
+        referenceFrameDetector = std::make_shared<providentia::features::SURFFeatureDetector>(detector);
+
+//        providentia::features::ORBFeatureDetector detector(1000);
+//        frameDetector = std::make_shared<providentia::features::ORBFeatureDetector>(detector);
+//        referenceFrameDetector = std::make_shared<providentia::features::ORBFeatureDetector>(detector);
+
+//        providentia::features::FastFREAKFeatureDetector detector;
+//        frameDetector = std::make_shared<providentia::features::FastFREAKFeatureDetector>(detector);
+//        referenceFrameDetector = std::make_shared<providentia::features::FastFREAKFeatureDetector>(detector);
+
         matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_L2);
+//        matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_HAMMING);
+//        matcher = std::make_shared<providentia::features::FlannFeatureMatcher>(true);
     }
 
     void specificMainLoop() override {
@@ -45,8 +56,8 @@ public:
     }
 
     void specificAddMessages() override {
-        addRuntimeToFinalFrame("SURF detection", frameDetector->getTotalMilliseconds(), 5, 20);
-        addRuntimeToFinalFrame("Brute Force Matching", matcher->getTotalMilliseconds(), 5, 40);
+        addRuntimeToFinalFrame("Feature detection", frameDetector->getTotalMilliseconds(), 5, 20);
+        addRuntimeToFinalFrame("Feature matching", matcher->getTotalMilliseconds(), 5, 40);
     }
 };
 

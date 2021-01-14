@@ -2,8 +2,8 @@
 // Created by brucknem on 13.01.21.
 //
 
-#ifndef CAMERASTABILIZATION_FRAMEWARPING_H
-#define CAMERASTABILIZATION_FRAMEWARPING_H
+#ifndef CAMERASTABILIZATION_FRAMEWARPING_HPP
+#define CAMERASTABILIZATION_FRAMEWARPING_HPP
 
 #include "opencv2/opencv.hpp"
 #include "FeatureMatching.hpp"
@@ -28,7 +28,7 @@ namespace providentia {
             int perspectiveWarpFlags = cv::INTER_LINEAR;
 
             /**
-             * The found homography between the matched keypoints.
+             * The found homography between the matched keypointsCPU.
              * Minimizer for the reprojection error between the frames.
              */
             cv::Mat homography;
@@ -67,4 +67,4 @@ namespace providentia {
 }
 
 
-#endif //CAMERASTABILIZATION_FRAMEWARPING_H
+#endif //CAMERASTABILIZATION_FRAMEWARPING_HPP

@@ -12,7 +12,7 @@ void providentia::stabilization::DynamicStabilizerBase::stabilize(const cv::cuda
     frameFeatureDetector->detect(_frame, segmentor->getBackgroundMask(_frame.size()));
     if (referenceFeatureDetector->isEmpty()) {
         // TODO copy/clone frameFeatureDetector
-        referenceFeatureDetector->detect(_frame, segmentor->getBackgroundMask(_frame.size()).clone());
+        referenceFeatureDetector->detect(_frame, segmentor->getBackgroundMask(_frame.size()));
     }
 
     matcher->match(frameFeatureDetector, referenceFeatureDetector);
@@ -95,13 +95,11 @@ providentia::stabilization::SURFBFDynamicStabilizer::SURFBFDynamicStabilizer(dou
                                                                              bool _extended,
                                                                              float _keypointsRatio,
                                                                              bool _upright) {
-    frameFeatureDetector = std::make_shared<providentia::features::SURFFeatureDetector>(_hessianThreshold, _nOctaves,
-                                                                                        _nOctaveLayers, _extended,
-                                                                                        _keypointsRatio, _upright);
-    referenceFeatureDetector = std::make_shared<providentia::features::SURFFeatureDetector>(_hessianThreshold,
-                                                                                            _nOctaves, _nOctaveLayers,
-                                                                                            _extended, _keypointsRatio,
-                                                                                            _upright);
+    auto detector = providentia::features::SURFFeatureDetector(_hessianThreshold, _nOctaves,
+                                                               _nOctaveLayers, _extended,
+                                                               _keypointsRatio, _upright);
+    frameFeatureDetector = std::make_shared<providentia::features::SURFFeatureDetector>(detector);
+    referenceFeatureDetector = std::make_shared<providentia::features::SURFFeatureDetector>(detector);
     matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_L2);
     setName(typeid(*this).name());
 }
@@ -115,17 +113,36 @@ providentia::stabilization::ORBBFDynamicStabilizer::ORBBFDynamicStabilizer(int n
                                                                            int firstLevel, int WTA_K, int scoreType,
                                                                            int patchSize, int fastThreshold,
                                                                            bool blurForDescriptor) {
-    frameFeatureDetector = std::make_shared<providentia::features::ORBFeatureDetector>(nfeatures, scaleFactor,
-                                                                                       nlevels, edgeThreshold,
-                                                                                       firstLevel, WTA_K, scoreType,
-                                                                                       patchSize, fastThreshold,
-                                                                                       blurForDescriptor);
-    referenceFeatureDetector = std::make_shared<providentia::features::ORBFeatureDetector>(nfeatures, scaleFactor,
-                                                                                           nlevels, edgeThreshold,
-                                                                                           firstLevel, WTA_K, scoreType,
-                                                                                           patchSize, fastThreshold,
-                                                                                           blurForDescriptor);
+    auto detector = providentia::features::ORBFeatureDetector(nfeatures, scaleFactor,
+                                                              nlevels, edgeThreshold,
+                                                              firstLevel, WTA_K, scoreType,
+                                                              patchSize, fastThreshold,
+                                                              blurForDescriptor);
+    frameFeatureDetector = std::make_shared<providentia::features::ORBFeatureDetector>(detector);
+    referenceFeatureDetector = std::make_shared<providentia::features::ORBFeatureDetector>(detector);
     matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_HAMMING);
+    setName(typeid(*this).name());
 }
 
 #pragma endregion ORBBFDynamicStabilizer
+
+providentia::stabilization::FastFREAKBFDynamicStabilizer::FastFREAKBFDynamicStabilizer(int threshold,
+                                                                                       bool nonmaxSuppression,
+                                                                                       cv::FastFeatureDetector::DetectorType type,
+                                                                                       int max_npoints,
+                                                                                       bool orientationNormalized,
+                                                                                       bool scaleNormalized,
+                                                                                       float patternScale, int nOctaves,
+                                                                                       const std::vector<int> &selectedPairs) {
+    auto detector = providentia::features::FastFREAKFeatureDetector(threshold,
+                                                                    nonmaxSuppression, type,
+                                                                    max_npoints,
+                                                                    orientationNormalized,
+                                                                    scaleNormalized,
+                                                                    patternScale, nOctaves,
+                                                                    selectedPairs);
+    frameFeatureDetector = std::make_shared<providentia::features::FastFREAKFeatureDetector>(detector);
+    referenceFeatureDetector = std::make_shared<providentia::features::FastFREAKFeatureDetector>(detector);
+    matcher = std::make_shared<providentia::features::FlannFeatureMatcher>();
+    setName(typeid(*this).name());
+}

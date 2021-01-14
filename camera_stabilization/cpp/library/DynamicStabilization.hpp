@@ -7,7 +7,7 @@
 #include "BackgroundSegmentation.hpp"
 #include "FeatureDetection.hpp"
 #include "FeatureMatching.hpp"
-#include "FrameWarping.h"
+#include "FrameWarping.hpp"
 
 namespace providentia {
     namespace stabilization {
@@ -120,6 +120,7 @@ namespace providentia {
              */
             void updateKeyframe();
 
+            void setDetectors(const providentia::features::FeatureDetectorBase &detector);
         };
 
         /**
@@ -160,6 +161,19 @@ namespace providentia {
                                             int patchSize = 31,
                                             int fastThreshold = 20,
                                             bool blurForDescriptor = false);
+        };
+
+        class FastFREAKBFDynamicStabilizer : public DynamicStabilizerBase {
+        public:
+            explicit FastFREAKBFDynamicStabilizer(int threshold = 50,
+                                                  bool nonmaxSuppression = true,
+                                                  cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16,
+                                                  int max_npoints = 5000,
+                                                  bool orientationNormalized = true,
+                                                  bool scaleNormalized = true,
+                                                  float patternScale = 22.0f,
+                                                  int nOctaves = 4,
+                                                  const std::vector<int> &selectedPairs = std::vector<int>());
         };
     }
 } // namespace providentia::calibration

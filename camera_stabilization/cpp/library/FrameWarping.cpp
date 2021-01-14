@@ -3,7 +3,7 @@
 //
 
 #include <opencv2/cudawarping.hpp>
-#include "FrameWarping.h"
+#include "FrameWarping.hpp"
 
 void
 providentia::stabilization::FrameWarper::warp(const cv::cuda::GpuMat &_frame,

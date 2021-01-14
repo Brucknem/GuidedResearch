@@ -18,14 +18,9 @@ private:
 public:
     explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
         detectors.emplace_back(std::make_pair(new providentia::features::SURFFeatureDetector(), 1.0));
-//        detectors.emplace_back(std::make_pair(new providentia::features::SURFFeatureDetector(), 0.75));
-//        detectors.emplace_back(std::make_pair(new providentia::features::SURFFeatureDetector(), 0.5));
         detectors.emplace_back(std::make_pair(new providentia::features::ORBFeatureDetector(), 1.0));
-//        detectors.emplace_back(std::make_pair(new providentia::features::ORBFeatureDetector(), 0.75));
-//        detectors.emplace_back(std::make_pair(new providentia::features::ORBFeatureDetector(), 0.5));
-        detectors.emplace_back(std::make_pair(new providentia::features::FastFeatureDetector(), 1.0));
-//        detectors.emplace_back(std::make_pair(new providentia::features::FastFeatureDetector(), 0.75));
-//        detectors.emplace_back(std::make_pair(new providentia::features::FastFeatureDetector(), 0.5));
+        detectors.emplace_back(std::make_pair(new providentia::features::SIFTFeatureDetector(), 1.0));
+        detectors.emplace_back(std::make_pair(new providentia::features::FastFREAKFeatureDetector(), 1.0));
     }
 
     void specificMainLoop() override {

@@ -43,31 +43,29 @@ namespace providentia {
             cv::cuda::GpuMat latestMask, noMask, currentMask;
 
             /**
-             * The GPU feature descriptors.
+             * The frame with the features drawn into.
              */
-            cv::cuda::GpuMat descriptorsGPU;
-
-            /**
-             * The CPU feature descriptors.
-             */
-            cv::cuda::GpuMat descriptorsCPU;
-
-            /**
-             * The GPU feature keypoints.
-             */
-            cv::cuda::GpuMat keypointsGPU;
+            cv::Mat drawFrame;
 
             /**
              * The CPU feature keypoints.
              */
             std::vector<cv::KeyPoint> keypointsCPU;
 
-        protected:
+            /**
+             * The CPU feature descriptors.
+             */
+            cv::Mat descriptorsCPU;
 
             /**
-             * The frame with the features drawn into.
+             * The GPU feature descriptors.
              */
-            cv::Mat drawFrame;
+            cv::cuda::GpuMat descriptorsGPU;
+
+            /**
+             * The GPU feature keypoints.
+             */
+            cv::cuda::GpuMat keypointsGPU;
 
             /**
              * Specific detection implementation.
@@ -85,7 +83,22 @@ namespace providentia {
              */
             FeatureDetectorBase();
 
+
         public:
+            /**
+             * @get
+             */
+            const std::vector<cv::KeyPoint> &getKeypoints() const;
+
+            /**
+             * @get
+             */
+            const cv::Mat &getDescriptorsCPU() const;
+
+            /**
+             * @get
+             */
+            const cv::cuda::GpuMat &getDescriptorsGPU() const;
 
             /**
              * @get Gets the current mask from the latest or an empty mask based on the useLatestMask flag.
@@ -98,17 +111,7 @@ namespace providentia {
             const cv::cuda::GpuMat &getOriginalFrame() const;
 
             /**
-             * @get
-             */
-            const cv::cuda::GpuMat &getDescriptorsGPU() const;
-
-            /**
-             * @get
-             */
-            const std::vector<cv::KeyPoint> &getKeypointsCPU() const;
-
-            /**
-             * Flag if there is a frame and corresponding keypoints and descriptors present.
+             * Flag if there is a frame and corresponding keypointsCPU and descriptorsGPU present.
              *
              * @return true if a detection has been performed previously, false else.
              */
@@ -116,14 +119,14 @@ namespace providentia {
 
             /**
              * Grayscales the given frame.
-             * Detects keypoints and features using the subclass specific implementations.
+             * Detects keypointsCPU and features using the subclass specific implementations.
              *
              * @param _frame The frame used for detection.
              */
             void detect(const cv::cuda::GpuMat &_frame);
 
             /**
-             * Detects keypoints and features using the latest mask or without a mask.
+             * Detects keypointsCPU and features using the latest mask or without a mask.
              *
              * @param _frame The frame used for detection.
              * @param _useLatestMask Flag whether or not to use the latest mask.
@@ -134,7 +137,7 @@ namespace providentia {
             void detect(const cv::cuda::GpuMat &_frame, bool _useLatestMask);
 
             /**
-             * Detects keypoints and features using the given mask.
+             * Detects keypointsCPU and features using the given mask.
              *
              * @param _frame The frame used for detection.
              * @param _mask The mask used for detection.
@@ -154,12 +157,12 @@ namespace providentia {
         /**
          * Wrapper for the CUDA SURF feature detector.
          */
-        class SURFFeatureDetector : public FeatureDetectorBase {
+        class SIFTFeatureDetector : public FeatureDetectorBase {
         private:
             /**
-             * The CUDA SURF detector used to detect keypointsGPU and descriptorsGPU.
+             * The CPU SIFT detector used to detect keypointsCPU and descriptorsGPU.
              */
-            cv::Ptr<cv::cuda::SURF_CUDA> detector;
+            cv::Ptr<cv::SIFT> detector;
 
         public:
 
@@ -168,11 +171,37 @@ namespace providentia {
              *
              * @ref opencv2/xfeatures2d/cuda.hpp -> cv::cuda::SURF_CUDA::create
              */
-            explicit SURFFeatureDetector(double _hessianThreshold = 1000, int _nOctaves = 4,
-                                         int _nOctaveLayers = 2, bool _extended = false, float _keypointsRatio = 0.01f,
-                                         bool _upright = false);
+            explicit SIFTFeatureDetector(int nfeatures = 0, int nOctaveLayers = 3,
+                                         double contrastThreshold = 0.04, double edgeThreshold = 10,
+                                         double sigma = 1.6);
 
             void specificDetect() override;
+
+        };
+
+        /**
+         * Wrapper for the CUDA SURF feature detector.
+         */
+        class SURFFeatureDetector : public FeatureDetectorBase {
+        private:
+            /**
+             * The CUDA SURF detector used to detect keypointsCPU and descriptorsGPU.
+             */
+            cv::Ptr<cv::cuda::SURF_CUDA> detector;
+
+        protected:
+            void specificDetect() override;
+
+        public:
+
+            /**
+             * @constructor
+             *
+             * @ref opencv2/xfeatures2d/cuda.hpp -> cv::cuda::SURF_CUDA::create
+             */
+            explicit SURFFeatureDetector(double _hessianThreshold = 500, int _nOctaves = 4,
+                                         int _nOctaveLayers = 2, bool _extended = false, float _keypointsRatio = 0.01f,
+                                         bool _upright = false);
 
         };
 
@@ -182,7 +211,7 @@ namespace providentia {
         class ORBFeatureDetector : public FeatureDetectorBase {
         private:
             /**
-             * The CUDA ORB detector used to detect keypoints and descriptors.
+             * The CUDA ORB detector used to detect keypointsCPU and descriptorsGPU.
              */
             cv::Ptr<cv::cuda::ORB> detector;
 
@@ -210,12 +239,12 @@ namespace providentia {
         /**
          * Wrapper for the CUDA SURF feature detector.
          */
-        class FastFeatureDetector : public FeatureDetectorBase {
+        class FastFREAKFeatureDetector : public FeatureDetectorBase {
         private:
             /**
-             * The CUDA FastFeature detector used to detect keypoints and descriptors.
+             * The CUDA FastFeature detector used to detect keypointsCPU and descriptorsGPU.
              */
-            cv::Ptr<cv::cuda::FastFeatureDetector> detector;
+            cv::Ptr<cv::FastFeatureDetector> detector;
             cv::Ptr<cv::xfeatures2d::FREAK> descriptor;
 
         public:
@@ -225,15 +254,15 @@ namespace providentia {
              *
              * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
              */
-            explicit FastFeatureDetector(int threshold = 10,
-                                         bool nonmaxSuppression = true,
-                                         int type = cv::FastFeatureDetector::TYPE_9_16,
-                                         int max_npoints = 5000,
-                                         bool orientationNormalized = true,
-                                         bool scaleNormalized = true,
-                                         float patternScale = 22.0f,
-                                         int nOctaves = 4,
-                                         const std::vector<int> &selectedPairs = std::vector<int>());
+            explicit FastFREAKFeatureDetector(int threshold = 50,
+                                              bool nonmaxSuppression = true,
+                                              cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16,
+                                              int max_npoints = 5000,
+                                              bool orientationNormalized = true,
+                                              bool scaleNormalized = true,
+                                              float patternScale = 22.0f,
+                                              int nOctaves = 4,
+                                              const std::vector<int> &selectedPairs = std::vector<int>());
 
             void specificDetect() override;
         };

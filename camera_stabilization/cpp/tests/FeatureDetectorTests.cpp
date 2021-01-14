@@ -14,7 +14,7 @@ namespace providentia {
         TEST_F(FeatureDetectorTests, testSURFFeatureDetectorRuns) {
             providentia::features::SURFFeatureDetector detector(1000);
             detector.detect(testImgGPU);
-            std::vector<cv::KeyPoint> keypoints = detector.getKeypointsCPU();
+            std::vector<cv::KeyPoint> keypoints = detector.getKeypoints();
             int keypointsSize = 3108;
             ASSERT_EQ(keypoints.size(), keypointsSize);
 
@@ -35,7 +35,7 @@ namespace providentia {
             int nFeatures = 1000;
             providentia::features::ORBFeatureDetector detector(nFeatures);
             detector.detect(testImgGPU);
-            std::vector<cv::KeyPoint> keypoints = detector.getKeypointsCPU();
+            std::vector<cv::KeyPoint> keypoints = detector.getKeypoints();
             ASSERT_EQ(keypoints.size(), nFeatures);
 
             std::sort(keypoints.begin(), keypoints.end(), [](const cv::KeyPoint &a, const cv::KeyPoint &b) {
