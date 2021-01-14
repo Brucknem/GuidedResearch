@@ -7,6 +7,7 @@
 
 
 #include <opencv2/opencv.hpp>
+#include "opencv2/xfeatures2d.hpp"
 #include "opencv2/xfeatures2d/cuda.hpp"
 #include <opencv2/cudafeatures2d.hpp>
 
@@ -28,9 +29,14 @@ namespace providentia {
             bool useLatestMask = false;
 
             /**
-             * The current processed frame.
+             * The current processed GPU frame.
              */
             cv::cuda::GpuMat frame;
+
+            /**
+             * The current processed CPU frame.
+             */
+            cv::Mat frameCPU;
 
             /**
              * The current original frame.
@@ -111,7 +117,7 @@ namespace providentia {
             const cv::cuda::GpuMat &getOriginalFrame() const;
 
             /**
-             * Flag if there is a frame and corresponding keypointsCPU and descriptorsGPU present.
+             * Flag if there is a frame and corresponding keypoints and descriptors present.
              *
              * @return true if a detection has been performed previously, false else.
              */
@@ -160,7 +166,7 @@ namespace providentia {
         class SIFTFeatureDetector : public FeatureDetectorBase {
         private:
             /**
-             * The CPU SIFT detector used to detect keypointsCPU and descriptorsGPU.
+             * The CPU SIFT detector used to detect keypoints and descriptors.
              */
             cv::Ptr<cv::SIFT> detector;
 
@@ -185,7 +191,7 @@ namespace providentia {
         class SURFFeatureDetector : public FeatureDetectorBase {
         private:
             /**
-             * The CUDA SURF detector used to detect keypointsCPU and descriptorsGPU.
+             * The CUDA SURF detector used to detect keypoints and descriptors.
              */
             cv::Ptr<cv::cuda::SURF_CUDA> detector;
 
@@ -211,7 +217,7 @@ namespace providentia {
         class ORBFeatureDetector : public FeatureDetectorBase {
         private:
             /**
-             * The CUDA ORB detector used to detect keypointsCPU and descriptorsGPU.
+             * The CUDA ORB detector used to detect keypoints and descriptors.
              */
             cv::Ptr<cv::cuda::ORB> detector;
 
@@ -242,9 +248,9 @@ namespace providentia {
         class FastFREAKFeatureDetector : public FeatureDetectorBase {
         private:
             /**
-             * The CUDA FastFeature detector used to detect keypointsCPU and descriptorsGPU.
+             * The CUDA FastFeature detector used to detect keypoints and descriptors.
              */
-            cv::Ptr<cv::FastFeatureDetector> detector;
+            cv::Ptr<cv::cuda::FastFeatureDetector> detector;
             cv::Ptr<cv::xfeatures2d::FREAK> descriptor;
 
         public:
@@ -254,15 +260,42 @@ namespace providentia {
              *
              * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
              */
-            explicit FastFREAKFeatureDetector(int threshold = 50,
+            explicit FastFREAKFeatureDetector(int threshold = 40,
                                               bool nonmaxSuppression = true,
                                               cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16,
-                                              int max_npoints = 5000,
+                                              int max_npoints = 500000,
                                               bool orientationNormalized = true,
                                               bool scaleNormalized = true,
                                               float patternScale = 22.0f,
                                               int nOctaves = 4,
                                               const std::vector<int> &selectedPairs = std::vector<int>());
+
+            void specificDetect() override;
+        };
+
+        /**
+         * Wrapper for the CUDA SURF feature detector.
+         */
+        class StarBRIEFFeatureDetector : public FeatureDetectorBase {
+        private:
+            /**
+             * The CUDA FastFeature detector used to detect keypoints and descriptors.
+             */
+            cv::Ptr<cv::xfeatures2d::StarDetector> detector;
+            cv::Ptr<cv::xfeatures2d::BriefDescriptorExtractor> descriptor;
+
+        public:
+
+            /**
+             * @constructor
+             *
+             * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
+             */
+            explicit StarBRIEFFeatureDetector(int maxSize = 45, int responseThreshold = 30,
+                                              int lineThresholdProjected = 10,
+                                              int lineThresholdBinarized = 8,
+                                              int suppressNonmaxSize = 5,
+                                              int bytes = 64, bool use_orientation = false);
 
             void specificDetect() override;
         };

@@ -21,6 +21,7 @@ public:
         detectors.emplace_back(std::make_pair(new providentia::features::ORBFeatureDetector(), 1.0));
         detectors.emplace_back(std::make_pair(new providentia::features::SIFTFeatureDetector(), 1.0));
         detectors.emplace_back(std::make_pair(new providentia::features::FastFREAKFeatureDetector(), 1.0));
+        detectors.emplace_back(std::make_pair(new providentia::features::StarBRIEFFeatureDetector(), 1.0));
     }
 
     void specificMainLoop() override {

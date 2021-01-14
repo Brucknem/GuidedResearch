@@ -114,9 +114,8 @@ void providentia::features::FlannFeatureMatcher::specificMatch() {
 
 providentia::features::FlannFeatureMatcher::FlannFeatureMatcher(bool binaryDescriptors,
                                                                 float _goodMatchRatioThreshold) {
-    cv::flann::IndexParams *params;
     if (binaryDescriptors) {
-        matcher = std::make_shared<cv::FlannBasedMatcher>(new cv::flann::LshIndexParams(20, 10, 2));
+        matcher = std::make_shared<cv::FlannBasedMatcher>(new cv::flann::LshIndexParams(12, 20, 2));
     } else {
         matcher = std::make_shared<cv::FlannBasedMatcher>();
     }

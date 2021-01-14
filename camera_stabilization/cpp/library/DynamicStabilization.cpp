@@ -132,7 +132,8 @@ providentia::stabilization::FastFREAKBFDynamicStabilizer::FastFREAKBFDynamicStab
                                                                                        int max_npoints,
                                                                                        bool orientationNormalized,
                                                                                        bool scaleNormalized,
-                                                                                       float patternScale, int nOctaves,
+                                                                                       float patternScale,
+                                                                                       int nOctaves,
                                                                                        const std::vector<int> &selectedPairs) {
     auto detector = providentia::features::FastFREAKFeatureDetector(threshold,
                                                                     nonmaxSuppression, type,
@@ -143,6 +144,6 @@ providentia::stabilization::FastFREAKBFDynamicStabilizer::FastFREAKBFDynamicStab
                                                                     selectedPairs);
     frameFeatureDetector = std::make_shared<providentia::features::FastFREAKFeatureDetector>(detector);
     referenceFeatureDetector = std::make_shared<providentia::features::FastFREAKFeatureDetector>(detector);
-    matcher = std::make_shared<providentia::features::FlannFeatureMatcher>();
+    matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_HAMMING);
     setName(typeid(*this).name());
 }
