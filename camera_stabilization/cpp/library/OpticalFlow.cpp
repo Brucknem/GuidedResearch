@@ -41,7 +41,7 @@ namespace providentia {
             _hsv[0] = flowParts[1];
             _hsv[1] = cv::Mat::ones(flowParts[1].size(), CV_32F);
             _hsv[2] = flowParts[2];
-            merge(_hsv, 3, hsv);
+            merge(_hsv.data(), 3, hsv);
 
             hsv.convertTo(hsv8, CV_8U, 255.0);
             cvtColor(hsv8, bgr, cv::COLOR_HSV2BGR);
