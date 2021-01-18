@@ -121,7 +121,8 @@ namespace providentia {
         }
 
         FlannFeatureMatcher::FlannFeatureMatcher(bool binaryDescriptors,
-                                                 float _goodMatchRatioThreshold) {
+                                                 float _goodMatchRatioThreshold) : FeatureMatcherBase(
+                _goodMatchRatioThreshold) {
             if (binaryDescriptors) {
                 matcher = std::make_shared<cv::FlannBasedMatcher>(new cv::flann::LshIndexParams(12, 20, 2));
             } else {

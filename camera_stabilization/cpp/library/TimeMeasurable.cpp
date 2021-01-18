@@ -49,7 +49,7 @@ namespace providentia {
             return (timestamps[timestamps.size() - 1].second - timestamps[0].second).count();
         }
 
-        std::string TimeMeasurable::durations_str() {
+        std::string TimeMeasurable::durationsToString() {
             std::stringstream ss;
 
             for (const auto &duration : durations) {

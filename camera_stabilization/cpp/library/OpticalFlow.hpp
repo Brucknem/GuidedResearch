@@ -52,7 +52,12 @@ namespace providentia {
             /**
              * Color frames for visualization.
              */
-            cv::Mat _hsv[3], hsv8, bgr;
+            cv::Mat hsv8, bgr;
+
+            /**
+             * Color frames for merging the channels.
+             */
+            std::array<cv::Mat, 3> _hsv;
 
             /**
              * @constructor
@@ -112,6 +117,12 @@ namespace providentia {
              */
             cv::Ptr<cv::cuda::FarnebackOpticalFlow> opticalFlow;
 
+        protected:
+            /**
+             * @copydoc
+             */
+            void specificCalculate() override;
+
         public:
             /**
              * @constructor
@@ -123,7 +134,6 @@ namespace providentia {
              */
             ~FarnebackDenseOpticalFlow() override;
 
-            void specificCalculate() override;
         };
 
     }

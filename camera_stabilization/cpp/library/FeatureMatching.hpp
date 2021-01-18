@@ -114,6 +114,11 @@ namespace providentia {
              */
             cv::Ptr<cv::cuda::DescriptorMatcher> matcher;
 
+        protected:
+            /**
+             * @copydoc
+             */
+            void specificMatch() override;
 
         public:
             /**
@@ -129,7 +134,6 @@ namespace providentia {
              */
             explicit BruteForceFeatureMatcher(cv::NormTypes norm, float _goodMatchRatioThreshold = 0.75f);
 
-            void specificMatch() override;
         };
 
         /**
@@ -142,6 +146,12 @@ namespace providentia {
              * The CPU FLANN matching algorithm.
              */
             cv::Ptr<cv::FlannBasedMatcher> matcher;
+
+        protected:
+            /**
+             * @copydoc
+             */
+            void specificMatch() override;
 
         public:
 
@@ -167,7 +177,6 @@ namespace providentia {
              */
             explicit FlannFeatureMatcher(cv::flann::IndexParams *params, float _goodMatchRatioThreshold = 0.75f);
 
-            void specificMatch() override;
         };
     }
 }

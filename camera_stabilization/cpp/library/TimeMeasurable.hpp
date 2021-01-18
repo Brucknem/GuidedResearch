@@ -109,7 +109,7 @@ namespace providentia {
              *
              * @return The formatted durations.
              */
-            std::string durations_str();
+            std::string durationsToString();
         };
     }
 }

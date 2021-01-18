@@ -124,8 +124,15 @@ namespace providentia {
             cv::Ptr<cv::cuda::BackgroundSubtractorMOG2> algorithm;
 
         protected:
+
+            /**
+             * @copydoc
+             */
             void specificApply() override;
 
+            /**
+             * @copydoc
+             */
             void addFilters() override;
 
         public:
@@ -145,7 +152,10 @@ namespace providentia {
                                              double varThreshold = 16,
                                              bool detectShadows = false);
 
-            virtual ~MOG2BackgroundSegmentor();
+            /**
+             * @desctructor
+             */
+            ~MOG2BackgroundSegmentor() override;
         };
     }
 }

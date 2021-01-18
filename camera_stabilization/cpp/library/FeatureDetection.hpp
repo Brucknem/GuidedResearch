@@ -175,6 +175,12 @@ namespace providentia {
              */
             cv::Ptr<cv::SIFT> detector;
 
+        protected:
+            /**
+             * @copydoc
+             */
+            void specificDetect() override;
+
         public:
 
             /**
@@ -190,8 +196,6 @@ namespace providentia {
              * @destructor
              */
             ~SIFTFeatureDetector() override;
-
-            void specificDetect() override;
         };
 
         /**
@@ -205,6 +209,9 @@ namespace providentia {
             cv::Ptr<cv::cuda::SURF_CUDA> detector;
 
         protected:
+            /**
+             * @copydoc
+             */
             void specificDetect() override;
 
         public:
@@ -235,6 +242,12 @@ namespace providentia {
              */
             cv::Ptr<cv::cuda::ORB> detector;
 
+        protected:
+            /**
+             * @copydoc
+             */
+            void specificDetect() override;
+
         public:
 
             /**
@@ -257,8 +270,6 @@ namespace providentia {
              * @destructor
              */
             ~ORBFeatureDetector() override;
-
-            void specificDetect() override;
         };
 
         /**
@@ -271,6 +282,12 @@ namespace providentia {
              */
             cv::Ptr<cv::cuda::FastFeatureDetector> detector;
             cv::Ptr<cv::xfeatures2d::FREAK> descriptor;
+
+        protected:
+            /**
+             * @copydoc
+             */
+            void specificDetect() override;
 
         public:
 
@@ -293,8 +310,6 @@ namespace providentia {
              * @destructor
              */
             ~FastFREAKFeatureDetector() override;
-
-            void specificDetect() override;
         };
 
         /**
@@ -307,6 +322,12 @@ namespace providentia {
              */
             cv::Ptr<cv::xfeatures2d::StarDetector> detector;
             cv::Ptr<cv::xfeatures2d::BriefDescriptorExtractor> descriptor;
+
+        protected:
+            /**
+             * @copydoc
+             */
+            void specificDetect() override;
 
         public:
 
@@ -326,7 +347,6 @@ namespace providentia {
              */
             ~StarBRIEFFeatureDetector() override;
 
-            void specificDetect() override;
         };
     }
 }
