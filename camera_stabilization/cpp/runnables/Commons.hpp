@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 #include "opencv2/opencv.hpp"
-#include "../library/Utils.hpp"
+#include "../library/TimeMeasurable.hpp"
 
 namespace providentia {
     namespace runnables {

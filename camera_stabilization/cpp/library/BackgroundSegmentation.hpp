@@ -8,7 +8,8 @@
 #include <opencv2/cudabgsegm.hpp>
 #include "opencv2/opencv.hpp"
 #include "opencv2/cudafilters.hpp"
-#include "Utils.hpp"
+#include "TimeMeasurable.hpp"
+
 
 namespace providentia {
     namespace segmentation {

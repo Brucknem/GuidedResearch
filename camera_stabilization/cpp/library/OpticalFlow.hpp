@@ -12,7 +12,8 @@
 #include "opencv2/cudaarithm.hpp"
 #include "opencv2/cudaoptflow.hpp"
 
-#include "Utils.hpp"
+#include "TimeMeasurable.hpp"
+
 
 namespace providentia {
     namespace opticalflow {

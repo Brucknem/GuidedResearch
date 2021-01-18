@@ -8,10 +8,17 @@
 
 namespace providentia {
     namespace tests {
-        class StabilizerTests : public TestBase {
+
+        /**
+         * Setup for the background segmentation tests.
+         */
+        class BackgroundSegmentationTests : public TestBase {
         };
 
-        TEST_F(StabilizerTests, testMOG2BackgroundSubtractorRuns) {
+        /**
+         * Tests that the MOG2 background segmentor gives a only black mask for all the same image.
+         */
+        TEST_F(BackgroundSegmentationTests, testMOG2BackgroundSubtractorRuns) {
             providentia::segmentation::MOG2BackgroundSegmentor segmentor;
             for (int i = 0; i < 20; i++) {
                 segmentor.segment(testImgGPU);

@@ -6,6 +6,8 @@ add_library(libCameraStabilization
         BackgroundSegmentation.cpp
         FrameWarping.cpp
         OpticalFlow.cpp
+        TimeMeasurable.cpp
+        CSVWriter.cpp
         )
 
 target_include_directories(libCameraStabilization

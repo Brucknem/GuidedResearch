@@ -11,7 +11,8 @@
 #include "opencv2/xfeatures2d/cuda.hpp"
 #include <opencv2/cudafeatures2d.hpp>
 
-#include "Utils.hpp"
+#include "TimeMeasurable.hpp"
+
 
 namespace providentia {
     namespace features {
@@ -181,7 +182,6 @@ namespace providentia {
                                          double sigma = 1.6);
 
             void specificDetect() override;
-
         };
 
         /**

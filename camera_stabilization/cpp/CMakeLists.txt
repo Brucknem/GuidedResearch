@@ -89,7 +89,7 @@ enable_testing()
 add_executable(Tests tests/TestBase.cpp
         tests/FeatureDetectorTests.cpp
         tests/FeatureMatcherTests.cpp
-        tests/StabilizerTests.cpp
+        tests/DynamicStabiliationTests.cpp
         tests/BackgroundSubtractorTests.cpp
         )
 target_link_libraries(Tests PUBLIC libCameraStabilization gtest_main ${OpenCV_LIBS})
