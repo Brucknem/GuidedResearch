@@ -8,6 +8,7 @@
 #include "FeatureDetection.hpp"
 #include "FeatureMatching.hpp"
 #include "FrameWarping.hpp"
+#include "TimeMeasurable.hpp"
 
 namespace providentia {
     namespace stabilization {

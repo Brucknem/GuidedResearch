@@ -9,6 +9,7 @@
 #include "opencv2/core/base.hpp"
 #include "opencv2/cudafeatures2d.hpp"
 #include "FeatureDetection.hpp"
+#include "TimeMeasurable.hpp"
 
 namespace providentia {
     namespace features {

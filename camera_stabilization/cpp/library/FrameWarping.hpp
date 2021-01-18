@@ -8,6 +8,7 @@
 #include "opencv2/opencv.hpp"
 #include "FeatureMatching.hpp"
 #include "CSVWriter.hpp"
+#include "TimeMeasurable.hpp"
 
 
 namespace providentia {
