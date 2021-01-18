@@ -38,7 +38,7 @@ void providentia::features::FeatureMatcherBase::match(
     referenceMatchedPoints.clear();
 
     for (auto &goodMatch : goodMatches) {
-        //-- Get the keypointsGPU from the good matches
+        //-- Get the keypoints from the good matches
         frameMatchedPoints.push_back(frameDetector->getKeypoints()[goodMatch.queryIdx].pt);
         referenceMatchedPoints.push_back(referenceFrameDetector->getKeypoints()[goodMatch.trainIdx].pt);
     }

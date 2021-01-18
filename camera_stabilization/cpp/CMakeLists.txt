@@ -77,6 +77,10 @@ add_executable(VisualizeDynamicStabilization runnables/VisualizeDynamicStabiliza
 target_link_libraries(VisualizeDynamicStabilization PUBLIC libCameraStabilization libRunnables ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeDynamicStabilization PUBLIC "${PROJECT_BINARY_DIR}")
 
+add_executable(VisualizeOpticalFlow runnables/VisualizeOpticalFlow.cpp)
+target_link_libraries(VisualizeOpticalFlow PUBLIC libCameraStabilization libRunnables ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_include_directories(VisualizeOpticalFlow PUBLIC "${PROJECT_BINARY_DIR}")
+
 ########################################################################################################################
 ### TESTING ###
 ########################################################################################################################

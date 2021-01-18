@@ -28,7 +28,7 @@ namespace providentia {
             int perspectiveWarpFlags = cv::INTER_LINEAR;
 
             /**
-             * The found homography between the matched keypointsCPU.
+             * The found homography between the matched keypoints.
              * Minimizer for the reprojection error between the frames.
              */
             cv::Mat homography;

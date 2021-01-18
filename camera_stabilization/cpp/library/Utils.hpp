@@ -5,6 +5,7 @@
 #ifndef DYNAMICSTABILIZATION_UTILS_HPP
 #define DYNAMICSTABILIZATION_UTILS_HPP
 
+#include <vector>
 #include <string>
 #include <sstream>
 #include <cstdio>

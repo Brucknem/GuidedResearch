@@ -12,7 +12,6 @@
 #include <opencv2/cudafeatures2d.hpp>
 
 #include "Utils.hpp"
-#include "OpticalFlow.h"
 
 namespace providentia {
     namespace features {
@@ -125,14 +124,14 @@ namespace providentia {
 
             /**
              * Grayscales the given frame.
-             * Detects keypointsCPU and features using the subclass specific implementations.
+             * Detects keypoints and features using the subclass specific implementations.
              *
              * @param _frame The frame used for detection.
              */
             void detect(const cv::cuda::GpuMat &_frame);
 
             /**
-             * Detects keypointsCPU and features using the latest mask or without a mask.
+             * Detects keypoints and features using the latest mask or without a mask.
              *
              * @param _frame The frame used for detection.
              * @param _useLatestMask Flag whether or not to use the latest mask.
@@ -143,7 +142,7 @@ namespace providentia {
             void detect(const cv::cuda::GpuMat &_frame, bool _useLatestMask);
 
             /**
-             * Detects keypointsCPU and features using the given mask.
+             * Detects keypoints and features using the given mask.
              *
              * @param _frame The frame used for detection.
              * @param _mask The mask used for detection.
