@@ -94,7 +94,7 @@ namespace providentia {
             /**
              * @destructor
              */
-            virtual ~FeatureDetectorBase();
+            ~FeatureDetectorBase() override;
 
             /**
              * @get

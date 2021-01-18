@@ -78,7 +78,7 @@ namespace providentia {
             /**
              * @destructor
              */
-            virtual ~BackgroundSegmentorBase();
+            ~BackgroundSegmentorBase() override;
 
             /**
              * Appends the given frame to the internal history of frames and calculates the background segmentation.

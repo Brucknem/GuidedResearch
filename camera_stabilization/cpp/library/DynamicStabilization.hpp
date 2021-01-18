@@ -57,7 +57,7 @@ namespace providentia {
             /**
              * @destructor
              */
-            virtual ~DynamicStabilizerBase();
+            ~DynamicStabilizerBase() override;
 
             /**
              * @get The warper used to align the frame with the reference frame.

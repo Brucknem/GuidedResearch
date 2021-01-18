@@ -59,7 +59,7 @@ namespace providentia {
             /**
              * @destructor
              */
-            virtual ~FeatureMatcherBase();
+            ~FeatureMatcherBase() override;
 
             /**
              * @constructor

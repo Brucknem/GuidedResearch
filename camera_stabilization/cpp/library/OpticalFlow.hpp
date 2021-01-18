@@ -74,7 +74,7 @@ namespace providentia {
             /**
              * @destructor
              */
-            virtual ~DenseOpticalFlow();
+            ~DenseOpticalFlow() override;
 
             /**
              * @get the mean of the magnitudes over the flow field.

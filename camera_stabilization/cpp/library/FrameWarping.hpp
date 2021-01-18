@@ -44,7 +44,7 @@ namespace providentia {
             /**
              * @destructor
              */
-            virtual ~FrameWarper();
+            ~FrameWarper() override;
 
             /**
              * @get The final frame warped by the found homography.
@@ -67,7 +67,8 @@ namespace providentia {
              * @param matcher The matched features.
              */
             void
-            warp(const cv::cuda::GpuMat &_frame, std::shared_ptr<providentia::features::FeatureMatcherBase> matcher);
+            warp(const cv::cuda::GpuMat &_frame,
+                 const std::shared_ptr<providentia::features::FeatureMatcherBase> &matcher);
 
         };
     }
