@@ -40,6 +40,12 @@ namespace providentia {
             cv::cuda::GpuMat warpedFrame;
 
         public:
+
+            /**
+             * @destructor
+             */
+            virtual ~FrameWarper();
+
             /**
              * @get The final frame warped by the found homography.
              */

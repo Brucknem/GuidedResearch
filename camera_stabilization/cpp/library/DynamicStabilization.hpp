@@ -43,8 +43,6 @@ namespace providentia {
              */
             std::shared_ptr<providentia::stabilization::FrameWarper> warper;
 
-        protected:
-
             /**
              * Generates the foreground background masks.
              */
@@ -56,6 +54,11 @@ namespace providentia {
             DynamicStabilizerBase();
 
         public:
+            /**
+             * @destructor
+             */
+            virtual ~DynamicStabilizerBase();
+
             /**
              * @get The warper used to align the frame with the reference frame.
              */
@@ -119,8 +122,6 @@ namespace providentia {
              * Updates the keyframe.
              */
             void updateKeyframe();
-
-            void setDetectors(const providentia::features::FeatureDetectorBase &detector);
         };
 
         /**
@@ -131,13 +132,16 @@ namespace providentia {
 
             /**
              * @constructor
-             *
-             * @ref providentia::features::SURFFeatureDetector
              */
             explicit SURFBFDynamicStabilizer(double _hessianThreshold = 1000, int _nOctaves = 4,
                                              int _nOctaveLayers = 2, bool _extended = false,
                                              float _keypointsRatio = 0.01f,
                                              bool _upright = false);
+
+            /**
+             * @destructor
+             */
+            ~SURFBFDynamicStabilizer() override;
         };
 
         /**
@@ -148,8 +152,6 @@ namespace providentia {
 
             /**
              * @constructor
-             *
-             * @ref providentia::features::SURFFeatureDetector
              */
             explicit ORBBFDynamicStabilizer(int nfeatures = 1e4,
                                             float scaleFactor = 1.2f,
@@ -161,10 +163,21 @@ namespace providentia {
                                             int patchSize = 31,
                                             int fastThreshold = 20,
                                             bool blurForDescriptor = false);
+
+            /**
+             * @destructor
+             */
+            ~ORBBFDynamicStabilizer() override;
         };
 
+        /**
+         * Dynamic stabilization with Fast feature detectors, FREAK feature descriptors and Brute Force matching.
+         */
         class FastFREAKBFDynamicStabilizer : public DynamicStabilizerBase {
         public:
+            /**
+             * @constructor
+             */
             explicit FastFREAKBFDynamicStabilizer(int threshold = 50,
                                                   bool nonmaxSuppression = true,
                                                   cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16,
@@ -174,6 +187,11 @@ namespace providentia {
                                                   float patternScale = 22.0f,
                                                   int nOctaves = 4,
                                                   const std::vector<int> &selectedPairs = std::vector<int>());
+
+            /**
+             * @destructor
+             */
+            ~FastFREAKBFDynamicStabilizer() override;
         };
     }
 } // namespace providentia::calibration

@@ -59,6 +59,11 @@ namespace providentia {
             explicit TimeMeasurable(std::string name = "Unnamed", int verbosity = 1);
 
             /**
+             * @destructor
+             */
+            virtual ~TimeMeasurable();
+
+            /**
              * @set The print name of the instance.
              */
             void setName(std::string _name);

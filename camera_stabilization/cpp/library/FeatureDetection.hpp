@@ -92,6 +92,11 @@ namespace providentia {
 
         public:
             /**
+             * @destructor
+             */
+            virtual ~FeatureDetectorBase();
+
+            /**
              * @get
              */
             const std::vector<cv::KeyPoint> &getKeypoints() const;
@@ -181,6 +186,11 @@ namespace providentia {
                                          double contrastThreshold = 0.04, double edgeThreshold = 10,
                                          double sigma = 1.6);
 
+            /**
+             * @destructor
+             */
+            ~SIFTFeatureDetector() override;
+
             void specificDetect() override;
         };
 
@@ -207,6 +217,11 @@ namespace providentia {
             explicit SURFFeatureDetector(double _hessianThreshold = 500, int _nOctaves = 4,
                                          int _nOctaveLayers = 2, bool _extended = false, float _keypointsRatio = 0.01f,
                                          bool _upright = false);
+
+            /**
+             * @destructor
+             */
+            ~SURFFeatureDetector() override;
 
         };
 
@@ -237,6 +252,11 @@ namespace providentia {
                                         int patchSize = 31,
                                         int fastThreshold = 20,
                                         bool blurForDescriptor = false);
+
+            /**
+             * @destructor
+             */
+            ~ORBFeatureDetector() override;
 
             void specificDetect() override;
         };
@@ -269,6 +289,11 @@ namespace providentia {
                                               int nOctaves = 4,
                                               const std::vector<int> &selectedPairs = std::vector<int>());
 
+            /**
+             * @destructor
+             */
+            ~FastFREAKFeatureDetector() override;
+
             void specificDetect() override;
         };
 
@@ -295,6 +320,11 @@ namespace providentia {
                                               int lineThresholdBinarized = 8,
                                               int suppressNonmaxSize = 5,
                                               int bytes = 64, bool use_orientation = false);
+
+            /**
+             * @destructor
+             */
+            ~StarBRIEFFeatureDetector() override;
 
             void specificDetect() override;
         };

@@ -47,12 +47,12 @@ namespace providentia {
              * @param path The absolute path of the CSV file.
              * @param _write Flag whether to write or not.
              */
-            explicit CSVWriter(const std::string &path, bool _write = true);
+            explicit CSVWriter(const std::string &path, bool write = true);
 
             /**
              * @desctructor Writes and closes the file.
              */
-            ~CSVWriter();
+            virtual ~CSVWriter();
 
             /**
              * Write the last name and start a new one.

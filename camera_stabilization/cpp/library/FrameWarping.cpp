@@ -31,3 +31,5 @@ const cv::cuda::GpuMat &providentia::stabilization::FrameWarper::getWarpedFrame(
 const cv::Mat &providentia::stabilization::FrameWarper::getHomography() const {
     return homography;
 }
+
+providentia::stabilization::FrameWarper::~FrameWarper() = default;

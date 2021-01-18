@@ -17,7 +17,7 @@ void providentia::utils::TimeMeasurable::setVerbosity(int _verbosity) {
 
 void providentia::utils::TimeMeasurable::setNameAndVerbosity(std::string _name, int _verbosity) {
     setName(std::move(_name));
-    setVerbosity(verbosity);
+    setVerbosity(_verbosity);
 }
 
 std::chrono::milliseconds providentia::utils::TimeMeasurable::now() {
@@ -55,6 +55,8 @@ std::string providentia::utils::TimeMeasurable::durations_str() {
 
     return ss.str();
 }
+
+providentia::utils::TimeMeasurable::~TimeMeasurable() = default;
 
 
 

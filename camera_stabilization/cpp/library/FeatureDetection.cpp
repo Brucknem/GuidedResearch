@@ -83,6 +83,8 @@ const cv::Mat &providentia::features::FeatureDetectorBase::getDescriptorsCPU() c
     return descriptorsCPU;
 }
 
+providentia::features::FeatureDetectorBase::~FeatureDetectorBase() = default;
+
 #pragma endregion FeatureDetectorBase
 
 #pragma region SURFFeatureDetector
@@ -100,6 +102,8 @@ void providentia::features::SURFFeatureDetector::specificDetect() {
     detector->downloadKeypoints(keypointsGPU, keypointsCPU);
     descriptorsGPU.download(descriptorsCPU);
 }
+
+providentia::features::SURFFeatureDetector::~SURFFeatureDetector() = default;
 
 #pragma endregion SURFFeatureDetector
 
@@ -120,6 +124,8 @@ void providentia::features::ORBFeatureDetector::specificDetect() {
     descriptorsGPU.download(descriptorsCPU);
 }
 
+providentia::features::ORBFeatureDetector::~ORBFeatureDetector() = default;
+
 #pragma endregion ORBFeatureDetector
 
 #pragma region FastFREAKFeatureDetector
@@ -131,7 +137,8 @@ providentia::features::FastFREAKFeatureDetector::FastFREAKFeatureDetector(int th
                                                                           int nOctaves,
                                                                           const std::vector<int> &selectedPairs) {
     detector = cv::cuda::FastFeatureDetector::create(threshold, nonmaxSuppression, type, max_npoints);
-    descriptor = cv::xfeatures2d::FREAK::create(orientationNormalized, scaleNormalized, patternScale, nOctaves);
+    descriptor = cv::xfeatures2d::FREAK::create(orientationNormalized, scaleNormalized, patternScale, nOctaves,
+                                                selectedPairs);
     setName(typeid(*this).name());
 }
 
@@ -140,6 +147,8 @@ void providentia::features::FastFREAKFeatureDetector::specificDetect() {
     descriptor->compute(frameCPU, keypointsCPU, descriptorsCPU);
     descriptorsGPU.upload(descriptorsCPU);
 }
+
+providentia::features::FastFREAKFeatureDetector::~FastFREAKFeatureDetector() = default;
 
 #pragma endregion FastFREAKFeatureDetector
 
@@ -156,6 +165,8 @@ void providentia::features::SIFTFeatureDetector::specificDetect() {
     detector->detectAndCompute(frameCPU, cv::Mat(getCurrentMask()), keypointsCPU, descriptorsCPU);
     descriptorsGPU.upload(descriptorsCPU);
 }
+
+providentia::features::SIFTFeatureDetector::~SIFTFeatureDetector() = default;
 
 #pragma endregion SIFTFeatureDetector
 
@@ -177,6 +188,8 @@ void providentia::features::StarBRIEFFeatureDetector::specificDetect() {
     descriptor->compute(frameCPU, keypointsCPU, descriptorsCPU);
     descriptorsGPU.upload(descriptorsCPU);
 }
+
+providentia::features::StarBRIEFFeatureDetector::~StarBRIEFFeatureDetector() = default;
 
 #pragma endregion StarBRIEFFeatureDetector
 

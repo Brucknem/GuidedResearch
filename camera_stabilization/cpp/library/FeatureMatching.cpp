@@ -72,6 +72,8 @@ providentia::features::FeatureMatcherBase::FeatureMatcherBase(float _goodMatchRa
         _goodMatchRatioThreshold) {
 }
 
+providentia::features::FeatureMatcherBase::~FeatureMatcherBase() = default;
+
 #pragma endregion FeatureMatchingBase
 
 #pragma region BruteForceFeatureMatching
@@ -94,8 +96,11 @@ void providentia::features::BruteForceFeatureMatcher::specificMatch() {
     matcher->knnMatchConvert(knnMatchesGPU, knnMatchesCPU);
 }
 
+providentia::features::BruteForceFeatureMatcher::~BruteForceFeatureMatcher() = default;
 
 #pragma endregion BruteForceFeatureMatching
+
+#pragma region FlannFeatureMatching
 
 providentia::features::FlannFeatureMatcher::FlannFeatureMatcher(cv::flann::IndexParams *params,
                                                                 float _goodMatchRatioThreshold) : FeatureMatcherBase(
@@ -120,3 +125,7 @@ providentia::features::FlannFeatureMatcher::FlannFeatureMatcher(bool binaryDescr
         matcher = std::make_shared<cv::FlannBasedMatcher>();
     }
 }
+
+providentia::features::FlannFeatureMatcher::~FlannFeatureMatcher() = default;
+
+#pragma endregion FlannFeatureMatching

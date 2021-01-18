@@ -57,6 +57,11 @@ namespace providentia {
 
         public:
             /**
+             * @destructor
+             */
+            virtual ~FeatureMatcherBase();
+
+            /**
              * @constructor
              *
              * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
@@ -112,6 +117,11 @@ namespace providentia {
 
         public:
             /**
+             * @destructor
+             */
+            ~BruteForceFeatureMatcher() override;
+
+            /**
              * @constructor
              *
              * @param norm The norm used to compare the features.
@@ -134,6 +144,12 @@ namespace providentia {
             cv::Ptr<cv::FlannBasedMatcher> matcher;
 
         public:
+
+            /**
+             * @destructor
+             */
+            ~FlannFeatureMatcher() override;
+
             /**
              * @constructor
              *

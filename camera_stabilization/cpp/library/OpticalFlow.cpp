@@ -59,6 +59,8 @@ const cv::Mat &providentia::opticalflow::DenseOpticalFlow::draw() const {
     return bgr;
 }
 
+providentia::opticalflow::DenseOpticalFlow::~DenseOpticalFlow() = default;
+
 #pragma endregion DenseOpticalFlow
 
 #pragma region FarnebackDenseOpticalFlow
@@ -71,5 +73,7 @@ providentia::opticalflow::FarnebackDenseOpticalFlow::FarnebackDenseOpticalFlow()
     opticalFlow = cv::cuda::FarnebackOpticalFlow::create();
     setName(typeid(*this).name());
 }
+
+providentia::opticalflow::FarnebackDenseOpticalFlow::~FarnebackDenseOpticalFlow() = default;
 
 #pragma endregion FarnebackDenseOpticalFlow

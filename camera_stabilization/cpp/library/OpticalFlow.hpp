@@ -54,8 +54,6 @@ namespace providentia {
              */
             cv::Mat _hsv[3], hsv8, bgr;
 
-        protected:
-
             /**
              * @constructor
              */
@@ -72,6 +70,11 @@ namespace providentia {
             virtual void specificCalculate() = 0;
 
         public:
+
+            /**
+             * @destructor
+             */
+            virtual ~DenseOpticalFlow();
 
             /**
              * @get the mean of the magnitudes over the flow field.
@@ -114,6 +117,11 @@ namespace providentia {
              * @constructor
              */
             explicit FarnebackDenseOpticalFlow();
+
+            /**
+             * @destructor
+             */
+            ~FarnebackDenseOpticalFlow() override;
 
             void specificCalculate() override;
         };

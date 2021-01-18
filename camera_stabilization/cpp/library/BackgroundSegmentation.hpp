@@ -13,6 +13,9 @@
 
 namespace providentia {
     namespace segmentation {
+        /**
+         * Base class for the background segmentation wrappers.
+         */
         class BackgroundSegmentorBase : public providentia::utils::TimeMeasurable {
         private:
 
@@ -71,6 +74,12 @@ namespace providentia {
             virtual void addFilters();
 
         public:
+
+            /**
+             * @destructor
+             */
+            virtual ~BackgroundSegmentorBase();
+
             /**
              * Appends the given frame to the internal history of frames and calculates the background segmentation.
              *
@@ -103,8 +112,15 @@ namespace providentia {
             cv::Mat draw() const;
         };
 
+        /**
+         * Wrapper for the MOG2 background segmentation algorithm.
+         */
         class MOG2BackgroundSegmentor : public BackgroundSegmentorBase {
         private:
+
+            /**
+             * The algorithm implementation.
+             */
             cv::Ptr<cv::cuda::BackgroundSubtractorMOG2> algorithm;
 
         protected:
@@ -113,9 +129,23 @@ namespace providentia {
             void addFilters() override;
 
         public:
-            explicit MOG2BackgroundSegmentor(cv::Size _calculationSize = cv::Size(), int history = 500,
+
+            /**
+             * @constructor
+             *
+             * @param _calculationSize The scaling size of the frame during calculation.
+             * @param history Length of the history.
+             * @param varThreshold Threshold on the squared Mahalanobis distance between the pixel and the model
+             * to decide whether a pixel is well described by the background model. This parameter does not
+             * affect the background update.
+             * @param detectShadows If true, the algorithm will detect shadows and mark them. It decreases the
+             * speed a bit, so if you do not need this feature, set the parameter to false.
+             */
+            explicit MOG2BackgroundSegmentor(cv::Size calculationSize = cv::Size(), int history = 500,
                                              double varThreshold = 16,
                                              bool detectShadows = false);
+
+            virtual ~MOG2BackgroundSegmentor();
         };
     }
 }

@@ -4,7 +4,7 @@
 
 #include "CSVWriter.hpp"
 
-providentia::utils::CSVWriter::CSVWriter(const std::string &path, bool _write) : write(_write) {
+providentia::utils::CSVWriter::CSVWriter(const std::string &path, bool write) : write(write) {
     if (!write) {
         return;
     }

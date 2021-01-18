@@ -78,17 +78,21 @@ providentia::segmentation::BackgroundSegmentorBase::BackgroundSegmentorBase(cv::
         "BackgroundSegmentorBase", 1), calculationSize(std::move(_size)) {
 }
 
-void providentia::segmentation::BackgroundSegmentorBase::addFilters() {}
+void providentia::segmentation::BackgroundSegmentorBase::addFilters() {
+    // Optional filters can be added by overriding this function.
+}
+
+providentia::segmentation::BackgroundSegmentorBase::~BackgroundSegmentorBase() = default;
 
 
 #pragma endregion BackgroundSegmentorBase
 
 #pragma region MOG2BackgroundSegmentor
 
-providentia::segmentation::MOG2BackgroundSegmentor::MOG2BackgroundSegmentor(cv::Size _calculationSize, int history,
+providentia::segmentation::MOG2BackgroundSegmentor::MOG2BackgroundSegmentor(cv::Size calculationSize, int history,
                                                                             double varThreshold,
                                                                             bool detectShadows)
-        : BackgroundSegmentorBase(std::move(_calculationSize)) {
+        : BackgroundSegmentorBase(std::move(calculationSize)) {
     algorithm = cv::cuda::createBackgroundSubtractorMOG2(history, varThreshold, detectShadows);
     addFilters();
 }
@@ -124,5 +128,7 @@ void providentia::segmentation::MOG2BackgroundSegmentor::addFilters() {
                                                                        cv::Size(5, 5)), cv::Point(-1, -1), 3
             ));
 }
+
+providentia::segmentation::MOG2BackgroundSegmentor::~MOG2BackgroundSegmentor() = default;
 
 #pragma endregion MOG2BackgroundSegmentor

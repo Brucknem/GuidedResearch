@@ -47,7 +47,6 @@ providentia::stabilization::DynamicStabilizerBase::DynamicStabilizerBase() : pro
         "DynamicStabilizerBase", 1) {
     warper = std::make_shared<providentia::stabilization::FrameWarper>();
     segmentor = std::make_shared<providentia::segmentation::MOG2BackgroundSegmentor>(cv::Size(1920, 1200) / 10);
-//    segmentor = std::make_shared<providentia::segmentation::MockBackgroundSegmentor>();
 }
 
 cv::Mat providentia::stabilization::DynamicStabilizerBase::draw() {
@@ -85,6 +84,8 @@ providentia::stabilization::DynamicStabilizerBase::getWarper() const {
     return warper;
 }
 
+providentia::stabilization::DynamicStabilizerBase::~DynamicStabilizerBase() = default;
+
 #pragma endregion DynamicStabilizerBase
 
 #pragma region SURFBFDynamicStabilizer
@@ -103,6 +104,8 @@ providentia::stabilization::SURFBFDynamicStabilizer::SURFBFDynamicStabilizer(dou
     matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_L2);
     setName(typeid(*this).name());
 }
+
+providentia::stabilization::SURFBFDynamicStabilizer::~SURFBFDynamicStabilizer() = default;
 
 #pragma endregion SURFBFDynamicStabilizer
 
@@ -123,6 +126,8 @@ providentia::stabilization::ORBBFDynamicStabilizer::ORBBFDynamicStabilizer(int n
     matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_HAMMING);
     setName(typeid(*this).name());
 }
+
+providentia::stabilization::ORBBFDynamicStabilizer::~ORBBFDynamicStabilizer() = default;
 
 #pragma endregion ORBBFDynamicStabilizer
 
@@ -147,3 +152,5 @@ providentia::stabilization::FastFREAKBFDynamicStabilizer::FastFREAKBFDynamicStab
     matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_HAMMING);
     setName(typeid(*this).name());
 }
+
+providentia::stabilization::FastFREAKBFDynamicStabilizer::~FastFREAKBFDynamicStabilizer() = default;
