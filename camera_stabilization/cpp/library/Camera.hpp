@@ -5,8 +5,8 @@
 #ifndef CAMERASTABILIZATION_CAMERA_HPP
 #define CAMERASTABILIZATION_CAMERA_HPP
 
-#include "CameraMatrix.hpp"
 #include "Eigen/Dense"
+#include "Intrinsics.hpp"
 #include <memory>
 
 namespace providentia {
@@ -14,13 +14,13 @@ namespace providentia {
 
         class Camera {
         private:
-            providentia::camera::CameraMatrix cameraMatrix = providentia::camera::CameraMatrix(0, 0, 0, 0);
+            providentia::camera::Intrinsics cameraMatrix = providentia::camera::Intrinsics(0, 0, 0, 0);
 
             Eigen::Matrix4f translation;
 
             Eigen::Matrix4f rotation, rotationCalculationBuffer;
 
-            Eigen::Matrix4f viewMatrix;
+            Eigen::Matrix4f viewMatrix, viewMatrixInverse;
 
             void setViewMatrix();
 
@@ -28,10 +28,10 @@ namespace providentia {
             Camera(const Eigen::Vector4f &intrinsics, const Eigen::Vector3f &translation,
                    const Eigen::Vector3f &rotation);
 
-            Camera(const providentia::camera::CameraMatrix &cameraMatrix, const Eigen::Vector3f &translation,
+            Camera(const providentia::camera::Intrinsics &cameraMatrix, const Eigen::Vector3f &translation,
                    const Eigen::Vector3f &rotation);
 
-            const CameraMatrix &getCameraMatrix() const;
+            const Intrinsics &getCameraMatrix() const;
 
             const Eigen::Matrix4f &getTranslation() const;
 

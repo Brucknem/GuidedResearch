@@ -9,7 +9,7 @@ add_library(libCameraStabilization
         TimeMeasurable.cpp
         CSVWriter.cpp
         KeyframeHistory.cpp
-        CameraMatrix.cpp
+        Intrinsics.cpp
         Camera.cpp)
 
 target_include_directories(libCameraStabilization

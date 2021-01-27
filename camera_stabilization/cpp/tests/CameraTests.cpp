@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include "Camera.hpp"
-#include "CameraMatrix.hpp"
+#include "Intrinsics.hpp"
 
 namespace providentia {
     namespace tests {
@@ -13,9 +13,9 @@ namespace providentia {
         /**
          * Asserts that the elements of the given vectors are not further away than the maximal difference.
          */
-        void assertVectorsNearEqual(const Eigen::Vector3f &a, const Eigen::Vector3f &b, float maxDifference = 1e-4) {
-            Eigen::Vector3f difference = a - b;
-            for (int i = 0; i < 3; i++) {
+        void assertVectorsNearEqual(const Eigen::VectorXf &a, const Eigen::VectorXf &b, float maxDifference = 1e-4) {
+            Eigen::VectorXf difference = a - b;
+            for (int i = 0; i < difference.rows(); i++) {
                 EXPECT_NEAR(difference(i), 0, maxDifference);
             }
         }
@@ -24,6 +24,10 @@ namespace providentia {
             assertVectorsNearEqual(camera.getRotation().block<3, 1>(0, 0), expectedRight);
             assertVectorsNearEqual(camera.getRotation().block<3, 1>(0, 1), expectedUp);
             assertVectorsNearEqual(camera.getRotation().block<3, 1>(0, 2), expectedForward);
+        }
+
+        void assertTranslation(const providentia::camera::Camera &camera, const Eigen::Vector3f &expectedTranslation) {
+            assertVectorsNearEqual(camera.getTranslation().block<3, 1>(0, 3), expectedTranslation);
         }
 
         class CameraTests : public ::testing::Test {
@@ -36,20 +40,19 @@ namespace providentia {
         };
 
         /**
-         * Tests the Camera Matrix.
+         * Tests the camera intrinsics matrix.
          */
-        TEST_F(CameraTests, testCameraMatrix) {
-            providentia::camera::CameraMatrix matrix(intrinsics);
+        TEST_F(CameraTests, testCameraIntrinsics) {
+            providentia::camera::Intrinsics matrix(intrinsics);
 
-            std::cout << matrix << std::endl;
-            std::cout << matrix * testPoint;
+            assertVectorsNearEqual(Eigen::Vector4f(matrix.getFocalLength()(0), matrix.getFocalLength()(1), matrix.getCenter()(0), matrix.getCenter()(1)), intrinsics);
         }
 
 
         /**
-         * Tests the Camera.
+         * Tests the camera rotation matrix that is built from the euler angles rotation vector.
          */
-        TEST_F(CameraTests, testCameraCreation) {
+        TEST_F(CameraTests, testCameraRotationMatrix) {
             providentia::camera::Camera camera(intrinsics, translation, Eigen::Vector3f::Zero());
             assertRotation(camera, Eigen::Vector3f::UnitX(), Eigen::Vector3f::UnitY(), -Eigen::Vector3f::UnitZ());
 
@@ -88,6 +91,26 @@ namespace providentia {
 
             camera.setRotation(180, 180, 180);
             assertRotation(camera, Eigen::Vector3f::UnitX(), Eigen::Vector3f::UnitY(), -Eigen::Vector3f::UnitZ());
+
+            camera.setRotation(360, 360, 360);
+            assertRotation(camera, Eigen::Vector3f::UnitX(), Eigen::Vector3f::UnitY(), -Eigen::Vector3f::UnitZ());
+        }
+
+        /**
+         * Tests the camera translation matrix that is built from the translation vector.
+         */
+        TEST_F(CameraTests, testCameraTranslationMatrix) {
+            Eigen::Vector3f translation = Eigen::Vector3f::Zero();
+            providentia::camera::Camera camera(intrinsics, translation, rotation);
+            assertTranslation(camera, translation);
+
+            translation = Eigen::Vector3f(10, 10, 10);
+            camera.setTranslation(translation);
+            assertTranslation(camera, translation);
+
+            translation = Eigen::Vector3f(-M_PI, M_E, M_PI * M_E);
+            camera.setTranslation(translation);
+            assertTranslation(camera, translation);
         }
     }// namespace tests
 }// namespace providentia

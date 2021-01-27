@@ -10,18 +10,18 @@ namespace providentia {
 #pragma region Camera
 
         Camera::Camera(const Eigen::Vector4f &intrinsics, const Eigen::Vector3f &translation,
-                       const Eigen::Vector3f &rotation) : Camera(providentia::camera::CameraMatrix(intrinsics),
+                       const Eigen::Vector3f &rotation) : Camera(providentia::camera::Intrinsics(intrinsics),
                                                                  translation, rotation) {}
 
-        Camera::Camera(const CameraMatrix &_cameraMatrix, const Eigen::Vector3f &translation,
+        Camera::Camera(const Intrinsics &_cameraMatrix, const Eigen::Vector3f &translation,
                        const Eigen::Vector3f &rotation) {
-            cameraMatrix = providentia::camera::CameraMatrix(_cameraMatrix);
+            cameraMatrix = providentia::camera::Intrinsics(_cameraMatrix);
             setTranslation(translation);
             setRotation(rotation);
         }
 
 
-        const CameraMatrix &Camera::getCameraMatrix() const {
+        const Intrinsics &Camera::getCameraMatrix() const {
             return cameraMatrix;
         }
 
@@ -39,12 +39,15 @@ namespace providentia {
         }
 
         void Camera::setTranslation(const Eigen::Vector3f &_translation) {
-            Camera::translation = Eigen::Matrix4f::Identity();
-            Camera::translation.col(3).head<3>() = _translation;
+            setTranslation(_translation(0), _translation(1), _translation(2));
+        }
 
-            for (int i = 0; i < 3; i++) {
-                assert(Camera::translation(i, 3) == _translation(i));
-            }
+        void Camera::setTranslation(float x, float y, float z) {
+            translation = Eigen::Matrix4f::Identity();
+            translation(0, 3) = x;
+            translation(1, 3) = y;
+            translation(2, 3) = z;
+
             setViewMatrix();
         }
 
@@ -75,9 +78,8 @@ namespace providentia {
         }
 
         void Camera::setViewMatrix() {
-            viewMatrix = (rotation * translation).inverse();
-        }
-        void Camera::setTranslation(float x, float y, float z) {
+            viewMatrix = rotation * translation;
+            viewMatrixInverse = viewMatrix.inverse();
         }
 
         std::ostream &operator<<(std::ostream &os, const Camera &obj) {
