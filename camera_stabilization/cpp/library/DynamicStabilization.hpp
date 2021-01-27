@@ -28,6 +28,14 @@ namespace providentia {
              */
             int currentIteration = 0;
 
+            /**
+             * Flag if the keyframe should be updated.
+             */
+            bool shouldUpdateKeyframe = false;
+
+        public:
+            void setShouldUseFundamentalMatrix(bool shouldUseFundamentalMatrix);
+
         protected:
             /**
              * Feature detectors for the current frame and reference frame.
@@ -86,22 +94,29 @@ namespace providentia {
             const cv::cuda::GpuMat &getStabilizedFrame() const;
 
             /**
-             * @get
-             * @return The reference frame.
+             * @get The reference frame.
              */
             const cv::cuda::GpuMat &getReferenceframe() const;
 
             /**
-             * @get
-             * @return The reference frame mask.
+             * @get The reference frame mask.
              */
             const cv::cuda::GpuMat &getReferenceframeMask() const;
 
             /**
-             * @get
-             * @return The found homography minimizing the reprojection error between the frame and reference frame.
+             * @get The found homography minimizing the reprojection error between the frame and reference frame.
              */
             const cv::Mat &getHomography() const;
+
+            /**
+             * @get
+             */
+            bool isShouldUpdateKeyframe() const;
+
+            /**
+             * @set
+             */
+            void setShouldUpdateKeyframe(bool _shouldUpdateKeyframe);
 
             /**
              * Main algorithm. <br>

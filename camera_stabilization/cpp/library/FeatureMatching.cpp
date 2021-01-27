@@ -43,6 +43,29 @@ namespace providentia {
                 frameMatchedPoints.push_back(frameDetector->getKeypoints()[goodMatch.queryIdx].pt);
                 referenceMatchedPoints.push_back(referenceFrameDetector->getKeypoints()[goodMatch.trainIdx].pt);
             }
+
+            if (shouldUseFundamentalMatrix) {
+                fundamentalMatrix = cv::findFundamentalMat(frameMatchedPoints, referenceMatchedPoints,
+                                                           cv::FM_RANSAC, 1.0, 0.975, fundamentalMatrixInlierMask);
+                fundamentalMatches.clear();
+                for (int i = 0; i < goodMatches.size(); i++) {
+                    if (fundamentalMatrixInlierMask.at<bool>(i, 0)) {
+                        fundamentalMatches.push_back(goodMatches[i]);
+                    }
+                }
+
+                //-- Localize the object
+                frameMatchedPoints.clear();
+                referenceMatchedPoints.clear();
+                for (auto &goodMatch : fundamentalMatches) {
+                    //-- Get the keypoints from the good matches
+                    frameMatchedPoints.push_back(frameDetector->getKeypoints()[goodMatch.queryIdx].pt);
+                    referenceMatchedPoints.push_back(referenceFrameDetector->getKeypoints()[goodMatch.trainIdx].pt);
+                }
+            } else {
+                fundamentalMatches = goodMatches;
+            }
+
             addTimestamp("Matching finished", 0);
         }
 
@@ -50,7 +73,7 @@ namespace providentia {
             drawMatches(
                     cv::Mat(frameDetector->getOriginalFrame()), frameDetector->getKeypoints(),
                     cv::Mat(referenceFrameDetector->getOriginalFrame()), referenceFrameDetector->getKeypoints(),
-                    goodMatches, drawFrame, cv::Scalar::all(-1),
+                    fundamentalMatches, drawFrame, cv::Scalar::all(-1),
                     cv::Scalar::all(-1), std::vector<char>(),
                     cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
             return drawFrame;
@@ -64,13 +87,17 @@ namespace providentia {
             return frameMatchedPoints;
         }
 
-        const std::vector<cv::Point2f> &FeatureMatcherBase::getReferenceMatchedPoints() const {
+        const std::vector<cv::Point2f> &FeatureMatcherBase::getReferenceMatchedPoints() {
             return referenceMatchedPoints;
         }
 
         FeatureMatcherBase::FeatureMatcherBase(float _goodMatchRatioThreshold)
                 : providentia::utils::TimeMeasurable("FeatureMatcherBase", 1), goodMatchRatioThreshold(
                 _goodMatchRatioThreshold) {
+        }
+
+        void FeatureMatcherBase::setShouldUseFundamentalMatrix(bool shouldUseFundamentalMatrix) {
+            FeatureMatcherBase::shouldUseFundamentalMatrix = shouldUseFundamentalMatrix;
         }
 
         FeatureMatcherBase::~FeatureMatcherBase() = default;
@@ -133,5 +160,39 @@ namespace providentia {
         FlannFeatureMatcher::~FlannFeatureMatcher() = default;
 
 #pragma endregion FlannFeatureMatching
+
+#pragma region SequenceFeatureMatching
+
+        void SequenceFeatureMatcher::match(
+                const std::vector<std::shared_ptr<providentia::features::FeatureDetectorBase>> &sequence) {
+            for (int i = 0; i < sequence.size() - 1; i++) {
+                matcher->match(sequence[i], sequence[i + 1]);
+
+                auto newMatches = matcher->getFrameMatchedPoints();
+
+                if (matchSequences.empty()) {
+                    for (int j = 0; j < newMatches.size(); j++) {
+                        matchSequences.emplace_back(
+                                std::vector<cv::Point2f>{newMatches[j], matcher->getReferenceMatchedPoints()[j]});
+                    }
+                } else {
+                    for (auto &matchSequence : matchSequences) {
+                        for (int j = 0; j < newMatches.size(); j++) {
+                            cv::Point2f &latest = matchSequence.back();
+                            cv::Point2f &newest = newMatches[j];
+                            if (newest == latest) {
+                                matchSequence.emplace_back(matcher->getReferenceMatchedPoints()[j]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+#pragma endregion SequenceFeatureMatching
+
+        BruteForceSequenceFeatureMatcher::BruteForceSequenceFeatureMatcher() {
+            matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_L2);
+        }
     }
 }

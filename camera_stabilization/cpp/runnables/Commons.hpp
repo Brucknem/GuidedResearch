@@ -7,7 +7,6 @@
 
 #include <stdexcept>
 #include "opencv2/opencv.hpp"
-#include "../library/TimeMeasurable.hpp"
 
 namespace providentia {
     namespace runnables {
@@ -69,7 +68,7 @@ namespace providentia {
          * Base class for all runnable setups.
          * Wraps the main loop and field initializations.
          */
-        class BaseSetup : providentia::utils::TimeMeasurable {
+        class BaseSetup {
         protected:
             /**
              * The current CPU frame.
@@ -163,6 +162,11 @@ namespace providentia {
             void init();
 
         public:
+            /**
+             * @set
+             */
+            void setCapture(const std::string &file);
+
             /**
              * @set
              */

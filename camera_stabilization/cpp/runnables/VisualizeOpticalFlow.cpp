@@ -24,6 +24,7 @@ private:
 public:
     explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
         stabilizer = std::make_shared<providentia::stabilization::SURFBFDynamicStabilizer>();
+        stabilizer->setShouldUpdateKeyframe(true);
 
         originalOpticalFlow = std::make_shared<providentia::opticalflow::FarnebackDenseOpticalFlow>();
         stabilizedOpticalFlow = std::make_shared<providentia::opticalflow::FarnebackDenseOpticalFlow>();
@@ -34,9 +35,10 @@ public:
         originalOpticalFlow->calculate(frameGPU);
         stabilizedOpticalFlow->calculate(stabilizer->getStabilizedFrame());
 
-        totalAlgorithmsDuration = stabilizer->getTotalMilliseconds() + originalOpticalFlow->getTotalMilliseconds() +
-                                  stabilizedOpticalFlow->getTotalMilliseconds();
+//        totalAlgorithmsDuration = stabilizer->getTotalMilliseconds() + originalOpticalFlow->getTotalMilliseconds() +
+//                                  stabilizedOpticalFlow->getTotalMilliseconds();
 
+//        cv::imshow("Keyframe", cv::Mat(stabilizer->getReferenceframe()));
 
         cv::hconcat(std::vector<cv::Mat>{frameCPU, cv::Mat(stabilizer->getStabilizedFrame())}, finalFrame);
 
@@ -45,9 +47,23 @@ public:
     }
 
     void specificAddMessages() override {
-        addRuntimeToFinalFrame("Stabilization", stabilizer->getTotalMilliseconds(), 5, 20);
-        addRuntimeToFinalFrame("Optical Flow [Original]", originalOpticalFlow->getTotalMilliseconds(), 5, 40);
-        addRuntimeToFinalFrame("Optical Flow [Stabilized]", stabilizedOpticalFlow->getTotalMilliseconds(), 5, 60);
+        addRuntimeToFinalFrame("Original", 1, 5, 20);
+        addRuntimeToFinalFrame("Stabilized", stabilizer->getTotalMilliseconds(), finalFrame.cols / 2 + 5, 20);
+
+//        addRuntimeToFinalFrame("Optical Flow [Original]", originalOpticalFlow->getTotalMilliseconds(), 5,
+//                               finalFrame.rows / 2 + 20);
+        addTextToFinalFrame(
+                "Optical Flow [Original] - Mean pixel shift - " +
+                std::to_string(originalOpticalFlow->getMagnitudeMean()) + " px", 5,
+                finalFrame.rows / 2 + 20);
+
+
+//        addRuntimeToFinalFrame("Optical Flow [Stabilized]", stabilizedOpticalFlow->getTotalMilliseconds(),
+//                               finalFrame.cols / 2 + 5, finalFrame.rows / 2 + 20);
+        addTextToFinalFrame(
+                "Optical Flow [Stabilized] - Mean pixel shift - " +
+                std::to_string(stabilizedOpticalFlow->getMagnitudeMean()) + " px", finalFrame.cols / 2 + 5,
+                finalFrame.rows / 2 + 20);
     }
 };
 

@@ -18,7 +18,7 @@ private:
     /**
      * The matcher used to match the features.
      */
-    std::shared_ptr<providentia::features::FeatureMatcherBase> matcher;
+    std::shared_ptr<providentia::features::FeatureMatcherBase> matcher, matcherWithoutFundamental;
 
 public:
     explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
@@ -39,6 +39,8 @@ public:
 //        referenceFrameDetector = std::make_shared<providentia::features::FastFREAKFeatureDetector>(detector);
 
         matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_L2);
+        matcher->setShouldUseFundamentalMatrix(false);
+        matcherWithoutFundamental = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_L2);
 //        matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_HAMMING);
 //        matcher = std::make_shared<providentia::features::FlannFeatureMatcher>(true);
     }
@@ -50,9 +52,11 @@ public:
         }
 
         matcher->match(frameDetector, referenceFrameDetector);
-        totalAlgorithmsDuration = frameDetector->getTotalMilliseconds() + matcher->getTotalMilliseconds();
+        matcherWithoutFundamental->match(frameDetector, referenceFrameDetector);
+        totalAlgorithmsDuration = frameDetector->getTotalMilliseconds() + matcher->getTotalMilliseconds() +
+                                  matcherWithoutFundamental->getTotalMilliseconds();
 
-        finalFrame = matcher->draw();
+        cv::vconcat(matcherWithoutFundamental->draw(), matcher->draw(), finalFrame);
     }
 
     void specificAddMessages() override {

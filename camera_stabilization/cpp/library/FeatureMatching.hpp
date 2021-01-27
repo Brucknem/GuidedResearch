@@ -26,6 +26,21 @@ namespace providentia {
             std::shared_ptr<providentia::features::FeatureDetectorBase> frameDetector, referenceFrameDetector;
 
             /**
+             * Flag if the fundamental matrix should be used.
+             */
+            bool shouldUseFundamentalMatrix = true;
+
+            /**
+             * Fundamental matrix inlier mask.
+             */
+            cv::Mat fundamentalMatrixInlierMask;
+
+            /**
+             * The fundamental matrix between the images.
+             */
+            cv::Mat fundamentalMatrix;
+
+            /**
              * The k nearest neighbors of features.
              */
             cv::cuda::GpuMat knnMatchesGPU;
@@ -35,6 +50,11 @@ namespace providentia {
              * A vector of good matches of features.
              */
             std::vector<cv::DMatch> goodMatches;
+
+            /**
+             * A vector of matches of features filtered using the fundamental matrix.
+             */
+            std::vector<cv::DMatch> fundamentalMatches;
 
             /**
              * The matched points of the frame and reference frame.
@@ -77,12 +97,17 @@ namespace providentia {
             /**
              * @get
              */
-            const std::vector<cv::Point2f> &getReferenceMatchedPoints() const;
+            const std::vector<cv::Point2f> &getReferenceMatchedPoints();
 
             /**
              * @get
              */
             const std::vector<cv::Point2f> &getFrameMatchedPoints() const;
+
+            /**
+             * @set Flag for the matcher to filter the matches using the fundamental matrix.
+             */
+            void setShouldUseFundamentalMatrix(bool shouldUseFundamentalMatrix);
 
             /**
              * Matches the detected features of two frames.
@@ -178,6 +203,22 @@ namespace providentia {
              */
             explicit FlannFeatureMatcher(cv::flann::IndexParams *params, float _goodMatchRatioThreshold = 0.75f);
 
+        };
+
+        class SequenceFeatureMatcher {
+        private:
+            std::vector<std::vector<cv::Point2f>> matchSequences;
+
+        protected:
+            std::shared_ptr<providentia::features::FeatureMatcherBase> matcher;
+
+        public:
+            void match(const std::vector<std::shared_ptr<providentia::features::FeatureDetectorBase>> &sequence);
+        };
+
+        class BruteForceSequenceFeatureMatcher : public SequenceFeatureMatcher {
+        public:
+            BruteForceSequenceFeatureMatcher();
         };
     }
 }

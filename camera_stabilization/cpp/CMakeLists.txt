@@ -52,6 +52,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS program_options)
 include_directories(${Boost_INCLUDE_DIRS})
 
+
 ########################################################################################################################
 ### Own libraries ###
 ########################################################################################################################
@@ -81,16 +82,25 @@ add_executable(VisualizeOpticalFlow runnables/VisualizeOpticalFlow.cpp)
 target_link_libraries(VisualizeOpticalFlow PUBLIC libCameraStabilization libRunnables ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeOpticalFlow PUBLIC "${PROJECT_BINARY_DIR}")
 
+add_executable(VisualizeStaticCalibration runnables/VisualizeStaticCalibration.cpp)
+target_link_libraries(VisualizeStaticCalibration PUBLIC libCameraStabilization libRunnables ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_include_directories(VisualizeStaticCalibration PUBLIC "${PROJECT_BINARY_DIR}")
+
+add_executable(VisualizeWatershed runnables/VisualizeWatershed.cpp)
+target_link_libraries(VisualizeWatershed PUBLIC libCameraStabilization libRunnables ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_include_directories(VisualizeWatershed PUBLIC "${PROJECT_BINARY_DIR}")
+
 ########################################################################################################################
 ### TESTING ###
 ########################################################################################################################
 enable_testing()
 
-add_executable(Tests tests/TestBase.cpp
+add_executable(Tests tests/ImageTestBase.cpp
         tests/FeatureDetectorTests.cpp
         tests/FeatureMatcherTests.cpp
         tests/DynamicStabiliationTests.cpp
         tests/BackgroundSubtractorTests.cpp
+        tests/CameraTests.cpp
         )
 target_link_libraries(Tests PUBLIC libCameraStabilization gtest_main ${OpenCV_LIBS})
 target_include_directories(Tests PUBLIC tests "${PROJECT_BINARY_DIR}")

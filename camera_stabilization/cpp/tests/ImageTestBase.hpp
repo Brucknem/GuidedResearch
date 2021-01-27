@@ -2,8 +2,8 @@
 // Created by brucknem on 13.01.21.
 //
 
-#ifndef CAMERASTABILIZATION_TESTBASE_HPP
-#define CAMERASTABILIZATION_TESTBASE_HPP
+#ifndef CAMERASTABILIZATION_IMAGETESTBASE_HPP
+#define CAMERASTABILIZATION_IMAGETESTBASE_HPP
 
 #include "gtest/gtest.h"
 #include "FeatureDetection.hpp"
@@ -18,7 +18,7 @@ namespace providentia {
         /**
          * Base class for all tests.
          */
-        class TestBase : public ::testing::Test {
+        class ImageTestBase : public ::testing::Test {
         protected:
             /**
              * The loaded test image.
@@ -39,4 +39,4 @@ namespace providentia {
 }
 
 
-#endif //CAMERASTABILIZATION_TESTBASE_HPP
+#endif //CAMERASTABILIZATION_IMAGETESTBASE_HPP

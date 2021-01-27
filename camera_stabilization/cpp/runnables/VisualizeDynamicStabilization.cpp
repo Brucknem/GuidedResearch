@@ -20,6 +20,7 @@ public:
 //        stabilizer = std::make_shared<providentia::stabilization::SURFBFDynamicStabilizer>();
 //        stabilizer = std::make_shared<providentia::stabilization::ORBBFDynamicStabilizer>();
         stabilizer = std::make_shared<providentia::stabilization::FastFREAKBFDynamicStabilizer>();
+//        stabilizer->setShouldUpdateKeyframe(true);
     }
 
     void specificMainLoop() override {
@@ -52,6 +53,7 @@ public:
 
 int main(int argc, char const *argv[]) {
     Setup setup(argc, argv);
+    setup.setRenderingScaleFactor(0.4);
     setup.mainLoop();
     return 0;
 }

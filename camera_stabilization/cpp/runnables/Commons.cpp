@@ -67,8 +67,6 @@ providentia::runnables::BaseSetup::BaseSetup(std::string _videoFileName,
 
 providentia::runnables::BaseSetup::BaseSetup(int argc, const char **argv) {
     boost::program_options::options_description description("Allowed options");
-    setName("Main Loop");
-    setVerbosity(1);
     description.add_options()
             ("help", "Produce help message.")
             ("videoFileName",
@@ -120,7 +118,6 @@ void providentia::runnables::BaseSetup::mainLoop() {
             break;
         }
         finalFrame = cv::Mat();
-        clear();
         cv::Mat originalFrame = frameCPU.clone();
         cv::resize(frameCPU, frameCPU, cv::Size(), calculationScaleFactor, calculationScaleFactor);
         frameGPU.upload(frameCPU);
@@ -128,10 +125,8 @@ void providentia::runnables::BaseSetup::mainLoop() {
         totalAlgorithmsDuration = 0;
         specificMainLoop();
 
-        addTimestamp("Main Loop Finished", 0);
 
         cv::resize(finalFrame, finalFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
-        addRuntimeToFinalFrame("Total", getTotalMilliseconds(), 5, finalFrame.size().height - 10);
 
         if (totalAlgorithmsDuration > 0) {
             addRuntimeToFinalFrame("Algorithms total", totalAlgorithmsDuration, 5, finalFrame.size().height - 30);
@@ -141,7 +136,7 @@ void providentia::runnables::BaseSetup::mainLoop() {
 
         cv::imshow(windowName, finalFrame);
 
-        if ((char) cv::waitKey(1) == 27) {
+        if (cv::waitKey(1) == (int) ('q')) {
             break;
         }
     }
@@ -157,6 +152,13 @@ void providentia::runnables::BaseSetup::setCalculationScaleFactor(double calcula
 
 void providentia::runnables::BaseSetup::setRenderingScaleFactor(double renderingScaleFactor) {
     BaseSetup::renderingScaleFactor = renderingScaleFactor;
+}
+
+void providentia::runnables::BaseSetup::setCapture(const std::string &file) {
+    if (BaseSetup::capture.isOpened()) {
+        BaseSetup::capture.release();
+    }
+    BaseSetup::capture = openVideoCapture(file);
 }
 
 #pragma endregion RunnablesCommons

@@ -25,7 +25,7 @@ namespace providentia {
         }
 
         void DynamicStabilizerBase::updateKeyframe() {
-            if (currentIteration++ < warmUp) {
+            if (!shouldUpdateKeyframe || currentIteration++ < warmUp) {
                 return;
             }
 
@@ -87,6 +87,18 @@ namespace providentia {
         const std::shared_ptr<FrameWarper> &
         DynamicStabilizerBase::getWarper() const {
             return warper;
+        }
+
+        bool DynamicStabilizerBase::isShouldUpdateKeyframe() const {
+            return shouldUpdateKeyframe;
+        }
+
+        void DynamicStabilizerBase::setShouldUpdateKeyframe(bool _shouldUpdateKeyframe) {
+            DynamicStabilizerBase::shouldUpdateKeyframe = _shouldUpdateKeyframe;
+        }
+
+        void DynamicStabilizerBase::setShouldUseFundamentalMatrix(bool shouldUseFundamentalMatrix) {
+            matcher->setShouldUseFundamentalMatrix(shouldUseFundamentalMatrix);
         }
 
         DynamicStabilizerBase::~DynamicStabilizerBase() = default;

@@ -2,7 +2,7 @@
 // Created by brucknem on 12.01.21.
 //
 #include "gtest/gtest.h"
-#include "TestBase.hpp"
+#include "ImageTestBase.hpp"
 #include "BackgroundSegmentation.hpp"
 #include <iostream>
 
@@ -12,7 +12,7 @@ namespace providentia {
         /**
          * Setup for the background segmentation tests.
          */
-        class BackgroundSegmentationTests : public TestBase {
+        class BackgroundSegmentationTests : public ImageTestBase {
         };
 
         /**
