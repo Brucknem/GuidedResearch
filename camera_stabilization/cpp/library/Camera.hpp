@@ -7,17 +7,22 @@
 
 #include "CameraMatrix.hpp"
 #include "Eigen/Dense"
+#include <memory>
 
 namespace providentia {
     namespace camera {
 
         class Camera {
         private:
-            std::shared_ptr<providentia::camera::CameraMatrix> cameraMatrix;
+            providentia::camera::CameraMatrix cameraMatrix = providentia::camera::CameraMatrix(0, 0, 0, 0);
 
             Eigen::Matrix4f translation;
 
-            Eigen::Matrix4f rotation;
+            Eigen::Matrix4f rotation, rotationCalculationBuffer;
+
+            Eigen::Matrix4f viewMatrix;
+
+            void setViewMatrix();
 
         public:
             Camera(const Eigen::Vector4f &intrinsics, const Eigen::Vector3f &translation,
@@ -31,6 +36,18 @@ namespace providentia {
             const Eigen::Matrix4f &getTranslation() const;
 
             const Eigen::Matrix4f &getRotation() const;
+
+            const Eigen::Matrix4f &getViewMatrix() const;
+
+            void setTranslation(const Eigen::Vector3f &_translation);
+
+            void setTranslation(float x, float y, float z);
+
+            void setRotation(const Eigen::Vector3f &_rotation);
+
+            void setRotation(float x, float y, float z);
+
+            Eigen::Vector3f operator*(const Eigen::Vector4f &vector);
         };
 
         std::ostream &operator<<(std::ostream &os, const Camera &obj);
@@ -40,7 +57,7 @@ namespace providentia {
             BlenderCamera(const Eigen::Vector3f &translation = Eigen::Vector3f(0, -10, 5),
                           const Eigen::Vector3f &rotation = Eigen::Vector3f(76.5, 0, 0));
         };
-    }
-}
+    }// namespace camera
+}// namespace providentia
 
-#endif //CAMERASTABILIZATION_CAMERA_HPP
+#endif//CAMERASTABILIZATION_CAMERA_HPP
