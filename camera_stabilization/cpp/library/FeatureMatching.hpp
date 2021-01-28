@@ -18,6 +18,13 @@ namespace providentia {
 		 * Base class for all feature matchers.
 		 */
 		class FeatureMatcherBase : public providentia::utils::TimeMeasurable {
+		private:
+
+			/**
+			 * Filters the good matches by using the fundamental matrix.
+			 */
+			void filterUsingFundamentalMatrix();
+
 		protected:
 
 			/**

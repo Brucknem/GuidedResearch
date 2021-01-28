@@ -13,29 +13,34 @@
 #include <iostream>
 
 namespace providentia {
-    namespace tests {
+	namespace tests {
 
-        /**
-         * Base class for all tests.
-         */
-        class ImageTestBase : public ::testing::Test {
-        protected:
-            /**
-             * The loaded test image.
-             */
-            cv::Mat testImgCPU;
+		/**
+		 * Base class for all tests.
+		 */
+		class ImageTestBase : public ::testing::Test {
+		protected:
+			/**
+			 * The loaded test image.
+			 */
+			cv::Mat testImgCPU;
 
-            /**
-             * The loaded test image on GPU.
-             */
-            cv::cuda::GpuMat testImgGPU;
+			/**
+			 * The loaded test image on GPU.
+			 */
+			cv::cuda::GpuMat testImgGPU;
 
-            /**
-             * Sets up the random number generator for deterministic tests and loads the test image.
-             */
-            void SetUp() override;
-        };
-    }
+			/**
+			 * Sets up the random number generator for deterministic tests and loads the test image.
+			 */
+			void SetUp() override;
+
+			/**
+			 * @destructor
+			 */
+			~ImageTestBase() override = default;
+		};
+	}
 }
 
 

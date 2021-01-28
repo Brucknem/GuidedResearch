@@ -97,6 +97,11 @@ namespace providentia {
 			 * @constructor
 			 */
 			BlenderIntrinsics();
+
+			/**
+			 * @destructor
+			 */
+			~BlenderIntrinsics() override = default;
 		};
 	}// namespace camera
 }// namespace providentia

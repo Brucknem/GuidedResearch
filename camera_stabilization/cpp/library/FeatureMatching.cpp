@@ -45,28 +45,32 @@ namespace providentia {
 			}
 
 			if (shouldUseFundamentalMatrix) {
-				fundamentalMatrix = cv::findFundamentalMat(frameMatchedPoints, referenceMatchedPoints,
-														   cv::FM_RANSAC, 1.0, 0.975, fundamentalMatrixInlierMask);
-				fundamentalMatches.clear();
-				for (int i = 0; i < goodMatches.size(); i++) {
-					if (fundamentalMatrixInlierMask.at<bool>(i, 0)) {
-						fundamentalMatches.push_back(goodMatches[i]);
-					}
-				}
-
-				//-- Localize the object
-				frameMatchedPoints.clear();
-				referenceMatchedPoints.clear();
-				for (auto &goodMatch : fundamentalMatches) {
-					//-- Get the keypoints from the good matches
-					frameMatchedPoints.push_back(frameDetector->getKeypoints()[goodMatch.queryIdx].pt);
-					referenceMatchedPoints.push_back(referenceFrameDetector->getKeypoints()[goodMatch.trainIdx].pt);
-				}
+				filterUsingFundamentalMatrix();
 			} else {
 				fundamentalMatches = goodMatches;
 			}
 
 			addTimestamp("Matching finished", 0);
+		}
+
+		void FeatureMatcherBase::filterUsingFundamentalMatrix() {
+			fundamentalMatrix = cv::findFundamentalMat(frameMatchedPoints, referenceMatchedPoints,
+													   cv::FM_RANSAC, 1.0, 0.975, fundamentalMatrixInlierMask);
+			fundamentalMatches.clear();
+			for (int i = 0; i < goodMatches.size(); i++) {
+				if (fundamentalMatrixInlierMask.at<bool>(i, 0)) {
+					fundamentalMatches.push_back(goodMatches[i]);
+				}
+			}
+
+			//-- Localize the object
+			frameMatchedPoints.clear();
+			referenceMatchedPoints.clear();
+			for (auto &goodMatch : fundamentalMatches) {
+				//-- Get the keypoints from the good matches
+				frameMatchedPoints.push_back(frameDetector->getKeypoints()[goodMatch.queryIdx].pt);
+				referenceMatchedPoints.push_back(referenceFrameDetector->getKeypoints()[goodMatch.trainIdx].pt);
+			}
 		}
 
 		cv::Mat FeatureMatcherBase::draw() {
@@ -96,8 +100,8 @@ namespace providentia {
 				_goodMatchRatioThreshold) {
 		}
 
-		void FeatureMatcherBase::setShouldUseFundamentalMatrix(bool shouldUseFundamentalMatrix) {
-			FeatureMatcherBase::shouldUseFundamentalMatrix = shouldUseFundamentalMatrix;
+		void FeatureMatcherBase::setShouldUseFundamentalMatrix(bool _shouldUseFundamentalMatrix) {
+			shouldUseFundamentalMatrix = _shouldUseFundamentalMatrix;
 		}
 
 

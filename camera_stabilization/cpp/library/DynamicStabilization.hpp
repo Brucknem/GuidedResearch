@@ -33,9 +33,6 @@ namespace providentia {
 			 */
 			bool shouldUpdateKeyframe = false;
 
-		public:
-			void setShouldUseFundamentalMatrix(bool shouldUseFundamentalMatrix);
-
 		protected:
 			/**
 			 * Feature detectors for the current frame and reference frame.
@@ -112,6 +109,11 @@ namespace providentia {
 			 * @get
 			 */
 			bool isShouldUpdateKeyframe() const;
+
+			/**
+			 * @set
+			 */
+			void setShouldUseFundamentalMatrix(bool shouldUseFundamentalMatrix);
 
 			/**
 			 * @set
