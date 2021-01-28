@@ -1,6 +1,3 @@
-//
-// Created by brucknem on 27.01.21.
-//
 
 #ifndef CAMERASTABILIZATION_INTRINSICS_HPP
 #define CAMERASTABILIZATION_INTRINSICS_HPP
@@ -8,40 +5,100 @@
 #include "Eigen/Dense"
 
 namespace providentia {
-    namespace camera {
-        class Intrinsics {
-        private:
-            Eigen::Vector3f calculationBuffer;
+	namespace camera {
 
-            Eigen::Matrix3f matrix;
+		/**
+		 * The camera intrinsic parameters that are used to project vectors in
+		 * camera space to image space.
+		 */
+		class Intrinsics {
+		private:
+			/**
+			 * A buffer used during calculations.
+			 */
+			Eigen::Vector3f calculationBuffer;
 
-            Eigen::Vector2f center;
+			/**
+			 * The actual intrinsics matrix.
+			 */
+			Eigen::Matrix3f matrix;
 
-            Eigen::Vector2f focalLength;
+			/**
+			 * The camera center point.
+			 */
+			Eigen::Vector2f center;
 
-        public:
-            Intrinsics(float focalX, float focalY, int centerX, int centerY);
+			/**
+			 * The focal lengths.
+			 */
+			Eigen::Vector2f focalLength;
 
-            explicit Intrinsics(const Eigen::Vector4f &intrinsics);
+		public:
 
-            const Eigen::Vector2f &getCenter() const;
+			/**
+			 * @constructor
+			 *
+			 * @param focalX The focal length in X direction.
+			 * @param focalY The focal length in Y direction.
+			 * @param centerX The X pixel coordinate of the image center (principal point).
+			 * @param centerY The Y pixel coordinate of the image center (principal point).
+			 */
+			Intrinsics(float focalX, float focalY, int centerX, int centerY);
 
-            const Eigen::Vector2f &getFocalLength() const;
+			/**
+			 * @constructor
+			 *
+			 * @param intrinsics A vector containing the focal lengths and center point.
+			 */
+			explicit Intrinsics(const Eigen::Vector4f &intrinsics);
 
-            const Eigen::Matrix3f &getMatrix() const;
+			/**
+			 * @destructor
+			 */
+			virtual ~Intrinsics() = default;
 
-            Eigen::Vector3f operator*(const Eigen::Vector4f &vector);
+			/**
+			 * @get The center point.
+			 */
+			const Eigen::Vector2f &getCenter() const;
 
-            Eigen::Vector3f operator*(const Eigen::Vector3f &vector);
-        };
+			/**
+			 * @get The focal lengths.
+			 */
+			const Eigen::Vector2f &getFocalLength() const;
 
-        std::ostream &operator<<(std::ostream &os, const Intrinsics &obj);
+			/**
+			 * @get The intrinsics matrix.
+			 */
+			const Eigen::Matrix3f &getMatrix() const;
 
-        class BlenderCameraMatrix : public Intrinsics {
-        public:
-            BlenderCameraMatrix();
-        };
-    }// namespace camera
+			/**
+			 * Multiply the given vector and project to camera space.
+			 */
+			Eigen::Vector3f operator*(const Eigen::Vector4f &vector);
+
+			/**
+			 * Multiply the given vector and project to camera space.
+			 */
+			Eigen::Vector3f operator*(const Eigen::Vector3f &vector);
+		};
+
+		/**
+		 * Adds a string representation of the intrinsics to the given stream.
+		 */
+		std::ostream &operator<<(std::ostream &os, const Intrinsics &obj);
+
+		/**
+		 * Mock class for the intrinsics used in the blender test setup.
+		 */
+		class BlenderIntrinsics : public Intrinsics {
+		public:
+			/**
+			 * @constructor
+			 */
+			BlenderIntrinsics();
+		};
+	}// namespace camera
 }// namespace providentia
 
 

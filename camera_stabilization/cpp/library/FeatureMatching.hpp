@@ -12,215 +12,199 @@
 #include "TimeMeasurable.hpp"
 
 namespace providentia {
-    namespace features {
+	namespace features {
 
-        /**
-         * Base class for all feature matchers.
-         */
-        class FeatureMatcherBase : public providentia::utils::TimeMeasurable {
-        protected:
+		/**
+		 * Base class for all feature matchers.
+		 */
+		class FeatureMatcherBase : public providentia::utils::TimeMeasurable {
+		protected:
 
-            /**
-             * The current frame feature detector applied in the main loop.
-             */
-            std::shared_ptr<providentia::features::FeatureDetectorBase> frameDetector, referenceFrameDetector;
+			/**
+			 * The current frame feature detector applied in the main loop.
+			 */
+			std::shared_ptr<providentia::features::FeatureDetectorBase> frameDetector, referenceFrameDetector;
 
-            /**
-             * Flag if the fundamental matrix should be used.
-             */
-            bool shouldUseFundamentalMatrix = true;
+			/**
+			 * Flag if the fundamental matrix should be used.
+			 */
+			bool shouldUseFundamentalMatrix = true;
 
-            /**
-             * Fundamental matrix inlier mask.
-             */
-            cv::Mat fundamentalMatrixInlierMask;
+			/**
+			 * Fundamental matrix inlier mask.
+			 */
+			cv::Mat fundamentalMatrixInlierMask;
 
-            /**
-             * The fundamental matrix between the images.
-             */
-            cv::Mat fundamentalMatrix;
+			/**
+			 * The fundamental matrix between the images.
+			 */
+			cv::Mat fundamentalMatrix;
 
-            /**
-             * The k nearest neighbors of features.
-             */
-            cv::cuda::GpuMat knnMatchesGPU;
-            std::vector<std::vector<cv::DMatch>> knnMatchesCPU;
+			/**
+			 * The k nearest neighbors of features.
+			 */
+			cv::cuda::GpuMat knnMatchesGPU;
+			std::vector<std::vector<cv::DMatch>> knnMatchesCPU;
 
-            /**
-             * A vector of good matches of features.
-             */
-            std::vector<cv::DMatch> goodMatches;
+			/**
+			 * A vector of good matches of features.
+			 */
+			std::vector<cv::DMatch> goodMatches;
 
-            /**
-             * A vector of matches of features filtered using the fundamental matrix.
-             */
-            std::vector<cv::DMatch> fundamentalMatches;
+			/**
+			 * A vector of matches of features filtered using the fundamental matrix.
+			 */
+			std::vector<cv::DMatch> fundamentalMatches;
 
-            /**
-             * The matched points of the frame and reference frame.
-             */
-            std::vector<cv::Point2f> frameMatchedPoints, referenceMatchedPoints;
+			/**
+			 * The matched points of the frame and reference frame.
+			 */
+			std::vector<cv::Point2f> frameMatchedPoints, referenceMatchedPoints;
 
-            /**
-             * The ratio threshold of good matches for the Lowe's ratio test.
-             */
-            float goodMatchRatioThreshold;
+			/**
+			 * The ratio threshold of good matches for the Lowe's ratio test.
+			 */
+			float goodMatchRatioThreshold;
 
-            /**
-             * The frame with the matches drawn into.
-             */
-            cv::Mat drawFrame;
+			/**
+			 * The frame with the matches drawn into.
+			 */
+			cv::Mat drawFrame;
 
-            /**
-             * Specific implementation of the matching algorithm.
-             */
-            virtual void specificMatch() = 0;
+			/**
+			 * Specific implementation of the matching algorithm.
+			 */
+			virtual void specificMatch() = 0;
 
-        public:
-            /**
-             * @destructor
-             */
-            ~FeatureMatcherBase() override;
+		public:
+			/**
+			 * @destructor
+			 */
+			~FeatureMatcherBase() override = default;
 
-            /**
-             * @constructor
-             *
-             * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
-             */
-            explicit FeatureMatcherBase(float _goodMatchRatioThreshold = 0.75f);
+			/**
+			 * @constructor
+			 *
+			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
+			 */
+			explicit FeatureMatcherBase(float _goodMatchRatioThreshold = 0.75f);
 
-            /**
-             * @get
-             */
-            const std::vector<cv::DMatch> &getGoodMatches() const;
+			/**
+			 * @get
+			 */
+			const std::vector<cv::DMatch> &getGoodMatches() const;
 
-            /**
-             * @get
-             */
-            const std::vector<cv::Point2f> &getReferenceMatchedPoints();
+			/**
+			 * @get
+			 */
+			const std::vector<cv::Point2f> &getReferenceMatchedPoints();
 
-            /**
-             * @get
-             */
-            const std::vector<cv::Point2f> &getFrameMatchedPoints() const;
+			/**
+			 * @get
+			 */
+			const std::vector<cv::Point2f> &getFrameMatchedPoints() const;
 
-            /**
-             * @set Flag for the matcher to filter the matches using the fundamental matrix.
-             */
-            void setShouldUseFundamentalMatrix(bool shouldUseFundamentalMatrix);
+			/**
+			 * @set Flag for the matcher to filter the matches using the fundamental matrix.
+			 */
+			void setShouldUseFundamentalMatrix(bool shouldUseFundamentalMatrix);
 
-            /**
-             * Matches the detected features of two frames.
-             *
-             * @param frameFeatureDetector The feature detector of the frame.
-             * @param referenceFeatureDetector  The feature detector of the reference frame.
-             */
-            void match(const std::shared_ptr<providentia::features::FeatureDetectorBase> &_frameFeatureDetector,
-                       const std::shared_ptr<providentia::features::FeatureDetectorBase> &_referenceFeatureDetector);
+			/**
+			 * Matches the detected features of two frames.
+			 *
+			 * @param frameFeatureDetector The feature detector of the frame.
+			 * @param referenceFeatureDetector  The feature detector of the reference frame.
+			 */
+			void match(const std::shared_ptr<providentia::features::FeatureDetectorBase> &_frameFeatureDetector,
+					   const std::shared_ptr<providentia::features::FeatureDetectorBase> &_referenceFeatureDetector);
 
-            /**
-             * Horizontally stacks the frames and draws the matched features.
-             */
-            cv::Mat draw();
+			/**
+			 * Horizontally stacks the frames and draws the matched features.
+			 */
+			cv::Mat draw();
 
-        };
+		};
 
-        /**
-         * Brute force feature matching on GPU.
-         */
-        class BruteForceFeatureMatcher : public FeatureMatcherBase {
-        private:
-            /**
-             * The CUDA GPU stream used during matching.
-             */
-            cv::cuda::Stream stream;
+		/**
+		 * Brute force feature matching on GPU.
+		 */
+		class BruteForceFeatureMatcher : public FeatureMatcherBase {
+		private:
+			/**
+			 * The CUDA GPU stream used during matching.
+			 */
+			cv::cuda::Stream stream;
 
-            /**
-             * The Brute Force matching algorithm.
-             */
-            cv::Ptr<cv::cuda::DescriptorMatcher> matcher;
+			/**
+			 * The Brute Force matching algorithm.
+			 */
+			cv::Ptr<cv::cuda::DescriptorMatcher> matcher;
 
-        protected:
-            /**
-             * @copydoc
-             */
-            void specificMatch() override;
+		protected:
+			/**
+			 * @copydoc
+			 */
+			void specificMatch() override;
 
-        public:
-            /**
-             * @destructor
-             */
-            ~BruteForceFeatureMatcher() override;
+		public:
+			/**
+			 * @destructor
+			 */
+			~BruteForceFeatureMatcher() override = default;
 
-            /**
-             * @constructor
-             *
-             * @param norm The norm used to compare the features.
-             * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
-             */
-            explicit BruteForceFeatureMatcher(cv::NormTypes norm, float _goodMatchRatioThreshold = 0.75f);
+			/**
+			 * @constructor
+			 *
+			 * @param norm The norm used to compare the features.
+			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
+			 */
+			explicit BruteForceFeatureMatcher(cv::NormTypes norm, float _goodMatchRatioThreshold = 0.75f);
 
-        };
+		};
 
-        /**
-         * CPU implementation of the FLANN feature matcher.
-         */
-        class FlannFeatureMatcher : public FeatureMatcherBase {
-        private:
+		/**
+		 * CPU implementation of the FLANN feature matcher.
+		 */
+		class FlannFeatureMatcher : public FeatureMatcherBase {
+		private:
 
-            /**
-             * The CPU FLANN matching algorithm.
-             */
-            cv::Ptr<cv::FlannBasedMatcher> matcher;
+			/**
+			 * The CPU FLANN matching algorithm.
+			 */
+			cv::Ptr<cv::FlannBasedMatcher> matcher;
 
-        protected:
-            /**
-             * @copydoc
-             */
-            void specificMatch() override;
+		protected:
+			/**
+			 * @copydoc
+			 */
+			void specificMatch() override;
 
-        public:
+		public:
 
-            /**
-             * @destructor
-             */
-            ~FlannFeatureMatcher() override;
+			/**
+			 * @destructor
+			 */
+			~FlannFeatureMatcher() override = default;
 
-            /**
-             * @constructor
-             *
-             * @param binaryDescriptors Flag if binary desccriptors are used.
-             * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
-             */
-            explicit FlannFeatureMatcher(bool binaryDescriptors = false,
-                                         float _goodMatchRatioThreshold = 0.75f);
+			/**
+			 * @constructor
+			 *
+			 * @param binaryDescriptors Flag if binary desccriptors are used.
+			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
+			 */
+			explicit FlannFeatureMatcher(bool binaryDescriptors = false,
+										 float _goodMatchRatioThreshold = 0.75f);
 
-            /**
-             * @constructor
-             *
-             * @params The FLANN parameters.
-             * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
-             */
-            explicit FlannFeatureMatcher(cv::flann::IndexParams *params, float _goodMatchRatioThreshold = 0.75f);
+			/**
+			 * @constructor
+			 *
+			 * @params The FLANN parameters.
+			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
+			 */
+			explicit FlannFeatureMatcher(cv::flann::IndexParams *params, float _goodMatchRatioThreshold = 0.75f);
 
-        };
-
-        class SequenceFeatureMatcher {
-        private:
-            std::vector<std::vector<cv::Point2f>> matchSequences;
-
-        protected:
-            std::shared_ptr<providentia::features::FeatureMatcherBase> matcher;
-
-        public:
-            void match(const std::vector<std::shared_ptr<providentia::features::FeatureDetectorBase>> &sequence);
-        };
-
-        class BruteForceSequenceFeatureMatcher : public SequenceFeatureMatcher {
-        public:
-            BruteForceSequenceFeatureMatcher();
-        };
-    }
+		};
+	}
 }
 
 #endif //CAMERASTABILIZATION_FEATUREMATCHING_HPP

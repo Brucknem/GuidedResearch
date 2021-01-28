@@ -16,127 +16,127 @@
 
 
 namespace providentia {
-    namespace opticalflow {
+	namespace opticalflow {
 
-        /**
-         * Base class for dense optical flow algorithms
-         */
-        class DenseOpticalFlow : public providentia::utils::TimeMeasurable {
-        protected:
-            /**
-             * The current and previous GPU frame.
-             */
-            cv::cuda::GpuMat currentFrame, previousFrame;
+		/**
+		 * Base class for dense optical flow algorithms
+		 */
+		class DenseOpticalFlow : public providentia::utils::TimeMeasurable {
+		protected:
+			/**
+			 * The current and previous GPU frame.
+			 */
+			cv::cuda::GpuMat currentFrame, previousFrame;
 
-            /**
-             * The calculated dense optical flow.
-             */
-            cv::Mat denseOpticalFlowCPU;
-            cv::cuda::GpuMat denseOpticalFlowGPU;
+			/**
+			 * The calculated dense optical flow.
+			 */
+			cv::Mat denseOpticalFlowCPU;
+			cv::cuda::GpuMat denseOpticalFlowGPU;
 
-            /**
-             * Buffer matrices.
-             */
-            cv::Mat hsv, magnitude, angle, angles;
+			/**
+			 * Buffer matrices.
+			 */
+			cv::Mat hsv, magnitude, angle, angles;
 
-            /**
-             * The three channels of the optical flow.
-             */
-            std::vector<cv::Mat> flowParts{3};
+			/**
+			 * The three channels of the optical flow.
+			 */
+			std::vector<cv::Mat> flowParts{3};
 
-            /**
-             * The CUDA stream for async calculations on GPU.
-             */
-            cv::cuda::Stream stream;
+			/**
+			 * The CUDA stream for async calculations on GPU.
+			 */
+			cv::cuda::Stream stream;
 
-            /**
-             * Color frames for visualization.
-             */
-            cv::Mat hsv8, bgr;
+			/**
+			 * Color frames for visualization.
+			 */
+			cv::Mat hsv8, bgr;
 
-            /**
-             * Color frames for merging the channels.
-             */
-            std::array<cv::Mat, 3> _hsv;
+			/**
+			 * Color frames for merging the channels.
+			 */
+			std::array<cv::Mat, 3> _hsv;
 
-            /**
-             * @constructor
-             */
-            explicit DenseOpticalFlow() : providentia::utils::TimeMeasurable("Dense Optical Flow", 1) {}
+			/**
+			 * @constructor
+			 */
+			explicit DenseOpticalFlow() : providentia::utils::TimeMeasurable("Dense Optical Flow", 1) {}
 
-            /**
-             * Initializes the frame buffers on the first input frame.
-             */
-            void initialize();
+			/**
+			 * Initializes the frame buffers on the first input frame.
+			 */
+			void initialize();
 
-            /**
-             * Algorithm specific calculation function.
-             */
-            virtual void specificCalculate() = 0;
+			/**
+			 * Algorithm specific calculation function.
+			 */
+			virtual void specificCalculate() = 0;
 
-        public:
+		public:
 
-            /**
-             * @destructor
-             */
-            ~DenseOpticalFlow() override;
+			/**
+			 * @destructor
+			 */
+			~DenseOpticalFlow() override = default;
 
-            /**
-             * @get the mean of the magnitudes over the flow field.
-             */
-            double getMagnitudeMean();
+			/**
+			 * @get the mean of the magnitudes over the flow field.
+			 */
+			double getMagnitudeMean();
 
 
-            /**
-             * @get the mean of the angles over the flow field.
-             */
-            double getAngleMean();
+			/**
+			 * @get the mean of the angles over the flow field.
+			 */
+			double getAngleMean();
 
-            /**
-             * Draws the optical flow field as BGR image.
-             * @return
-             */
-            const cv::Mat &draw() const;
+			/**
+			 * Draws the optical flow field as BGR image.
+			 * @return
+			 */
+			const cv::Mat &draw() const;
 
-            /**
-             * Main calculation function.
-             *
-             * @param _frame The frame to process.
-             */
-            void calculate(const cv::cuda::GpuMat &_frame);
-        };
+			/**
+			 * Main calculation function.
+			 *
+			 * @param _frame The frame to process.
+			 */
+			void calculate(const cv::cuda::GpuMat &_frame);
+		};
 
-        /**
-         * Wrapper of the Farneback dense optical flow algorithm.
-         */
-        class FarnebackDenseOpticalFlow : public DenseOpticalFlow {
-        private:
+		/**
+		 * Wrapper of the Farneback dense optical flow algorithm.
+		 */
+		class FarnebackDenseOpticalFlow : public DenseOpticalFlow {
+		private:
 
-            /**
-             * The algorithm implementation.
-             */
-            cv::Ptr<cv::cuda::FarnebackOpticalFlow> opticalFlow;
+			/**
+			 * The algorithm implementation.
+			 */
+			cv::Ptr<cv::cuda::FarnebackOpticalFlow> opticalFlow;
 
-        protected:
-            /**
-             * @copydoc
-             */
-            void specificCalculate() override;
+		protected:
+			/**
+			 * @copydoc
+			 */
+			void specificCalculate() override;
 
-        public:
-            /**
-             * @constructor
-             */
-            explicit FarnebackDenseOpticalFlow();
+		public:
+			/**
+			 * @constructor
+			 */
+			explicit FarnebackDenseOpticalFlow();
 
-            /**
-             * @destructor
-             */
-            ~FarnebackDenseOpticalFlow() override;
+			/**
+			 * @destructor
+			 */
+			~FarnebackDenseOpticalFlow() override = default;
 
-        };
+		};
 
-    }
+	}
 }
 
 

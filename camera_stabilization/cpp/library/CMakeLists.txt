@@ -8,7 +8,6 @@ add_library(libCameraStabilization
         OpticalFlow.cpp
         TimeMeasurable.cpp
         CSVWriter.cpp
-        KeyframeHistory.cpp
         Intrinsics.cpp
         Camera.cpp)
 

@@ -11,67 +11,67 @@
 
 
 namespace providentia {
-    namespace stabilization {
-        /**
-         * Base class for the frame warpers.
-         */
-        class FrameWarper : public providentia::utils::TimeMeasurable {
-        protected:
+	namespace stabilization {
+		/**
+		 * Base class for the frame warpers.
+		 */
+		class FrameWarper : public providentia::utils::TimeMeasurable {
+		protected:
 
-            /**
-             * The algorithm used to find the homography.
-             */
-            int homographyCalculationAlgorithm = cv::RANSAC;
+			/**
+			 * The algorithm used to find the homography.
+			 */
+			int homographyCalculationAlgorithm = cv::RANSAC;
 
-            /**
-             * The interpolation algorithm used to warp the frame.
-             */
-            int perspectiveWarpFlags = cv::INTER_LINEAR;
+			/**
+			 * The interpolation algorithm used to warp the frame.
+			 */
+			int perspectiveWarpFlags = cv::INTER_LINEAR;
 
-            /**
-             * The found homography between the matched keypoints.
-             * Minimizer for the reprojection error between the frames.
-             */
-            cv::Mat homography;
+			/**
+			 * The found homography between the matched keypoints.
+			 * Minimizer for the reprojection error between the frames.
+			 */
+			cv::Mat homography;
 
-            /**
-             * The current frame warpedFrame by the found homography and with minimal reprojection error to the reference frame.
-             */
-            cv::cuda::GpuMat warpedFrame;
+			/**
+			 * The current frame warpedFrame by the found homography and with minimal reprojection error to the reference frame.
+			 */
+			cv::cuda::GpuMat warpedFrame;
 
-        public:
+		public:
 
-            /**
-             * @destructor
-             */
-            ~FrameWarper() override;
+			/**
+			 * @destructor
+			 */
+			~FrameWarper() override = default;
 
-            /**
-             * @get The final frame warped by the found homography.
-             */
-            const cv::cuda::GpuMat &getWarpedFrame() const;
+			/**
+			 * @get The final frame warped by the found homography.
+			 */
+			const cv::cuda::GpuMat &getWarpedFrame() const;
 
-            /**
-             * @get The homography that minimizes the reprojection error.
-             */
-            const cv::Mat &getHomography() const;
+			/**
+			 * @get The homography that minimizes the reprojection error.
+			 */
+			const cv::Mat &getHomography() const;
 
-            /**
-             * @constructor
-             */
-            explicit FrameWarper();
+			/**
+			 * @constructor
+			 */
+			explicit FrameWarper();
 
-            /**
-             * Finds the homography that minimizes the reprojection error between the feature matches and warpes the frame.
-             * @param _frame The frame to warp.
-             * @param matcher The matched features.
-             */
-            void
-            warp(const cv::cuda::GpuMat &_frame,
-                 const std::shared_ptr<providentia::features::FeatureMatcherBase> &matcher);
+			/**
+			 * Finds the homography that minimizes the reprojection error between the feature matches and warpes the frame.
+			 * @param _frame The frame to warp.
+			 * @param matcher The matched features.
+			 */
+			void
+			warp(const cv::cuda::GpuMat &_frame,
+				 const std::shared_ptr<providentia::features::FeatureMatcherBase> &matcher);
 
-        };
-    }
+		};
+	}
 }
 
 

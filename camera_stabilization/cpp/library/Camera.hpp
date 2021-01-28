@@ -10,54 +10,137 @@
 #include <memory>
 
 namespace providentia {
-    namespace camera {
+	namespace camera {
 
-        class Camera {
-        private:
-            providentia::camera::Intrinsics cameraMatrix = providentia::camera::Intrinsics(0, 0, 0, 0);
+		/**
+		 *	A virtual camera.
+		 */
+		class Camera {
+		private:
+			/**
+			 * The camera intrinsic parameters.
+			 */
+			providentia::camera::Intrinsics cameraMatrix = providentia::camera::Intrinsics(0, 0, 0, 0);
 
-            Eigen::Matrix4f translation;
+			/**
+			 * The camera translation in world space.
+			 */
+			Eigen::Matrix4f translation;
 
-            Eigen::Matrix4f rotation, rotationCalculationBuffer;
+			/**
+			 * The camera rotation in world space.
+			 */
+			Eigen::Matrix4f rotation, rotationCalculationBuffer;
 
-            Eigen::Matrix4f viewMatrix, viewMatrixInverse;
+			/**
+			 * The camera view matrix.
+			 */
+			Eigen::Matrix4f viewMatrix, viewMatrixInverse;
 
-            void setViewMatrix();
+			/**
+			 * Updates the view matrix based on the translation and rotation.
+			 */
+			void setViewMatrix();
 
-        public:
-            Camera(const Eigen::Vector4f &intrinsics, const Eigen::Vector3f &translation,
-                   const Eigen::Vector3f &rotation);
+		public:
 
-            Camera(const providentia::camera::Intrinsics &cameraMatrix, const Eigen::Vector3f &translation,
-                   const Eigen::Vector3f &rotation);
+			/**
+			 * @constructor
+			 *
+			 * @param intrinsics A vector of camera intrinsic parameters.
+			 * @param translation The translation of the camera in world space.
+			 * @param rotation The rotation of the camera in world space.
+			 */
+			Camera(const Eigen::Vector4f &intrinsics, const Eigen::Vector3f &translation,
+				   const Eigen::Vector3f &rotation);
 
-            const Intrinsics &getCameraMatrix() const;
+			/**
+			 * @constructor
+			 *
+			 * @param intrinsics A vector of camera intrinsic parameters.
+			 * @param translation The translation of the camera in world space.
+			 * @param rotation The rotation of the camera in world space.
+			 */
+			Camera(const providentia::camera::Intrinsics &intrinsics, const Eigen::Vector3f &translation,
+				   const Eigen::Vector3f &rotation);
 
-            const Eigen::Matrix4f &getTranslation() const;
+			/**
+			 * @destructor
+			 */
+			virtual ~Camera() = default;
 
-            const Eigen::Matrix4f &getRotation() const;
+			/**
+			 * @get
+			 */
+			const Intrinsics &getCameraMatrix() const;
 
-            const Eigen::Matrix4f &getViewMatrix() const;
+			/**
+			 * @get
+			 */
+			const Eigen::Matrix4f &getTranslation() const;
 
-            void setTranslation(const Eigen::Vector3f &_translation);
+			/**
+			 * @get
+			 */
+			const Eigen::Matrix4f &getRotation() const;
 
-            void setTranslation(float x, float y, float z);
+			/**
+			 * @get
+			 */
+			const Eigen::Matrix4f &getViewMatrix() const;
 
-            void setRotation(const Eigen::Vector3f &_rotation);
+			/**
+			 * @set
+			 */
+			void setTranslation(const Eigen::Vector3f &_translation);
 
-            void setRotation(float x, float y, float z);
+			/**
+			 * @set
+			 */
+			void setTranslation(float x, float y, float z);
 
-            Eigen::Vector3f operator*(const Eigen::Vector4f &vector);
-        };
+			/**
+			 * @set
+			 */
+			void setRotation(const Eigen::Vector3f &_rotation);
 
-        std::ostream &operator<<(std::ostream &os, const Camera &obj);
+			/**
+			 * @set
+			 */
+			void setRotation(float x, float y, float z);
 
-        class BlenderCamera : public Camera {
-        public:
-            BlenderCamera(const Eigen::Vector3f &translation = Eigen::Vector3f(0, -10, 5),
-                          const Eigen::Vector3f &rotation = Eigen::Vector3f(76.5, 0, 0));
-        };
-    }// namespace camera
+			/**
+			 * @operator
+			 */
+			Eigen::Vector3f operator*(const Eigen::Vector4f &vector);
+		};
+
+		/**
+		 * Writes the camera object to the stream.
+		 */
+		std::ostream &operator<<(std::ostream &os, const Camera &obj);
+
+		/**
+		 * The virtual camera used in the blender test setup.
+		 */
+		class BlenderCamera : public Camera {
+		public:
+
+			/**
+			 * @constructor
+			 *
+			 * @param translation The translation of the camera in world space.
+			 * @param rotation The rotation of the camera in world space.
+			 */
+			explicit BlenderCamera(const Eigen::Vector3f &translation = Eigen::Vector3f(0, -10, 5),
+								   const Eigen::Vector3f &rotation = Eigen::Vector3f(76.5, 0, 0));
+
+			/**
+			 * @destructor
+			 */
+			virtual ~BlenderCamera() = default;
+		};
+	}// namespace camera
 }// namespace providentia
 
 #endif//CAMERASTABILIZATION_CAMERA_HPP
