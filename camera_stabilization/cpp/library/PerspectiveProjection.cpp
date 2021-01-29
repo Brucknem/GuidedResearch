@@ -23,8 +23,8 @@ namespace providentia {
 		void PerspectiveProjection::updateMatrices() {
 			float r = (float) imagePlaneSize.x() / 2;
 			float l = -r;
-			float b = (float) imagePlaneSize.y() / 2;
-			float t = -b;
+			float t = (float) imagePlaneSize.y() / 2;
+			float b = -t;
 
 			frustum << frustumPlaneDistances.x(), 0, 0, 0,
 					0, frustumPlaneDistances.x(), 0, 0,
@@ -79,8 +79,8 @@ namespace providentia {
 			return os;
 		}
 
-		Eigen::Vector4f PerspectiveProjection::operator*(const Eigen::Vector4f &vectorInCameraSpace) {
-			return normalize(projection * vectorInCameraSpace);
+		Eigen::Vector3f PerspectiveProjection::operator*(const Eigen::Vector4f &vectorInCameraSpace) {
+			return normalize(projection * vectorInCameraSpace).head<3>();
 		}
 
 		Eigen::Vector4f PerspectiveProjection::toFrustum(const Eigen::Vector4f &vectorInCameraSpace) {

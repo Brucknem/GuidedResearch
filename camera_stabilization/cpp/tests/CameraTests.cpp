@@ -23,9 +23,17 @@ namespace providentia {
 		/**
 		 * Asserts that the elements of the given vectors are not further away than the maximal difference.
 		 */
-		void assertVectorsNearEqual(const Eigen::VectorXf &a, float x, float y, float z, float w = 1,
+		void assertVectorsNearEqual(const Eigen::Vector4f &a, float x, float y, float z, float w = 1,
 									float maxDifference = 1e-4) {
 			assertVectorsNearEqual(a, Eigen::Vector4f(x, y, z, w), maxDifference);
+		}
+
+		/**
+		 * Asserts that the elements of the given vectors are not further away than the maximal difference.
+		 */
+		void assertVectorsNearEqual(const Eigen::Vector3f &a, float x, float y, float z = 1,
+									float maxDifference = 1e-4) {
+			assertVectorsNearEqual(Eigen::Vector4f(a(0), a(1), a(2), 1), x, y, z, 1, maxDifference);
 		}
 
 		/**
@@ -113,22 +121,36 @@ namespace providentia {
 			providentia::camera::PerspectiveProjection perspectiveProjection(8, aspect, 4);
 
 			Eigen::Vector4f pointInCameraSpace;
-			Eigen::Vector4f pointInNormalizedFrustum;
+			Eigen::Vector3f pointInNormalizedFrustum;
 			pointInCameraSpace << 0, 0, 1, 1;
 			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
 			assertVectorsNearEqual(pointInNormalizedFrustum, 0, 0, -1);
 
 			pointInCameraSpace << -1, 1 / aspect, 1, 1;
 			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(pointInNormalizedFrustum, -1, -1, -1);
+			assertVectorsNearEqual(pointInNormalizedFrustum, -1, 1, -1);
 
 			pointInCameraSpace << 1, -1 / aspect, 1, 1;
 			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(pointInNormalizedFrustum, 1, 1, -1);
+			assertVectorsNearEqual(pointInNormalizedFrustum, 1, -1, -1);
 
-			pointInCameraSpace << 0, 0, 1000, 1;
+			pointInCameraSpace << 0, 0, 1, 1;
+			pointInCameraSpace *= 1000;
+			pointInCameraSpace.w() = 1;
 			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
 			assertVectorsNearEqual(pointInNormalizedFrustum, 0, 0, 1);
+
+			pointInCameraSpace << 1, 1 / aspect, 1, 1;
+			pointInCameraSpace *= 1000;
+			pointInCameraSpace.w() = 1;
+			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
+			assertVectorsNearEqual(pointInNormalizedFrustum, 1, 1, 1);
+
+			pointInCameraSpace << -1, -1 / aspect, 1, 1;
+			pointInCameraSpace *= 1000;
+			pointInCameraSpace.w() = 1;
+			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
+			assertVectorsNearEqual(pointInNormalizedFrustum, -1, -1, 1);
 		}
 
 

@@ -99,7 +99,7 @@ namespace providentia {
 			 * @param vectorInCameraSpace The vector given in camera space.
 			 * @return The transformed vector in the normalized device coordinates. w coordinate is normalized to 1.
 			 */
-			Eigen::Vector4f operator*(const Eigen::Vector4f &vectorInCameraSpace);
+			Eigen::Vector3f operator*(const Eigen::Vector4f &vectorInCameraSpace);
 
 			/**
 			 * @stream
