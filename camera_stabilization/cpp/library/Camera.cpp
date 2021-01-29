@@ -13,16 +13,16 @@ namespace providentia {
 					   const Eigen::Vector3f &rotation) : Camera(providentia::camera::Intrinsics(intrinsics),
 																 translation, rotation) {}
 
-		Camera::Camera(const Intrinsics &intrinsics, const Eigen::Vector3f &translation,
+		Camera::Camera(const Intrinsics &_intrinsics, const Eigen::Vector3f &translation,
 					   const Eigen::Vector3f &rotation) {
-			cameraMatrix = providentia::camera::Intrinsics(intrinsics);
+			intrinsics = providentia::camera::Intrinsics(_intrinsics);
 			setTranslation(translation);
 			setRotation(rotation);
 		}
 
 
 		const Intrinsics &Camera::getCameraMatrix() const {
-			return cameraMatrix;
+			return intrinsics;
 		}
 
 		const Eigen::Matrix4f &Camera::getTranslation() const {
@@ -34,8 +34,8 @@ namespace providentia {
 		}
 
 		Eigen::Vector3f Camera::operator*(const Eigen::Vector4f &vector) {
-			Eigen::Vector4f pointInCameraSpace = viewMatrix * vector;
-			return cameraMatrix * pointInCameraSpace;
+			Eigen::Vector4f pointInCameraSpace = worldToCamera * vector;
+			return intrinsics * pointInCameraSpace;
 		}
 
 		void Camera::setTranslation(const Eigen::Vector3f &_translation) {
@@ -48,7 +48,7 @@ namespace providentia {
 			translation(1, 3) = y;
 			translation(2, 3) = z;
 
-			setViewMatrix();
+			updateWorldToCamera();
 		}
 
 		void Camera::setRotation(const Eigen::Vector3f &_rotation) {
@@ -73,16 +73,17 @@ namespace providentia {
 																			Eigen::Vector3f::UnitX()).matrix();
 			rotation = rotation * rotationCalculationBuffer;
 
-			setViewMatrix();
+			updateWorldToCamera();
 		}
 
-		const Eigen::Matrix4f &Camera::getViewMatrix() const {
-			return viewMatrix;
+		const Eigen::Matrix4f &Camera::getWorldToCameraTransformation() const {
+			return worldToCamera;
 		}
 
-		void Camera::setViewMatrix() {
-			viewMatrix = rotation * translation;
-			viewMatrixInverse = viewMatrix.inverse();
+		void Camera::updateWorldToCamera() {
+			cameraToWorld = rotation;
+			cameraToWorld.block<3, 1>(0, 3) = translation.block<3, 1>(0, 3);
+			worldToCamera = cameraToWorld.inverse();
 		}
 
 		std::ostream &operator<<(std::ostream &os, const Camera &obj) {
@@ -93,7 +94,7 @@ namespace providentia {
 			os << "Rotation" << std::endl
 			   << obj.getRotation() << std::endl;
 			os << "View" << std::endl
-			   << obj.getViewMatrix();
+			   << obj.getWorldToCameraTransformation();
 			return os;
 		}
 

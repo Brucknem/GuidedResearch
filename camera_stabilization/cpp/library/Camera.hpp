@@ -9,6 +9,9 @@
 #include "Intrinsics.hpp"
 #include <memory>
 
+// TODO
+
+
 namespace providentia {
 	namespace camera {
 
@@ -20,7 +23,7 @@ namespace providentia {
 			/**
 			 * The camera intrinsic parameters.
 			 */
-			providentia::camera::Intrinsics cameraMatrix = providentia::camera::Intrinsics(0, 0, 0, 0);
+			providentia::camera::Intrinsics intrinsics = providentia::camera::Intrinsics(0, 0, 0, 0);
 
 			/**
 			 * The camera translation in world space.
@@ -33,14 +36,14 @@ namespace providentia {
 			Eigen::Matrix4f rotation, rotationCalculationBuffer;
 
 			/**
-			 * The camera view matrix.
+			 * The world to camera transformation matrix.
 			 */
-			Eigen::Matrix4f viewMatrix, viewMatrixInverse;
+			Eigen::Matrix4f worldToCamera, cameraToWorld;
 
 			/**
-			 * Updates the view matrix based on the translation and rotation.
+			 * Updates the world to camera transformation based on the translation and rotation.
 			 */
-			void setViewMatrix();
+			void updateWorldToCamera();
 
 		public:
 
@@ -87,7 +90,7 @@ namespace providentia {
 			/**
 			 * @get
 			 */
-			const Eigen::Matrix4f &getViewMatrix() const;
+			const Eigen::Matrix4f &getWorldToCameraTransformation() const;
 
 			/**
 			 * @set

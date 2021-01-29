@@ -5,6 +5,7 @@
 
 #include "Camera.hpp"
 #include "Intrinsics.hpp"
+#include "Perspective.hpp"
 
 namespace providentia {
 	namespace tests {
@@ -17,6 +18,14 @@ namespace providentia {
 			for (int i = 0; i < difference.rows(); i++) {
 				EXPECT_NEAR(difference(i), 0, maxDifference);
 			}
+		}
+
+		/**
+		 * Asserts that the elements of the given vectors are not further away than the maximal difference.
+		 */
+		void assertVectorsNearEqual(const Eigen::VectorXf &a, float x, float y, float z, float w = 1,
+									float maxDifference = 1e-4) {
+			assertVectorsNearEqual(a, Eigen::Vector4f(x, y, z, w), maxDifference);
 		}
 
 		/**
@@ -49,7 +58,7 @@ namespace providentia {
 			/**
 			 * A test translation.
 			 */
-			Eigen::Vector3f translation = Eigen::Vector3f::Zero();
+			Eigen::Vector3f translation = Eigen::Vector3f(0, -10, 5);
 
 			/**
 			 * A test camera rotation.
@@ -72,6 +81,54 @@ namespace providentia {
 			assertVectorsNearEqual(
 					Eigen::Vector4f(matrix.getFocalLength()(0), matrix.getFocalLength()(1), matrix.getCenter()(0),
 									matrix.getCenter()(1)), intrinsics);
+		}
+
+		/**
+		 * Tests the camera frustum matrix.
+		 */
+		TEST_F(CameraTests, testCameraFrustum) {
+			providentia::camera::Perspective perspective(8, 1920.f / 1200, 4);
+
+			Eigen::Vector4f pointInCameraSpace;
+
+			Eigen::Vector4f pointInFrustum;
+			pointInCameraSpace << 0, 0, 1, 1;
+			pointInFrustum = perspective.toFrustum(pointInCameraSpace);
+			assertVectorsNearEqual(pointInFrustum, 0, 0, 1);
+
+			pointInCameraSpace << 4, 7, 1, 1;
+			pointInFrustum = perspective.toFrustum(pointInCameraSpace);
+			assertVectorsNearEqual(pointInFrustum, 4, 7, 1);
+
+			pointInCameraSpace << 0, 0, 1000, 1;
+			pointInFrustum = perspective.toFrustum(pointInCameraSpace);
+			assertVectorsNearEqual(pointInFrustum, 0, 0, 1000);
+		}
+
+		/**
+		 * Tests the camera intrinsics matrix.
+		 */
+		TEST_F(CameraTests, testCameraFrustumNormalized) {
+			float aspect = 1920.f / 1200;
+			providentia::camera::Perspective perspective(8, aspect, 4);
+
+			Eigen::Vector4f pointInCameraSpace;
+			Eigen::Vector4f pointInNormalizedFrustum;
+			pointInCameraSpace << 0, 0, 1, 1;
+			pointInNormalizedFrustum = perspective * pointInCameraSpace;
+			assertVectorsNearEqual(pointInNormalizedFrustum, 0, 0, -1);
+
+			pointInCameraSpace << -1, 1 / aspect, 1, 1;
+			pointInNormalizedFrustum = perspective * pointInCameraSpace;
+			assertVectorsNearEqual(pointInNormalizedFrustum, -1, -1, -1);
+
+			pointInCameraSpace << 1, -1 / aspect, 1, 1;
+			pointInNormalizedFrustum = perspective * pointInCameraSpace;
+			assertVectorsNearEqual(pointInNormalizedFrustum, 1, 1, -1);
+
+			pointInCameraSpace << 0, 0, 1000, 1;
+			pointInNormalizedFrustum = perspective * pointInCameraSpace;
+			assertVectorsNearEqual(pointInNormalizedFrustum, 0, 0, 1);
 		}
 
 
@@ -136,6 +193,50 @@ namespace providentia {
 			translation = Eigen::Vector3f(-M_PI, M_E, M_PI * M_E);
 			camera.setTranslation(translation);
 			assertTranslation(camera, translation);
+		}
+
+		/**
+		 * Tests the camera translation matrix that is built from the translation vector.
+		 */
+		TEST_F(CameraTests, testCameraViewMatrix) {
+			providentia::camera::Camera camera(intrinsics, translation, rotation);
+
+			Eigen::Matrix4f expectedView;
+			expectedView << 1, 0, 0, 0,
+					0, 0, 1, -10,
+					0, 1, 0, 5,
+					0, 0, 0, 1;
+
+			for (int row = 0; row < camera.getWorldToCameraTransformation().rows(); row++) {
+				assertVectorsNearEqual(camera.getWorldToCameraTransformation().row(row),
+									   expectedView.inverse().row(row));
+			}
+		}
+
+		/**
+		 * Tests the camera translation matrix that is built from the translation vector.
+		 */
+		TEST_F(CameraTests, testWorldToCameraTransformation) {
+			providentia::camera::Camera camera(intrinsics, translation, rotation);
+
+			Eigen::Vector4f pointInWorldSpace;
+			Eigen::Vector4f pointInCameraSpace;
+
+			pointInWorldSpace << 0, 10, 0, 1;
+			pointInCameraSpace = camera.getWorldToCameraTransformation() * pointInWorldSpace;
+			assertVectorsNearEqual(pointInCameraSpace, 0, -5, 20);
+
+			pointInWorldSpace << 10, 0, 0, 1;
+			pointInCameraSpace = camera.getWorldToCameraTransformation() * pointInWorldSpace;
+			assertVectorsNearEqual(pointInCameraSpace, 10, -5, 10);
+
+			pointInWorldSpace << 0, 0, 10, 1;
+			pointInCameraSpace = camera.getWorldToCameraTransformation() * pointInWorldSpace;
+			assertVectorsNearEqual(pointInCameraSpace, 0, 5, 10);
+
+			pointInWorldSpace << -10, -10, -10, 1;
+			pointInCameraSpace = camera.getWorldToCameraTransformation() * pointInWorldSpace;
+			assertVectorsNearEqual(pointInCameraSpace, -10, -15, 0);
 		}
 	}// namespace tests
 }// namespace providentia
