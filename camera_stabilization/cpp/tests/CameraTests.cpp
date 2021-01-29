@@ -2,11 +2,10 @@
 
 #include "gtest/gtest.h"
 #include <iostream>
-#include <PerspectiveProjection.hpp>
 
 #include "Camera.hpp"
 #include "Intrinsics.hpp"
-#include "perspectiveProjectionProjection.hpp"
+#include "PerspectiveProjection.hpp"
 
 namespace providentia {
 	namespace tests {
