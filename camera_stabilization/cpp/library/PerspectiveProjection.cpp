@@ -2,7 +2,7 @@
 // Created by brucknem on 28.01.21.
 //
 
-#include "Perspective.hpp"
+#include "PerspectiveProjection.hpp"
 
 namespace providentia {
 	namespace camera {
@@ -10,8 +10,9 @@ namespace providentia {
 			return vector / vector(3);
 		}
 
-		Perspective::Perspective(float sensorWidth, float aspectRatio, float focalLength, float nearPlaneDistance,
-								 float farPlaneDistance) {
+		PerspectiveProjection::PerspectiveProjection(float sensorWidth, float aspectRatio, float focalLength,
+													 float nearPlaneDistance,
+													 float farPlaneDistance) {
 			setFieldOfView(sensorWidth, aspectRatio, focalLength);
 			setImagePlaneSize(nearPlaneDistance, aspectRatio);
 			setFrustumPlaneDistances(nearPlaneDistance, farPlaneDistance);
@@ -19,7 +20,7 @@ namespace providentia {
 			updateMatrices();
 		}
 
-		void Perspective::updateMatrices() {
+		void PerspectiveProjection::updateMatrices() {
 			float r = (float) imagePlaneSize.x() / 2;
 			float l = -r;
 			float b = (float) imagePlaneSize.y() / 2;
@@ -41,31 +42,31 @@ namespace providentia {
 			projection = normalization * frustum;
 		}
 
-		void Perspective::setFrustumPlaneDistances(float nearPlaneDistance,
-												   float farPlaneDistance) {
+		void PerspectiveProjection::setFrustumPlaneDistances(float nearPlaneDistance,
+															 float farPlaneDistance) {
 			frustumPlaneDistances = Eigen::Vector2d(nearPlaneDistance, farPlaneDistance);
 		}
 
-		void Perspective::setFrustumPlaneDistances(float nearPlaneDistance) {
+		void PerspectiveProjection::setFrustumPlaneDistances(float nearPlaneDistance) {
 			setFrustumPlaneDistances(nearPlaneDistance, frustumPlaneDistances.y());
 		}
 
-		void Perspective::setImagePlaneSize(float nearPlaneDistance, float aspectRatio) {
+		void PerspectiveProjection::setImagePlaneSize(float nearPlaneDistance, float aspectRatio) {
 			imagePlaneSize = Eigen::Vector2d(2 * nearPlaneDistance * tan(fieldOfView.x() * 0.5), 1);
 			imagePlaneSize.y() = imagePlaneSize.x() / aspectRatio;
 			setFrustumPlaneDistances(nearPlaneDistance);
 		}
 
-		void Perspective::setImagePlaneSize(float nearPlaneDistance) {
+		void PerspectiveProjection::setImagePlaneSize(float nearPlaneDistance) {
 			setImagePlaneSize(nearPlaneDistance, (float) (fieldOfView.x() / fieldOfView.y()));
 		}
 
-		void Perspective::setFieldOfView(float sensorWidth, float aspectRatio, float focalLength) {
+		void PerspectiveProjection::setFieldOfView(float sensorWidth, float aspectRatio, float focalLength) {
 			fieldOfView = Eigen::Vector2d(2. * atan(0.5 * (sensorWidth / focalLength)), 1);
 			fieldOfView.y() = fieldOfView.x() / aspectRatio;
 		}
 
-		std::string Perspective::toString() const {
+		std::string PerspectiveProjection::toString() const {
 			std::stringstream ss;
 			ss << "Frustum" << std::endl << frustum << std::endl;
 			ss << "Normalization" << std::endl << normalization << std::endl;
@@ -73,16 +74,16 @@ namespace providentia {
 			return ss.str();
 		}
 
-		std::ostream &operator<<(std::ostream &os, const Perspective &perspective) {
+		std::ostream &operator<<(std::ostream &os, const PerspectiveProjection &perspective) {
 			os << perspective.toString();
 			return os;
 		}
 
-		Eigen::Vector4f Perspective::operator*(const Eigen::Vector4f &vectorInCameraSpace) {
+		Eigen::Vector4f PerspectiveProjection::operator*(const Eigen::Vector4f &vectorInCameraSpace) {
 			return normalize(projection * vectorInCameraSpace);
 		}
 
-		Eigen::Vector4f Perspective::toFrustum(const Eigen::Vector4f &vectorInCameraSpace) {
+		Eigen::Vector4f PerspectiveProjection::toFrustum(const Eigen::Vector4f &vectorInCameraSpace) {
 			return normalize(frustum * vectorInCameraSpace);
 		}
 	}

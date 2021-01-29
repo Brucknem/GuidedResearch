@@ -2,10 +2,11 @@
 
 #include "gtest/gtest.h"
 #include <iostream>
+#include <PerspectiveProjection.hpp>
 
 #include "Camera.hpp"
 #include "Intrinsics.hpp"
-#include "Perspective.hpp"
+#include "perspectiveProjectionProjection.hpp"
 
 namespace providentia {
 	namespace tests {
@@ -87,21 +88,21 @@ namespace providentia {
 		 * Tests the camera frustum matrix.
 		 */
 		TEST_F(CameraTests, testCameraFrustum) {
-			providentia::camera::Perspective perspective(8, 1920.f / 1200, 4);
+			providentia::camera::PerspectiveProjection perspectiveProjection(8, 1920.f / 1200, 4);
 
 			Eigen::Vector4f pointInCameraSpace;
 
 			Eigen::Vector4f pointInFrustum;
 			pointInCameraSpace << 0, 0, 1, 1;
-			pointInFrustum = perspective.toFrustum(pointInCameraSpace);
+			pointInFrustum = perspectiveProjection.toFrustum(pointInCameraSpace);
 			assertVectorsNearEqual(pointInFrustum, 0, 0, 1);
 
 			pointInCameraSpace << 4, 7, 1, 1;
-			pointInFrustum = perspective.toFrustum(pointInCameraSpace);
+			pointInFrustum = perspectiveProjection.toFrustum(pointInCameraSpace);
 			assertVectorsNearEqual(pointInFrustum, 4, 7, 1);
 
 			pointInCameraSpace << 0, 0, 1000, 1;
-			pointInFrustum = perspective.toFrustum(pointInCameraSpace);
+			pointInFrustum = perspectiveProjection.toFrustum(pointInCameraSpace);
 			assertVectorsNearEqual(pointInFrustum, 0, 0, 1000);
 		}
 
@@ -110,24 +111,24 @@ namespace providentia {
 		 */
 		TEST_F(CameraTests, testCameraFrustumNormalized) {
 			float aspect = 1920.f / 1200;
-			providentia::camera::Perspective perspective(8, aspect, 4);
+			providentia::camera::PerspectiveProjection perspectiveProjection(8, aspect, 4);
 
 			Eigen::Vector4f pointInCameraSpace;
 			Eigen::Vector4f pointInNormalizedFrustum;
 			pointInCameraSpace << 0, 0, 1, 1;
-			pointInNormalizedFrustum = perspective * pointInCameraSpace;
+			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
 			assertVectorsNearEqual(pointInNormalizedFrustum, 0, 0, -1);
 
 			pointInCameraSpace << -1, 1 / aspect, 1, 1;
-			pointInNormalizedFrustum = perspective * pointInCameraSpace;
+			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
 			assertVectorsNearEqual(pointInNormalizedFrustum, -1, -1, -1);
 
 			pointInCameraSpace << 1, -1 / aspect, 1, 1;
-			pointInNormalizedFrustum = perspective * pointInCameraSpace;
+			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
 			assertVectorsNearEqual(pointInNormalizedFrustum, 1, 1, -1);
 
 			pointInCameraSpace << 0, 0, 1000, 1;
-			pointInNormalizedFrustum = perspective * pointInCameraSpace;
+			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
 			assertVectorsNearEqual(pointInNormalizedFrustum, 0, 0, 1);
 		}
 

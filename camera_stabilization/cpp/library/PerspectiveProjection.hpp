@@ -2,8 +2,8 @@
 // Created by brucknem on 28.01.21.
 //
 
-#ifndef CAMERASTABILIZATION_PERSPECTIVE_HPP
-#define CAMERASTABILIZATION_PERSPECTIVE_HPP
+#ifndef CAMERASTABILIZATION_PERSPECTIVEPROJECTION_HPP
+#define CAMERASTABILIZATION_PERSPECTIVEPROJECTION_HPP
 
 #include <ostream>
 #include "Eigen/Dense"
@@ -15,7 +15,7 @@ namespace providentia {
 		/**
 		 * Class performing the perspective transformation from camera space to normalized device coordinates.
 		 */
-		class Perspective {
+		class PerspectiveProjection {
 		private:
 			/**
 			 * Buffer used during calculations of different vectors.
@@ -71,13 +71,14 @@ namespace providentia {
 			 * @param nearPlaneDistance The distance [m] of the near plane of the view frustum.
 			 * @param farPlaneDistance The distance [m] of the far plane of the view frustum.
 			 */
-			Perspective(float sensorWidth, float aspectRatio, float focalLength, float nearPlaneDistance = 1.f,
-						float farPlaneDistance = 1000.f);
+			PerspectiveProjection(float sensorWidth, float aspectRatio, float focalLength,
+								  float nearPlaneDistance = 1.f,
+								  float farPlaneDistance = 1000.f);
 
 			/**
 			 * @destructor
 			 */
-			virtual ~Perspective() = default;
+			virtual ~PerspectiveProjection() = default;
 
 			/**
 			 * @toString
@@ -103,7 +104,7 @@ namespace providentia {
 			/**
 			 * @stream
 			 */
-			friend std::ostream &operator<<(std::ostream &os, const Perspective &perspective);
+			friend std::ostream &operator<<(std::ostream &os, const PerspectiveProjection &perspective);
 
 			/**
 			 * Sets the field of view based on the physical camera parameters.
@@ -147,4 +148,4 @@ namespace providentia {
 
 	}
 }
-#endif //CAMERASTABILIZATION_PERSPECTIVE_HPP
+#endif //CAMERASTABILIZATION_PERSPECTIVEPROJECTION_HPP
