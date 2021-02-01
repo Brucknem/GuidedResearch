@@ -77,3 +77,6 @@ fabric.properties
 # Doxygen
 html/*
 latex/*
+
+# Include lib
+!/lib/
