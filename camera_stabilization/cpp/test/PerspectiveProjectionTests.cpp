@@ -49,7 +49,6 @@ namespace providentia {
 
 			pointInCameraSpace << -1, 1 / aspect, 1, 1;
 			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
-			std::cout << pointInClipSpace << std::endl;
 			assertVectorsNearEqual(pointInClipSpace, -1, 1, -1);
 
 			pointInCameraSpace << 1, -1 / aspect, 1, 1;
