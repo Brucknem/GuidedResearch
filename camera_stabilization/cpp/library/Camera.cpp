@@ -9,21 +9,24 @@ namespace providentia {
 	namespace camera {
 #pragma region Camera
 
-		Camera::Camera(const Eigen::Vector4f &intrinsics, const Eigen::Vector3f &translation,
-					   const Eigen::Vector3f &rotation) : Camera(providentia::camera::Intrinsics(intrinsics),
-																 translation, rotation) {}
 
-		Camera::Camera(const Intrinsics &_intrinsics, const Eigen::Vector3f &translation,
+		Camera::Camera(const float sensorWidth, const float aspectRatio, const float focalLength,
+					   const Eigen::Vector2f &_imageSize, const Eigen::Vector3f &translation,
 					   const Eigen::Vector3f &rotation) {
-			intrinsics = providentia::camera::Intrinsics(_intrinsics);
+			perspectiveProjection = std::make_shared<providentia::camera::PerspectiveProjection>(sensorWidth,
+																								 aspectRatio,
+																								 focalLength);
+			imageSize = _imageSize;
 			setTranslation(translation);
 			setRotation(rotation);
 		}
 
-
-		const Intrinsics &Camera::getCameraMatrix() const {
-			return intrinsics;
-		}
+//		Camera::Camera(const Intrinsics &_intrinsics, const Eigen::Vector3f &translation,
+//					   const Eigen::Vector3f &rotation) {
+//			intrinsics = providentia::camera::Intrinsics(_intrinsics);
+//			setTranslation(translation);
+//			setRotation(rotation);
+//		}
 
 		const Eigen::Matrix4f &Camera::getTranslation() const {
 			return translation;
@@ -33,9 +36,10 @@ namespace providentia {
 			return rotation;
 		}
 
-		Eigen::Vector3f Camera::operator*(const Eigen::Vector4f &vector) {
+		Eigen::Vector2f Camera::operator*(const Eigen::Vector4f &vector) {
 			Eigen::Vector4f pointInCameraSpace = worldToCamera * vector;
-			return intrinsics * pointInCameraSpace;
+			Eigen::Vector2f normalizedDeviceCoordinate = *perspectiveProjection * pointInCameraSpace;
+			return (normalizedDeviceCoordinate + Eigen::Vector2f::Ones()) / 2;
 		}
 
 		void Camera::setTranslation(const Eigen::Vector3f &_translation) {
@@ -87,14 +91,14 @@ namespace providentia {
 		}
 
 		std::ostream &operator<<(std::ostream &os, const Camera &obj) {
-			os << "Intrinsics" << std::endl
-			   << obj.getCameraMatrix() << std::endl;
+//			os << "Intrinsics" << std::endl
+//			   << obj.intrinsics << std::endl;
 			os << "Translation" << std::endl
-			   << obj.getTranslation() << std::endl;
+			   << obj.translation << std::endl;
 			os << "Rotation" << std::endl
-			   << obj.getRotation() << std::endl;
+			   << obj.rotation << std::endl;
 			os << "View" << std::endl
-			   << obj.getWorldToCameraTransformation();
+			   << obj.worldToCamera;
 			return os;
 		}
 
@@ -103,7 +107,7 @@ namespace providentia {
 #pragma region BlenderCamera
 
 		BlenderCamera::BlenderCamera(const Eigen::Vector3f &translation, const Eigen::Vector3f &rotation) : Camera(
-				providentia::camera::BlenderIntrinsics(), translation, rotation) {}
+				8, 1920.0f / 1200, 4, Eigen::Vector2f(1920, 1200), translation, rotation) {}
 
 #pragma endregion BlenderCamera
 

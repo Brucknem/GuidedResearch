@@ -5,44 +5,10 @@
 
 #include "Camera.hpp"
 #include "Intrinsics.hpp"
-#include "PerspectiveProjection.hpp"
+#include "CameraTestBase.hpp"
 
 namespace providentia {
 	namespace tests {
-
-		/**
-		 * Asserts that the elements of the given vectors are not further away than the maximal difference.
-		 */
-		void assertVectorsNearEqual(const Eigen::VectorXf &a, const Eigen::VectorXf &b, float maxDifference = 1e-4) {
-			Eigen::VectorXf difference = a - b;
-			for (int i = 0; i < difference.rows(); i++) {
-				EXPECT_NEAR(difference(i), 0, maxDifference);
-			}
-		}
-
-		/**
-		 * Asserts that the elements of the given vectors are not further away than the maximal difference.
-		 */
-		void assertVectorsNearEqual(const Eigen::Vector4f &a, float x, float y, float z, float w = 1,
-									float maxDifference = 1e-4) {
-			assertVectorsNearEqual(a, Eigen::Vector4f(x, y, z, w), maxDifference);
-		}
-
-		/**
-		 * Asserts that the elements of the given vectors are not further away than the maximal difference.
-		 */
-		void assertVectorsNearEqual(const Eigen::Vector3f &a, float x, float y, float z = 1,
-									float maxDifference = 1e-4) {
-			assertVectorsNearEqual(Eigen::Vector4f(a(0), a(1), a(2), 1), x, y, z, 1, maxDifference);
-		}
-
-		/**
-		 * Asserts that the elements of the given vectors are not further away than the maximal difference.
-		 */
-		void assertVectorsNearEqual(const Eigen::Vector2f &a, float x, float y,
-									float maxDifference = 1e-4) {
-			assertVectorsNearEqual(Eigen::Vector3f(a(0), a(1), 1), x, y, 1, maxDifference);
-		}
 
 		/**
 		 * Asserts that the camera rotation matrix is built up by the given right, up and forward vectors.
@@ -55,159 +21,25 @@ namespace providentia {
 		}
 
 		/**
-		 * Asserts that the camera translation is the given ecpected translation.
+		 * Asserts that the camera translation is the given expected translation.
 		 */
 		void assertTranslation(const providentia::camera::Camera &camera, const Eigen::Vector3f &expectedTranslation) {
 			assertVectorsNearEqual(camera.getTranslation().block<3, 1>(0, 3), expectedTranslation);
 		}
 
-		/**
-		 * Base class for the camera tests.
-		 */
-		class CameraTests : public ::testing::Test {
-		protected:
-			/**
-			 * Some test intrinsics.
-			 */
-			Eigen::Vector4f intrinsics = Eigen::Vector4f(0.05, 0.05, 1920. / 2, 1200. / 2);
-
-			/**
-			 * A test translation.
-			 */
-			Eigen::Vector3f translation = Eigen::Vector3f(0, -10, 5);
-
-			/**
-			 * A test camera rotation.
-			 */
-			Eigen::Vector3f rotation = Eigen::Vector3f(90, 0, 0);
-
+		class CameraTests : public CameraTestBase {
 		public:
-			/**
-			 * @destructor
-			 */
+			Eigen::Vector2f imageSize{1920, 1200};
+			providentia::camera::Camera camera{8.f, 1920.f / 1200, 4.f, imageSize, translation, rotation};
+
 			~CameraTests() override = default;
 		};
-
-		/**
-		 * Tests the camera intrinsics matrix.
-		 */
-		TEST_F(CameraTests, testCameraIntrinsics) {
-			providentia::camera::Intrinsics matrix(intrinsics);
-
-			assertVectorsNearEqual(
-					Eigen::Vector4f(matrix.getFocalLength()(0), matrix.getFocalLength()(1), matrix.getCenter()(0),
-									matrix.getCenter()(1)), intrinsics);
-		}
-
-		/**
-		 * Tests the camera frustum matrix.
-		 */
-		TEST_F(CameraTests, testCameraFrustum) {
-			providentia::camera::PerspectiveProjection perspectiveProjection(8, 1920.f / 1200, 4);
-
-			Eigen::Vector4f pointInCameraSpace;
-
-			Eigen::Vector4f pointInFrustum;
-			pointInCameraSpace << 0, 0, 1, 1;
-			pointInFrustum = perspectiveProjection.toFrustum(pointInCameraSpace);
-			assertVectorsNearEqual(pointInFrustum, 0, 0, 1);
-
-			pointInCameraSpace << 4, 7, 1, 1;
-			pointInFrustum = perspectiveProjection.toFrustum(pointInCameraSpace);
-			assertVectorsNearEqual(pointInFrustum, 4, 7, 1);
-
-			pointInCameraSpace << 0, 0, 1000, 1;
-			pointInFrustum = perspectiveProjection.toFrustum(pointInCameraSpace);
-			assertVectorsNearEqual(pointInFrustum, 0, 0, 1000);
-		}
-
-
-		/**
-		 * Tests the camera intrinsics matrix.
-		 */
-		TEST_F(CameraTests, testCameraToClipSpace) {
-			float aspect = 1920.f / 1200;
-			providentia::camera::PerspectiveProjection perspectiveProjection(8, aspect, 4);
-
-			Eigen::Vector4f pointInCameraSpace;
-			Eigen::Vector3f pointInClipSpace;
-			pointInCameraSpace << 0, 0, 1, 1;
-			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
-			assertVectorsNearEqual(pointInClipSpace, 0, 0, -1);
-
-			pointInCameraSpace << -1, 1 / aspect, 1, 1;
-			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
-			assertVectorsNearEqual(pointInClipSpace, -1, 1, -1);
-
-			pointInCameraSpace << 1, -1 / aspect, 1, 1;
-			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
-			assertVectorsNearEqual(pointInClipSpace, 1, -1, -1);
-
-			pointInCameraSpace << 0, 0, 1, 1;
-			pointInCameraSpace *= 1000;
-			pointInCameraSpace.w() = 1;
-			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
-			assertVectorsNearEqual(pointInClipSpace, 0, 0, 1);
-
-			pointInCameraSpace << 1, 1 / aspect, 1, 1;
-			pointInCameraSpace *= 1000;
-			pointInCameraSpace.w() = 1;
-			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
-			assertVectorsNearEqual(pointInClipSpace, 1, 1, 1);
-
-			pointInCameraSpace << -1, -1 / aspect, 1, 1;
-			pointInCameraSpace *= 1000;
-			pointInCameraSpace.w() = 1;
-			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
-			assertVectorsNearEqual(pointInClipSpace, -1, -1, 1);
-		}
-
-		/**
-		 * Tests the camera intrinsics matrix.
-		 */
-		TEST_F(CameraTests, testCameraToNormalizedDeviceCoordinates) {
-			float aspect = 1920.f / 1200;
-			providentia::camera::PerspectiveProjection perspectiveProjection(8, aspect, 4);
-
-			Eigen::Vector4f pointInCameraSpace;
-			Eigen::Vector2f normalizedDeviceCoordinate;
-			pointInCameraSpace << 0, 0, 1, 1;
-			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(normalizedDeviceCoordinate, 0, 0);
-
-			pointInCameraSpace << -1, 1 / aspect, 1, 1;
-			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(normalizedDeviceCoordinate, -1, 1);
-
-			pointInCameraSpace << 1, -1 / aspect, 1, 1;
-			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(normalizedDeviceCoordinate, 1, -1);
-
-			pointInCameraSpace << 0, 0, 1, 1;
-			pointInCameraSpace *= 1000;
-			pointInCameraSpace.w() = 1;
-			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(normalizedDeviceCoordinate, 0, 0);
-
-			pointInCameraSpace << 1, 1 / aspect, 1, 1;
-			pointInCameraSpace *= 1000;
-			pointInCameraSpace.w() = 1;
-			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(normalizedDeviceCoordinate, 1, 1);
-
-			pointInCameraSpace << -1, -1 / aspect, 1, 1;
-			pointInCameraSpace *= 1000;
-			pointInCameraSpace.w() = 1;
-			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(normalizedDeviceCoordinate, -1, -1);
-		}
-
 
 		/**
 		 * Tests the camera rotation matrix that is built from the euler angles rotation vector.
 		 */
 		TEST_F(CameraTests, testCameraRotationMatrix) {
-			providentia::camera::Camera camera(intrinsics, translation, Eigen::Vector3f::Zero());
+			camera.setRotation(0, 0, 0);
 			assertRotation(camera, Eigen::Vector3f::UnitX(), Eigen::Vector3f::UnitY(), -Eigen::Vector3f::UnitZ());
 
 			camera.setRotation(90, 0, 0);
@@ -254,7 +86,6 @@ namespace providentia {
 		 * Tests the camera translation matrix that is built from the translation vector.
 		 */
 		TEST_F(CameraTests, testCameraTranslationMatrix) {
-			providentia::camera::Camera camera(intrinsics, translation, rotation);
 			assertTranslation(camera, translation);
 
 			translation = Eigen::Vector3f(10, 10, 10);
@@ -270,8 +101,6 @@ namespace providentia {
 		 * Tests the camera translation matrix that is built from the translation vector.
 		 */
 		TEST_F(CameraTests, testCameraViewMatrix) {
-			providentia::camera::Camera camera(intrinsics, translation, rotation);
-
 			Eigen::Matrix4f expectedView;
 			expectedView << 1, 0, 0, 0,
 					0, 0, 1, -10,
@@ -288,8 +117,6 @@ namespace providentia {
 		 * Tests the camera translation matrix that is built from the translation vector.
 		 */
 		TEST_F(CameraTests, testWorldToCameraTransformation) {
-			providentia::camera::Camera camera(intrinsics, translation, rotation);
-
 			Eigen::Vector4f pointInWorldSpace;
 			Eigen::Vector4f pointInCameraSpace;
 

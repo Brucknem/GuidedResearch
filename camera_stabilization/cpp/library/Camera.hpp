@@ -5,12 +5,11 @@
 #ifndef CAMERASTABILIZATION_CAMERA_HPP
 #define CAMERASTABILIZATION_CAMERA_HPP
 
-#include "Eigen/Dense"
-#include "Intrinsics.hpp"
 #include <memory>
 
-// TODO
-
+#include "Eigen/Dense"
+#include "Intrinsics.hpp"
+#include "PerspectiveProjection.hpp"
 
 namespace providentia {
 	namespace camera {
@@ -20,10 +19,20 @@ namespace providentia {
 		 */
 		class Camera {
 		private:
+//			/**
+//			 * The camera intrinsic parameters.
+//			 */
+//			providentia::camera::Intrinsics intrinsics = providentia::camera::Intrinsics(0, 0, 0, 0);
+
 			/**
-			 * The camera intrinsic parameters.
+			 * The perspective transformation from camera space to normalized device coordinates.
 			 */
-			providentia::camera::Intrinsics intrinsics = providentia::camera::Intrinsics(0, 0, 0, 0);
+			std::shared_ptr<providentia::camera::PerspectiveProjection> perspectiveProjection;
+
+			/**
+			 * The image size in pixels.
+			 */
+			Eigen::Vector2f imageSize;
 
 			/**
 			 * The camera translation in world space.
@@ -50,32 +59,31 @@ namespace providentia {
 			/**
 			 * @constructor
 			 *
-			 * @param intrinsics A vector of camera intrinsic parameters.
+			 * @param sensorWidth The physical width [mm] of the camera sensor. Given by the camera specifications.
+			 * @param aspectRatio The ratio of width to height of the camera sensor. Given by the camera specifications.
+			 * @param imageSize The size [px] of the output image.
+			 * @param focalLength The focal length [mm] of the camera. Given by the camera specifications.
 			 * @param translation The translation of the camera in world space.
 			 * @param rotation The rotation of the camera in world space.
 			 */
-			Camera(const Eigen::Vector4f &intrinsics, const Eigen::Vector3f &translation,
-				   const Eigen::Vector3f &rotation);
+			Camera(float sensorWidth, float aspectRatio, float focalLength,
+				   const Eigen::Vector2f &imageSize, const Eigen::Vector3f &translation = Eigen::Vector3f::Zero(),
+				   const Eigen::Vector3f &rotation = Eigen::Vector3f::Zero());
 
-			/**
-			 * @constructor
-			 *
-			 * @param intrinsics A vector of camera intrinsic parameters.
-			 * @param translation The translation of the camera in world space.
-			 * @param rotation The rotation of the camera in world space.
-			 */
-			Camera(const providentia::camera::Intrinsics &intrinsics, const Eigen::Vector3f &translation,
-				   const Eigen::Vector3f &rotation);
+//			/**
+//			 * @constructor
+//			 *
+//			 * @param intrinsics A vector of camera intrinsic parameters.
+//			 * @param translation The translation of the camera in world space.
+//			 * @param rotation The rotation of the camera in world space.
+//			 */
+//			Camera(const providentia::camera::Intrinsics &intrinsics, const Eigen::Vector3f &translation,
+//				   const Eigen::Vector3f &rotation);
 
 			/**
 			 * @destructor
 			 */
 			virtual ~Camera() = default;
-
-			/**
-			 * @get
-			 */
-			const Intrinsics &getCameraMatrix() const;
 
 			/**
 			 * @get
@@ -115,7 +123,7 @@ namespace providentia {
 			/**
 			 * @operator
 			 */
-			Eigen::Vector3f operator*(const Eigen::Vector4f &vector);
+			Eigen::Vector2f operator*(const Eigen::Vector4f &vector);
 
 			/**
 			 * Writes the camera object to the stream.

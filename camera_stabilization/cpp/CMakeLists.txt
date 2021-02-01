@@ -95,12 +95,13 @@ target_include_directories(VisualizeWatershed PUBLIC "${PROJECT_BINARY_DIR}")
 ########################################################################################################################
 enable_testing()
 
-add_executable(Tests tests/ImageTestBase.cpp
+add_executable(Tests tests/ImageTestBase.cpp tests/CameraTestBase.cpp
         tests/FeatureDetectorTests.cpp
         tests/FeatureMatcherTests.cpp
         tests/DynamicStabiliationTests.cpp
         tests/BackgroundSubtractorTests.cpp
         tests/CameraTests.cpp
+        tests/PerspectiveProjectionTests.cpp
         )
 target_link_libraries(Tests PUBLIC libCameraStabilization gtest_main ${OpenCV_LIBS})
 target_include_directories(Tests PUBLIC tests "${PROJECT_BINARY_DIR}")
