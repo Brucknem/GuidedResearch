@@ -42,17 +42,17 @@ namespace providentia {
 			/**
 			 * Some test intrinsics.
 			 */
-			Eigen::Vector4f intrinsics = Eigen::Vector4f(0.05, 0.05, 1920. / 2, 1200. / 2);
+			Eigen::Vector4f intrinsics = {0.05, 0.05, 1920. / 2, 1200. / 2};
 
 			/**
 			 * A test translation.
 			 */
-			Eigen::Vector3f translation = Eigen::Vector3f(0, -10, 5);
+			Eigen::Vector3f translation = {0, -10, 5};
 
 			/**
 			 * A test camera rotation.
 			 */
-			Eigen::Vector3f rotation = Eigen::Vector3f(90, 0, 0);
+			Eigen::Vector3f rotation = {90, 0, 0};
 
 		public:
 			/**

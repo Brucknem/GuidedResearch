@@ -30,7 +30,7 @@ namespace providentia {
 		class CameraTests : public CameraTestBase {
 		public:
 			Eigen::Vector2f imageSize{1920, 1200};
-			providentia::camera::Camera camera{8.f, 1920.f / 1200, 4.f, imageSize, translation, rotation};
+			providentia::camera::Camera camera{32, 1920.f / 1200, 20, imageSize, translation, rotation};
 
 			~CameraTests() override = default;
 		};
@@ -88,11 +88,11 @@ namespace providentia {
 		TEST_F(CameraTests, testCameraTranslationMatrix) {
 			assertTranslation(camera, translation);
 
-			translation = Eigen::Vector3f(10, 10, 10);
+			translation = {10, 10, 10};
 			camera.setTranslation(translation);
 			assertTranslation(camera, translation);
 
-			translation = Eigen::Vector3f(-M_PI, M_E, M_PI * M_E);
+			translation = {-M_PI, M_E, M_PI * M_E};
 			camera.setTranslation(translation);
 			assertTranslation(camera, translation);
 		}
@@ -135,6 +135,51 @@ namespace providentia {
 			pointInWorldSpace << -10, -10, -10, 1;
 			pointInCameraSpace = camera.getWorldToCameraTransformation() * pointInWorldSpace;
 			assertVectorsNearEqual(pointInCameraSpace, -10, -15, 0);
+		}
+
+
+		/**
+		 * Tests the camera translation matrix that is built from the translation vector.
+		 */
+		TEST_F(CameraTests, testRenderToImage) {
+			Eigen::Vector4f pointInWorldSpace;
+			Eigen::Vector2f pointInCameraSpace;
+
+			float maxDifference = 1e-3;
+
+			pointInWorldSpace << 0, 0, 0, 1;
+			pointInCameraSpace = camera * pointInWorldSpace;
+			assertVectorsNearEqual(pointInCameraSpace, 960, 0);
+
+			pointInWorldSpace << 8, 0, 0, 1;
+			pointInCameraSpace = camera * pointInWorldSpace;
+			assertVectorsNearEqual(pointInCameraSpace, 1920, 0);
+
+			pointInWorldSpace << -8, 0, 0, 1;
+			pointInCameraSpace = camera * pointInWorldSpace;
+			assertVectorsNearEqual(pointInCameraSpace, 0, 0, maxDifference);
+
+			pointInWorldSpace << 0, 0, 10, 1;
+			pointInCameraSpace = camera * pointInWorldSpace;
+			assertVectorsNearEqual(pointInCameraSpace, 960, 1200, maxDifference);
+
+			pointInWorldSpace << 8, 0, 10, 1;
+			pointInCameraSpace = camera * pointInWorldSpace;
+			assertVectorsNearEqual(pointInCameraSpace, 1920, 1200, maxDifference);
+
+			pointInWorldSpace << -8, 0, 10, 1;
+			pointInCameraSpace = camera * pointInWorldSpace;
+			assertVectorsNearEqual(pointInCameraSpace, 0, 1200, maxDifference);
+
+			pointInWorldSpace << 0, 0, 5, 1;
+			pointInCameraSpace = camera * pointInWorldSpace;
+			assertVectorsNearEqual(pointInCameraSpace, 1920.f / 2, 1200.f / 2, maxDifference);
+
+			for (int i = 0; i < 1000; i += 10) {
+				pointInWorldSpace << 0, i, 5, 1;
+				pointInCameraSpace = camera * pointInWorldSpace;
+				assertVectorsNearEqual(pointInCameraSpace, 1920.f / 2, 1200.f / 2, maxDifference);
+			}
 		}
 	}// namespace test
 }// namespace providentia
