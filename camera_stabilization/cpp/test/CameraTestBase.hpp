@@ -54,6 +54,21 @@ namespace providentia {
 			 */
 			Eigen::Vector3f rotation = {90, 0, 0};
 
+			/**
+			 * Buffer for test points in world space.
+			 */
+			Eigen::Vector4f pointInWorldSpace;
+
+			/**
+			 * Buffer for test points in camera space.
+			 */
+			Eigen::Vector4f pointInCameraSpace;
+
+			/**
+			 * Buffer for test points in image space.
+			 */
+			Eigen::Vector2f pointInImageSpace;
+
 		public:
 			/**
 			 * @destructor

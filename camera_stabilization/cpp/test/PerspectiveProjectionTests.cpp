@@ -23,9 +23,6 @@ namespace providentia {
 		 * Tests the camera frustum matrix.
 		 */
 		TEST_F(PerspectiveProjectionTests, testCameraFrustum) {
-
-			Eigen::Vector4f pointInCameraSpace;
-
 			Eigen::Vector4f pointInFrustum;
 			pointInCameraSpace << 0, 0, 1, 1;
 			pointInFrustum = perspectiveProjection.toFrustum(pointInCameraSpace);
@@ -45,7 +42,6 @@ namespace providentia {
 		 * Tests the camera intrinsics matrix.
 		 */
 		TEST_F(PerspectiveProjectionTests, testCameraToClipSpace) {
-			Eigen::Vector4f pointInCameraSpace;
 			Eigen::Vector3f pointInClipSpace;
 			pointInCameraSpace << 0, 0, 1, 1;
 			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
@@ -53,6 +49,7 @@ namespace providentia {
 
 			pointInCameraSpace << -1, 1 / aspect, 1, 1;
 			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
+			std::cout << pointInClipSpace << std::endl;
 			assertVectorsNearEqual(pointInClipSpace, -1, 1, -1);
 
 			pointInCameraSpace << 1, -1 / aspect, 1, 1;
@@ -82,7 +79,6 @@ namespace providentia {
 		 * Tests the camera intrinsics matrix.
 		 */
 		TEST_F(PerspectiveProjectionTests, testCameraToNormalizedDeviceCoordinates) {
-			Eigen::Vector4f pointInCameraSpace;
 			Eigen::Vector2f normalizedDeviceCoordinate;
 			pointInCameraSpace << 0, 0, 1, 1;
 			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
