@@ -33,7 +33,7 @@ namespace providentia {
 						if (row == column) {
 							value -= 1;
 						}
-						EXPECT_NEAR(value, 0, 1e-3);
+						EXPECT_NEAR(value, 0, 1e-2);
 					}
 				}
 

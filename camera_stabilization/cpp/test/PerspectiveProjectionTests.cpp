@@ -3,7 +3,6 @@
 #include "gtest/gtest.h"
 #include <iostream>
 
-#include "Camera.hpp"
 #include "CameraTestBase.hpp"
 #include "Intrinsics.hpp"
 #include "PerspectiveProjection.hpp"
@@ -11,11 +10,24 @@
 namespace providentia {
 	namespace tests {
 
+		/**
+		 * Test setup for the perspective projection.
+		 */
 		class PerspectiveProjectionTests : public CameraTestBase {
-		public:
+		protected:
+			/**
+			 * A test aspect ratio.
+			 */
 			float aspect = 1920.f / 1200;
+
+			/**
+			 * A test perspective projection.
+			 */
 			providentia::camera::PerspectiveProjection perspectiveProjection{8, aspect, 4};
 
+			/**
+			 * @destructor
+			 */
 			~PerspectiveProjectionTests() override = default;
 		};
 

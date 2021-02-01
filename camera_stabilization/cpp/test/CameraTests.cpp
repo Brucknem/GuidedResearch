@@ -31,7 +31,7 @@ namespace providentia {
 		 * Common test setup for the camera tests.
 		 */
 		class CameraTests : public CameraTestBase {
-		public:
+		protected:
 			/**
 			 * A test image size.
 			 */
