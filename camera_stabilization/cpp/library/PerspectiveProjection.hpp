@@ -20,7 +20,7 @@ namespace providentia {
 			/**
 			 * Buffer used during calculations of different vectors.
 			 */
-			Eigen::Vector4f calculationBuffer;
+			Eigen::Vector3f calculationBuffer;
 
 			/**
 			 * The frustum matrix according to the view frustum of the pinhole camera model.
@@ -81,11 +81,6 @@ namespace providentia {
 			virtual ~PerspectiveProjection() = default;
 
 			/**
-			 * @toString
-			 */
-			std::string toString() const;
-
-			/**
 			 * Transforms the given vector to the frustum.
 			 *
 			 * @param vectorInCameraSpace The vector given in camera space.
@@ -94,12 +89,21 @@ namespace providentia {
 			Eigen::Vector4f toFrustum(const Eigen::Vector4f &vectorInCameraSpace);
 
 			/**
+			 * Transforms the given vector to clip space.
+			 *
+			 * @param vectorInCameraSpace The vector given in camera space.
+			 * @return The transformed vector in the clip space. <br>
+			 * 			x, y, z are in range [-1, 1]
+			 */
+			Eigen::Vector3f toClipSpace(const Eigen::Vector4f &vectorInCameraSpace);
+
+			/**
 			 * Projects the given vector from camera space to normalized device coordinates.
 			 *
 			 * @param vectorInCameraSpace The vector given in camera space.
-			 * @return The transformed vector in the normalized device coordinates. w coordinate is normalized to 1.
+			 * @return The transformed vector in the normalized device coordinates.
 			 */
-			Eigen::Vector3f operator*(const Eigen::Vector4f &vectorInCameraSpace);
+			Eigen::Vector2f operator*(const Eigen::Vector4f &vectorInCameraSpace);
 
 			/**
 			 * @stream

@@ -66,25 +66,23 @@ namespace providentia {
 			fieldOfView.y() = fieldOfView.x() / aspectRatio;
 		}
 
-		std::string PerspectiveProjection::toString() const {
-			std::stringstream ss;
-			ss << "Frustum" << std::endl << frustum << std::endl;
-			ss << "Normalization" << std::endl << normalization << std::endl;
-			ss << "Projection" << std::endl << projection << std::endl;
-			return ss.str();
-		}
-
 		std::ostream &operator<<(std::ostream &os, const PerspectiveProjection &perspective) {
-			os << perspective.toString();
+			os << "Frustum" << std::endl << perspective.frustum << std::endl;
+			os << "Normalization" << std::endl << perspective.normalization << std::endl;
+			os << "Projection" << std::endl << perspective.projection << std::endl;
 			return os;
 		}
 
-		Eigen::Vector3f PerspectiveProjection::operator*(const Eigen::Vector4f &vectorInCameraSpace) {
-			return normalize(projection * vectorInCameraSpace).head<3>();
+		Eigen::Vector2f PerspectiveProjection::operator*(const Eigen::Vector4f &vectorInCameraSpace) {
+			return toClipSpace(vectorInCameraSpace).head<2>();
 		}
 
 		Eigen::Vector4f PerspectiveProjection::toFrustum(const Eigen::Vector4f &vectorInCameraSpace) {
 			return normalize(frustum * vectorInCameraSpace);
+		}
+
+		Eigen::Vector3f PerspectiveProjection::toClipSpace(const Eigen::Vector4f &vectorInCameraSpace) {
+			return normalize(projection * vectorInCameraSpace).head<3>();
 		}
 	}
 }

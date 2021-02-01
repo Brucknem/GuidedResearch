@@ -4,11 +4,13 @@
 
 #include "Eigen/Dense"
 
+// TODO https://www.mathworks.com/help/vision/ug/camera-calibration.html
+
 namespace providentia {
 	namespace camera {
 
 		/**
-		 * The camera intrinsic parameters that are used to project vectors in
+		 * The camera intrinsic parameters that are used to project vectors from
 		 * camera space to image space.
 		 */
 		class Intrinsics {
@@ -81,12 +83,13 @@ namespace providentia {
 			 * Multiply the given vector and project to camera space.
 			 */
 			Eigen::Vector3f operator*(const Eigen::Vector3f &vector);
+
+			/**
+			 * Adds a string representation of the intrinsics to the given stream.
+			 */
+			friend std::ostream &operator<<(std::ostream &os, const Intrinsics &obj);
 		};
 
-		/**
-		 * Adds a string representation of the intrinsics to the given stream.
-		 */
-		std::ostream &operator<<(std::ostream &os, const Intrinsics &obj);
 
 		/**
 		 * Mock class for the intrinsics used in the blender test setup.

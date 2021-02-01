@@ -116,12 +116,12 @@ namespace providentia {
 			 * @operator
 			 */
 			Eigen::Vector3f operator*(const Eigen::Vector4f &vector);
-		};
 
-		/**
-		 * Writes the camera object to the stream.
-		 */
-		std::ostream &operator<<(std::ostream &os, const Camera &obj);
+			/**
+			 * Writes the camera object to the stream.
+			 */
+			friend std::ostream &operator<<(std::ostream &os, const Camera &obj);
+		};
 
 		/**
 		 * The virtual camera used in the blender test setup.

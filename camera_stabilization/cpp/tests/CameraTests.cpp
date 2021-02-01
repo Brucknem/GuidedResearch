@@ -37,6 +37,14 @@ namespace providentia {
 		}
 
 		/**
+		 * Asserts that the elements of the given vectors are not further away than the maximal difference.
+		 */
+		void assertVectorsNearEqual(const Eigen::Vector2f &a, float x, float y,
+									float maxDifference = 1e-4) {
+			assertVectorsNearEqual(Eigen::Vector3f(a(0), a(1), 1), x, y, 1, maxDifference);
+		}
+
+		/**
 		 * Asserts that the camera rotation matrix is built up by the given right, up and forward vectors.
 		 */
 		void assertRotation(const providentia::camera::Camera &camera, const Eigen::Vector3f &expectedRight,
@@ -113,44 +121,85 @@ namespace providentia {
 			assertVectorsNearEqual(pointInFrustum, 0, 0, 1000);
 		}
 
+
 		/**
 		 * Tests the camera intrinsics matrix.
 		 */
-		TEST_F(CameraTests, testCameraFrustumNormalized) {
+		TEST_F(CameraTests, testCameraToClipSpace) {
 			float aspect = 1920.f / 1200;
 			providentia::camera::PerspectiveProjection perspectiveProjection(8, aspect, 4);
 
 			Eigen::Vector4f pointInCameraSpace;
-			Eigen::Vector3f pointInNormalizedFrustum;
+			Eigen::Vector3f pointInClipSpace;
 			pointInCameraSpace << 0, 0, 1, 1;
-			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(pointInNormalizedFrustum, 0, 0, -1);
+			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
+			assertVectorsNearEqual(pointInClipSpace, 0, 0, -1);
 
 			pointInCameraSpace << -1, 1 / aspect, 1, 1;
-			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(pointInNormalizedFrustum, -1, 1, -1);
+			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
+			assertVectorsNearEqual(pointInClipSpace, -1, 1, -1);
 
 			pointInCameraSpace << 1, -1 / aspect, 1, 1;
-			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(pointInNormalizedFrustum, 1, -1, -1);
+			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
+			assertVectorsNearEqual(pointInClipSpace, 1, -1, -1);
 
 			pointInCameraSpace << 0, 0, 1, 1;
 			pointInCameraSpace *= 1000;
 			pointInCameraSpace.w() = 1;
-			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(pointInNormalizedFrustum, 0, 0, 1);
+			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
+			assertVectorsNearEqual(pointInClipSpace, 0, 0, 1);
 
 			pointInCameraSpace << 1, 1 / aspect, 1, 1;
 			pointInCameraSpace *= 1000;
 			pointInCameraSpace.w() = 1;
-			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(pointInNormalizedFrustum, 1, 1, 1);
+			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
+			assertVectorsNearEqual(pointInClipSpace, 1, 1, 1);
 
 			pointInCameraSpace << -1, -1 / aspect, 1, 1;
 			pointInCameraSpace *= 1000;
 			pointInCameraSpace.w() = 1;
-			pointInNormalizedFrustum = perspectiveProjection * pointInCameraSpace;
-			assertVectorsNearEqual(pointInNormalizedFrustum, -1, -1, 1);
+			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
+			assertVectorsNearEqual(pointInClipSpace, -1, -1, 1);
+		}
+
+		/**
+		 * Tests the camera intrinsics matrix.
+		 */
+		TEST_F(CameraTests, testCameraToNormalizedDeviceCoordinates) {
+			float aspect = 1920.f / 1200;
+			providentia::camera::PerspectiveProjection perspectiveProjection(8, aspect, 4);
+
+			Eigen::Vector4f pointInCameraSpace;
+			Eigen::Vector2f normalizedDeviceCoordinate;
+			pointInCameraSpace << 0, 0, 1, 1;
+			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
+			assertVectorsNearEqual(normalizedDeviceCoordinate, 0, 0);
+
+			pointInCameraSpace << -1, 1 / aspect, 1, 1;
+			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
+			assertVectorsNearEqual(normalizedDeviceCoordinate, -1, 1);
+
+			pointInCameraSpace << 1, -1 / aspect, 1, 1;
+			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
+			assertVectorsNearEqual(normalizedDeviceCoordinate, 1, -1);
+
+			pointInCameraSpace << 0, 0, 1, 1;
+			pointInCameraSpace *= 1000;
+			pointInCameraSpace.w() = 1;
+			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
+			assertVectorsNearEqual(normalizedDeviceCoordinate, 0, 0);
+
+			pointInCameraSpace << 1, 1 / aspect, 1, 1;
+			pointInCameraSpace *= 1000;
+			pointInCameraSpace.w() = 1;
+			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
+			assertVectorsNearEqual(normalizedDeviceCoordinate, 1, 1);
+
+			pointInCameraSpace << -1, -1 / aspect, 1, 1;
+			pointInCameraSpace *= 1000;
+			pointInCameraSpace.w() = 1;
+			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
+			assertVectorsNearEqual(normalizedDeviceCoordinate, -1, -1);
 		}
 
 
