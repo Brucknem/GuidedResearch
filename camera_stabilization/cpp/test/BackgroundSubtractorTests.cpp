@@ -10,7 +10,7 @@ namespace providentia {
 	namespace tests {
 
 		/**
-		 * Setup for the background segmentation tests.
+		 * Setup for the background segmentation test.
 		 */
 		class BackgroundSegmentationTests : public ImageTestBase {
 		public:

@@ -136,5 +136,5 @@ namespace providentia {
 			pointInCameraSpace = camera.getWorldToCameraTransformation() * pointInWorldSpace;
 			assertVectorsNearEqual(pointInCameraSpace, -10, -15, 0);
 		}
-	}// namespace tests
+	}// namespace test
 }// namespace providentia

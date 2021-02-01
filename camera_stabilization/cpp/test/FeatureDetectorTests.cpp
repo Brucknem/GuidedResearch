@@ -10,7 +10,7 @@ namespace providentia {
 	namespace tests {
 
 		/**
-		 * Setup for the feature detector tests.
+		 * Setup for the feature detector test.
 		 */
 		class FeatureDetectorTests : public ImageTestBase {
 		public:

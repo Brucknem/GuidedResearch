@@ -35,7 +35,7 @@ namespace providentia {
 									float maxDifference = 1e-4);
 
 		/**
-		 * Base class for the camera tests.
+		 * Base class for the camera test.
 		 */
 		class CameraTestBase : public ::testing::Test {
 		protected:

@@ -21,7 +21,7 @@ public:
     explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
         stereo = cv::cuda::createStereoBM(4, 15);
 //        stereo = cv::cuda::createStereoSGM();
-        right.upload(cv::imread("../tests/s40_n_cam_near_calibration_test_image.png"));
+        right.upload(cv::imread("../test/s40_n_cam_near_calibration_test_image.png"));
         cv::cuda::cvtColor(right, right, cv::COLOR_BGR2GRAY);
     }
 

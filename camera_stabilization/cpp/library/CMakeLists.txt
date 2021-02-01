@@ -1,4 +1,8 @@
 # add the main library
+
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+
 add_library(libCameraStabilization
         FeatureDetection.cpp
         DynamicStabilization.cpp
@@ -18,4 +22,4 @@ target_include_directories(libCameraStabilization
         )
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-target_link_libraries(libCameraStabilization Eigen3::Eigen)
+target_link_libraries(libCameraStabilization Eigen3::Eigen ${OpenCV_LIBS})

@@ -114,5 +114,5 @@ namespace providentia {
 			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
 			assertVectorsNearEqual(normalizedDeviceCoordinate, -1, -1);
 		}
-	}// namespace tests
+	}// namespace test
 }// namespace providentia

@@ -16,7 +16,7 @@ namespace providentia {
 	namespace tests {
 
 		/**
-		 * Base class for all tests.
+		 * Base class for all test.
 		 */
 		class ImageTestBase : public ::testing::Test {
 		protected:
@@ -31,7 +31,7 @@ namespace providentia {
 			cv::cuda::GpuMat testImgGPU;
 
 			/**
-			 * Sets up the random number generator for deterministic tests and loads the test image.
+			 * Sets up the random number generator for deterministic test and loads the test image.
 			 */
 			void SetUp() override;
 
