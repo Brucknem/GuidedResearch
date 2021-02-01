@@ -13,7 +13,7 @@ namespace providentia {
 		 * Setup for the feature detector test.
 		 */
 		class FeatureDetectorTests : public ImageTestBase {
-		public:
+		protected:
 
 			/**
 			 * @destructor
