@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "opencv2/opencv.hpp"
 #include "Eigen/Dense"
 #include "Intrinsics.hpp"
 #include "PerspectiveProjection.hpp"
@@ -23,6 +24,11 @@ namespace providentia {
 //			 * The camera intrinsic parameters.
 //			 */
 //			providentia::camera::Intrinsics intrinsics = providentia::camera::Intrinsics(0, 0, 0, 0);
+
+			/**
+			 * The currently rendering image.
+			 */
+			cv::Mat imageBuffer;
 
 			/**
 			 * Buffer for the calculation of the resulting pixel.
@@ -42,7 +48,7 @@ namespace providentia {
 			/**
 			 * The image size in pixels.
 			 */
-			Eigen::Vector2f imageSize;
+			Eigen::Vector2i imageSize;
 
 			/**
 			 * The camera translation in world space.
@@ -77,7 +83,7 @@ namespace providentia {
 			 * @param rotation The rotation of the camera in world space.
 			 */
 			Camera(float sensorWidth, float aspectRatio, float focalLength,
-				   const Eigen::Vector2f &imageSize, const Eigen::Vector3f &translation = Eigen::Vector3f::Zero(),
+				   const Eigen::Vector2i &imageSize, const Eigen::Vector3f &translation = Eigen::Vector3f::Zero(),
 				   const Eigen::Vector3f &rotation = Eigen::Vector3f::Zero());
 
 //			/**
@@ -121,6 +127,11 @@ namespace providentia {
 			const std::shared_ptr<providentia::camera::PerspectiveProjection> &getPerspectiveProjection() const;
 
 			/**
+			 * @get
+			 */
+			cv::Mat getImage() const;
+
+			/**
 			 * @set
 			 */
 			void setTranslation(const Eigen::Vector3f &_translation);
@@ -140,9 +151,14 @@ namespace providentia {
 			 */
 			void setRotation(float x, float y, float z);
 
-			// TODO Document!!
 			/**
+			 * Performs the whole rendering pipeline. <br>
 			 *
+			 * World -> Camera Space <br>
+			 * Camera Space -> Frustum <br>
+			 * Frustum -> Clip Space <br>
+			 * Clip Space -> Normalized device coordinates <br>
+			 * Normalized device coordinates -> Pixels <br>
 			 */
 			Eigen::Vector2f operator*(const Eigen::Vector4f &vector);
 
@@ -151,6 +167,20 @@ namespace providentia {
 			 */
 			friend std::ostream &operator<<(std::ostream &os, const Camera &obj);
 
+			/**
+			 * Renders the given vector onto the virtual image.
+			 */
+			void render(const Eigen::Vector4f &vector, const cv::Vec3f &color = {1, 1, 1});
+
+			/**
+			 * Renders the given vector onto the virtual image.
+			 */
+			void render(float x, float y, float z, const cv::Vec3f &color = {1, 1, 1});
+
+			/**
+			 * Clears the image buffer.
+			 */
+			void resetImage();
 		};
 
 		/**
@@ -166,13 +196,12 @@ namespace providentia {
 			 * @param rotation The rotation of the camera in world space.
 			 */
 			explicit BlenderCamera(const Eigen::Vector3f &translation = {0, -10, 5},
-								   const Eigen::Vector3f &rotation = {76.5, 0, 0});
+								   const Eigen::Vector3f &rotation = {90, 0, 0});
 
 			/**
 			 * @destructor
 			 */
-			virtual ~BlenderCamera() =
-			default;
+			~BlenderCamera() override = default;
 		};
 	}// namespace camera
 }// namespace providentia

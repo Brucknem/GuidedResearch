@@ -11,7 +11,7 @@ namespace providentia {
 
 
 		Camera::Camera(const float sensorWidth, const float aspectRatio, const float focalLength,
-					   const Eigen::Vector2f &_imageSize, const Eigen::Vector3f &translation,
+					   const Eigen::Vector2i &_imageSize, const Eigen::Vector3f &translation,
 					   const Eigen::Vector3f &rotation) {
 			perspectiveProjection = std::make_shared<providentia::camera::PerspectiveProjection>(sensorWidth,
 																								 aspectRatio,
@@ -113,12 +113,55 @@ namespace providentia {
 			return perspectiveProjection;
 		}
 
+
+		void Camera::render(float x, float y, float z, const cv::Vec3f &color) {
+			render({x, y, z, 1}, color);
+		}
+
+		void Camera::render(const Eigen::Vector4f &vector, const cv::Vec3f &color) {
+			if (imageBuffer.empty()) {
+				resetImage();
+			}
+			*this * vector;
+
+			for (int i = 0; i < 2; ++i) {
+				for (int j = 0; j < 2; ++j) {
+					Eigen::Vector2i nearestPixel = pointInImageSpace.cast<int>();
+					nearestPixel.x() += i;
+					nearestPixel.y() += j;
+					nearestPixel.y() = imageSize.y() - 1 - nearestPixel.y();
+
+					if (nearestPixel.x() >= imageSize.x() || nearestPixel.y() >= imageSize.y() ||
+						nearestPixel.x() < 0 || nearestPixel.y() < 0) {
+//						std::cout << "[" << nearestPixel[0] << ", " << nearestPixel[1] << "] out of frustum"
+//								  << std::endl;
+						continue;
+					}
+
+					float distance = (nearestPixel.cast<float>() - pointInImageSpace).norm();
+					cv::Vec4f _color = {color[0], color[1], color[2], (distance / (float) sqrt(2))};
+
+					imageBuffer.at<cv::Vec4f>(nearestPixel.y(), nearestPixel.x()) = _color;
+				}
+			}
+		}
+
+		void Camera::resetImage() {
+			imageBuffer = cv::Mat::zeros(cv::Size(imageSize.x(), imageSize.y()), CV_32FC4);
+		}
+
+		cv::Mat Camera::getImage() const {
+			return imageBuffer.clone();
+		}
+
 #pragma endregion Camera
 
 #pragma region BlenderCamera
 
-		BlenderCamera::BlenderCamera(const Eigen::Vector3f &translation, const Eigen::Vector3f &rotation) : Camera(
-				8, 1920.0f / 1200, 4, Eigen::Vector2f(1920, 1200), translation, rotation) {}
+		BlenderCamera::BlenderCamera(
+				const Eigen::Vector3f &translation,
+				const Eigen::Vector3f &rotation) : Camera(
+				32, 1920.0f / 1200, 20, {1920, 1200}, translation, rotation) {}
 
 #pragma endregion BlenderCamera
 

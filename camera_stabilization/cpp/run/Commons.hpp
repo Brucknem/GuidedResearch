@@ -7,9 +7,10 @@
 
 #include <stdexcept>
 #include "opencv2/opencv.hpp"
+#include "TimeMeasurable.hpp"
 
 namespace providentia {
-	namespace runnables {
+	namespace runnable {
 
 		/**
 		 * Gets the default video file path.
@@ -68,7 +69,7 @@ namespace providentia {
 		 * Base class for all run setups.
 		 * Wraps the main loop and field initializations.
 		 */
-		class BaseSetup {
+		class BaseSetup : public providentia::utils::TimeMeasurable {
 		protected:
 			/**
 			 * The current CPU frame.
@@ -201,7 +202,7 @@ namespace providentia {
 			/**
 			 * @destructor
 			 */
-			~BaseSetup();
+			~BaseSetup() override;
 
 			/**
 			 * The main loop of the setup. <br>
