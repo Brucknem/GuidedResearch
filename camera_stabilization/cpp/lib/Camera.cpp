@@ -4,6 +4,8 @@
 
 #include "Camera.hpp"
 #include <iostream>
+#include "ceres/ceres.h"
+#include "ceres/rotation.h"
 
 namespace providentia {
 	namespace camera {
@@ -28,17 +30,8 @@ namespace providentia {
 //			setRotation(rotation);
 //		}
 
-		const Eigen::Matrix4f &Camera::getTranslation() const {
-			return translation;
-		}
-
-		const Eigen::Matrix4f &Camera::getRotation() const {
-			return rotation;
-		}
-
 		Eigen::Vector2f Camera::operator*(const Eigen::Vector4f &vector) {
-			pointInCameraSpace = worldToCamera * vector;
-			pointInImageSpace = *perspectiveProjection * pointInCameraSpace;
+			pointInImageSpace = *perspectiveProjection * toCameraSpace(vector);
 			pointInImageSpace = (pointInImageSpace + Eigen::Vector2f::Ones()) / 2;
 			pointInImageSpace.x() *= imageSize.x();
 			pointInImageSpace.y() *= imageSize.y();
@@ -46,55 +39,15 @@ namespace providentia {
 		}
 
 		void Camera::setTranslation(const Eigen::Vector3f &_translation) {
-			setTranslation(_translation(0), _translation(1), _translation(2));
-		}
-
-		void Camera::setTranslation(float x, float y, float z) {
-			translation = Eigen::Matrix4f::Identity();
-			translation(0, 3) = x;
-			translation(1, 3) = y;
-			translation(2, 3) = z;
-
-			updateWorldToCamera();
+			translation = {_translation.x(), _translation.y(), _translation.z(), 0};
 		}
 
 		void Camera::setRotation(const Eigen::Vector3f &_rotation) {
-			setRotation(_rotation(0), _rotation(1), _rotation(2));
+			rotation = _rotation;
 		}
 
 		void Camera::setRotation(float x, float y, float z) {
-			rotation = Eigen::Matrix4f::Identity();
-			rotation(2, 2) = -1;
-
-			rotationCalculationBuffer = Eigen::Matrix4f::Identity();
-
-			rotationCalculationBuffer.block<3, 3>(0, 0) = Eigen::AngleAxisf(z * M_PI / 180,
-																			Eigen::Vector3f::UnitZ()).matrix();
-			rotation = rotation * rotationCalculationBuffer;
-
-			rotationCalculationBuffer.block<3, 3>(0, 0) = Eigen::AngleAxisf(-y * M_PI / 180,
-																			Eigen::Vector3f::UnitY()).matrix();
-			rotation = rotation * rotationCalculationBuffer;
-
-			rotationCalculationBuffer.block<3, 3>(0, 0) = Eigen::AngleAxisf(-x * M_PI / 180,
-																			Eigen::Vector3f::UnitX()).matrix();
-			rotation = rotation * rotationCalculationBuffer;
-
-			updateWorldToCamera();
-		}
-
-		const Eigen::Matrix4f &Camera::getWorldToCameraTransformation() const {
-			return worldToCamera;
-		}
-
-		const Eigen::Matrix4f &Camera::getCameraToWorldTransformation() const {
-			return cameraToWorld;
-		}
-
-		void Camera::updateWorldToCamera() {
-			cameraToWorld = rotation;
-			cameraToWorld.block<3, 1>(0, 3) = translation.block<3, 1>(0, 3);
-			worldToCamera = cameraToWorld.inverse();
+			setRotation({x, y, z});
 		}
 
 		std::ostream &operator<<(std::ostream &os, const Camera &obj) {
@@ -104,8 +57,6 @@ namespace providentia {
 			   << obj.translation << std::endl;
 			os << "Rotation" << std::endl
 			   << obj.rotation << std::endl;
-			os << "View" << std::endl
-			   << obj.worldToCamera;
 			return os;
 		}
 
@@ -152,6 +103,49 @@ namespace providentia {
 
 		cv::Mat Camera::getImage() const {
 			return imageBuffer.clone();
+		}
+
+		Eigen::Matrix4f Camera::getRotationMatrix() const {
+			Eigen::Vector3f rotationInRadians = rotation;
+			rotationInRadians.x() *= -1;
+			rotationInRadians.y() *= -1;
+			rotationInRadians *= M_PI / 180;
+
+			Eigen::Matrix4f zAxis;
+			float theta = rotationInRadians.z();
+			zAxis << cos(theta), -sin(theta), 0, 0,
+					sin(theta), cos(theta), 0, 0,
+					0, 0, 1, 0,
+					0, 0, 0, 1;
+
+			Eigen::Matrix4f yAxis;
+			theta = rotationInRadians.y();
+			yAxis << cos(theta), 0, sin(theta), 0,
+					0, 1, 0, 0,
+					-sin(theta), 0, cos(theta), 0,
+					0, 0, 0, 1;
+
+			Eigen::Matrix4f xAxis;
+			theta = rotationInRadians.x();
+			xAxis << 1, 0, 0, 0,
+					0, cos(theta), -sin(theta), 0,
+					0, sin(theta), cos(theta), 0,
+					0, 0, 0, 1;
+
+			Eigen::Matrix4f initialCameraRotation;
+			initialCameraRotation << 1, 0, 0, 0,
+					0, 1, 0, 0,
+					0, 0, -1, 0,
+					0, 0, 0, 1;
+			return (initialCameraRotation * zAxis * yAxis * xAxis);
+		}
+
+		Eigen::Vector4f Camera::toCameraSpace(const Eigen::Vector4f &vector) {
+			return getRotationMatrix().inverse() * (vector - translation);
+		}
+
+		Eigen::Vector4f Camera::toWorldSpace(const Eigen::Vector4f &vector) {
+			return (getRotationMatrix() * vector) + translation;
 		}
 
 #pragma endregion Camera

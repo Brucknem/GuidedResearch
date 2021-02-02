@@ -36,11 +36,6 @@ namespace providentia {
 			Eigen::Vector2f pointInImageSpace;
 
 			/**
-			 * Buffer for the intermediate vector in camera space.
-			 */
-			Eigen::Vector4f pointInCameraSpace;
-
-			/**
 			 * The perspective transformation from camera space to normalized device coordinates.
 			 */
 			std::shared_ptr<providentia::camera::PerspectiveProjection> perspectiveProjection;
@@ -53,22 +48,13 @@ namespace providentia {
 			/**
 			 * The camera translation in world space.
 			 */
-			Eigen::Matrix4f translation;
+			Eigen::Vector4f translation;
 
 			/**
 			 * The camera rotation in world space.
 			 */
-			Eigen::Matrix4f rotation, rotationCalculationBuffer;
+			Eigen::Vector3f rotation;
 
-			/**
-			 * The world to camera transformation matrix.
-			 */
-			Eigen::Matrix4f worldToCamera, cameraToWorld;
-
-			/**
-			 * Updates the world to camera transformation based on the translation and rotation.
-			 */
-			void updateWorldToCamera();
 
 		public:
 
@@ -104,27 +90,12 @@ namespace providentia {
 			/**
 			 * @get
 			 */
-			const Eigen::Matrix4f &getTranslation() const;
-
-			/**
-			 * @get
-			 */
-			const Eigen::Matrix4f &getRotation() const;
-
-			/**
-			 * @get
-			 */
-			const Eigen::Matrix4f &getWorldToCameraTransformation() const;
-
-			/**
-			 * @get
-			 */
-			const Eigen::Matrix4f &getCameraToWorldTransformation() const;
-
-			/**
-			 * @get
-			 */
 			const std::shared_ptr<providentia::camera::PerspectiveProjection> &getPerspectiveProjection() const;
+
+			/**
+			 * @get The rotation matrix from the angle axis rotation.
+			 */
+			Eigen::Matrix4f getRotationMatrix() const;
 
 			/**
 			 * @get
@@ -135,11 +106,6 @@ namespace providentia {
 			 * @set
 			 */
 			void setTranslation(const Eigen::Vector3f &_translation);
-
-			/**
-			 * @set
-			 */
-			void setTranslation(float x, float y, float z);
 
 			/**
 			 * @set
@@ -161,6 +127,16 @@ namespace providentia {
 			 * Normalized device coordinates -> Pixels <br>
 			 */
 			Eigen::Vector2f operator*(const Eigen::Vector4f &vector);
+
+			/**
+			 * Transforms a given vector from camera to world space.
+			 */
+			Eigen::Vector4f toWorldSpace(const Eigen::Vector4f &vector);
+
+			/**
+			 * Transforms a given vector from world to camera space.
+			 */
+			Eigen::Vector4f toCameraSpace(const Eigen::Vector4f &vector);
 
 			/**
 			 * Writes the camera object to the stream.
