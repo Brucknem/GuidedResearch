@@ -21,12 +21,18 @@ namespace providentia {
 			Solve(options, &problem, &summary);
 		}
 
-		void CameraPoseEstimator::addReprojectionResidual(const Eigen::Vector2i &pixel,
-														  const Eigen::Vector3d &worldCoordinate) {
+		void CameraPoseEstimator::addReprojectionResidual(const Eigen::Vector4d &worldCoordinate,
+														  const Eigen::Vector2d &pixel) {
+			addReprojectionResidual(Eigen::Vector3d(worldCoordinate.x(), worldCoordinate.y(), worldCoordinate.z()),
+									pixel);
+		}
+
+		void CameraPoseEstimator::addReprojectionResidual(const Eigen::Vector3d &worldCoordinate,
+														  const Eigen::Vector2d &pixel) {
 			ceres::CostFunction *cost_function = new ceres::AutoDiffCostFunction<ReprojectionResidual, 3, 3, 2>(
 					new ReprojectionResidual(pixel, worldCoordinate));
-//			problem.AddResidualBlock(cost_function, nullptr, camera.getTranslation().data(),
-//									 camera.getRotation().data());
+			problem.AddResidualBlock(cost_function, nullptr, (double *) camera.getTranslation().data(),
+									 (double *) camera.getRotation().data());
 		}
 
 	}

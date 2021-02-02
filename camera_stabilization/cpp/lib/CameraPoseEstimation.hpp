@@ -15,11 +15,11 @@ namespace providentia {
 
 		struct ReprojectionResidual {
 		private:
-			const Eigen::Vector2i pixel;
+			const Eigen::Vector2d pixel;
 			const Eigen::Vector3d worldCoordinate;
 
 		public:
-			ReprojectionResidual(Eigen::Vector2i _pixel, Eigen::Vector3d _worldCoordinate) :
+			ReprojectionResidual(Eigen::Vector2d _pixel, Eigen::Vector3d _worldCoordinate) :
 					pixel(std::move(_pixel)), worldCoordinate(std::move(_worldCoordinate)) {}
 
 			template<typename T>
@@ -53,9 +53,12 @@ namespace providentia {
 		public:
 			explicit CameraPoseEstimator(const providentia::camera::Camera &_camera);
 
-			void addReprojectionResidual(const Eigen::Vector2i &pixel, const Eigen::Vector3d &worldCoordinate);
+			void addReprojectionResidual(const Eigen::Vector3d &worldCoordinate, const Eigen::Vector2d &pixel);
+
+			void addReprojectionResidual(const Eigen::Vector4d &worldCoordinate, const Eigen::Vector2d &pixel);
 
 			void solve();
+
 		};
 	}
 }
