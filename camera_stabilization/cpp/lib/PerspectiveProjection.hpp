@@ -20,17 +20,17 @@ namespace providentia {
 			/**
 			 * The frustum matrix according to the view frustum of the pinhole camera model.
 			 */
-			Eigen::Matrix4f frustum;
+			Eigen::Matrix4d frustum;
 
 			/**
 			 * The matrix mapping the points in the view frustum to normalized device coordinates.
 			 */
-			Eigen::Matrix4f normalization;
+			Eigen::Matrix4d normalization;
 
 			/**
 			 * The total projection matrix mapping from camera space to image space.
 			 */
-			Eigen::Matrix4f projection;
+			Eigen::Matrix4d projection;
 
 			/**
 			 * The field of view angles (rad) of the camera related to the focal length and sensor width.
@@ -40,7 +40,7 @@ namespace providentia {
 			/**
 			 * The top right and lower left points on the near image plane.
 			 */
-			Eigen::Vector2f topRight, lowerLeft;
+			Eigen::Vector2d topRight, lowerLeft;
 
 			/**
 			 * The distances [m] of the near and far planes of the view frustum.
@@ -64,9 +64,9 @@ namespace providentia {
 			 * @param nearPlaneDistance The distance [m] of the near plane of the view frustum.
 			 * @param farPlaneDistance The distance [m] of the far plane of the view frustum.
 			 */
-			PerspectiveProjection(float sensorWidth, float aspectRatio, float focalLength,
-								  float nearPlaneDistance = 1.f,
-								  float farPlaneDistance = 1000.f);
+			PerspectiveProjection(double sensorWidth, double aspectRatio, double focalLength,
+								  double nearPlaneDistance = 1.,
+								  double farPlaneDistance = 1000.);
 
 			/**
 			 * @destructor
@@ -79,7 +79,7 @@ namespace providentia {
 			 * @param vectorInCameraSpace The vector given in camera space.
 			 * @return The transformed vector in the frustum. w coordinate is normalized to 1.
 			 */
-			Eigen::Vector4f toFrustum(const Eigen::Vector4f &vectorInCameraSpace);
+			Eigen::Vector4d toFrustum(const Eigen::Vector4d &vectorInCameraSpace);
 
 			/**
 			 * Transforms the given vector to clip space.
@@ -88,7 +88,7 @@ namespace providentia {
 			 * @return The transformed vector in the clip space. <br>
 			 * 			x, y, z are in range [-1, 1]
 			 */
-			Eigen::Vector3f toClipSpace(const Eigen::Vector4f &vectorInCameraSpace);
+			Eigen::Vector3d toClipSpace(const Eigen::Vector4d &vectorInCameraSpace);
 
 			/**
 			 * Projects the given vector from camera space to normalized device coordinates.
@@ -96,7 +96,7 @@ namespace providentia {
 			 * @param vectorInCameraSpace The vector given in camera space.
 			 * @return The transformed vector in the normalized device coordinates.
 			 */
-			Eigen::Vector2f operator*(const Eigen::Vector4f &vectorInCameraSpace);
+			Eigen::Vector2d operator*(const Eigen::Vector4d &vectorInCameraSpace);
 
 			/**
 			 * @stream
@@ -110,7 +110,7 @@ namespace providentia {
 			 * @param aspectRatio The ratio of width to height of the camera sensor. Given by the camera specifications.
 			 * @param focalLength The focal length [mm] of the camera. Given by the camera specifications.
 			 */
-			void setFieldOfView(float sensorWidth, float aspectRatio, float focalLength);
+			void setFieldOfView(double sensorWidth, double aspectRatio, double focalLength);
 
 			/**
 			 * Sets the size of the image plane based on the field of view, the aspect ratio of the sensor and the distance of the near plane.
@@ -118,7 +118,7 @@ namespace providentia {
 			 * @param nearPlaneDistance The distance [m] of the near plane of the view frustum.
 			 * @param aspectRatio The ratio of width to height of the camera sensor. Given by the camera specifications.
 			 */
-			void setImagePlaneBounds(float nearPlaneDistance, float aspectRatio);
+			void setImagePlaneBounds(double nearPlaneDistance, double aspectRatio);
 
 			/**
 			 * Sets the near and far plane distance of the frustum
@@ -126,17 +126,17 @@ namespace providentia {
 			 * @param nearPlaneDistance The distance [m] of the near plane of the view frustum.
 			 * @param farPlaneDistance The distance [m] of the far plane of the view frustum.
 			 */
-			void setFrustumPlaneDistances(float nearPlaneDistance, float farPlaneDistance);
+			void setFrustumPlaneDistances(double nearPlaneDistance, double farPlaneDistance);
 
 			/**
 			 * @get
 			 */
-			const Eigen::Vector2f &getTopRight() const;
+			const Eigen::Vector2d &getTopRight() const;
 
 			/**
 			 * @get
 			 */
-			const Eigen::Vector2f &getLowerLeft() const;
+			const Eigen::Vector2d &getLowerLeft() const;
 
 			/**
 			 * @get

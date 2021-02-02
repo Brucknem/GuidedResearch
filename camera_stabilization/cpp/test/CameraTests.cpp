@@ -13,8 +13,8 @@ namespace providentia {
 		/**
 		 * Asserts that the camera rotation matrix is built up by the given right, up and forward vectors.
 		 */
-		void assertRotation(const providentia::camera::Camera &camera, const Eigen::Vector3f &expectedRight,
-							const Eigen::Vector3f &expectedUp, const Eigen::Vector3f &expectedForward) {
+		void assertRotation(const providentia::camera::Camera &camera, const Eigen::Vector3d &expectedRight,
+							const Eigen::Vector3d &expectedUp, const Eigen::Vector3d &expectedForward) {
 			assertVectorsNearEqual(camera.getRotationMatrix().block<3, 1>(0, 0), expectedRight);
 			assertVectorsNearEqual(camera.getRotationMatrix().block<3, 1>(0, 1), expectedUp);
 			assertVectorsNearEqual(camera.getRotationMatrix().block<3, 1>(0, 2), expectedForward);
@@ -54,7 +54,7 @@ namespace providentia {
 			 * @param _maxDifference	The maximal difference in pixel space.
 			 */
 			void
-			assertPointInCameraSpaceOnPixel(const Eigen::Vector3f &direction,
+			assertPointInCameraSpaceOnPixel(const Eigen::Vector3d &direction,
 											const float expectedX, float expectedY,
 											float _maxDifference = 1e-4) {
 				for (int i = 1; i < 20; ++i) {
@@ -62,7 +62,7 @@ namespace providentia {
 					pointInCameraSpace.w() = 1;
 					pointInWorldSpace = camera.toWorldSpace(pointInCameraSpace);
 					pointInImageSpace = camera * pointInWorldSpace;
-					assertVectorsNearEqual(pointInImageSpace, Eigen::Vector2f(expectedX, expectedY), _maxDifference);
+					assertVectorsNearEqual(pointInImageSpace, Eigen::Vector2d(expectedX, expectedY), _maxDifference);
 				}
 			}
 
@@ -75,10 +75,10 @@ namespace providentia {
 			 * @param expectedY The expected y pixel location.
 			 * @param _maxDifference	The maximal difference in pixel space.
 			 */
-			void assertPointOnCorner(const Eigen::Vector2f &imagePlaneCorner,
+			void assertPointOnCorner(const Eigen::Vector2d &imagePlaneCorner,
 									 const float expectedX, float expectedY,
 									 float _maxDifference = 1e-3) {
-				assertPointInCameraSpaceOnPixel(Eigen::Vector3f{imagePlaneCorner.x(), imagePlaneCorner.y(),
+				assertPointInCameraSpaceOnPixel(Eigen::Vector3d{imagePlaneCorner.x(), imagePlaneCorner.y(),
 																(float) camera.getPerspectiveProjection()->getFrustumPlaneDistances().x()},
 												expectedX, expectedY, _maxDifference);
 			}
@@ -89,46 +89,46 @@ namespace providentia {
 		 */
 		TEST_F(CameraTests, testCameraRotationMatrix) {
 			camera.setRotation(0, 0, 0);
-			assertRotation(camera, Eigen::Vector3f::UnitX(), Eigen::Vector3f::UnitY(), -Eigen::Vector3f::UnitZ());
+			assertRotation(camera, Eigen::Vector3d::UnitX(), Eigen::Vector3d::UnitY(), -Eigen::Vector3d::UnitZ());
 
 			camera.setRotation(90, 0, 0);
-			assertRotation(camera, Eigen::Vector3f::UnitX(), Eigen::Vector3f::UnitZ(), Eigen::Vector3f::UnitY());
+			assertRotation(camera, Eigen::Vector3d::UnitX(), Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitY());
 
 			camera.setRotation(0, 90, 0);
-			assertRotation(camera, -Eigen::Vector3f::UnitZ(), Eigen::Vector3f::UnitY(), -Eigen::Vector3f::UnitX());
+			assertRotation(camera, -Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitY(), -Eigen::Vector3d::UnitX());
 
 			camera.setRotation(0, 0, 90);
-			assertRotation(camera, Eigen::Vector3f::UnitY(), -Eigen::Vector3f::UnitX(), -Eigen::Vector3f::UnitZ());
+			assertRotation(camera, Eigen::Vector3d::UnitY(), -Eigen::Vector3d::UnitX(), -Eigen::Vector3d::UnitZ());
 
 			camera.setRotation(-90, 0, 0);
-			assertRotation(camera, Eigen::Vector3f::UnitX(), -Eigen::Vector3f::UnitZ(), -Eigen::Vector3f::UnitY());
+			assertRotation(camera, Eigen::Vector3d::UnitX(), -Eigen::Vector3d::UnitZ(), -Eigen::Vector3d::UnitY());
 
 			camera.setRotation(90, 90, 0);
-			assertRotation(camera, -Eigen::Vector3f::UnitZ(), Eigen::Vector3f::UnitX(), Eigen::Vector3f::UnitY());
+			assertRotation(camera, -Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX(), Eigen::Vector3d::UnitY());
 
 			camera.setRotation(90, 0, 90);
-			assertRotation(camera, Eigen::Vector3f::UnitY(), Eigen::Vector3f::UnitZ(), -Eigen::Vector3f::UnitX());
+			assertRotation(camera, Eigen::Vector3d::UnitY(), Eigen::Vector3d::UnitZ(), -Eigen::Vector3d::UnitX());
 
 			camera.setRotation(0, 90, 90);
-			assertRotation(camera, -Eigen::Vector3f::UnitZ(), -Eigen::Vector3f::UnitX(), -Eigen::Vector3f::UnitY());
+			assertRotation(camera, -Eigen::Vector3d::UnitZ(), -Eigen::Vector3d::UnitX(), -Eigen::Vector3d::UnitY());
 
 			camera.setRotation(90, 90, 90);
-			assertRotation(camera, -Eigen::Vector3f::UnitZ(), Eigen::Vector3f::UnitY(), -Eigen::Vector3f::UnitX());
+			assertRotation(camera, -Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitY(), -Eigen::Vector3d::UnitX());
 
 			camera.setRotation(180, 0, 0);
-			assertRotation(camera, Eigen::Vector3f::UnitX(), -Eigen::Vector3f::UnitY(), Eigen::Vector3f::UnitZ());
+			assertRotation(camera, Eigen::Vector3d::UnitX(), -Eigen::Vector3d::UnitY(), Eigen::Vector3d::UnitZ());
 
 			camera.setRotation(0, 180, 0);
-			assertRotation(camera, -Eigen::Vector3f::UnitX(), Eigen::Vector3f::UnitY(), Eigen::Vector3f::UnitZ());
+			assertRotation(camera, -Eigen::Vector3d::UnitX(), Eigen::Vector3d::UnitY(), Eigen::Vector3d::UnitZ());
 
 			camera.setRotation(0, 0, 180);
-			assertRotation(camera, -Eigen::Vector3f::UnitX(), -Eigen::Vector3f::UnitY(), -Eigen::Vector3f::UnitZ());
+			assertRotation(camera, -Eigen::Vector3d::UnitX(), -Eigen::Vector3d::UnitY(), -Eigen::Vector3d::UnitZ());
 
 			camera.setRotation(180, 180, 180);
-			assertRotation(camera, Eigen::Vector3f::UnitX(), Eigen::Vector3f::UnitY(), -Eigen::Vector3f::UnitZ());
+			assertRotation(camera, Eigen::Vector3d::UnitX(), Eigen::Vector3d::UnitY(), -Eigen::Vector3d::UnitZ());
 
 			camera.setRotation(360, 360, 360);
-			assertRotation(camera, Eigen::Vector3f::UnitX(), Eigen::Vector3f::UnitY(), -Eigen::Vector3f::UnitZ());
+			assertRotation(camera, Eigen::Vector3d::UnitX(), Eigen::Vector3d::UnitY(), -Eigen::Vector3d::UnitZ());
 		}
 
 		/**
@@ -156,7 +156,7 @@ namespace providentia {
 		 * Tests that points on the ray along the corners of the image plane all fall to the respective corner pixel.
 		 */
 		TEST_F(CameraTests, testCornerPixels) {
-			Eigen::Vector2f direction = camera.getPerspectiveProjection()->getLowerLeft();
+			Eigen::Vector2d direction = camera.getPerspectiveProjection()->getLowerLeft();
 			assertPointOnCorner(direction, 0, 0);
 
 			direction.y() *= -1;

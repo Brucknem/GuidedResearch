@@ -14,25 +14,25 @@ namespace providentia {
 		/**
 		 * Asserts that the elements of the given vectors are not further away than the maximal difference.
 		 */
-		void assertVectorsNearEqual(const Eigen::VectorXf &a, const Eigen::VectorXf &b, float maxDifference = 1e-4);
+		void assertVectorsNearEqual(const Eigen::VectorXd &a, const Eigen::VectorXd &b, double maxDifference = 1e-4);
 
 		/**
 		 * @overload
 		 */
-		void assertVectorsNearEqual(const Eigen::Vector4f &a, float x, float y, float z, float w = 1,
-									float maxDifference = 1e-4);
+		void assertVectorsNearEqual(const Eigen::Vector4d &a, double x, double y, double z, double w = 1,
+									double maxDifference = 1e-4);
 
 		/**
 		 * @overload
 		 */
-		void assertVectorsNearEqual(const Eigen::Vector3f &a, float x, float y, float z = 1,
-									float maxDifference = 1e-4);
+		void assertVectorsNearEqual(const Eigen::Vector3d &a, double x, double y, double z = 1,
+									double maxDifference = 1e-4);
 
 		/**
 		 * @overload
 		 */
-		void assertVectorsNearEqual(const Eigen::Vector2f &a, float x, float y,
-									float maxDifference = 1e-4);
+		void assertVectorsNearEqual(const Eigen::Vector2d &a, double x, double y,
+									double maxDifference = 1e-4);
 
 		/**
 		 * Base class for the camera test.
@@ -42,32 +42,32 @@ namespace providentia {
 			/**
 			 * Some test intrinsics.
 			 */
-			Eigen::Vector4f intrinsics = {0.05, 0.05, 1920. / 2, 1200. / 2};
+			Eigen::Vector4d intrinsics = {0.05, 0.05, 1920. / 2, 1200. / 2};
 
 			/**
 			 * A test translation.
 			 */
-			Eigen::Vector3f translation = {0, -10, 5};
+			Eigen::Vector3d translation = {0, -10, 5};
 
 			/**
 			 * A test camera rotation.
 			 */
-			Eigen::Vector3f rotation = {90, 0, 0};
+			Eigen::Vector3d rotation = {90, 0, 0};
 
 			/**
 			 * Buffer for test points in world space.
 			 */
-			Eigen::Vector4f pointInWorldSpace;
+			Eigen::Vector4d pointInWorldSpace;
 
 			/**
 			 * Buffer for test points in camera space.
 			 */
-			Eigen::Vector4f pointInCameraSpace;
+			Eigen::Vector4d pointInCameraSpace;
 
 			/**
 			 * Buffer for test points in image space.
 			 */
-			Eigen::Vector2f pointInImageSpace;
+			Eigen::Vector2d pointInImageSpace;
 
 		public:
 			/**

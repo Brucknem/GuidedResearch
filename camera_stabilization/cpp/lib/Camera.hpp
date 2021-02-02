@@ -15,6 +15,13 @@
 namespace providentia {
 	namespace camera {
 
+
+		/**
+		 * @get The rotation matrix from the angle axis rotation.
+		 */
+		template<typename T>
+		Eigen::Matrix<T, 4, 4> getRotationMatrix(Eigen::Matrix<T, 3, 1> rotation);
+
 		/**
 		 *	A virtual camera.
 		 */
@@ -33,7 +40,7 @@ namespace providentia {
 			/**
 			 * Buffer for the calculation of the resulting pixel.
 			 */
-			Eigen::Vector2f pointInImageSpace;
+			Eigen::Vector2d pointInImageSpace;
 
 			/**
 			 * The perspective transformation from camera space to normalized device coordinates.
@@ -48,13 +55,12 @@ namespace providentia {
 			/**
 			 * The camera translation in world space.
 			 */
-			Eigen::Vector4f translation;
+			Eigen::Vector4d translation;
 
 			/**
 			 * The camera rotation in world space.
 			 */
-			Eigen::Vector3f rotation;
-
+			Eigen::Matrix<double, 3, 1> rotation;
 
 		public:
 
@@ -68,9 +74,9 @@ namespace providentia {
 			 * @param translation The translation of the camera in world space.
 			 * @param rotation The rotation of the camera in world space.
 			 */
-			Camera(float sensorWidth, float aspectRatio, float focalLength,
-				   const Eigen::Vector2i &imageSize, const Eigen::Vector3f &translation = Eigen::Vector3f::Zero(),
-				   const Eigen::Vector3f &rotation = Eigen::Vector3f::Zero());
+			Camera(double sensorWidth, double aspectRatio, double focalLength,
+				   const Eigen::Vector2i &imageSize, const Eigen::Vector3d &translation = Eigen::Vector3d::Zero(),
+				   const Eigen::Vector3d &rotation = Eigen::Vector3d::Zero());
 
 //			/**
 //			 * @constructor
@@ -79,8 +85,8 @@ namespace providentia {
 //			 * @param translation The translation of the camera in world space.
 //			 * @param rotation The rotation of the camera in world space.
 //			 */
-//			Camera(const providentia::camera::Intrinsics &intrinsics, const Eigen::Vector3f &translation,
-//				   const Eigen::Vector3f &rotation);
+//			Camera(const providentia::camera::Intrinsics &intrinsics, const Eigen::Vector3d &translation,
+//				   const Eigen::Vector3d &rotation);
 
 			/**
 			 * @destructor
@@ -93,29 +99,29 @@ namespace providentia {
 			const std::shared_ptr<providentia::camera::PerspectiveProjection> &getPerspectiveProjection() const;
 
 			/**
-			 * @get The rotation matrix from the angle axis rotation.
-			 */
-			Eigen::Matrix4f getRotationMatrix() const;
-
-			/**
 			 * @get
 			 */
 			cv::Mat getImage() const;
 
 			/**
-			 * @set
+			 * @get The rotation matrix from the angle axis rotation.
 			 */
-			void setTranslation(const Eigen::Vector3f &_translation);
+			Eigen::Matrix4d getRotationMatrix() const;
 
 			/**
 			 * @set
 			 */
-			void setRotation(const Eigen::Vector3f &_rotation);
+			void setTranslation(const Eigen::Vector3d &_translation);
 
 			/**
 			 * @set
 			 */
-			void setRotation(float x, float y, float z);
+			void setRotation(const Eigen::Vector3d &_rotation);
+
+			/**
+			 * @set
+			 */
+			void setRotation(double x, double y, double z);
 
 			/**
 			 * Performs the whole rendering pipeline. <br>
@@ -126,17 +132,17 @@ namespace providentia {
 			 * Clip Space -> Normalized device coordinates <br>
 			 * Normalized device coordinates -> Pixels <br>
 			 */
-			Eigen::Vector2f operator*(const Eigen::Vector4f &vector);
+			Eigen::Vector2d operator*(const Eigen::Vector4d &vector);
 
 			/**
 			 * Transforms a given vector from camera to world space.
 			 */
-			Eigen::Vector4f toWorldSpace(const Eigen::Vector4f &vector);
+			Eigen::Vector4d toWorldSpace(const Eigen::Vector4d &vector);
 
 			/**
 			 * Transforms a given vector from world to camera space.
 			 */
-			Eigen::Vector4f toCameraSpace(const Eigen::Vector4f &vector);
+			Eigen::Vector4d toCameraSpace(const Eigen::Vector4d &vector);
 
 			/**
 			 * Writes the camera object to the stream.
@@ -146,17 +152,21 @@ namespace providentia {
 			/**
 			 * Renders the given vector onto the virtual image.
 			 */
-			void render(const Eigen::Vector4f &vector, const cv::Vec3f &color = {1, 1, 1});
+			void render(const Eigen::Vector4d &vector, const cv::Vec3d &color = {1, 1, 1});
 
 			/**
 			 * Renders the given vector onto the virtual image.
 			 */
-			void render(float x, float y, float z, const cv::Vec3f &color = {1, 1, 1});
+			void render(double x, double y, double z, const cv::Vec3d &color = {1, 1, 1});
 
 			/**
 			 * Clears the image buffer.
 			 */
 			void resetImage();
+
+			const Eigen::Vector4d &getTranslation();
+
+			const Eigen::Matrix<double, 3, 1> &getRotation();
 		};
 
 		/**
@@ -171,8 +181,8 @@ namespace providentia {
 			 * @param translation The translation of the camera in world space.
 			 * @param rotation The rotation of the camera in world space.
 			 */
-			explicit BlenderCamera(const Eigen::Vector3f &translation = {0, -10, 5},
-								   const Eigen::Vector3f &rotation = {90, 0, 0});
+			explicit BlenderCamera(const Eigen::Vector3d &translation = {0, -10, 5},
+								   const Eigen::Vector3d &rotation = {90, 0, 0});
 
 			/**
 			 * @destructor

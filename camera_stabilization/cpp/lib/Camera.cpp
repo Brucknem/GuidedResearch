@@ -11,10 +11,45 @@ namespace providentia {
 	namespace camera {
 #pragma region Camera
 
+		template<typename T>
+		Eigen::Matrix<T, 4, 4> getRotationMatrix(Eigen::Matrix<T, 3, 1> rotation) {
+			Eigen::Vector3d rotationInRadians = rotation;
+			rotationInRadians.x() *= -1;
+			rotationInRadians.y() *= -1;
+			rotationInRadians *= M_PI / 180;
 
-		Camera::Camera(const float sensorWidth, const float aspectRatio, const float focalLength,
-					   const Eigen::Vector2i &_imageSize, const Eigen::Vector3f &translation,
-					   const Eigen::Vector3f &rotation) {
+			Eigen::Matrix4d zAxis;
+			double theta = rotationInRadians.z();
+			zAxis << cos(theta), -sin(theta), 0, 0,
+					sin(theta), cos(theta), 0, 0,
+					0, 0, 1, 0,
+					0, 0, 0, 1;
+
+			Eigen::Matrix4d yAxis;
+			theta = rotationInRadians.y();
+			yAxis << cos(theta), 0, sin(theta), 0,
+					0, 1, 0, 0,
+					-sin(theta), 0, cos(theta), 0,
+					0, 0, 0, 1;
+
+			Eigen::Matrix4d xAxis;
+			theta = rotationInRadians.x();
+			xAxis << 1, 0, 0, 0,
+					0, cos(theta), -sin(theta), 0,
+					0, sin(theta), cos(theta), 0,
+					0, 0, 0, 1;
+
+			Eigen::Matrix4d initialCameraRotation;
+			initialCameraRotation << 1, 0, 0, 0,
+					0, 1, 0, 0,
+					0, 0, -1, 0,
+					0, 0, 0, 1;
+			return (initialCameraRotation * zAxis * yAxis * xAxis);
+		}
+
+		Camera::Camera(const double sensorWidth, const double aspectRatio, const double focalLength,
+					   const Eigen::Vector2i &_imageSize, const Eigen::Vector3d &translation,
+					   const Eigen::Vector3d &rotation) {
 			perspectiveProjection = std::make_shared<providentia::camera::PerspectiveProjection>(sensorWidth,
 																								 aspectRatio,
 																								 focalLength);
@@ -23,30 +58,30 @@ namespace providentia {
 			setRotation(rotation);
 		}
 
-//		Camera::Camera(const Intrinsics &_intrinsics, const Eigen::Vector3f &translation,
-//					   const Eigen::Vector3f &rotation) {
+//		Camera::Camera(const Intrinsics &_intrinsics, const Eigen::Vector3d &translation,
+//					   const Eigen::Vector3d &rotation) {
 //			intrinsics = providentia::camera::Intrinsics(_intrinsics);
 //			setTranslation(translation);
 //			setRotation(rotation);
 //		}
 
-		Eigen::Vector2f Camera::operator*(const Eigen::Vector4f &vector) {
+		Eigen::Vector2d Camera::operator*(const Eigen::Vector4d &vector) {
 			pointInImageSpace = *perspectiveProjection * toCameraSpace(vector);
-			pointInImageSpace = (pointInImageSpace + Eigen::Vector2f::Ones()) / 2;
+			pointInImageSpace = (pointInImageSpace + Eigen::Vector2d::Ones()) / 2;
 			pointInImageSpace.x() *= imageSize.x();
 			pointInImageSpace.y() *= imageSize.y();
 			return pointInImageSpace;
 		}
 
-		void Camera::setTranslation(const Eigen::Vector3f &_translation) {
+		void Camera::setTranslation(const Eigen::Vector3d &_translation) {
 			translation = {_translation.x(), _translation.y(), _translation.z(), 0};
 		}
 
-		void Camera::setRotation(const Eigen::Vector3f &_rotation) {
+		void Camera::setRotation(const Eigen::Vector3d &_rotation) {
 			rotation = _rotation;
 		}
 
-		void Camera::setRotation(float x, float y, float z) {
+		void Camera::setRotation(double x, double y, double z) {
 			setRotation({x, y, z});
 		}
 
@@ -65,11 +100,11 @@ namespace providentia {
 		}
 
 
-		void Camera::render(float x, float y, float z, const cv::Vec3f &color) {
+		void Camera::render(double x, double y, double z, const cv::Vec3d &color) {
 			render({x, y, z, 1}, color);
 		}
 
-		void Camera::render(const Eigen::Vector4f &vector, const cv::Vec3f &color) {
+		void Camera::render(const Eigen::Vector4d &vector, const cv::Vec3d &color) {
 			if (imageBuffer.empty()) {
 				resetImage();
 			}
@@ -89,10 +124,10 @@ namespace providentia {
 						continue;
 					}
 
-					float distance = (nearestPixel.cast<float>() - pointInImageSpace).norm();
-					cv::Vec4f _color = {color[0], color[1], color[2], (distance / (float) sqrt(2))};
+					double distance = (nearestPixel.cast<double>() - pointInImageSpace).norm();
+					cv::Vec4d _color = {color[0], color[1], color[2], (distance / (double) sqrt(2))};
 
-					imageBuffer.at<cv::Vec4f>(nearestPixel.y(), nearestPixel.x()) = _color;
+					imageBuffer.at<cv::Vec4d>(nearestPixel.y(), nearestPixel.x()) = _color;
 				}
 			}
 		}
@@ -105,47 +140,24 @@ namespace providentia {
 			return imageBuffer.clone();
 		}
 
-		Eigen::Matrix4f Camera::getRotationMatrix() const {
-			Eigen::Vector3f rotationInRadians = rotation;
-			rotationInRadians.x() *= -1;
-			rotationInRadians.y() *= -1;
-			rotationInRadians *= M_PI / 180;
-
-			Eigen::Matrix4f zAxis;
-			float theta = rotationInRadians.z();
-			zAxis << cos(theta), -sin(theta), 0, 0,
-					sin(theta), cos(theta), 0, 0,
-					0, 0, 1, 0,
-					0, 0, 0, 1;
-
-			Eigen::Matrix4f yAxis;
-			theta = rotationInRadians.y();
-			yAxis << cos(theta), 0, sin(theta), 0,
-					0, 1, 0, 0,
-					-sin(theta), 0, cos(theta), 0,
-					0, 0, 0, 1;
-
-			Eigen::Matrix4f xAxis;
-			theta = rotationInRadians.x();
-			xAxis << 1, 0, 0, 0,
-					0, cos(theta), -sin(theta), 0,
-					0, sin(theta), cos(theta), 0,
-					0, 0, 0, 1;
-
-			Eigen::Matrix4f initialCameraRotation;
-			initialCameraRotation << 1, 0, 0, 0,
-					0, 1, 0, 0,
-					0, 0, -1, 0,
-					0, 0, 0, 1;
-			return (initialCameraRotation * zAxis * yAxis * xAxis);
+		Eigen::Matrix4d Camera::getRotationMatrix() const {
+			return providentia::camera::getRotationMatrix<double>(rotation);
 		}
 
-		Eigen::Vector4f Camera::toCameraSpace(const Eigen::Vector4f &vector) {
+		Eigen::Vector4d Camera::toCameraSpace(const Eigen::Vector4d &vector) {
 			return getRotationMatrix().inverse() * (vector - translation);
 		}
 
-		Eigen::Vector4f Camera::toWorldSpace(const Eigen::Vector4f &vector) {
+		Eigen::Vector4d Camera::toWorldSpace(const Eigen::Vector4d &vector) {
 			return (getRotationMatrix() * vector) + translation;
+		}
+
+		const Eigen::Vector4d &Camera::getTranslation() {
+			return translation;
+		}
+
+		const Eigen::Matrix<double, 3, 1> &Camera::getRotation() {
+			return rotation;
 		}
 
 #pragma endregion Camera
@@ -153,8 +165,8 @@ namespace providentia {
 #pragma region BlenderCamera
 
 		BlenderCamera::BlenderCamera(
-				const Eigen::Vector3f &translation,
-				const Eigen::Vector3f &rotation) : Camera(
+				const Eigen::Vector3d &translation,
+				const Eigen::Vector3d &rotation) : Camera(
 				32, 1920.0f / 1200, 20, {1920, 1200}, translation, rotation) {}
 
 #pragma endregion BlenderCamera

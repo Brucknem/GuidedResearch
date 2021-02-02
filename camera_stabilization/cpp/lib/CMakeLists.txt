@@ -14,7 +14,8 @@ add_library(libCameraStabilization
         CSVWriter.cpp
         Intrinsics.cpp
         Camera.cpp
-        PerspectiveProjection.cpp)
+        PerspectiveProjection.cpp
+        CameraPoseEstimation.cpp)
 
 target_include_directories(libCameraStabilization
         INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}

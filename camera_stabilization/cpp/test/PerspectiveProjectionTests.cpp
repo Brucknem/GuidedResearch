@@ -18,7 +18,7 @@ namespace providentia {
 			/**
 			 * A test aspect ratio.
 			 */
-			float aspect = 1920.f / 1200;
+			double aspect = 1920.f / 1200;
 
 			/**
 			 * A test perspective projection.
@@ -35,7 +35,7 @@ namespace providentia {
 		 * Tests the camera frustum matrix.
 		 */
 		TEST_F(PerspectiveProjectionTests, testCameraFrustum) {
-			Eigen::Vector4f pointInFrustum;
+			Eigen::Vector4d pointInFrustum;
 			pointInCameraSpace << 0, 0, 1, 1;
 			pointInFrustum = perspectiveProjection.toFrustum(pointInCameraSpace);
 			assertVectorsNearEqual(pointInFrustum, 0, 0, 1);
@@ -54,7 +54,7 @@ namespace providentia {
 		 * Tests the camera intrinsics matrix.
 		 */
 		TEST_F(PerspectiveProjectionTests, testCameraToClipSpace) {
-			Eigen::Vector3f pointInClipSpace;
+			Eigen::Vector3d pointInClipSpace;
 			pointInCameraSpace << 0, 0, 1, 1;
 			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
 			assertVectorsNearEqual(pointInClipSpace, 0, 0, -1);
@@ -90,7 +90,7 @@ namespace providentia {
 		 * Tests the camera intrinsics matrix.
 		 */
 		TEST_F(PerspectiveProjectionTests, testCameraToNormalizedDeviceCoordinates) {
-			Eigen::Vector2f normalizedDeviceCoordinate;
+			Eigen::Vector2d normalizedDeviceCoordinate;
 			pointInCameraSpace << 0, 0, 1, 1;
 			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
 			assertVectorsNearEqual(normalizedDeviceCoordinate, 0, 0);
