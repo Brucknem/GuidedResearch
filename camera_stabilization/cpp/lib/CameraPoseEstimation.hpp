@@ -149,7 +149,7 @@ namespace providentia {
 		void render(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation,
 					const Eigen::Vector2d &_frustumParameters, const Eigen::Vector3d &_intrinsics,
 					const Eigen::Vector4d &vector, const cv::Vec3d &color, cv::Mat image) {
-			Eigen::Vector2d imageSize(image.size().width, image.size().height);
+			Eigen::Vector2d imageSize(image.cols, image.rows);
 			Eigen::Vector2d pointInImageSpace = render(
 					_translation.data(), _rotation.data(),
 					_frustumParameters.data(), _intrinsics.data(),
@@ -161,19 +161,21 @@ namespace providentia {
 					Eigen::Vector2i nearestPixel = pointInImageSpace.cast<int>();
 					nearestPixel.x() += i;
 					nearestPixel.y() += j;
+					double distance = (nearestPixel.cast<double>() - pointInImageSpace).norm();
 					nearestPixel.y() = imageSize.y() - 1 - nearestPixel.y();
 
-					std::cout << "[" << nearestPixel[0] << ", " << nearestPixel[1] << "]";
+//					std::cout << "[" << nearestPixel.x() << ", " << nearestPixel.y() << "] - " << distance;
 					if (nearestPixel.x() >= imageSize.x() || nearestPixel.y() >= imageSize.y() ||
 						nearestPixel.x() < 0 || nearestPixel.y() < 0) {
-						std::cout << " out of frustum";
+//						std::cout << " out of frustum";
+//						std::cout << std::endl;
 						continue;
 					}
-					std::cout << std::endl;
+//					std::cout << std::endl;
 
-					double distance = (nearestPixel.cast<double>() - pointInImageSpace).norm();
 					cv::Vec4d _color = {color[0], color[1], color[2], (distance / (double) sqrt(2))};
 
+					// 1200, 1920
 					image.at<cv::Vec4d>(nearestPixel.y(), nearestPixel.x()) = _color;
 				}
 			}

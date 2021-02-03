@@ -131,13 +131,13 @@ void providentia::runnable::BaseSetup::mainLoop() {
 		cv::resize(finalFrame, finalFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
 
 		if (totalAlgorithmsDuration > 0) {
-			addRuntimeToFinalFrame("Algorithms total", totalAlgorithmsDuration, 5, finalFrame.size().height - 40);
+			addRuntimeToFinalFrame("Algorithms total", totalAlgorithmsDuration, 5, finalFrame.rows - 40);
 		}
 
 		specificAddMessages();
 
 		addTimestamp("End");
-		addRuntimeToFinalFrame("Frame", getTotalMilliseconds(), 5, finalFrame.size().height - 20);
+		addRuntimeToFinalFrame("Frame", getTotalMilliseconds(), 5, finalFrame.rows - 20);
 
 		cv::imshow(windowName, finalFrame);
 

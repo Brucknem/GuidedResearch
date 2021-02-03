@@ -30,7 +30,7 @@ public:
 	}
 
 	void specificMainLoop() override {
-		finalFrame = cv::Mat::zeros(cv::Size(1920, 1200), CV_32FC4);
+		finalFrame = cv::Mat::zeros(cv::Size(1920, 1200), CV_64FC4);
 
 		// Vertical
 		for (int i = 0; i <= 10; ++i) {
@@ -45,9 +45,7 @@ public:
 			render(i - 8, 0, 5, {0, 0, 1});
 			render(i - 8, 0, 9.99, {0, 1, 0});
 		}
-
 	}
-
 };
 
 int main(int argc, char const *argv[]) {
