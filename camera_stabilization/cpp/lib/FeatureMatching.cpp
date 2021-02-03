@@ -25,7 +25,7 @@ namespace providentia {
 
 			specificMatch();
 
-			//-- Filter matches using the Lowe's ratio test
+			//-- Filter matches using the Lowe's ratio toCameraSpace
 			goodMatches.clear();
 
 			for (auto &knnMatchCPU : knnMatchesCPU) {

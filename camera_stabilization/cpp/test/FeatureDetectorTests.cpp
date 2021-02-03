@@ -10,7 +10,7 @@ namespace providentia {
 	namespace tests {
 
 		/**
-		 * Setup for the feature detector test.
+		 * Setup for the feature detector toCameraSpace.
 		 */
 		class FeatureDetectorTests : public ImageTestBase {
 		protected:

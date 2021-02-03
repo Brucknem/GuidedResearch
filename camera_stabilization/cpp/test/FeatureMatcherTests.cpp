@@ -10,7 +10,7 @@ namespace providentia {
 	namespace tests {
 
 		/**
-		 * Setup for the feature matcher test.
+		 * Setup for the feature matcher toCameraSpace.
 		 */
 		class FeatureMatcherTests : public ImageTestBase {
 		public:

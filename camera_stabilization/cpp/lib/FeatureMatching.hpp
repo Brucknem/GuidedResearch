@@ -69,7 +69,7 @@ namespace providentia {
 			std::vector<cv::Point2f> frameMatchedPoints, referenceMatchedPoints;
 
 			/**
-			 * The ratio threshold of good matches for the Lowe's ratio test.
+			 * The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
 			 */
 			float goodMatchRatioThreshold;
 
@@ -92,7 +92,7 @@ namespace providentia {
 			/**
 			 * @constructor
 			 *
-			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
+			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
 			 */
 			explicit FeatureMatcherBase(float _goodMatchRatioThreshold = 0.75f);
 
@@ -163,7 +163,7 @@ namespace providentia {
 			 * @constructor
 			 *
 			 * @param norm The norm used to compare the features.
-			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
+			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
 			 */
 			explicit BruteForceFeatureMatcher(cv::NormTypes norm, float _goodMatchRatioThreshold = 0.75f);
 
@@ -197,7 +197,7 @@ namespace providentia {
 			 * @constructor
 			 *
 			 * @param binaryDescriptors Flag if binary desccriptors are used.
-			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
+			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
 			 */
 			explicit FlannFeatureMatcher(bool binaryDescriptors = false,
 										 float _goodMatchRatioThreshold = 0.75f);
@@ -206,7 +206,7 @@ namespace providentia {
 			 * @constructor
 			 *
 			 * @params The FLANN parameters.
-			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio test.
+			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
 			 */
 			explicit FlannFeatureMatcher(cv::flann::IndexParams *params, float _goodMatchRatioThreshold = 0.75f);
 

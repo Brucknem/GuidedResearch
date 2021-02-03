@@ -92,7 +92,7 @@ namespace providentia {
 
 
 		/**
-		 * Mock class for the intrinsics used in the blender test setup.
+		 * Mock class for the intrinsics used in the blender toCameraSpace setup.
 		 */
 		class BlenderIntrinsics : public Intrinsics {
 		public:

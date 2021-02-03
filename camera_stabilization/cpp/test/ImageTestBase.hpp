@@ -16,22 +16,22 @@ namespace providentia {
 	namespace tests {
 
 		/**
-		 * Base class for all test.
+		 * Base class for all toCameraSpace.
 		 */
 		class ImageTestBase : public ::testing::Test {
 		protected:
 			/**
-			 * The loaded test image.
+			 * The loaded toCameraSpace image.
 			 */
 			cv::Mat testImgCPU;
 
 			/**
-			 * The loaded test image on GPU.
+			 * The loaded toCameraSpace image on GPU.
 			 */
 			cv::cuda::GpuMat testImgGPU;
 
 			/**
-			 * Sets up the random number generator for deterministic test and loads the test image.
+			 * Sets up the random number generator for deterministic test and loads the toCameraSpace image.
 			 */
 			void SetUp() override;
 

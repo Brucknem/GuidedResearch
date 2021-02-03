@@ -3,6 +3,9 @@
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
+find_package(Ceres REQUIRED)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+
 add_library(libCameraStabilization
         FeatureDetection.cpp
         DynamicStabilization.cpp
@@ -13,8 +16,6 @@ add_library(libCameraStabilization
         TimeMeasurable.cpp
         CSVWriter.cpp
         Intrinsics.cpp
-        Camera.cpp
-        PerspectiveProjection.cpp
         CameraPoseEstimation.cpp)
 
 target_include_directories(libCameraStabilization
@@ -22,5 +23,4 @@ target_include_directories(libCameraStabilization
         PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
         )
 
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-target_link_libraries(libCameraStabilization Eigen3::Eigen ${OpenCV_LIBS})
+target_link_libraries(libCameraStabilization Eigen3::Eigen Ceres::ceres ${OpenCV_LIBS})

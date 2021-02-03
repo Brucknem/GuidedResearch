@@ -13,7 +13,6 @@
 namespace providentia {
 	namespace calibration {
 
-		CameraPoseEstimator::CameraPoseEstimator(const camera::Camera &_camera) : camera(_camera) {};
 
 		void CameraPoseEstimator::solve() {
 			options.linear_solver_type = ceres::DENSE_QR;
@@ -31,8 +30,15 @@ namespace providentia {
 														  const Eigen::Vector2d &pixel) {
 			ceres::CostFunction *cost_function = new ceres::AutoDiffCostFunction<ReprojectionResidual, 3, 3, 2>(
 					new ReprojectionResidual(pixel, worldCoordinate));
-			problem.AddResidualBlock(cost_function, nullptr, (double *) camera.getTranslation().data(),
-									 (double *) camera.getRotation().data());
+			problem.AddResidualBlock(cost_function, nullptr, translation.data(), rotation.data());
+		}
+
+		CameraPoseEstimator::CameraPoseEstimator(const Eigen::Vector3d &_initialTranslation,
+												 const Eigen::Vector3d &_initialRotation) {
+			initialTranslation = _initialTranslation;
+			initialRotation = _initialRotation;
+			translation = _initialTranslation;
+			rotation = _initialRotation;
 		}
 
 	}

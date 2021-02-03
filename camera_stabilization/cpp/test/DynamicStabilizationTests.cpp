@@ -10,7 +10,7 @@ namespace providentia {
 	namespace tests {
 
 		/**
-		 * Setup for the dynamic stabilizer test.
+		 * Setup for the dynamic stabilizer toCameraSpace.
 		 */
 		class DynamicStabilizationTests : public ImageTestBase {
 		public:

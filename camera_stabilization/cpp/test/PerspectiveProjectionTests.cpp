@@ -5,7 +5,7 @@
 
 #include "CameraTestBase.hpp"
 #include "Intrinsics.hpp"
-#include "PerspectiveProjection.hpp"
+#include "CameraPoseEstimation.hpp"
 
 namespace providentia {
 	namespace tests {
@@ -13,17 +13,10 @@ namespace providentia {
 		/**
 		 * Test setup for the perspective projection.
 		 */
-		class PerspectiveProjectionTests : public CameraTestBase {
+		class PerspectiveProjectionTests : public ::testing::Test {
 		protected:
-			/**
-			 * A test aspect ratio.
-			 */
-			double aspect = 1920.f / 1200;
-
-			/**
-			 * A test perspective projection.
-			 */
-			providentia::camera::PerspectiveProjection perspectiveProjection{8, aspect, 4};
+			Eigen::Vector2d frustumParameters{1, 1000};
+			Eigen::Vector3d intrinsics{8, 1920. / 1200., 4};
 
 			/**
 			 * @destructor
@@ -35,18 +28,21 @@ namespace providentia {
 		 * Tests the camera frustum matrix.
 		 */
 		TEST_F(PerspectiveProjectionTests, testCameraFrustum) {
-			Eigen::Vector4d pointInFrustum;
-			pointInCameraSpace << 0, 0, 1, 1;
-			pointInFrustum = perspectiveProjection.toFrustum(pointInCameraSpace);
-			assertVectorsNearEqual(pointInFrustum, 0, 0, 1);
+			Eigen::Vector4d pointInFrustum, pointInCameraSpace;
+			pointInCameraSpace << 0, 0, frustumParameters.x(), 1;
+			pointInFrustum = providentia::calibration::toFrustum<double>(frustumParameters.data(),
+																		 pointInCameraSpace.data());
+			assertVectorsNearEqual(pointInFrustum, 0, 0, frustumParameters.x());
 
-			pointInCameraSpace << 4, 7, 1, 1;
-			pointInFrustum = perspectiveProjection.toFrustum(pointInCameraSpace);
-			assertVectorsNearEqual(pointInFrustum, 4, 7, 1);
+			pointInCameraSpace << 4, 7, frustumParameters.x(), 1;
+			pointInFrustum = providentia::calibration::toFrustum<double>(frustumParameters.data(),
+																		 pointInCameraSpace.data());
+			assertVectorsNearEqual(pointInFrustum, 4, 7, frustumParameters.x());
 
-			pointInCameraSpace << 0, 0, 1000, 1;
-			pointInFrustum = perspectiveProjection.toFrustum(pointInCameraSpace);
-			assertVectorsNearEqual(pointInFrustum, 0, 0, 1000);
+			pointInCameraSpace << 0, 0, frustumParameters.y(), 1;
+			pointInFrustum = providentia::calibration::toFrustum<double>(frustumParameters.data(),
+																		 pointInCameraSpace.data());
+			assertVectorsNearEqual(pointInFrustum, 0, 0, frustumParameters.y());
 		}
 
 
@@ -54,35 +50,52 @@ namespace providentia {
 		 * Tests the camera intrinsics matrix.
 		 */
 		TEST_F(PerspectiveProjectionTests, testCameraToClipSpace) {
-			Eigen::Vector3d pointInClipSpace;
-			pointInCameraSpace << 0, 0, 1, 1;
-			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
+			Eigen::Vector4d pointInCameraSpace, pointInClipSpace;
+			pointInCameraSpace << 0, 0, frustumParameters.x(), 1;
+			pointInClipSpace = providentia::calibration::toClipSpace<double>(frustumParameters.data(),
+																			 intrinsics.data(),
+																			 pointInCameraSpace.data());
 			assertVectorsNearEqual(pointInClipSpace, 0, 0, -1);
 
-			pointInCameraSpace << -1, 1 / aspect, 1, 1;
-			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
+			pointInCameraSpace << -1, 1 / intrinsics[1], frustumParameters.x(), 1;
+			pointInClipSpace = providentia::calibration::toClipSpace<double>(frustumParameters.data(),
+																			 intrinsics.data(),
+
+																			 pointInCameraSpace.data());
 			assertVectorsNearEqual(pointInClipSpace, -1, 1, -1);
 
-			pointInCameraSpace << 1, -1 / aspect, 1, 1;
-			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
+			pointInCameraSpace << 1, -1 / intrinsics[1], frustumParameters.x(), 1;
+			pointInClipSpace = providentia::calibration::toClipSpace<double>(frustumParameters.data(),
+																			 intrinsics.data(),
+
+																			 pointInCameraSpace.data());
 			assertVectorsNearEqual(pointInClipSpace, 1, -1, -1);
 
-			pointInCameraSpace << 0, 0, 1, 1;
-			pointInCameraSpace *= 1000;
+			pointInCameraSpace << 0, 0, frustumParameters.x(), 1;
+			pointInCameraSpace *= frustumParameters[1];
 			pointInCameraSpace.w() = 1;
-			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
+			pointInClipSpace = providentia::calibration::toClipSpace<double>(frustumParameters.data(),
+																			 intrinsics.data(),
+
+																			 pointInCameraSpace.data());
 			assertVectorsNearEqual(pointInClipSpace, 0, 0, 1);
 
-			pointInCameraSpace << 1, 1 / aspect, 1, 1;
-			pointInCameraSpace *= 1000;
+			pointInCameraSpace << 1, 1 / intrinsics[1], frustumParameters.x(), 1;
+			pointInCameraSpace *= frustumParameters[1];
 			pointInCameraSpace.w() = 1;
-			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
+			pointInClipSpace = providentia::calibration::toClipSpace<double>(frustumParameters.data(),
+																			 intrinsics.data(),
+
+																			 pointInCameraSpace.data());
 			assertVectorsNearEqual(pointInClipSpace, 1, 1, 1);
 
-			pointInCameraSpace << -1, -1 / aspect, 1, 1;
-			pointInCameraSpace *= 1000;
+			pointInCameraSpace << -1, -1 / intrinsics[1], frustumParameters.x(), 1;
+			pointInCameraSpace *= frustumParameters[1];
 			pointInCameraSpace.w() = 1;
-			pointInClipSpace = perspectiveProjection.toClipSpace(pointInCameraSpace);
+			pointInClipSpace = providentia::calibration::toClipSpace<double>(frustumParameters.data(),
+																			 intrinsics.data(),
+
+																			 pointInCameraSpace.data());
 			assertVectorsNearEqual(pointInClipSpace, -1, -1, 1);
 		}
 
@@ -90,36 +103,67 @@ namespace providentia {
 		 * Tests the camera intrinsics matrix.
 		 */
 		TEST_F(PerspectiveProjectionTests, testCameraToNormalizedDeviceCoordinates) {
+			Eigen::Vector4d pointInCameraSpace, pointInClipSpace;
 			Eigen::Vector2d normalizedDeviceCoordinate;
-			pointInCameraSpace << 0, 0, 1, 1;
-			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
+			pointInCameraSpace << 0, 0, frustumParameters.x(), 1;
+			pointInClipSpace = providentia::calibration::toClipSpace<double>(frustumParameters.data(),
+																			 intrinsics.data(),
+
+																			 pointInCameraSpace.data());
+			normalizedDeviceCoordinate = providentia::calibration::toNormalizedDeviceCoordinates<double>(
+					pointInClipSpace.data());
 			assertVectorsNearEqual(normalizedDeviceCoordinate, 0, 0);
 
-			pointInCameraSpace << -1, 1 / aspect, 1, 1;
-			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
+			pointInCameraSpace << -1, 1 / intrinsics[1], frustumParameters.x(), 1;
+			pointInClipSpace = providentia::calibration::toClipSpace<double>(frustumParameters.data(),
+																			 intrinsics.data(),
+
+																			 pointInCameraSpace.data());
+			normalizedDeviceCoordinate = providentia::calibration::toNormalizedDeviceCoordinates<double>(
+					pointInClipSpace.data());
 			assertVectorsNearEqual(normalizedDeviceCoordinate, -1, 1);
 
-			pointInCameraSpace << 1, -1 / aspect, 1, 1;
-			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
+			pointInCameraSpace << 1, -1 / intrinsics[1], frustumParameters.x(), 1;
+			pointInClipSpace = providentia::calibration::toClipSpace<double>(frustumParameters.data(),
+																			 intrinsics.data(),
+
+																			 pointInCameraSpace.data());
+			normalizedDeviceCoordinate = providentia::calibration::toNormalizedDeviceCoordinates<double>(
+					pointInClipSpace.data());
 			assertVectorsNearEqual(normalizedDeviceCoordinate, 1, -1);
 
-			pointInCameraSpace << 0, 0, 1, 1;
-			pointInCameraSpace *= 1000;
+			pointInCameraSpace << 0, 0, frustumParameters.x(), 1;
+			pointInCameraSpace *= frustumParameters[1];
 			pointInCameraSpace.w() = 1;
-			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
+			pointInClipSpace = providentia::calibration::toClipSpace<double>(frustumParameters.data(),
+																			 intrinsics.data(),
+
+																			 pointInCameraSpace.data());
+			normalizedDeviceCoordinate = providentia::calibration::toNormalizedDeviceCoordinates<double>(
+					pointInClipSpace.data());
 			assertVectorsNearEqual(normalizedDeviceCoordinate, 0, 0);
 
-			pointInCameraSpace << 1, 1 / aspect, 1, 1;
-			pointInCameraSpace *= 1000;
+			pointInCameraSpace << 1, 1 / intrinsics[1], frustumParameters.x(), 1;
+			pointInCameraSpace *= frustumParameters[1];
 			pointInCameraSpace.w() = 1;
-			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
+			pointInClipSpace = providentia::calibration::toClipSpace<double>(frustumParameters.data(),
+																			 intrinsics.data(),
+
+																			 pointInCameraSpace.data());
+			normalizedDeviceCoordinate = providentia::calibration::toNormalizedDeviceCoordinates<double>(
+					pointInClipSpace.data());
 			assertVectorsNearEqual(normalizedDeviceCoordinate, 1, 1);
 
-			pointInCameraSpace << -1, -1 / aspect, 1, 1;
-			pointInCameraSpace *= 1000;
+			pointInCameraSpace << -1, -1 / intrinsics[1], frustumParameters.x(), 1;
+			pointInCameraSpace *= frustumParameters[1];
 			pointInCameraSpace.w() = 1;
-			normalizedDeviceCoordinate = perspectiveProjection * pointInCameraSpace;
+			pointInClipSpace = providentia::calibration::toClipSpace<double>(frustumParameters.data(),
+																			 intrinsics.data(),
+
+																			 pointInCameraSpace.data());
+			normalizedDeviceCoordinate = providentia::calibration::toNormalizedDeviceCoordinates<double>(
+					pointInClipSpace.data());
 			assertVectorsNearEqual(normalizedDeviceCoordinate, -1, -1);
 		}
-	}// namespace test
+	}// namespace toCameraSpace
 }// namespace providentia
