@@ -6,7 +6,7 @@
 #define CAMERASTABILIZATION_CAMERAPOSEESTIMATION_HPP
 
 #include <utility>
-
+#include <vector>
 #include "ceres/ceres.h"
 #include "glog/logging.h"
 #include "opencv2/opencv.hpp"
@@ -103,19 +103,20 @@ namespace providentia {
 			void addPointCorrespondence(const Eigen::Vector3d &worldPosition, const Eigen::Vector2d &pixel);
 
 			/**
-			 * Adds a correspondence to the optimization problem.
-			 *
-			 * @param worldPosition The [x, y, z, w] world position of the correspondence.
-			 * @param pixel The [u, v] pixel position of the correspondence.
-			 */
-			void addPointCorrespondence(const Eigen::Vector4d &worldPosition, const Eigen::Vector2d &pixel);
-
-			/**
 			 * Estimates the camera translation and rotation based on the known correspondences between the world and
 			 * image.
 			 */
-			void estimate();
+			void estimate(bool _logSummary = false);
 
+			/**
+			 * @get
+			 */
+			const Eigen::Vector3d &getTranslation() const;
+
+			/**
+			 * @get
+			 */
+			const Eigen::Vector3d &getRotation() const;
 		};
 	}
 }

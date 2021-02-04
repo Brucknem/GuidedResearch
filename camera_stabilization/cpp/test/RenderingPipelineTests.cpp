@@ -43,6 +43,14 @@ namespace providentia {
 			 * @destructor
 			 */
 			~RenderingPipelineTests() override = default;
+
+			Eigen::Vector2d render(const Eigen::Vector4d &pointInWorldSpace) {
+				return providentia::camera::render(
+						translation.data(), rotation.data(),
+						frustumParameters.data(), intrinsics.data(),
+						imageSize.data(),
+						pointInWorldSpace.data());
+			}
 		};
 
 
@@ -131,63 +139,50 @@ namespace providentia {
 			Eigen::Vector2d pointInImageSpace;
 
 			pointInWorldSpace << 0, 0, 0, 1;
+			assertVectorsNearEqual(render(pointInWorldSpace), 960, 0);
 
-			pointInImageSpace = providentia::camera::render(
-					translation.data(), rotation.data(),
-					frustumParameters.data(), intrinsics.data(),
-					imageSize.data(),
-					pointInWorldSpace.data());
-			assertVectorsNearEqual(pointInImageSpace, 960, 0);
-
+			pointInWorldSpace << 7.99, 0, 0, 1;
+			assertVectorsNearEqual(render(pointInWorldSpace), 1918.8, 0);
 			pointInWorldSpace << 8, 0, 0, 1;
-			pointInImageSpace = providentia::camera::render(
-					translation.data(), rotation.data(),
-					frustumParameters.data(), intrinsics.data(),
-					imageSize.data(),
-					pointInWorldSpace.data());
-			assertVectorsNearEqual(pointInImageSpace, 1920, 0);
+			assertVectorsNearEqual(render(pointInWorldSpace), 1920, 0);
 
 			pointInWorldSpace << -8, 0, 0, 1;
-			pointInImageSpace = providentia::camera::render(
-					translation.data(), rotation.data(),
-					frustumParameters.data(), intrinsics.data(),
-					imageSize.data(),
-					pointInWorldSpace.data());
-			assertVectorsNearEqual(pointInImageSpace, 0, 0, maxDifference);
+			assertVectorsNearEqual(render(pointInWorldSpace), 0, 0, maxDifference);
 
 			pointInWorldSpace << 0, 0, 10, 1;
-			pointInImageSpace = providentia::camera::render(
-					translation.data(), rotation.data(),
-					frustumParameters.data(), intrinsics.data(),
-					imageSize.data(),
-					pointInWorldSpace.data());
-			assertVectorsNearEqual(pointInImageSpace, 960, 1200, maxDifference);
+			assertVectorsNearEqual(render(pointInWorldSpace), 960, 1200, maxDifference);
 
 			pointInWorldSpace << 8, 0, 10, 1;
-			pointInImageSpace = providentia::camera::render(
-					translation.data(), rotation.data(),
-					frustumParameters.data(), intrinsics.data(),
-					imageSize.data(),
-					pointInWorldSpace.data());
-			assertVectorsNearEqual(pointInImageSpace, 1920, 1200, maxDifference);
+			assertVectorsNearEqual(render(pointInWorldSpace), 1920, 1200, maxDifference);
 
 			pointInWorldSpace << -8, 0, 10, 1;
-			pointInImageSpace = providentia::camera::render(
-					translation.data(), rotation.data(),
-					frustumParameters.data(), intrinsics.data(),
-					imageSize.data(),
-					pointInWorldSpace.data());
-			assertVectorsNearEqual(pointInImageSpace, 0, 1200, maxDifference);
+			assertVectorsNearEqual(render(pointInWorldSpace), 0, 1200, maxDifference);
 
 			for (int i = -8; i < 1000; i += 10) {
 				pointInWorldSpace << 0, i, 5, 1;
-				pointInImageSpace = providentia::camera::render(
-						translation.data(), rotation.data(),
-						frustumParameters.data(), intrinsics.data(),
-						imageSize.data(),
-						pointInWorldSpace.data());
-				assertVectorsNearEqual(pointInImageSpace, 1920.f / 2, 1200.f / 2, maxDifference);
+				assertVectorsNearEqual(render(pointInWorldSpace), 1920.f / 2, 1200.f / 2, maxDifference);
 			}
+		}
+
+
+		/**
+		 * Tests that rendering points in world coordinates results in correct points in expectedPixel coordinates.
+		 */
+		TEST_F(RenderingPipelineTests, testRenderPointsOutOfFrustum) {
+			Eigen::Vector4d pointInWorldSpace;
+			Eigen::Vector2d pointInImageSpace;
+
+			pointInWorldSpace << 0, 20, 0, 1;
+			assertVectorsNearEqual(render(pointInWorldSpace), 960, 400);
+			pointInWorldSpace << 0, -20, 0, 1;
+			assertVectorsNearEqual(render(pointInWorldSpace), 960, 1200);
+
+			pointInWorldSpace << translation.x(), translation.y(), translation.z(), 1;
+			assertVectorsNearEqual(render(pointInWorldSpace), 960, 600);
+
+			pointInWorldSpace << -100, -9, 5, 1;
+			assertVectorsNearEqual(render(pointInWorldSpace), -119039.99879999, 600);
+
 		}
 	}// namespace toCameraSpace
 }// namespace providentia

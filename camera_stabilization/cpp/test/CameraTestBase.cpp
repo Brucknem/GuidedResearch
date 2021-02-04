@@ -9,9 +9,8 @@ namespace providentia {
 		void
 		assertVectorsNearEqual(const Eigen::VectorXd &a, const Eigen::VectorXd &b,
 							   double maxDifference) {
-			Eigen::VectorXd difference = a - b;
-			for (int i = 0; i < difference.rows(); i++) {
-				EXPECT_NEAR(difference(i), 0, maxDifference);
+			for (int i = 0; i < a.rows(); i++) {
+				EXPECT_NEAR(a(i), b(i), maxDifference);
 			}
 		}
 

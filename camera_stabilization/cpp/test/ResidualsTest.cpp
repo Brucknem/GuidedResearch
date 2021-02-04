@@ -34,8 +34,8 @@ namespace providentia {
 				};
 				pointCorrespondenceResidual(translation.data(), rotation.data(), residual.data());
 
-				EXPECT_NEAR(residual.x(), expectedResidual.x(), 1e-8);
-				EXPECT_NEAR(residual.y(), expectedResidual.y(), 1e-8);
+				EXPECT_NEAR(residual.x(), expectedResidual.x(), 1e-6);
+				EXPECT_NEAR(residual.y(), expectedResidual.y(), 1e-6);
 			}
 		};
 

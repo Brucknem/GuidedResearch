@@ -34,14 +34,35 @@ namespace providentia {
 		void assertVectorsNearEqual(const Eigen::Vector2d &a, double x, double y,
 									double maxDifference = 1e-4);
 
+		/**
+		 * Base for tests that need camera parameters.
+		 */
 		class CameraTestBase : public ::testing::Test {
 		protected:
+
+			/**
+			 * The [near, far] plane distances of the view frustum.
+			 */
 			Eigen::Vector2d frustumParameters{1, 1000};
+
+			/**
+			 * The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
+			 */
 			Eigen::Vector3d intrinsics{32, 1920. / 1200., 20};
 
+			/**
+			 * The [width, height] of the image.
+			 */
 			Eigen::Vector2d imageSize{1920, 1200};
 
+			/**
+			 * Some [x, y, z] translation of the camera in world space.
+			 */
 			Eigen::Vector3d translation{0, -10, 5};
+
+			/**
+			 * Some [x, y, z] euler angle rotation of the camera around the world axis
+			 */
 			Eigen::Vector3d rotation{90, 0, 0};
 
 			/**

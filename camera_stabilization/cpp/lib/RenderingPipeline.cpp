@@ -51,7 +51,9 @@ namespace providentia {
 		render(const T *_translation, const T *_rotation, const T *_frustumParameters, const T *_intrinsics,
 			   const T *_imageSize, const T *vector) {
 			Eigen::Matrix<T, 4, 1> point = toCameraSpace(_translation, _rotation, vector);
+
 			point = toClipSpace(_frustumParameters, _intrinsics, point.data());
+
 			Eigen::Matrix<T, 2, 1> pixel = toNormalizedDeviceCoordinates(point.data());
 			pixel = toImageSpace(_imageSize, pixel.data());
 			return pixel;
@@ -67,9 +69,13 @@ namespace providentia {
 
 		template<typename T>
 		Eigen::Matrix<T, 4, 1> toClipSpace(const T *_frustumParameters, const T *_intrinsics, const T *vector) {
-			Eigen::Matrix<T, 4, 1> pointInClipSpace = getClipSpace(_frustumParameters, _intrinsics) *
-													  Eigen::Matrix<T, 4, 1>{vector[0], vector[1], vector[2],
-																			 vector[3]};
+			Eigen::Matrix<T, 4, 1> pointInCameraSpace{vector[0], vector[1], vector[2],
+													  vector[3]};
+			Eigen::Matrix<T, 4, 1> pointInClipSpace =
+					getClipSpace(_frustumParameters, _intrinsics) * pointInCameraSpace;
+			if (abs(pointInClipSpace.w()) <= (T) 1e-5) {
+				return Eigen::Matrix<T, 4, 1>{(T) 0, (T) 0, (T) 1, (T) 1};
+			}
 			return normalize(pointInClipSpace);
 		}
 
@@ -91,8 +97,8 @@ namespace providentia {
 					zero, (T) (2) / (top - -top), zero, -(top + -top) / (top - -top),
 					zero, zero, (T) (2) / (far - near), -(far + near) / (far - near),
 					zero, zero, zero, one;
-
-			return normalization * getFrustum(_frustumParameters);
+			Eigen::Matrix<T, 4, 4> clipSpaceMatrix = normalization * getFrustum(_frustumParameters);
+			return clipSpaceMatrix;
 		}
 
 		template<typename T>
@@ -105,7 +111,7 @@ namespace providentia {
 
 		template<typename T>
 		Eigen::Matrix<T, 4, 1> normalize(const Eigen::Matrix<T, 4, 1> &vector) {
-			return vector / vector[3];
+			return vector / (vector[3] + 1e-8);
 		}
 
 		template<typename T>

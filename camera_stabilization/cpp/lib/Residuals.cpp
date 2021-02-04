@@ -5,6 +5,7 @@
 #include "Residuals.hpp"
 
 #include <utility>
+#include "glog/logging.h"
 
 namespace providentia {
 	namespace calibration {
@@ -18,7 +19,8 @@ namespace providentia {
 				imageSize(std::move(_imageSize)) {}
 
 		template<typename T>
-		bool PointCorrespondenceResidual::operator()(const T *_translation, const T *_rotation, T *residual) const {
+		bool PointCorrespondenceResidual::operator()(const T *_translation, const T *_rotation, T
+		*residual) const {
 			Eigen::Matrix<T, 4, 1> point{(T) worldPosition.x(), (T) worldPosition.y(), (T) worldPosition.z(),
 										 (T) 1};
 
@@ -32,6 +34,9 @@ namespace providentia {
 
 			residual[0] = expectedPixel.x() - actualPixel.x();
 			residual[1] = expectedPixel.y() - actualPixel.y();
+
+			//			LOG(INFO) << residual[0];
+//			LOG(INFO) << residual[1];
 
 			return true;
 		}

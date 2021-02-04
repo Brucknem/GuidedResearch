@@ -14,50 +14,76 @@ namespace providentia {
 		 */
 		class CameraPoseEstimationTests : public CameraTestBase {
 		protected:
-			Eigen::Vector2d pixel;
-			Eigen::Vector3d worldCoordinate;
 
 			std::shared_ptr<providentia::calibration::CameraPoseEstimator> estimator;
-
-			void SetUp() override;
 
 			/**
 			 * @destructor
 			 */
 			~CameraPoseEstimationTests() override = default;
 
+			void addPerfectPointCorrespondence(const Eigen::Vector3d &pointInWorldSpace) {
+				estimator->addPointCorrespondence(pointInWorldSpace, providentia::camera::render(
+						translation.data(), rotation.data(),
+						frustumParameters.data(), intrinsics.data(),
+						imageSize.data(),
+						pointInWorldSpace.data()
+				));
+			}
 		};
 
-		void CameraPoseEstimationTests::SetUp() {
-			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(Eigen::Vector3d{0, -10, 5},
-																						Eigen::Vector3d{90, 0, 0},
-																						frustumParameters, intrinsics,
-																						imageSize);
+		/**
+		 * Tests that the optimization with an already perfect initialization converges instantly and doesn't change
+		 * the parameters.
+		 */
+		TEST_F(CameraPoseEstimationTests, testEstimationFromOriginalTransformation) {
+//			google::InitGoogleLogging("Test");
+			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
+					translation,
+					rotation,
+					frustumParameters,
+					intrinsics,
+					imageSize
+			);
+			addPerfectPointCorrespondence({0, 0, 0});
+			addPerfectPointCorrespondence({0, 10, 0});
+			addPerfectPointCorrespondence({0, 0, 5});
+			addPerfectPointCorrespondence({-4, 20, 4});
+			addPerfectPointCorrespondence({1, 2, 3});
+
+			estimator->estimate();
 		}
 
 		/**
-		 * Tests the camera rotation matrix that is built from the euler angles rotation vector.
+		 * Tests that the optimization with an already perfect initialization converges instantly and doesn't change
+		 * the parameters.
 		 */
-		TEST_F(CameraPoseEstimationTests, testEstimationFromOriginalTransformation) {
-			google::InitGoogleLogging("Test");
+		TEST_F(CameraPoseEstimationTests, testEstimationOnlyTranslation) {
+//			google::InitGoogleLogging("Test");
+//			FLAGS_logtostderr = 1;
 
-			Eigen::Vector4d pointInWorldSpace;
+			Eigen::Vector3d testTranslation{0, 0, 0};
+			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
+					Eigen::Vector3d{35, -100, 15},
+					rotation,
+					frustumParameters,
+					intrinsics,
+					imageSize
+			);
+			addPerfectPointCorrespondence({0, 0, 5});
+			addPerfectPointCorrespondence({0, 10, 5});
+			addPerfectPointCorrespondence({0, 30, 5});
+			addPerfectPointCorrespondence({0, 50, 5});
+			addPerfectPointCorrespondence({0, 70, 5});
 
-			pointInWorldSpace << 0, 0, 5, 1;
-			estimator->addPointCorrespondence(pointInWorldSpace, providentia::camera::render(
-					translation.data(), rotation.data(),
-					frustumParameters.data(), intrinsics.data(),
-					imageSize.data(),
-					pointInWorldSpace.data()
-			));
-//
-//			pointInWorldSpace << 0, 10, 5, 1;
-//			estimator->addPointCorrespondence(pointInWorldSpace, *camera * pointInWorldSpace);
-//
-//			pointInWorldSpace << -4, 15, 3, 1;
-//			estimator->addPointCorrespondence(pointInWorldSpace, *camera * pointInWorldSpace);
+			addPerfectPointCorrespondence({4, 10, 0});
+			addPerfectPointCorrespondence({-1, 30, -3});
 
 			estimator->estimate();
+
+			assertVectorsNearEqual(estimator->getTranslation(), translation);
+			assertVectorsNearEqual(estimator->getRotation(), rotation);
+
 		}
 	}// namespace toCameraSpace
 }// namespace providentia

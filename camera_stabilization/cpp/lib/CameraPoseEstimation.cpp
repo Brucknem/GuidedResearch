@@ -10,16 +10,10 @@
 namespace providentia {
 	namespace calibration {
 
-		void CameraPoseEstimator::estimate() {
+		void CameraPoseEstimator::estimate(bool _logSummary) {
 			options.linear_solver_type = ceres::DENSE_QR;
-			options.minimizer_progress_to_stdout = true;
+			options.minimizer_progress_to_stdout = _logSummary;
 			Solve(options, &problem, &summary);
-		}
-
-		void CameraPoseEstimator::addPointCorrespondence(const Eigen::Vector4d &worldPosition,
-														 const Eigen::Vector2d &pixel) {
-			addPointCorrespondence(Eigen::Vector3d(worldPosition.x(), worldPosition.y(), worldPosition.z()),
-								   pixel);
 		}
 
 		void CameraPoseEstimator::addPointCorrespondence(const Eigen::Vector3d &worldPosition,
@@ -38,7 +32,14 @@ namespace providentia {
 				initialRotation(_initialRotation), initialTranslation(_initialTranslation),
 				rotation(_initialRotation), translation(_initialTranslation),
 				frustumParameters(std::move(_frustumParameters)), intrinsics(std::move(_intrinsics)),
-				imageSize(std::move(_imageSize)) {
+				imageSize(std::move(_imageSize)) {}
+
+		const Eigen::Vector3d &CameraPoseEstimator::getTranslation() const {
+			return translation;
+		}
+
+		const Eigen::Vector3d &CameraPoseEstimator::getRotation() const {
+			return rotation;
 		}
 
 	}
