@@ -118,7 +118,7 @@ namespace providentia {
 		 * @param _imageSize The [width, height] of the image.
 		 * @param vector The [u, v] vector in normalized device coordinates.
 		 *
-		 * @return The resulting [u, v] pixel location in image space.
+		 * @return The resulting [u, v] expectedPixel location in image space.
 		 */
 		template<typename T>
 		Eigen::Matrix<T, 2, 1> toImageSpace(const T *_imageSize, const T *vector);
@@ -134,7 +134,7 @@ namespace providentia {
 		 * @param _imageSize The [width, height] of the image.
 		 * @param vector The [x, y, z, w] vector in world space.
 		 *
-		 * @return The [u, v] pixel location in image space.
+		 * @return The [u, v] expectedPixel location in image space.
 		 */
 		template<typename T>
 		Eigen::Matrix<T, 2, 1>
@@ -151,8 +151,8 @@ namespace providentia {
 		 * @param _intrinsics The [sensorWidth, aspectRatio, focalLength] defining the camera intrinsics.
 		 * @param _imageSize The [width, height] of the image.
 		 * @param vector The [x, y, z, w] vector in world space.
-		 * @param color The color that is assigned to the pixel.
-		 * @param image The image to which the pixel will rendered.
+		 * @param color The color that is assigned to the expectedPixel.
+		 * @param image The image to which the expectedPixel will rendered.
 		 */
 		void render(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation,
 					const Eigen::Vector2d &_frustumParameters, const Eigen::Vector3d &_intrinsics,

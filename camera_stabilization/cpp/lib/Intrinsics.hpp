@@ -42,8 +42,8 @@ namespace providentia {
 			 *
 			 * @param focalX The focal length in X direction.
 			 * @param focalY The focal length in Y direction.
-			 * @param centerX The X pixel coordinate of the image center (principal point).
-			 * @param centerY The Y pixel coordinate of the image center (principal point).
+			 * @param centerX The X expectedPixel coordinate of the image center (principal point).
+			 * @param centerY The Y expectedPixel coordinate of the image center (principal point).
 			 */
 			Intrinsics(float focalX, float focalY, int centerX, int centerY);
 
@@ -89,7 +89,6 @@ namespace providentia {
 			 */
 			friend std::ostream &operator<<(std::ostream &os, const Intrinsics &obj);
 		};
-
 
 		/**
 		 * Mock class for the intrinsics used in the blender toCameraSpace setup.

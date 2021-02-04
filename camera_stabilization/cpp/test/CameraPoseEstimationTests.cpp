@@ -52,7 +52,7 @@ namespace providentia {
 			Eigen::Vector4d pointInWorldSpace;
 
 			pointInWorldSpace << 0, 0, 5, 1;
-			estimator->addReprojectionResidual(pointInWorldSpace, providentia::camera::render(
+			estimator->addPointCorrespondence(pointInWorldSpace, providentia::camera::render(
 					translation.data(), rotation.data(),
 					frustumParameters.data(), intrinsics.data(),
 					imageSize.data(),
@@ -60,12 +60,12 @@ namespace providentia {
 			));
 //
 //			pointInWorldSpace << 0, 10, 5, 1;
-//			estimator->addReprojectionResidual(pointInWorldSpace, *camera * pointInWorldSpace);
+//			estimator->addPointCorrespondence(pointInWorldSpace, *camera * pointInWorldSpace);
 //
 //			pointInWorldSpace << -4, 15, 3, 1;
-//			estimator->addReprojectionResidual(pointInWorldSpace, *camera * pointInWorldSpace);
+//			estimator->addPointCorrespondence(pointInWorldSpace, *camera * pointInWorldSpace);
 
-			estimator->solve();
+			estimator->estimate();
 		}
 	}// namespace toCameraSpace
 }// namespace providentia

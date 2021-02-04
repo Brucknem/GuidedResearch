@@ -55,7 +55,7 @@ struct CostFunctor {
 
 int main(int argc, char **argv) {
 	google::InitGoogleLogging(argv[0]);
-	// The variable to solve for with its initial value. It will be
+	// The variable to estimate for with its initial value. It will be
 	// mutated in place by the solver.
 	double data[2] = {0, 0};
 	// Build the problem.

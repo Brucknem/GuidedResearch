@@ -10,7 +10,6 @@
 #include "opencv2/cudafilters.hpp"
 #include "TimeMeasurable.hpp"
 
-
 namespace providentia {
 	namespace segmentation {
 		/**
@@ -24,7 +23,6 @@ namespace providentia {
 			 * calculating the background mask as the difference of 255 - foreground mask.
 			 */
 			cv::cuda::GpuMat all255Mask;
-
 
 		protected:
 			/**
@@ -142,8 +140,8 @@ namespace providentia {
 			 *
 			 * @param _calculationSize The scaling size of the frame during calculation.
 			 * @param history Length of the history.
-			 * @param varThreshold Threshold on the squared Mahalanobis distance between the pixel and the model
-			 * to decide whether a pixel is well described by the background model. This parameter does not
+			 * @param varThreshold Threshold on the squared Mahalanobis distance between the expectedPixel and the model
+			 * to decide whether a expectedPixel is well described by the background model. This parameter does not
 			 * affect the background update.
 			 * @param detectShadows If true, the algorithm will detect shadows and mark them. It decreases the
 			 * speed a bit, so if you do not need this feature, set the parameter to false.
@@ -159,6 +157,5 @@ namespace providentia {
 		};
 	}
 }
-
 
 #endif //CAMERASTABILIZATION_BACKGROUNDSEGMENTATION_HPP

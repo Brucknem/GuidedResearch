@@ -124,7 +124,7 @@ namespace providentia {
 		}
 
 		/**
-		 * Tests that rendering points in world coordinates results in correct points in pixel coordinates.
+		 * Tests that rendering points in world coordinates results in correct points in expectedPixel coordinates.
 		 */
 		TEST_F(RenderingPipelineTests, testRenderToImage) {
 			Eigen::Vector4d pointInWorldSpace;

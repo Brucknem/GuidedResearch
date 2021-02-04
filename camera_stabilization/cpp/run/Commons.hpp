@@ -40,8 +40,8 @@ namespace providentia {
 		 *
 		 * @param frame The frame to add text to.
 		 * @param text The text to add.
-		 * @param x The left starting pixel location.
-		 * @param y The upper starting pixel location.
+		 * @param x The left starting expectedPixel location.
+		 * @param y The upper starting expectedPixel location.
 		 */
 		void addText(const cv::Mat &frame, const std::string &text, int x, int y);
 
@@ -51,8 +51,8 @@ namespace providentia {
 		 * @param frame The frame to add message to.
 		 * @param message The message to add.
 		 * @param milliseconds The duration in milliseconds.
-		 * @param x The left starting pixel location.
-		 * @param y The upper starting pixel location.
+		 * @param x The left starting expectedPixel location.
+		 * @param y The upper starting expectedPixel location.
 		 */
 		void addRuntimeToFrame(const cv::Mat &_frame, const std::string &message, long milliseconds, int x, int y);
 
@@ -142,8 +142,8 @@ namespace providentia {
 			 * Adds some text to the final frame.
 			 *
 			 * @param text The text to add.
-			 * @param x The left starting pixel location.
-			 * @param y The upper starting pixel location.
+			 * @param x The left starting expectedPixel location.
+			 * @param y The upper starting expectedPixel location.
 			 */
 			void addTextToFinalFrame(const std::string &text, int x, int y);
 
@@ -152,8 +152,8 @@ namespace providentia {
 			 *
 			 * @param text The text to add.
 			 * @param milliseconds The runtime in milliseconds.
-			 * @param x The left starting pixel location.
-			 * @param y The upper starting pixel location.
+			 * @param x The left starting expectedPixel location.
+			 * @param y The upper starting expectedPixel location.
 			 */
 			void addRuntimeToFinalFrame(const std::string &text, long milliseconds, int x, int y);
 
@@ -213,6 +213,5 @@ namespace providentia {
 
 	}
 }
-
 
 #endif //CAMERASTABILIZATION_COMMONS_HPP

@@ -10,87 +10,106 @@
 #include "ceres/ceres.h"
 #include "glog/logging.h"
 #include "opencv2/opencv.hpp"
-#include "RenderingPipeline.hpp"
+
+#include "Residuals.hpp"
 
 namespace providentia {
 	namespace calibration {
 
-
-		struct ReprojectionResidual {
-		private:
-			Eigen::Vector2d pixel;
-			Eigen::Vector3d worldCoordinate;
-
-			Eigen::Vector2d frustumParameters;
-			Eigen::Vector3d intrinsics;
-
-			Eigen::Vector2d imageSize;
-
-		public:
-			ReprojectionResidual(Eigen::Vector2d _pixel, Eigen::Vector3d _worldCoordinate,
-								 Eigen::Vector2d _frustumParameters, Eigen::Vector3d _intrinsics,
-								 Eigen::Vector2d _imageSize) :
-					pixel(std::move(_pixel)), worldCoordinate(std::move(_worldCoordinate)),
-					frustumParameters(std::move(_frustumParameters)), intrinsics(std::move(_intrinsics)),
-					imageSize(std::move(_imageSize)) {}
-
-			template<typename T>
-			bool operator()(const T *_translation, const T *_rotation, T *residual) const {
-				Eigen::Matrix<T, 4, 1> point{(T) worldCoordinate.x(), (T) worldCoordinate.y(), (T) worldCoordinate.z(),
-											 (T) 1};
-
-				Eigen::Matrix<T, 2, 1> _frustumParameters{(T) frustumParameters.x(), (T) frustumParameters.y()};
-				Eigen::Matrix<T, 3, 1> _intrinsics{(T) intrinsics.x(), (T) intrinsics.y(), (T) intrinsics.z()};
-				Eigen::Matrix<T, 2, 1> _imageSize{(T) imageSize.x(), (T) imageSize.y()};
-				Eigen::Matrix<T, 2, 1> actualPixel;
-
-
-//				point = providentia::camera::toCameraSpace(_translation, _rotation, point.data());
-//				point = providentia::camera::toClipSpace(_frustumParameters.data(), _intrinsics.data(), point.data());
-//				 actualPixel = providentia::camera::toNormalizedDeviceCoordinates(point.data());
-//				actualPixel = providentia::camera::toImageSpace(_imageSize.data(), actualPixel.data());
-
-				actualPixel = providentia::camera::render(_translation, _rotation, _frustumParameters.data(),
-														  _intrinsics.data(), _imageSize.data(), point.data());
-
-//				Eigen::Matrix<T, 2, 1> actualPixel{_translation[0], _rotation[1]};
-				residual[0] = pixel.x() - actualPixel.x();
-				residual[1] = pixel.y() - actualPixel.y();
-
-				std::cout << residual[0] << ", " << residual[1] << std::endl;
-
-				return true;
-			}
-		};
-
+		/**
+		 * Estimates the camera pose from some known correspondences between the world and image.
+		 */
 		class CameraPoseEstimator {
 		protected:
-			// Build the problem.
+
+			/**
+			 * The ceres internal minimization problem definition.
+			 */
 			ceres::Problem problem;
 
+			/**
+			 * Some options passed to the ceres solver.
+			 */
 			ceres::Solver::Options options;
+
+			/**
+			 * The final optimization summary.
+			 */
 			ceres::Solver::Summary summary;
 
-			std::vector<double> initialTranslation, translation;
-			std::vector<double> initialRotation, rotation;
+			/**
+			 * The initial camera [x, y, z] translation in world space.
+			 */
+			Eigen::Vector3d initialTranslation;
 
+			/**
+			 * The current camera [x, y, z] translation in world space used for optimization.
+			 */
+			Eigen::Vector3d translation;
+
+			/**
+			 * The initial camera [x, y, z] euler angle rotation around the world space axis.
+			 */
+			Eigen::Vector3d initialRotation;
+
+			/**
+			 * The current camera [x, y, z] euler angle rotation around the world space axis.
+			 */
+			Eigen::Vector3d rotation;
+
+			/**
+			 * The [near, far] plane distances of the view frustum.
+			 */
 			Eigen::Vector2d frustumParameters;
+
+			/**
+			 * The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
+			 */
 			Eigen::Vector3d intrinsics;
 
+			/**
+			 * The [width, height] of the image.
+			 */
 			Eigen::Vector2d imageSize;
 
 		public:
-			explicit CameraPoseEstimator(Eigen::Vector3d _initialTranslation,
-										 Eigen::Vector3d _initialRotation,
-										 Eigen::Vector2d _frustumParameters,
-										 Eigen::Vector3d _intrinsics,
-										 Eigen::Vector2d _imageSize);
+			/**
+			 * @constructor
+			 *
+			 * @param _initialTranslation An initial guess for the camera [x, y, z] translation in world space.
+			 * @param _initialRotation An initial guess for the camera [x, y, z] euler angle rotation around the world
+			 * space axis.
+			 * @param _frustumParameters The [near, far] plane distances of the view frustum.
+			 * @param _intrinsics The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
+			 * @param _imageSize The [width, height] of the image.
+			 */
+			CameraPoseEstimator(const Eigen::Vector3d &_initialTranslation,
+								const Eigen::Vector3d &_initialRotation,
+								Eigen::Vector2d _frustumParameters,
+								Eigen::Vector3d _intrinsics,
+								Eigen::Vector2d _imageSize);
 
-			void addReprojectionResidual(const Eigen::Vector3d &worldCoordinate, const Eigen::Vector2d &pixel);
+			/**
+			 * Adds a correspondence to the optimization problem.
+			 *
+			 * @param worldPosition The [x, y, z] world position of the correspondence.
+			 * @param pixel The [u, v] pixel position of the correspondence.
+			 */
+			void addPointCorrespondence(const Eigen::Vector3d &worldPosition, const Eigen::Vector2d &pixel);
 
-			void addReprojectionResidual(const Eigen::Vector4d &worldCoordinate, const Eigen::Vector2d &pixel);
+			/**
+			 * Adds a correspondence to the optimization problem.
+			 *
+			 * @param worldPosition The [x, y, z, w] world position of the correspondence.
+			 * @param pixel The [u, v] pixel position of the correspondence.
+			 */
+			void addPointCorrespondence(const Eigen::Vector4d &worldPosition, const Eigen::Vector2d &pixel);
 
-			void solve();
+			/**
+			 * Estimates the camera translation and rotation based on the known correspondences between the world and
+			 * image.
+			 */
+			void estimate();
 
 		};
 	}
