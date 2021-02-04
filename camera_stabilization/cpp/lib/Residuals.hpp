@@ -71,7 +71,7 @@ namespace providentia {
 			bool operator()(const T *_translation, const T *_rotation, T *residual) const;
 
 			/**
-			 * Factory method to hide residual creation.
+			 * Factory method to hide the residual creation.
 			 */
 			static ceres::CostFunction *Create(Eigen::Vector2d _expectedPixel, Eigen::Vector3d _worldPosition,
 											   Eigen::Vector2d _frustumParameters, Eigen::Vector3d _intrinsics,

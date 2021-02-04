@@ -34,8 +34,22 @@ namespace providentia {
 		void assertVectorsNearEqual(const Eigen::Vector2d &a, double x, double y,
 									double maxDifference = 1e-4);
 
+		class CameraTestBase : public ::testing::Test {
+		protected:
+			Eigen::Vector2d frustumParameters{1, 1000};
+			Eigen::Vector3d intrinsics{32, 1920. / 1200., 20};
+
+			Eigen::Vector2d imageSize{1920, 1200};
+
+			Eigen::Vector3d translation{0, -10, 5};
+			Eigen::Vector3d rotation{90, 0, 0};
+
+			/**
+			 * @destructor
+			 */
+			~CameraTestBase() override = default;
+		};
 	}
 }
-
 
 #endif //CAMERASTABILIZATION_CAMERATESTBASE_HPP

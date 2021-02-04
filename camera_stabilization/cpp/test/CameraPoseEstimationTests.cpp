@@ -12,18 +12,10 @@ namespace providentia {
 		/**
 		 * Common toCameraSpace setup for the camera tests.
 		 */
-		class CameraPoseEstimationTests : public ::testing::Test {
+		class CameraPoseEstimationTests : public CameraTestBase {
 		protected:
 			Eigen::Vector2d pixel;
 			Eigen::Vector3d worldCoordinate;
-
-			Eigen::Vector2d frustumParameters{1, 1000};
-			Eigen::Vector3d intrinsics{32, 1920. / 1200., 20};
-
-			Eigen::Vector2d imageSize{1920, 1200};
-
-			Eigen::Vector3d translation{0, -10, 5};
-			Eigen::Vector3d rotation{90, 0, 0};
 
 			std::shared_ptr<providentia::calibration::CameraPoseEstimator> estimator;
 

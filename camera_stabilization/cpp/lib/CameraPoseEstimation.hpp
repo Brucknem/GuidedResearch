@@ -90,6 +90,11 @@ namespace providentia {
 								Eigen::Vector2d _imageSize);
 
 			/**
+			 * @destructor
+			 */
+			virtual ~CameraPoseEstimator() = default;
+
+			/**
 			 * Adds a correspondence to the optimization problem.
 			 *
 			 * @param worldPosition The [x, y, z] world position of the correspondence.

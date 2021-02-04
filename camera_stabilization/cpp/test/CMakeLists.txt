@@ -55,6 +55,7 @@ add_executable(Tests ImageTestBase.cpp CameraTestBase.cpp
         RenderingPipelineTests.cpp
         PerspectiveProjectionTests.cpp
         CameraPoseEstimationTests.cpp
+        ResidualsTest.cpp
         )
 target_link_libraries(Tests PUBLIC libCameraStabilization gtest_main ${OpenCV_LIBS} Eigen3::Eigen)
 target_include_directories(Tests PUBLIC tests "${PROJECT_BINARY_DIR}")
