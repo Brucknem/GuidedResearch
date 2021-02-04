@@ -4,7 +4,7 @@
 
 #include "Commons.hpp"
 #include "Eigen/Dense"
-#include "CameraPoseEstimation.hpp"
+#include "RenderingPipeline.hpp"
 
 /**
  * Setup to visualize the rendering pipeline.
@@ -22,7 +22,7 @@ public:
 	}
 
 	void render(double x, double y, double z, const cv::Vec3d &color) {
-		providentia::calibration::render(
+		providentia::camera::render(
 				translation, rotation,
 				frustumParameters, intrinsics,
 				Eigen::Vector4d(x, y, z, 1),

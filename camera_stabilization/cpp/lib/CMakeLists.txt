@@ -16,7 +16,8 @@ add_library(libCameraStabilization
         TimeMeasurable.cpp
         CSVWriter.cpp
         Intrinsics.cpp
-        CameraPoseEstimation.cpp)
+        CameraPoseEstimation.cpp
+        RenderingPipeline.cpp)
 
 target_include_directories(libCameraStabilization
         INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
