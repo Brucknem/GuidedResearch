@@ -6,16 +6,13 @@
 #include "Eigen/Dense"
 #include "RenderingPipeline.hpp"
 
-double getRandom01() {
-	return static_cast<double>((rand()) / static_cast<double>(RAND_MAX));
-}
+using namespace providentia::runnable;
 
 /**
  * Setup to visualize the rendering pipeline.
  */
 class Setup : public providentia::runnable::BaseSetup {
-private:
-
+public:
 	/**
 	 * The [near, far] plane distances of the view frustum.
 	 */
@@ -41,22 +38,9 @@ private:
 	 */
 	Eigen::Vector3d rotation{90, 0, 0};
 
-public:
 	explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
-		srand(static_cast <unsigned> (time(0)));
 	}
 
-	void specificMainLoop() override {
-		finalFrame = cv::Mat::zeros(cv::Size(1920, 1200), CV_64FC4);
-
-		renderOutlines();
-		renderRegularGrid(15);
-		renderRandom(1000);
-	}
-
-	/**
-	 * Renders the given [x, y, z] world space vector with the given color.
-	 */
 	void render(double x, double y, double z, const cv::Vec3d &color) {
 		providentia::camera::render(
 				translation, rotation,
@@ -65,10 +49,6 @@ public:
 				color, finalFrame);
 	}
 
-	/**
-	 * Renders random points with random colors in the [-10, 10]^3 cube.
-	 * @param amount
-	 */
 	void renderRandom(int amount) {
 		for (int z = 0; z < amount; ++z) {
 			render(
@@ -83,26 +63,20 @@ public:
 		}
 	}
 
-	/**
-	 * Renders points on a regular grid with 1m spacing and random colors.
-	 */
-	void renderRegularGrid(int size) {
-		for (int z = -size / 2 + 5; z < size / 2 + 5; ++z) {
-			for (int y = 0; y < size; ++y) {
-				for (int x = -size / 2; x < size / 2; ++x) {
-					render(x, y, z, {
-							getRandom01(),
-							getRandom01(),
-							getRandom01()
-					});
+	void renderRegularGrid(int size, const cv::Vec3d &color = {-1, -1, -1}) {
+		for (int z = -size / 2 + 5; z <= size / 2 + 5; ++z) {
+			for (int y = 0; y <= size; ++y) {
+				for (int x = -size / 2; x <= size / 2; ++x) {
+					cv::Vec3d _color = color;
+					if (_color[0] < 0) {
+						_color = {getRandom01(), getRandom01(), getRandom01()};
+					}
+					render(x, y, z, _color);
 				}
 			}
 		}
 	}
 
-	/**
-	 * Renders the outline of the image plane.
-	 */
 	void renderOutlines() {// Vertical
 		for (int i = 0; i <= 10; ++i) {
 			render(-8, 0, i, {1, 0, 1});
@@ -117,6 +91,17 @@ public:
 			render(i - 8, 0, 9.99, {0, 1, 0});
 		}
 	}
+
+protected:
+
+	void specificMainLoop() override {
+		finalFrame = cv::Mat::zeros(cv::Size(1920, 1200), CV_64FC4);
+
+		renderOutlines();
+		renderRegularGrid(15);
+		renderRandom(1000);
+	}
+
 };
 
 int main(int argc, char const *argv[]) {

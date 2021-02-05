@@ -6,8 +6,10 @@
 #define CAMERASTABILIZATION_COMMONS_HPP
 
 #include <stdexcept>
+#include <RenderingPipeline.hpp>
 #include "opencv2/opencv.hpp"
 #include "TimeMeasurable.hpp"
+#include "Eigen/Dense"
 
 namespace providentia {
 	namespace runnable {
@@ -66,6 +68,11 @@ namespace providentia {
 		cv::Mat pad(const cv::Mat &frame, int padding);
 
 		/**
+		 * @get a random float [0, 1)
+		 */
+		double getRandom01();
+
+		/**
 		 * Base class for all run setups.
 		 * Wraps the main loop and field initializations.
 		 */
@@ -119,8 +126,6 @@ namespace providentia {
 			 * A scaling factor applied to the final frame before rendering.
 			 */
 			double renderingScaleFactor = 0.5;
-
-		protected:
 
 			/**
 			 * The total duration of the algorithms.

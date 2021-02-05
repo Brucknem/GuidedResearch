@@ -41,8 +41,3 @@ add_executable(VisualizeRenderingPipeline VisualizeRenderingPipeline.cpp Commons
 target_link_libraries(VisualizeRenderingPipeline PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeRenderingPipeline PUBLIC "${PROJECT_BINARY_DIR}")
 
-
-add_executable(VisualizeCeres VisualizeCeres.cpp)
-target_link_libraries(VisualizeCeres PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
-target_include_directories(VisualizeCeres PUBLIC "${PROJECT_BINARY_DIR}")
-

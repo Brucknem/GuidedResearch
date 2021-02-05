@@ -15,7 +15,6 @@
 
 namespace providentia {
 	namespace calibration {
-
 		/**
 		 * Estimates the camera pose from some known correspondences between the world and image.
 		 */
@@ -124,9 +123,15 @@ namespace providentia {
 			 */
 			const Eigen::Vector3d &getRotation() const;
 
+			/**
+			 * Calculates the mean of the known world correspondences.
+			 */
 			Eigen::Vector3d calculateMean();
 
-			Eigen::Vector3d calculateFurthestKnownWorldPosition(const Eigen::Vector3d &mean);
+			/**
+			 * Adds a callback to the estimator that gets called after each optimization step.
+			 */
+			void addIterationCallback(ceres::IterationCallback *callback);
 		};
 	}
 }

@@ -28,7 +28,6 @@ cv::VideoCapture providentia::runnable::openVideoCapture(const std::string &vide
 	return cap;
 }
 
-
 std::string providentia::runnable::durationInfo(const std::string &message, long milliseconds) {
 	std::stringstream ss;
 	ss << message << " - Duration: " << milliseconds << "ms - FPS: " << 1000. / milliseconds;
@@ -45,11 +44,14 @@ cv::Mat providentia::runnable::pad(const cv::Mat &frame, int padding) {
 				   cv::Rect(padding, padding, frame.cols - 2 * padding, frame.rows - 2 * padding));
 }
 
-
 void providentia::runnable::addRuntimeToFrame(const cv::Mat &_frame, const std::string &message,
 											  long milliseconds, int x,
 											  int y) {
 	addText(_frame, durationInfo(message, milliseconds), x, y);
+}
+
+double providentia::runnable::getRandom01() {
+	return static_cast<double>((rand()) / static_cast<double>(RAND_MAX));
 }
 
 #pragma endregion Helpers
@@ -96,6 +98,7 @@ void providentia::runnable::BaseSetup::init() {
 	this->capture = providentia::runnable::openVideoCapture(videoFileName);
 	this->renderingScaleFactor /= this->calculationScaleFactor;
 	cv::namedWindow(this->windowName, cv::WINDOW_AUTOSIZE);
+	srand(static_cast <unsigned> (time(0)));
 }
 
 providentia::runnable::BaseSetup::~BaseSetup() {
@@ -126,7 +129,6 @@ void providentia::runnable::BaseSetup::mainLoop() {
 
 		totalAlgorithmsDuration = 0;
 		specificMainLoop();
-
 
 		cv::resize(finalFrame, finalFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
 

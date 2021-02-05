@@ -12,7 +12,6 @@ namespace providentia {
 
 		void CameraPoseEstimator::calculateInitialGuess() {
 			Eigen::Vector3d mean = calculateMean();
-			Eigen::Vector3d furthestFromMean = calculateFurthestKnownWorldPosition(mean);
 			double wantedDistance = (0.5 * (frustumParameters.y() - frustumParameters.x())) + frustumParameters.x();
 
 			initialTranslation = mean;
@@ -21,20 +20,6 @@ namespace providentia {
 
 			translation = initialTranslation;
 			rotation = initialRotation;
-		}
-
-		Eigen::Vector3d
-		CameraPoseEstimator::calculateFurthestKnownWorldPosition(const Eigen::Vector3d &mean) {
-			Eigen::Vector3d furthestFromMean;
-			double maxDistance = -1;
-			for (const auto &worldPosition : worldPositions) {
-				double distance = (mean - worldPosition).norm();
-				if (distance > maxDistance) {
-					maxDistance = distance;
-					furthestFromMean = worldPosition;
-				}
-			}
-			return furthestFromMean;
 		}
 
 		Eigen::Vector3d CameraPoseEstimator::calculateMean() {
@@ -48,8 +33,13 @@ namespace providentia {
 		void CameraPoseEstimator::estimate(bool _logSummary) {
 			options.linear_solver_type = ceres::DENSE_QR;
 			options.minimizer_progress_to_stdout = _logSummary;
+			options.update_state_every_iteration = true;
 			calculateInitialGuess();
 			Solve(options, &problem, &summary);
+		}
+
+		void CameraPoseEstimator::addIterationCallback(ceres::IterationCallback *callback) {
+			options.callbacks.push_back(callback);
 		}
 
 		void CameraPoseEstimator::addPointCorrespondence(const Eigen::Vector3d &worldPosition,

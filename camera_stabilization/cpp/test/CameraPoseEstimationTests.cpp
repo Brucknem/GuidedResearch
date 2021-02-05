@@ -84,7 +84,7 @@ namespace providentia {
 					imageSize
 			);
 			addSomePointCorrespondences();
-			assertEstimation(true);
+			assertEstimation();
 		}
 
 	}// namespace toCameraSpace
