@@ -72,20 +72,20 @@ namespace providentia {
 			 */
 			Eigen::Vector2d imageSize;
 
+			/**
+			 * A buffer for the known world positions used to calculate an initial guess for the optimization.
+			 */
+			std::vector<Eigen::Vector3d> worldPositions;
+
 		public:
 			/**
 			 * @constructor
 			 *
-			 * @param _initialTranslation An initial guess for the camera [x, y, z] translation in world space.
-			 * @param _initialRotation An initial guess for the camera [x, y, z] euler angle rotation around the world
-			 * space axis.
 			 * @param _frustumParameters The [near, far] plane distances of the view frustum.
 			 * @param _intrinsics The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
 			 * @param _imageSize The [width, height] of the image.
 			 */
-			CameraPoseEstimator(const Eigen::Vector3d &_initialTranslation,
-								const Eigen::Vector3d &_initialRotation,
-								Eigen::Vector2d _frustumParameters,
+			CameraPoseEstimator(Eigen::Vector2d _frustumParameters,
 								Eigen::Vector3d _intrinsics,
 								Eigen::Vector2d _imageSize);
 
@@ -109,6 +109,12 @@ namespace providentia {
 			void estimate(bool _logSummary = false);
 
 			/**
+			 * Based on the known world positions calculates and initial guess for the camera translation and rotation.
+			 * This is necessary as the optimization problem is rather ill posed and sensitive to the initialization.
+			 */
+			void calculateInitialGuess();
+
+			/**
 			 * @get
 			 */
 			const Eigen::Vector3d &getTranslation() const;
@@ -117,6 +123,10 @@ namespace providentia {
 			 * @get
 			 */
 			const Eigen::Vector3d &getRotation() const;
+
+			Eigen::Vector3d calculateMean();
+
+			Eigen::Vector3d calculateFurthestKnownWorldPosition(const Eigen::Vector3d &mean);
 		};
 	}
 }

@@ -10,27 +10,60 @@
 namespace providentia {
 	namespace calibration {
 
+		void CameraPoseEstimator::calculateInitialGuess() {
+			Eigen::Vector3d mean = calculateMean();
+			Eigen::Vector3d furthestFromMean = calculateFurthestKnownWorldPosition(mean);
+			double wantedDistance = (0.5 * (frustumParameters.y() - frustumParameters.x())) + frustumParameters.x();
+
+			initialTranslation = mean;
+			initialTranslation.z() += wantedDistance;
+			initialRotation = {0, 0, 0};
+
+			translation = initialTranslation;
+			rotation = initialRotation;
+		}
+
+		Eigen::Vector3d
+		CameraPoseEstimator::calculateFurthestKnownWorldPosition(const Eigen::Vector3d &mean) {
+			Eigen::Vector3d furthestFromMean;
+			double maxDistance = -1;
+			for (const auto &worldPosition : worldPositions) {
+				double distance = (mean - worldPosition).norm();
+				if (distance > maxDistance) {
+					maxDistance = distance;
+					furthestFromMean = worldPosition;
+				}
+			}
+			return furthestFromMean;
+		}
+
+		Eigen::Vector3d CameraPoseEstimator::calculateMean() {
+			Eigen::Vector3d meanVector(0, 0, 0);
+			for (const auto &worldPosition : worldPositions) {
+				meanVector += worldPosition;
+			}
+			return meanVector / worldPositions.size();
+		}
+
 		void CameraPoseEstimator::estimate(bool _logSummary) {
 			options.linear_solver_type = ceres::DENSE_QR;
 			options.minimizer_progress_to_stdout = _logSummary;
+			calculateInitialGuess();
 			Solve(options, &problem, &summary);
 		}
 
 		void CameraPoseEstimator::addPointCorrespondence(const Eigen::Vector3d &worldPosition,
 														 const Eigen::Vector2d &pixel) {
+			worldPositions.push_back(worldPosition);
 			problem.AddResidualBlock(
 					PointCorrespondenceResidual::Create(pixel, worldPosition, frustumParameters, intrinsics, imageSize),
 					nullptr, translation.data(), rotation.data()
 			);
 		}
 
-		CameraPoseEstimator::CameraPoseEstimator(const Eigen::Vector3d &_initialTranslation,
-												 const Eigen::Vector3d &_initialRotation,
-												 Eigen::Vector2d _frustumParameters,
+		CameraPoseEstimator::CameraPoseEstimator(Eigen::Vector2d _frustumParameters,
 												 Eigen::Vector3d _intrinsics,
 												 Eigen::Vector2d _imageSize) :
-				initialRotation(_initialRotation), initialTranslation(_initialTranslation),
-				rotation(_initialRotation), translation(_initialTranslation),
 				frustumParameters(std::move(_frustumParameters)), intrinsics(std::move(_intrinsics)),
 				imageSize(std::move(_imageSize)) {}
 

@@ -22,7 +22,7 @@ namespace providentia {
 			 */
 			~CameraPoseEstimationTests() override = default;
 
-			void addPerfectPointCorrespondence(const Eigen::Vector3d &pointInWorldSpace) {
+			void addPointCorrespondence(const Eigen::Vector3d &pointInWorldSpace) {
 				estimator->addPointCorrespondence(pointInWorldSpace, providentia::camera::render(
 						translation.data(), rotation.data(),
 						frustumParameters.data(), intrinsics.data(),
@@ -30,60 +30,62 @@ namespace providentia {
 						pointInWorldSpace.data()
 				));
 			}
+
+			void addSomePointCorrespondences() {
+				addPointCorrespondence({0, 0, 5});
+				addPointCorrespondence({0, 10, 5});
+				addPointCorrespondence({0, 30, 5});
+				addPointCorrespondence({0, 50, 5});
+				addPointCorrespondence({0, 70, 5});
+
+				addPointCorrespondence({4, 10, 0});
+				addPointCorrespondence({-1, 30, -3});
+			}
+
+			void assertEstimation(bool log = false) {
+				estimator->estimate(log);
+				assertVectorsNearEqual(estimator->getTranslation(), translation);
+				assertVectorsNearEqual(estimator->getRotation(), rotation);
+			}
 		};
 
 		/**
-		 * Tests that the optimization with an already perfect initialization converges instantly and doesn't change
-		 * the parameters.
+		 * Tests that the initial guess is half the frustum size above the mean.
 		 */
-		TEST_F(CameraPoseEstimationTests, testEstimationFromOriginalTransformation) {
-//			google::InitGoogleLogging("Test");
+		TEST_F(CameraPoseEstimationTests, testCalculateInitialGuess) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-					translation,
-					rotation,
 					frustumParameters,
 					intrinsics,
 					imageSize
 			);
-			addPerfectPointCorrespondence({0, 0, 0});
-			addPerfectPointCorrespondence({0, 10, 0});
-			addPerfectPointCorrespondence({0, 0, 5});
-			addPerfectPointCorrespondence({-4, 20, 4});
-			addPerfectPointCorrespondence({1, 2, 3});
 
-			estimator->estimate();
+			int size = 10;
+			for (int i = -size; i <= size; ++i) {
+				for (int j = -size; j <= size; ++j) {
+					for (int k = -size; k <= size; ++k) {
+						addPointCorrespondence({i * 1., j * 1., k * 1.});
+					}
+				}
+			}
+
+			estimator->calculateInitialGuess();
+
+			assertVectorsNearEqual(estimator->getTranslation(), Eigen::Vector3d{0, 0, 500.5});
+			assertVectorsNearEqual(estimator->getRotation(), Eigen::Vector3d{0, 0, 0});
 		}
 
 		/**
-		 * Tests that the optimization with an already perfect initialization converges instantly and doesn't change
-		 * the parameters.
+		 * Tests that the optimization converges to the expected extrinsic parameters.
 		 */
-		TEST_F(CameraPoseEstimationTests, testEstimationOnlyTranslation) {
-//			google::InitGoogleLogging("Test");
-//			FLAGS_logtostderr = 1;
-
-			Eigen::Vector3d testTranslation{0, 0, 0};
+		TEST_F(CameraPoseEstimationTests, testEstimation) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-					Eigen::Vector3d{35, -100, 15},
-					rotation,
 					frustumParameters,
 					intrinsics,
 					imageSize
 			);
-			addPerfectPointCorrespondence({0, 0, 5});
-			addPerfectPointCorrespondence({0, 10, 5});
-			addPerfectPointCorrespondence({0, 30, 5});
-			addPerfectPointCorrespondence({0, 50, 5});
-			addPerfectPointCorrespondence({0, 70, 5});
-
-			addPerfectPointCorrespondence({4, 10, 0});
-			addPerfectPointCorrespondence({-1, 30, -3});
-
-			estimator->estimate();
-
-			assertVectorsNearEqual(estimator->getTranslation(), translation);
-			assertVectorsNearEqual(estimator->getRotation(), rotation);
-
+			addSomePointCorrespondences();
+			assertEstimation(true);
 		}
+
 	}// namespace toCameraSpace
 }// namespace providentia

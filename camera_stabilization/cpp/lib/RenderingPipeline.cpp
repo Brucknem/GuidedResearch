@@ -51,7 +51,9 @@ namespace providentia {
 		render(const T *_translation, const T *_rotation, const T *_frustumParameters, const T *_intrinsics,
 			   const T *_imageSize, const T *vector) {
 			Eigen::Matrix<T, 4, 1> point = toCameraSpace(_translation, _rotation, vector);
-
+//			if (point.z() < _frustumParameters[0]) {
+//				return Eigen::Matrix<T, 2, 1>(_imageSize[0] * (T) 5, _imageSize[1] * (T) 5);
+//			}
 			point = toClipSpace(_frustumParameters, _intrinsics, point.data());
 
 			Eigen::Matrix<T, 2, 1> pixel = toNormalizedDeviceCoordinates(point.data());
@@ -181,9 +183,10 @@ namespace providentia {
 
 #pragma region TemplateInstances
 
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		/// These template instances are needed to tell the compiler for which types we want a specialized implementation of the function.
-		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////////////////////////////////////////////
+		/// These template instances are needed to tell the compiler for which types we want specialized
+		/// implementations of the functions.
+		//////////////////////////////////////////////////////////////////////////////////////////////////
 
 		template Eigen::Matrix<double, 2, 1> render<double>(const double *, const double *, const double *,
 															const double *, const double *, const double *);
