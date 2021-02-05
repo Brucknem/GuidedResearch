@@ -193,11 +193,32 @@ namespace providentia {
 
 		template Eigen::Matrix<double, 4, 1> toFrustum(const double *, const double *);
 
+		/**
+		 * Point correspondences.
+		 */
 		template Eigen::Matrix<ceres::Jet<double, 6>, 2, 1>
 		render<ceres::Jet<double, 6>>(const ceres::Jet<double, 6> *, const ceres::Jet<double, 6> *,
 									  const ceres::Jet<double, 6> *,
 									  const ceres::Jet<double, 6> *, const ceres::Jet<double, 6> *,
 									  const ceres::Jet<double, 6> *);
+
+		/**
+		 * Line correspondences.
+		 */
+		template Eigen::Matrix<ceres::Jet<double, 7>, 2, 1>
+		render<ceres::Jet<double, 7>>(const ceres::Jet<double, 7> *, const ceres::Jet<double, 7> *,
+									  const ceres::Jet<double, 7> *,
+									  const ceres::Jet<double, 7> *, const ceres::Jet<double, 7> *,
+									  const ceres::Jet<double, 7> *);
+
+		/**
+		 * Plane correspondences.
+		 */
+		template Eigen::Matrix<ceres::Jet<double, 8>, 2, 1>
+		render<ceres::Jet<double, 8>>(const ceres::Jet<double, 8> *, const ceres::Jet<double, 8> *,
+									  const ceres::Jet<double, 8> *,
+									  const ceres::Jet<double, 8> *, const ceres::Jet<double, 8> *,
+									  const ceres::Jet<double, 8> *);
 
 #pragma endregion TemplateInstances
 
