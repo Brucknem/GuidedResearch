@@ -14,6 +14,9 @@
 namespace providentia {
 	namespace calibration {
 
+		/**
+		 * Base class for the residuals.
+		 */
 		class CorrespondenceResidualBase {
 		protected:
 			/**
