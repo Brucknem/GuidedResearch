@@ -203,7 +203,7 @@ namespace providentia {
 									  const ceres::Jet<double, 6> *);
 
 		/**
-		 * Line correspondences.
+		 * PointOnLine correspondences.
 		 */
 		template Eigen::Matrix<ceres::Jet<double, 7>, 2, 1>
 		render<ceres::Jet<double, 7>>(const ceres::Jet<double, 7> *, const ceres::Jet<double, 7> *,
@@ -212,7 +212,7 @@ namespace providentia {
 									  const ceres::Jet<double, 7> *);
 
 		/**
-		 * Plane correspondences.
+		 * PointOnPlane correspondences.
 		 */
 		template Eigen::Matrix<ceres::Jet<double, 8>, 2, 1>
 		render<ceres::Jet<double, 8>>(const ceres::Jet<double, 8> *, const ceres::Jet<double, 8> *,

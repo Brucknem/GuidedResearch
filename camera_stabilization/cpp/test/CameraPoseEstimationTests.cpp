@@ -77,7 +77,7 @@ namespace providentia {
 		/**
 		 * Tests that the optimization converges to the expected extrinsic parameters.
 		 */
-		TEST_F(CameraPoseEstimationTests, testEstimation) {
+		TEST_F(CameraPoseEstimationTests, testEstimationOnlyWorldPositions) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
 					frustumParameters,
 					intrinsics,
@@ -86,6 +86,20 @@ namespace providentia {
 			addSomePointCorrespondences();
 			assertEstimation();
 		}
+
+
+//		/**
+//		 * Tests that the optimization converges to the expected extrinsic parameters.
+//		 */
+//		TEST_F(CameraPoseEstimationTests, testEstimationPlaneAndLines) {
+//			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
+//					frustumParameters,
+//					intrinsics,
+//					imageSize
+//			);
+//
+//			assertEstimation(true);
+//		}
 
 	}// namespace toCameraSpace
 }// namespace providentia

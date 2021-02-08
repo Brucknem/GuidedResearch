@@ -12,6 +12,7 @@
 #include "opencv2/opencv.hpp"
 
 #include "Residuals.hpp"
+#include "WorldObjects.hpp"
 
 namespace providentia {
 	namespace calibration {
@@ -72,9 +73,19 @@ namespace providentia {
 			Eigen::Vector2d imageSize;
 
 			/**
-			 * A buffer for the known world positions used to calculate an initial guess for the optimization.
+			 * A buffer for the known world positions.
 			 */
-			std::vector<Eigen::Vector3d> worldPositions;
+			std::vector<providentia::calibration::Point> positions;
+
+			/**
+			 * A buffer for the known world lines.
+			 */
+			std::vector<providentia::calibration::PointOnLine> lines;
+
+			/**
+			 * A buffer for the known world planes.
+			 */
+			std::vector<providentia::calibration::PointOnPlane> planes;
 
 		public:
 			/**
@@ -100,6 +111,30 @@ namespace providentia {
 			 * @param pixel The [u, v] pixel position of the correspondence.
 			 */
 			void addPointCorrespondence(const Eigen::Vector3d &worldPosition, const Eigen::Vector2d &pixel);
+
+			/**
+			 * Adds a correspondence to the optimization problem.
+			 *
+			 * @param _origin The [x, y, z] origin in world position of the line that results in the expected pixel.
+			 * @param _heading The [x, y, z] heading in world coordinates of the line that results in the expected pixel.
+			 * @param pixel The [u, v] pixel position of the correspondence.
+			 */
+			void addLineCorrespondence(Eigen::Vector3d _origin, const Eigen::Vector3d &_heading,
+									   const Eigen::Vector2d &pixel);
+
+			/**
+			 * Adds a correspondence to the optimization problem.
+			 *
+			 * @param _origin The [x, y, z] origin in world position of the plane that results in the expected
+			 * pixel.
+			 * @param _axisA The [x, y, z] axis in world coordinates of one side of the plane that results in
+			 * the expected pixel.
+			 * @param _axisB The [x, y, z] axis in world coordinates of another side of the plane that
+			 * results in the expected pixel.
+			 * @param pixel The [u, v] pixel position of the correspondence.
+			 */
+			void addPlaneCorrespondence(Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA,
+										const Eigen::Vector3d &_axisB, const Eigen::Vector2d &pixel);
 
 			/**
 			 * Estimates the camera translation and rotation based on the known correspondences between the world and

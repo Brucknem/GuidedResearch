@@ -10,6 +10,44 @@
 namespace providentia {
 	namespace calibration {
 
+		CameraPoseEstimator::CameraPoseEstimator(Eigen::Vector2d _frustumParameters,
+												 Eigen::Vector3d _intrinsics,
+												 Eigen::Vector2d _imageSize) :
+				frustumParameters(std::move(_frustumParameters)), intrinsics(std::move(_intrinsics)),
+				imageSize(std::move(_imageSize)) {}
+
+		const Eigen::Vector3d &CameraPoseEstimator::getTranslation() const {
+			return translation;
+		}
+
+		const Eigen::Vector3d &CameraPoseEstimator::getRotation() const {
+			return rotation;
+		}
+
+		void CameraPoseEstimator::addPointCorrespondence(const Eigen::Vector3d &worldPosition,
+														 const Eigen::Vector2d &pixel) {
+			double lambda = 0;
+			double mu = 0;
+			positions.emplace_back(worldPosition);
+			problem.AddResidualBlock(
+					CorrespondenceResidual::Create(pixel,
+												   std::make_shared<providentia::calibration::Point>(positions.back()),
+												   frustumParameters,
+												   intrinsics,
+												   imageSize),
+					nullptr, translation.data(), rotation.data(), &lambda, &mu);
+		}
+
+		void CameraPoseEstimator::addLineCorrespondence(Eigen::Vector3d _origin, const Eigen::Vector3d &_heading,
+														const Eigen::Vector2d &pixel) {
+
+		}
+
+		void CameraPoseEstimator::addPlaneCorrespondence(Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA,
+														 const Eigen::Vector3d &_axisB, const Eigen::Vector2d &pixel) {
+
+		}
+
 		void CameraPoseEstimator::calculateInitialGuess() {
 			Eigen::Vector3d mean = calculateMean();
 			double wantedDistance = (0.5 * (frustumParameters.y() - frustumParameters.x())) + frustumParameters.x();
@@ -24,10 +62,10 @@ namespace providentia {
 
 		Eigen::Vector3d CameraPoseEstimator::calculateMean() {
 			Eigen::Vector3d meanVector(0, 0, 0);
-			for (const auto &worldPosition : worldPositions) {
-				meanVector += worldPosition;
+			for (const auto &worldPosition : positions) {
+				meanVector += worldPosition.getPosition();
 			}
-			return meanVector / worldPositions.size();
+			return meanVector / positions.size();
 		}
 
 		void CameraPoseEstimator::estimate(bool _logSummary) {
@@ -40,29 +78,6 @@ namespace providentia {
 
 		void CameraPoseEstimator::addIterationCallback(ceres::IterationCallback *callback) {
 			options.callbacks.push_back(callback);
-		}
-
-		void CameraPoseEstimator::addPointCorrespondence(const Eigen::Vector3d &worldPosition,
-														 const Eigen::Vector2d &pixel) {
-			worldPositions.push_back(worldPosition);
-			problem.AddResidualBlock(
-					PointCorrespondenceResidual::Create(pixel, worldPosition, frustumParameters, intrinsics, imageSize),
-					nullptr, translation.data(), rotation.data()
-			);
-		}
-
-		CameraPoseEstimator::CameraPoseEstimator(Eigen::Vector2d _frustumParameters,
-												 Eigen::Vector3d _intrinsics,
-												 Eigen::Vector2d _imageSize) :
-				frustumParameters(std::move(_frustumParameters)), intrinsics(std::move(_intrinsics)),
-				imageSize(std::move(_imageSize)) {}
-
-		const Eigen::Vector3d &CameraPoseEstimator::getTranslation() const {
-			return translation;
-		}
-
-		const Eigen::Vector3d &CameraPoseEstimator::getRotation() const {
-			return rotation;
 		}
 
 	}

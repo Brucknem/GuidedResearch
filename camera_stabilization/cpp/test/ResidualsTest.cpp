@@ -29,10 +29,14 @@ namespace providentia {
 			void assertPointCorrespondenceResidual(Eigen::Vector3d worldPosition, Eigen::Vector2d pixel,
 												   Eigen::Vector2d expectedResidual) {
 				Eigen::Vector2d residual;
-				providentia::calibration::PointCorrespondenceResidual pointCorrespondenceResidual = {
-						std::move(pixel), std::move(worldPosition), frustumParameters, intrinsics, imageSize
+				providentia::calibration::Point point{std::move(worldPosition)};
+				providentia::calibration::CorrespondenceResidual correspondenceResidual = {
+						std::move(pixel), std::make_shared<providentia::calibration::Point>(point),
+						frustumParameters,
+						intrinsics, imageSize
 				};
-				pointCorrespondenceResidual(translation.data(), rotation.data(), residual.data());
+				correspondenceResidual(translation.data(), rotation.data(), point.getLambda(), point.getMu(), residual
+						.data());
 
 				EXPECT_NEAR(residual.x(), expectedResidual.x(), 1e-6);
 				EXPECT_NEAR(residual.y(), expectedResidual.y(), 1e-6);
@@ -42,14 +46,19 @@ namespace providentia {
 			 * Asserts that calculating projecting the world position to the image space results in the expected
 			 * residual error.
 			 */
-			void assertLineCorrespondenceResidual(Eigen::Vector3d lineOrigin, Eigen::Vector3d lineHeading, double
+			void assertLineCorrespondenceResidual(Eigen::Vector3d lineOrigin, const Eigen::Vector3d &lineHeading, double
 			lambda, Eigen::Vector2d pixel, Eigen::Vector2d expectedResidual) {
 				Eigen::Vector2d residual;
-				providentia::calibration::LineCorrespondenceResidual lineCorrespondenceResidual = {
-						std::move(pixel), std::move(lineOrigin), std::move(lineHeading), frustumParameters, intrinsics,
+				providentia::calibration::PointOnLine line(lineOrigin, lineHeading, lambda);
+				providentia::calibration::CorrespondenceResidual correspondenceResidual = {
+						std::move(pixel),
+						std::make_shared<providentia::calibration::PointOnLine>(line),
+						frustumParameters,
+						intrinsics,
 						imageSize
 				};
-				lineCorrespondenceResidual(translation.data(), rotation.data(), &lambda, residual.data());
+				correspondenceResidual(translation.data(), rotation.data(), line.getLambda(), line.getMu(),
+									   residual.data());
 
 				EXPECT_NEAR(residual.x(), expectedResidual.x(), 1e-6);
 				EXPECT_NEAR(residual.y(), expectedResidual.y(), 1e-6);
@@ -59,16 +68,20 @@ namespace providentia {
 			 * Asserts that calculating projecting the world position to the image space results in the expected
 			 * residual error.
 			 */
-			void assertPlaneCorrespondenceResidual(Eigen::Vector3d planeOrigin, Eigen::Vector3d planeSideA,
-												   double lambda, Eigen::Vector3d planeSideB, double mu,
+			void assertPlaneCorrespondenceResidual(Eigen::Vector3d planeOrigin, const Eigen::Vector3d &planeSideA,
+												   double lambda, const Eigen::Vector3d &planeSideB, double mu,
 												   Eigen::Vector2d pixel, Eigen::Vector2d expectedResidual) {
 				Eigen::Vector2d residual;
-				providentia::calibration::PlaneCorrespondenceResidual planeCorrespondenceResidual = {
-						std::move(pixel), std::move(planeOrigin), std::move(planeSideA), std::move(planeSideB),
+				providentia::calibration::PointOnPlane plane(std::move(planeOrigin), planeSideA, planeSideB, lambda,
+															 mu);
+				providentia::calibration::CorrespondenceResidual correspondenceResidual = {
+						std::move(pixel),
+						std::make_shared<providentia::calibration::PointOnPlane>(plane),
 						frustumParameters, intrinsics,
 						imageSize
 				};
-				planeCorrespondenceResidual(translation.data(), rotation.data(), &lambda, &mu, residual.data());
+				correspondenceResidual(translation.data(), rotation.data(), plane.getLambda(), plane.getMu(),
+									   residual.data());
 
 				EXPECT_NEAR(residual.x(), expectedResidual.x(), 1e-6);
 				EXPECT_NEAR(residual.y(), expectedResidual.y(), 1e-6);
