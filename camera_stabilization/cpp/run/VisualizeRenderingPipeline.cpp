@@ -5,6 +5,7 @@
 #include "Commons.hpp"
 #include "Eigen/Dense"
 #include "RenderingPipeline.hpp"
+#include "WorldObjects.hpp"
 
 using namespace providentia::runnable;
 
@@ -39,6 +40,41 @@ public:
 	Eigen::Vector3d rotation{90, 0, 0};
 
 	explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
+	}
+
+	void renderScene() {
+		for (int i = -7; i <= 7; i += 2) {
+			for (int j = 0; j < 200; j += 5) {
+				render(
+						providentia::calibration::ParametricPoint::OnPlane(
+								Eigen::Vector3d{0, 0, 0},
+								Eigen::Vector3d{1, 0, 0},
+								Eigen::Vector3d{0, 1, 0},
+								i, j).getPosition(),
+						{1, 1, 1});
+			}
+		}
+
+		for (int i = 0; i < 40; ++i) {
+			for (int j = 0; j < 5; ++j) {
+				render(
+						providentia::calibration::ParametricPoint::OnLine(
+								Eigen::Vector3d{-7.5, i * 5, 0},
+								Eigen::Vector3d{0, 0, 1},
+								j).getPosition(),
+						{1, 1, 0});
+				render(
+						providentia::calibration::ParametricPoint::OnLine(
+								Eigen::Vector3d{7.5, i * 5, 0},
+								Eigen::Vector3d{0, 0, 1},
+								j).getPosition(),
+						{0, 1, 1});
+			}
+		}
+	}
+
+	void render(Eigen::Vector3d vector, const cv::Vec3d &color) {
+		render(vector.x(), vector.y(), vector.z(), color);
 	}
 
 	void render(double x, double y, double z, const cv::Vec3d &color) {
@@ -95,11 +131,12 @@ public:
 protected:
 
 	void specificMainLoop() override {
-		finalFrame = cv::Mat::zeros(cv::Size(1920, 1200), CV_64FC4);
+		finalFrame = cv::Mat::zeros(cv::Size(imageSize[0], imageSize[1]), CV_64FC4);
 
-		renderOutlines();
-		renderRegularGrid(15);
-		renderRandom(1000);
+		renderScene();
+//		renderOutlines();
+//		renderRegularGrid(15);
+//		renderRandom(1000);
 	}
 
 };

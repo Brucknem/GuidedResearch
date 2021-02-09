@@ -8,6 +8,8 @@
 
 #include <utility>
 
+using namespace providentia::calibration;
+
 namespace providentia {
 	namespace tests {
 
@@ -22,18 +24,13 @@ namespace providentia {
 			 */
 			~ResidualsTest() override = default;
 
-			/**
-			 * Asserts that calculating projecting the world position to the image space results in the expected
-			 * residual error.
-			 */
-			void assertPointCorrespondenceResidual(Eigen::Vector3d worldPosition, Eigen::Vector2d pixel,
-												   Eigen::Vector2d expectedResidual) {
+			void assertParametricPoint(ParametricPoint point, Eigen::Vector2d expectedResidual) {
 				Eigen::Vector2d residual;
-				providentia::calibration::Point point{std::move(worldPosition)};
-				providentia::calibration::CorrespondenceResidual correspondenceResidual = {
-						std::move(pixel), std::make_shared<providentia::calibration::Point>(point),
+				CorrespondenceResidual correspondenceResidual = {
+						point.getExpectedPixel(), std::make_shared<ParametricPoint>(point),
 						frustumParameters,
-						intrinsics, imageSize
+						intrinsics, imageSize,
+						1
 				};
 				correspondenceResidual(translation.data(), rotation.data(), point.getLambda(), point.getMu(), residual
 						.data());
@@ -46,22 +43,20 @@ namespace providentia {
 			 * Asserts that calculating projecting the world position to the image space results in the expected
 			 * residual error.
 			 */
-			void assertLineCorrespondenceResidual(Eigen::Vector3d lineOrigin, const Eigen::Vector3d &lineHeading, double
-			lambda, Eigen::Vector2d pixel, Eigen::Vector2d expectedResidual) {
-				Eigen::Vector2d residual;
-				providentia::calibration::PointOnLine line(lineOrigin, lineHeading, lambda);
-				providentia::calibration::CorrespondenceResidual correspondenceResidual = {
-						std::move(pixel),
-						std::make_shared<providentia::calibration::PointOnLine>(line),
-						frustumParameters,
-						intrinsics,
-						imageSize
-				};
-				correspondenceResidual(translation.data(), rotation.data(), line.getLambda(), line.getMu(),
-									   residual.data());
+			void assertPointCorrespondenceResidual(const Eigen::Vector3d &worldPosition, const Eigen::Vector2d &pixel,
+												   Eigen::Vector2d expectedResidual) {
+				assertParametricPoint(ParametricPoint::OnPoint(pixel, worldPosition), std::move(expectedResidual));
+			}
 
-				EXPECT_NEAR(residual.x(), expectedResidual.x(), 1e-6);
-				EXPECT_NEAR(residual.y(), expectedResidual.y(), 1e-6);
+			/**
+			 * Asserts that calculating projecting the world position to the image space results in the expected
+			 * residual error.
+			 */
+			void assertLineCorrespondenceResidual(Eigen::Vector3d lineOrigin, const Eigen::Vector3d &lineHeading, double
+			lambda, const Eigen::Vector2d &pixel, const Eigen::Vector2d &expectedResidual) {
+				assertParametricPoint(
+						ParametricPoint::OnLine(pixel, std::move(lineOrigin), lineHeading, lambda),
+						expectedResidual);
 			}
 
 			/**
@@ -70,21 +65,9 @@ namespace providentia {
 			 */
 			void assertPlaneCorrespondenceResidual(Eigen::Vector3d planeOrigin, const Eigen::Vector3d &planeSideA,
 												   double lambda, const Eigen::Vector3d &planeSideB, double mu,
-												   Eigen::Vector2d pixel, Eigen::Vector2d expectedResidual) {
-				Eigen::Vector2d residual;
-				providentia::calibration::PointOnPlane plane(std::move(planeOrigin), planeSideA, planeSideB, lambda,
-															 mu);
-				providentia::calibration::CorrespondenceResidual correspondenceResidual = {
-						std::move(pixel),
-						std::make_shared<providentia::calibration::PointOnPlane>(plane),
-						frustumParameters, intrinsics,
-						imageSize
-				};
-				correspondenceResidual(translation.data(), rotation.data(), plane.getLambda(), plane.getMu(),
-									   residual.data());
-
-				EXPECT_NEAR(residual.x(), expectedResidual.x(), 1e-6);
-				EXPECT_NEAR(residual.y(), expectedResidual.y(), 1e-6);
+												   const Eigen::Vector2d &pixel, Eigen::Vector2d expectedResidual) {
+				assertParametricPoint(ParametricPoint::OnPlane(pixel, std::move(planeOrigin), planeSideA, planeSideB,
+															   lambda, mu), std::move(expectedResidual));
 			}
 		};
 

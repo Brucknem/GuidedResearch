@@ -24,31 +24,10 @@ namespace providentia {
 			return rotation;
 		}
 
-		void CameraPoseEstimator::addPointCorrespondence(const Eigen::Vector3d &worldPosition,
-														 const Eigen::Vector2d &pixel) {
-			double lambda = 0;
-			double mu = 0;
-			positions.emplace_back(worldPosition);
-			problem.AddResidualBlock(
-					CorrespondenceResidual::Create(pixel,
-												   std::make_shared<providentia::calibration::Point>(positions.back()),
-												   frustumParameters,
-												   intrinsics,
-												   imageSize),
-					nullptr, translation.data(), rotation.data(), &lambda, &mu);
-		}
-
-		void CameraPoseEstimator::addLineCorrespondence(Eigen::Vector3d _origin, const Eigen::Vector3d &_heading,
-														const Eigen::Vector2d &pixel) {
-
-		}
-
-		void CameraPoseEstimator::addPlaneCorrespondence(Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA,
-														 const Eigen::Vector3d &_axisB, const Eigen::Vector2d &pixel) {
-
-		}
-
 		void CameraPoseEstimator::calculateInitialGuess() {
+			if (hasInitialGuessSet) {
+				return;
+			}
 			Eigen::Vector3d mean = calculateMean();
 			double wantedDistance = (0.5 * (frustumParameters.y() - frustumParameters.x())) + frustumParameters.x();
 
@@ -62,10 +41,12 @@ namespace providentia {
 
 		Eigen::Vector3d CameraPoseEstimator::calculateMean() {
 			Eigen::Vector3d meanVector(0, 0, 0);
-			for (const auto &worldPosition : positions) {
-				meanVector += worldPosition.getPosition();
+			for (const auto &worldObject : worldObjects) {
+				for (const auto &point : worldObject.getPoints()) {
+					meanVector += point->getPosition() * worldObject.getWeight();
+				}
 			}
-			return meanVector / positions.size();
+			return meanVector / worldObjects.size();
 		}
 
 		void CameraPoseEstimator::estimate(bool _logSummary) {
@@ -73,12 +54,49 @@ namespace providentia {
 			options.minimizer_progress_to_stdout = _logSummary;
 			options.update_state_every_iteration = true;
 			calculateInitialGuess();
+			createProblem();
 			Solve(options, &problem, &summary);
+		}
+
+		void CameraPoseEstimator::createProblem() {
+			for (const auto &worldObject : worldObjects) {
+				for (const auto &point : worldObject.getPoints()) {
+					problem.AddResidualBlock(
+							CorrespondenceResidual::Create(
+									point->getExpectedPixel(),
+									point,
+									frustumParameters,
+									intrinsics,
+									imageSize,
+									worldObject.getWeight()
+							),
+							nullptr,
+							translation.data(),
+							rotation.data(),
+							point->getLambda(),
+							point->getMu());
+				}
+			}
 		}
 
 		void CameraPoseEstimator::addIterationCallback(ceres::IterationCallback *callback) {
 			options.callbacks.push_back(callback);
 		}
 
+		void CameraPoseEstimator::setInitialGuess(Eigen::Vector3d _translation, Eigen::Vector3d _rotation) {
+			hasInitialGuessSet = true;
+			initialTranslation = std::move(_translation);
+			initialRotation = std::move(_rotation);
+			translation = std::move(initialTranslation);
+			rotation = std::move(initialRotation);
+		}
+
+		void CameraPoseEstimator::addWorldObject(const WorldObject &worldObject) {
+			worldObjects.emplace_back(worldObject);
+		}
+
+		const std::vector<providentia::calibration::WorldObject> &CameraPoseEstimator::getWorldObjects() const {
+			return worldObjects;
+		}
 	}
 }

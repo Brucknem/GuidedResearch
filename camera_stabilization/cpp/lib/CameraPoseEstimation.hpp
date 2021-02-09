@@ -73,19 +73,11 @@ namespace providentia {
 			Eigen::Vector2d imageSize;
 
 			/**
-			 * A buffer for the known world positions.
+			 * A buffer for the known world worldObjects.
 			 */
-			std::vector<providentia::calibration::Point> positions;
+			std::vector<providentia::calibration::WorldObject> worldObjects;
 
-			/**
-			 * A buffer for the known world lines.
-			 */
-			std::vector<providentia::calibration::PointOnLine> lines;
-
-			/**
-			 * A buffer for the known world planes.
-			 */
-			std::vector<providentia::calibration::PointOnPlane> planes;
+			bool hasInitialGuessSet = false;
 
 		public:
 			/**
@@ -104,37 +96,7 @@ namespace providentia {
 			 */
 			virtual ~CameraPoseEstimator() = default;
 
-			/**
-			 * Adds a correspondence to the optimization problem.
-			 *
-			 * @param worldPosition The [x, y, z] world position of the correspondence.
-			 * @param pixel The [u, v] pixel position of the correspondence.
-			 */
-			void addPointCorrespondence(const Eigen::Vector3d &worldPosition, const Eigen::Vector2d &pixel);
-
-			/**
-			 * Adds a correspondence to the optimization problem.
-			 *
-			 * @param _origin The [x, y, z] origin in world position of the line that results in the expected pixel.
-			 * @param _heading The [x, y, z] heading in world coordinates of the line that results in the expected pixel.
-			 * @param pixel The [u, v] pixel position of the correspondence.
-			 */
-			void addLineCorrespondence(Eigen::Vector3d _origin, const Eigen::Vector3d &_heading,
-									   const Eigen::Vector2d &pixel);
-
-			/**
-			 * Adds a correspondence to the optimization problem.
-			 *
-			 * @param _origin The [x, y, z] origin in world position of the plane that results in the expected
-			 * pixel.
-			 * @param _axisA The [x, y, z] axis in world coordinates of one side of the plane that results in
-			 * the expected pixel.
-			 * @param _axisB The [x, y, z] axis in world coordinates of another side of the plane that
-			 * results in the expected pixel.
-			 * @param pixel The [u, v] pixel position of the correspondence.
-			 */
-			void addPlaneCorrespondence(Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA,
-										const Eigen::Vector3d &_axisB, const Eigen::Vector2d &pixel);
+			void addWorldObject(const WorldObject &worldObject);
 
 			/**
 			 * Estimates the camera translation and rotation based on the known correspondences between the world and
@@ -148,6 +110,8 @@ namespace providentia {
 			 */
 			void calculateInitialGuess();
 
+			void setInitialGuess(Eigen::Vector3d translation, Eigen::Vector3d rotation);
+
 			/**
 			 * @get
 			 */
@@ -158,6 +122,8 @@ namespace providentia {
 			 */
 			const Eigen::Vector3d &getRotation() const;
 
+			const std::vector<providentia::calibration::WorldObject> &getWorldObjects() const;
+
 			/**
 			 * Calculates the mean of the known world correspondences.
 			 */
@@ -167,6 +133,8 @@ namespace providentia {
 			 * Adds a callback to the estimator that gets called after each optimization step.
 			 */
 			void addIterationCallback(ceres::IterationCallback *callback);
+
+			void createProblem();
 		};
 	}
 }
