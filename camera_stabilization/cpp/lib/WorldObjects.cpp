@@ -103,10 +103,16 @@ namespace providentia {
 			return points;
 		}
 
-		WorldObject::WorldObject() {}
-
 		WorldObject::WorldObject(const ParametricPoint &point) {
 			add(point);
+		}
+
+		Eigen::Vector3d WorldObject::getMean() const {
+			Eigen::Vector3d mean{0, 0, 0};
+			for (const auto &point : points) {
+				mean += point->getPosition();
+			}
+			return mean / points.size();
 		}
 
 #pragma endregion Objects

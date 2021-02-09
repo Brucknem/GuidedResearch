@@ -96,8 +96,14 @@ namespace providentia {
 			 */
 			double *getMu();
 
+			/**
+			 * @get
+			 */
 			const Eigen::Vector2d &getExpectedPixel() const;
 
+			/**
+			 * @set
+			 */
 			void setExpectedPixel(const Eigen::Vector2d &_expectedPixel);
 
 			/**
@@ -168,7 +174,7 @@ namespace providentia {
 			/**
 			 * @constructor
 			 */
-			explicit WorldObject();
+			explicit WorldObject() = default;
 
 			/**
 			 * @constructor
@@ -187,7 +193,15 @@ namespace providentia {
 			 */
 			double getWeight() const;
 
+			/**
+			 * @get
+			 */
 			const std::vector<std::shared_ptr<ParametricPoint>> &getPoints() const;
+
+			/**
+			 * @get The mean of the points.
+			 */
+			Eigen::Vector3d getMean() const;
 		};
 	}
 }

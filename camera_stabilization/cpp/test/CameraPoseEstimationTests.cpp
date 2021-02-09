@@ -43,9 +43,14 @@ namespace providentia {
 			}
 
 			void addSomePointCorrespondences() {
-				addPointCorrespondence({1, 2, 3});
-				addPointCorrespondence({-1, 12, 13});
-				addPointCorrespondence({13, 22, -4});
+				addPointCorrespondence({0, 0, 5});
+				addPointCorrespondence({0, 10, 5});
+				addPointCorrespondence({0, 30, 5});
+				addPointCorrespondence({0, 50, 5});
+				addPointCorrespondence({0, 70, 5});
+
+				addPointCorrespondence({4, 10, 0});
+				addPointCorrespondence({-1, 30, -3});
 			}
 
 			void assertEstimation(bool log = false) {
@@ -111,18 +116,16 @@ namespace providentia {
 					imageSize
 			);
 
-			int size = 10;
-			for (int i = -size; i <= size; ++i) {
-				for (int j = -size; j <= size; ++j) {
-					for (int k = -size; k <= size; ++k) {
-						addPointCorrespondence({i * 1., j * 1., k * 1.});
-					}
-				}
-			}
+			addPointCorrespondence({0, 0, 9});
+			addPointCorrespondence({0, 0, -9});
+			addPointCorrespondence({0, 9, 0});
+			addPointCorrespondence({0, -9, 0});
+			addPointCorrespondence({9, 0, 0});
+			addPointCorrespondence({-9, 0, 0});
 
 			estimator->calculateInitialGuess();
 
-			assertVectorsNearEqual(estimator->getTranslation(), Eigen::Vector3d{0, 0, 500.5});
+			assertVectorsNearEqual(estimator->getTranslation(), Eigen::Vector3d{0, 0, 250.75});
 			assertVectorsNearEqual(estimator->getRotation(), Eigen::Vector3d{0, 0, 0});
 		}
 
@@ -136,15 +139,14 @@ namespace providentia {
 					imageSize
 			);
 			addSomePointCorrespondences();
-//			estimator->setInitialGuess({0, 0, 500}, {0, 0, 0});
-			assertEstimation(true);
+			assertEstimation();
 		}
 
 
 		/**
 		 * Tests that the optimization converges to the expected extrinsic parameters.
 		 */
-		TEST_F(CameraPoseEstimationTests, testEstimationPlaneAndLines) {
+		TEST_F(CameraPoseEstimationTests, testEstimationPointAndLines) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
 					frustumParameters,
 					intrinsics,
@@ -157,29 +159,17 @@ namespace providentia {
 			axisB << 0, 1, 0;
 
 			addPointCorrespondence({1, 2, 3});
-//			addPointCorrespondence({-1, 12, 13});
-//			addPointCorrespondence({13, 22, -4});
 
-			addPost({-7.5, 10, 0});
-//			addPost({7.5, 20, 0});
-//
-//			addPlane(100);
-
-//			for (int i = 0; i < 20; ++i) {
-//				addPost({
-//								(rand() % 2000) / 100. - 10,
-//								(rand() % 2000) / 100.,
-//								(rand() % 2000) / 100.
-//						});
-//			}
-//
-			for (int i = 0; i < 200; i += 20) {
-				addPost({-7.5, i, 0});
-				addPost({7.5, i, 0});
+			for (int i = 0; i < 5; ++i) {
+				addPost({
+								(rand() % 2000) / 100. - 10,
+								(rand() % 2000) / 100.,
+								(rand() % 2000) / 100.
+						});
 			}
 
 			estimator->setInitialGuess({0, -50, 0}, {80, 10, -10});
-			assertEstimation(true);
+			assertEstimation();
 
 		}
 	}// namespace toCameraSpace

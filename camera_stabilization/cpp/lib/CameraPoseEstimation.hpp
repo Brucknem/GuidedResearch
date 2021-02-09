@@ -135,6 +135,8 @@ namespace providentia {
 			void addIterationCallback(ceres::IterationCallback *callback);
 
 			void createProblem();
+
+			Eigen::Vector3d calculateFurthestPoint(Eigen::Vector3d mean);
 		};
 	}
 }

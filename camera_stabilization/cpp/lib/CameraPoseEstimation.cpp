@@ -28,8 +28,22 @@ namespace providentia {
 			if (hasInitialGuessSet) {
 				return;
 			}
+//			Eigen::Vector3d mean = calculateMean();
+//			Eigen::Vector3d furthestPoint = calculateFurthestPoint(mean);
+//			Eigen::Vector3d lookAt = mean - furthestPoint;
+//			initialTranslation = furthestPoint - lookAt.normalized() * (frustumParameters.x() + 1);
+//
+//			lookAt.z() = 0;
+//			lookAt = lookAt.normalized();
+//			double angle = Eigen::Vector3d(0, 1, 0).dot(lookAt);
+//			angle = acos(angle) / M_PI * 180;
+//
+//			initialRotation = {90, 0, angle};
+//
+//			translation = initialTranslation;
+//			rotation = initialRotation;
 			Eigen::Vector3d mean = calculateMean();
-			double wantedDistance = (0.5 * (frustumParameters.y() - frustumParameters.x())) + frustumParameters.x();
+			double wantedDistance = (0.25 * (frustumParameters.y() - frustumParameters.x())) + frustumParameters.x();
 
 			initialTranslation = mean;
 			initialTranslation.z() += wantedDistance;
@@ -42,11 +56,24 @@ namespace providentia {
 		Eigen::Vector3d CameraPoseEstimator::calculateMean() {
 			Eigen::Vector3d meanVector(0, 0, 0);
 			for (const auto &worldObject : worldObjects) {
-				for (const auto &point : worldObject.getPoints()) {
-					meanVector += point->getPosition() * worldObject.getWeight();
-				}
+				meanVector += worldObject.getMean();
 			}
 			return meanVector / worldObjects.size();
+		}
+
+		Eigen::Vector3d CameraPoseEstimator::calculateFurthestPoint(Eigen::Vector3d mean) {
+			Eigen::Vector3d furthestPoint{0, 0, 0};
+			double maxDistance = 0;
+			for (const auto &worldObject : worldObjects) {
+				for (const auto &point : worldObject.getPoints()) {
+					double distance = (point->getPosition() - mean).norm();
+					if (distance > maxDistance) {
+						maxDistance = distance;
+						furthestPoint = point->getPosition();
+					}
+				}
+			}
+			return furthestPoint;
 		}
 
 		void CameraPoseEstimator::estimate(bool _logSummary) {
