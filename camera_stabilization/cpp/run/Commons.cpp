@@ -75,7 +75,7 @@ providentia::runnable::BaseSetup::BaseSetup(int argc, const char **argv) : provi
 			("videoFileName",
 			 boost::program_options::value<std::string>(&videoFileName)->default_value(getDefaultVideoFile()),
 			 "The path to the video file.")
-			("windowName",
+			("mainWindowName",
 			 boost::program_options::value<std::string>(&windowName)->default_value("Camera Stabilization"),
 			 "The window name.")
 			("calcScale", boost::program_options::value<double>(&calculationScaleFactor)->default_value(1.0),

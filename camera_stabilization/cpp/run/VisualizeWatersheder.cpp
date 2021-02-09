@@ -7,15 +7,10 @@
 #include "Watersheder.hpp"
 
 int main(int argc, char const *argv[]) {
-	auto windowName = "Watersheder";
-	cv::namedWindow(windowName, cv::WINDOW_OPENGL);
-	auto watersheder = providentia::calibration::Watersheder(cv::imread(
-			"../misc/s40_n_cam_far_calibration_test_image.png"), windowName
+	auto watersheder = providentia::calibration::Watersheder(
+			"../misc/s40_n_cam_far_calibration_test_image.png"
 	);
-
-	while (cv::waitKey(1) != 'q') {
-		cv::imshow(windowName, watersheder.draw());
-	}
+	watersheder.run();
 
 	return 0;
 }

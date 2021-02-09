@@ -45,10 +45,6 @@ add_executable(VisualizeRectangleWatershed VisualizeRectangleWatershed.cpp Commo
 target_link_libraries(VisualizeRectangleWatershed PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeRectangleWatershed PUBLIC "${PROJECT_BINARY_DIR}")
 
-add_executable(VisualizeTrackBar VisualizeTrackBar.cpp Commons.cpp)
-target_link_libraries(VisualizeTrackBar PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
-target_include_directories(VisualizeTrackBar PUBLIC "${PROJECT_BINARY_DIR}")
-
 add_executable(VisualizeWatersheder VisualizeWatersheder.cpp Commons.cpp)
 target_link_libraries(VisualizeWatersheder PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeWatersheder PUBLIC "${PROJECT_BINARY_DIR}")

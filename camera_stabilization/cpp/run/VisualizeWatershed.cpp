@@ -79,10 +79,16 @@ int main(int argc, char **argv) {
 			if (contours.empty())
 				continue;
 			Mat markers(markerMask.size(), CV_32S);
+			cv::Mat _markers(markerMask.size(), CV_8UC1);
+
 			markers = Scalar::all(0);
+			_markers = Scalar::all(0);
 			int idx = 0;
-			for (; idx >= 0; idx = hierarchy[idx][0], compCount++)
+			for (; idx >= 0; idx = hierarchy[idx][0], compCount++) {
 				drawContours(markers, contours, idx, Scalar::all(compCount + 1), -1, 8, hierarchy, INT_MAX);
+				drawContours(_markers, contours, idx, Scalar::all(compCount + 1), -1, 8, hierarchy, INT_MAX);
+			}
+			cv::imshow("Yeet", _markers);
 			if (compCount == 0)
 				continue;
 			vector<Vec3b> colorTab;
