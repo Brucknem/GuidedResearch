@@ -101,6 +101,11 @@ void providentia::runnable::BaseSetup::init() {
 	srand(static_cast <unsigned> (time(0)));
 }
 
+void providentia::runnable::BaseSetup::setWindowMode(int flags) {
+	cv::destroyWindow(windowName);
+	cv::namedWindow(windowName, flags);
+}
+
 providentia::runnable::BaseSetup::~BaseSetup() {
 	capture.release();
 	cv::destroyAllWindows();
@@ -115,10 +120,14 @@ void providentia::runnable::BaseSetup::addTextToFinalFrame(const std::string &te
 	addText(finalFrame, text, x, y);
 }
 
+void providentia::runnable::BaseSetup::getNextFrame() {
+	capture >> frameCPU;
+}
+
 void providentia::runnable::BaseSetup::mainLoop() {
 	while (true) {
 		clear();
-		capture >> frameCPU;
+		getNextFrame();
 		if (frameCPU.empty()) {
 			break;
 		}

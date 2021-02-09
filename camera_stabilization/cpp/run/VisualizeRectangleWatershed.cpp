@@ -8,18 +8,7 @@
 using namespace cv;
 using namespace std;
 
-static void help(char **argv) {
-	cout << "\nThis program demonstrates the famous watershed segmentation algorithm in OpenCV: watershed()\n"
-			"Usage:\n" << argv[0] << " [image_name -- default is fruits.jpg]\n" << endl;
-	cout << "Hot keys: \n"
-			"\tESC - quit the program\n"
-			"\tr - restore the original image\n"
-			"\tw or SPACE - run watershed segmentation algorithm\n"
-			"\t\t(before running it, *roughly* mark the areas to segment on the image)\n"
-			"\t  (before that, roughly outline several markers on the image)\n";
-}
-
-Mat markerMask, img;
+Mat markerMask, img, roiImage;
 Point prevPt(-1, -1);
 
 static void onMouse(int event, int x, int y, int flags, void *) {
@@ -33,35 +22,54 @@ static void onMouse(int event, int x, int y, int flags, void *) {
 		Point pt(x, y);
 		if (prevPt.x < 0)
 			prevPt = pt;
-		int thickness = 1;
-		line(markerMask, prevPt, pt, Scalar::all(255), thickness, 8, 0);
-		line(img, prevPt, pt, Scalar::all(255), thickness, 8, 0);
+		line(markerMask, prevPt, pt, Scalar::all(255), 5, 8, 0);
+		line(roiImage, prevPt, pt, Scalar::all(255), 5, 8, 0);
 		prevPt = pt;
-		imshow("image", img);
+		imshow("image", roiImage);
+	}
+}
+
+static void zoomIn(int event, int x, int y, int flags, void *) {
+	if (x < 0 || x >= img.cols || y < 0 || y >= img.rows)
+		return;
+	if (event == EVENT_LBUTTONUP || !(flags & EVENT_FLAG_LBUTTON)) {
+		Point pt(x, y);
+		cv::Mat copy = img.clone();
+		cv::Rect roi(prevPt, pt);
+		if (roi.x < 0) {
+			return;
+		}
+		copy = copy(roi);
+		double aspect = roi.width * 1. / roi.height;
+		cv::resize(copy, copy, cv::Size(800 * aspect, 800));
+		imshow("roi", copy);
+		setMouseCallback("roi", onMouse, 0);
+		prevPt = Point(-1, -1);
+	} else if (event == EVENT_LBUTTONDOWN) {
+		Point pt(x, y);
+		prevPt = pt;
+	} else if (event == EVENT_MOUSEMOVE && (flags & EVENT_FLAG_LBUTTON)) {
+		Point pt(x, y);
+		if (prevPt.x < 0)
+			prevPt = pt;
+//		line(markerMask, prevPt, pt, Scalar::all(255), 5, 8, 0);
+		cv::Mat copy = img.clone();
+		rectangle(copy, prevPt, pt, Scalar::all(255), 3, 8, 0);
+//		prevPt = pt;
+		imshow("image", copy);
 	}
 }
 
 int main(int argc, char **argv) {
-	cv::CommandLineParser parser(argc, argv, "{help h | | }{ @input | fruits.jpg | }");
-	if (parser.has("help")) {
-		help(argv);
-		return 0;
-	}
-	string filename = samples::findFile(parser.get<string>("@input"));
+	string filename = "../misc/s40_n_cam_far_calibration_test_image.png";
 	Mat img0 = imread(filename, 1), imgGray;
-	if (img0.empty()) {
-		cout << "Couldn't open image ";
-		help(argv);
-		return 0;
-	}
-	help(argv);
 	namedWindow("image", 1);
 	img0.copyTo(img);
 	cvtColor(img, markerMask, COLOR_BGR2GRAY);
 	cvtColor(markerMask, imgGray, COLOR_GRAY2BGR);
 	markerMask = Scalar::all(0);
 	imshow("image", img);
-	setMouseCallback("image", onMouse, 0);
+	setMouseCallback("image", zoomIn, 0);
 	for (;;) {
 		char c = (char) waitKey(0);
 		if (c == 27)

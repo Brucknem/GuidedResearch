@@ -214,6 +214,11 @@ namespace providentia {
 			 * Retrieves the next frame, does the processing, renders the results and measures the total duration.
 			 */
 			void mainLoop();
+
+			void setWindowMode(int flags);
+
+			virtual void getNextFrame();
+
 		};
 
 	}

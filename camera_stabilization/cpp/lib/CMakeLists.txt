@@ -19,7 +19,8 @@ add_library(libCameraStabilization
         CameraPoseEstimation.cpp
         RenderingPipeline.cpp
         Residuals.cpp
-        WorldObjects.cpp)
+        WorldObjects.cpp
+        Watersheder.cpp)
 
 target_include_directories(libCameraStabilization
         INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
