@@ -16,7 +16,7 @@ static void help(char **argv) {
 			"\tr - restore the original image\n"
 			"\tw or SPACE - run watershed segmentation algorithm\n"
 			"\t\t(before running it, *roughly* mark the areas to segment on the image)\n"
-			"\t  (before that, roughly outline several markers on the image)\n";
+			"\t  (before that, roughly outline several watershedMarkers on the image)\n";
 }
 
 Mat markerMask, img;

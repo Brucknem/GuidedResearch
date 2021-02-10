@@ -52,10 +52,10 @@ static void zoomIn(int event, int x, int y, int flags, void *) {
 		Point pt(x, y);
 		if (prevPt.x < 0)
 			prevPt = pt;
-//		line(markerMask, prevPt, pt, Scalar::all(255), 5, 8, 0);
+//		line(drawnMarkers, drawingPointBuffer, pt, Scalar::all(255), 5, 8, 0);
 		cv::Mat copy = img.clone();
 		rectangle(copy, prevPt, pt, Scalar::all(255), 3, 8, 0);
-//		prevPt = pt;
+//		drawingPointBuffer = pt;
 		imshow("image", copy);
 	}
 }
