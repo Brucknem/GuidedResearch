@@ -89,7 +89,7 @@ namespace providentia {
 				}
 
 				basicCommands(c);
-				zoom(c);
+				quickZoom(c);
 				setThickness(c);
 				performAlgorithm(c);
 
@@ -114,7 +114,7 @@ namespace providentia {
 			}
 		}
 
-		void Watersheder::zoom(char c) {
+		void Watersheder::quickZoom(char c) {
 			if (c == 'n') {
 				zoomLevel = quickZoomLevel;
 				topLeftCorner.x = std::max(0, hoverPoint.x - getZoomWidth() / 2);

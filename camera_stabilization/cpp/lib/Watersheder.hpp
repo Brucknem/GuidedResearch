@@ -53,16 +53,16 @@ namespace providentia {
 			std::string posYName = "Pos Y:";
 
 			/**
-			 * The point that holds the mouse position used to zoom in and out of the image.
+			 * The point that holds the mouse position used to quickZoom in and out of the image.
 			 */
 			cv::Point hoverPoint{0, 0};
 
 			/**
-			 * The zoom level.
+			 * The quickZoom level.
 			 */
 			int zoomLevel = 100;
 			/**
-			 * The zoom level.
+			 * The quickZoom level.
 			 */
 			int quickZoomLevel = 3;
 
@@ -106,7 +106,7 @@ namespace providentia {
 			int getMaxY() const;
 
 			/**
-			 * @get The region of interest used to zoom into the image.
+			 * @get The region of interest used to quickZoom into the image.
 			 */
 			cv::Rect getRoi() const;
 
@@ -128,7 +128,7 @@ namespace providentia {
 			/**
 			 * Zooms in and out of the image base on the mouse position.
 			 */
-			void zoom(char c);
+			void quickZoom(char c);
 
 			/**
 			 * Performs basic commands like closing and saving.
@@ -163,7 +163,25 @@ namespace providentia {
 			 */
 			void createWatershedMask(int regions);
 
-		protected:
+			/**
+			 * Sets the thickness based on the input keyboard number.
+			 */
+			void setThickness(char c);
+
+			/**
+			 * Gets the fraction of the width after zoom.
+			 */
+			int getZoomWidth() const;
+
+			/**
+			 * Gets the fraction of the height after zoom.
+			 */
+			int getZoomHeight() const;
+
+			/**
+			 * Gets the aspect ratio.
+			 */
+			double getAspect() const;
 
 			/**
 			 * The algorithm implementation.
@@ -177,6 +195,11 @@ namespace providentia {
 			explicit Watersheder(const std::string &_filename);
 
 			/**
+			 * @destructor
+			 */
+			virtual ~Watersheder() = default;
+
+			/**
 			 * Main loop.
 			 */
 			void run();
@@ -185,14 +208,6 @@ namespace providentia {
 			 * Renders the image and overlays the watershedMarkers.
 			 */
 			cv::Mat draw() const;
-
-			void setThickness(char c);
-
-			int getZoomWidth() const;
-
-			int getZoomHeight() const;
-
-			double getAspect() const;
 		};
 	}
 }
