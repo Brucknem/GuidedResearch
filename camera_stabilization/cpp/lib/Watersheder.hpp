@@ -30,11 +30,6 @@ namespace providentia {
 			std::string mainWindowName = "Watersheder";
 
 			/**
-			 * The name of the window where the segmentation is displayed.
-			 */
-			std::string resultWindowName = "Watersheder Result";
-
-			/**
 			 * The image buffers.
 			 */
 			cv::Mat image, imageGray, drawnMarkers, watershedMask, watershedMarkers;
@@ -63,18 +58,23 @@ namespace providentia {
 			cv::Point hoverPoint{0, 0};
 
 			/**
-			 * The size of the region of interest.
+			 * The zoom level.
 			 */
-			cv::Point size{0, 0};
+			int zoomLevel = 100;
+			/**
+			 * The zoom level.
+			 */
+			int quickZoomLevel = 3;
 
 			/**
 			 * The name of the trackbar for the width.
 			 */
-			std::string widthName = "Width:";
+			std::string zoomLevelName = "Zoom:";
+
 			/**
-			 * The name of the trackbar for the height.
+			 * The name of the trackbar for the width.
 			 */
-			std::string heightName = "Height:";
+			std::string quickZoomLevelName = "Quick Zoom:";
 
 			/**
 			 * The drawing line thickness.
@@ -89,6 +89,11 @@ namespace providentia {
 			 * Flag indicating whether deletion mode is on.
 			 */
 			bool isDeleteModeOn = false;
+
+			/**
+			 * Flag indicating whether deletion mode is on.
+			 */
+			bool drawWatershedMask = false;
 
 			/**
 			 * @get The number of pixels in x direction.
@@ -136,7 +141,7 @@ namespace providentia {
 			void performAlgorithm(char c);
 
 			/**
-			 * Sets the trackbar values programatically.
+			 * Sets the trackbar values programmatically.
 			 */
 			void setTrackbarValues();
 
@@ -180,6 +185,14 @@ namespace providentia {
 			 * Renders the image and overlays the watershedMarkers.
 			 */
 			cv::Mat draw() const;
+
+			void setThickness(char c);
+
+			int getZoomWidth() const;
+
+			int getZoomHeight() const;
+
+			double getAspect() const;
 		};
 	}
 }

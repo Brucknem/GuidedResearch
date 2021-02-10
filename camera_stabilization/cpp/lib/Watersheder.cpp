@@ -31,6 +31,9 @@ namespace providentia {
 				watersheder->drawingPointBuffer = cv::Point(totalX, totalY);
 			} else if (event == cv::EVENT_MOUSEMOVE && (flags & cv::EVENT_FLAG_LBUTTON)) {
 				/// Drawing
+				if (watersheder->thickness <= 0) {
+					return;
+				}
 				cv::Point pt(totalX, totalY);
 				if (watersheder->drawingPointBuffer.x < 0) {
 					watersheder->drawingPointBuffer = pt;
@@ -51,8 +54,6 @@ namespace providentia {
 			image = cv::imread(inputFilename);
 			cv::namedWindow(mainWindowName, cv::WINDOW_NORMAL);
 
-			size.x = getMaxX();
-			size.y = getMaxY();
 			cv::cvtColor(image, imageGray, cv::COLOR_BGR2GRAY);
 			cv::cvtColor(imageGray, imageGray, cv::COLOR_GRAY2BGR);
 			drawnMarkers = cv::Mat(image.size(), CV_8UC3, cv::Scalar::all(0));
@@ -62,10 +63,9 @@ namespace providentia {
 			cv::createTrackbar(posXName, mainWindowName, &topLeftCorner.x, getMaxX());
 			cv::createTrackbar(posYName, mainWindowName, &topLeftCorner.y, getMaxY());
 
-			cv::createTrackbar(widthName, mainWindowName, &size.x, getMaxX());
-			cv::createTrackbar(heightName, mainWindowName, &size.y, getMaxY());
-
-			cv::createTrackbar(thicknessName, mainWindowName, &thickness, 10);
+			cv::createTrackbar(zoomLevelName, mainWindowName, &zoomLevel, 100);
+			cv::createTrackbar(quickZoomLevelName, mainWindowName, &quickZoomLevel, 100);
+			cv::createTrackbar(thicknessName, mainWindowName, &thickness, 9);
 
 			setTrackbarValues();
 		}
@@ -90,7 +90,10 @@ namespace providentia {
 
 				basicCommands(c);
 				zoom(c);
+				setThickness(c);
 				performAlgorithm(c);
+
+				setTrackbarValues();
 
 				cv::imshow(mainWindowName, draw());
 			}
@@ -98,7 +101,7 @@ namespace providentia {
 
 		void Watersheder::basicCommands(char c) {
 			if (c == 'r') {
-				cv::destroyWindow(resultWindowName);
+				drawWatershedMask = !drawWatershedMask;
 			}
 			if (c == 'd') {
 				isDeleteModeOn = !isDeleteModeOn;
@@ -113,27 +116,26 @@ namespace providentia {
 
 		void Watersheder::zoom(char c) {
 			if (c == 'n') {
-				topLeftCorner.x = std::max(0, hoverPoint.x - 25);
-				topLeftCorner.y = std::max(0, hoverPoint.y - 25);
-				size.x = 50;
-				size.y = 50;
+				zoomLevel = quickZoomLevel;
+				topLeftCorner.x = std::max(0, hoverPoint.x - getZoomWidth() / 2);
+				topLeftCorner.y = std::max(0, hoverPoint.y - getZoomHeight() / 2);
 			}
 			if (c == 'b') {
 				topLeftCorner.x = 0;
 				topLeftCorner.y = 0;
-				size.x = getMaxX();
-				size.y = getMaxY();
+				zoomLevel = 100;
 			}
-			setTrackbarValues();
+		}
+
+		void Watersheder::setThickness(char c) {
+			if (c >= '0' && c <= '9') {
+				thickness = (int) (c - '0');
+			}
 		}
 
 		void Watersheder::performAlgorithm(char c) {
 			if (c == 'w' || c == ' ') {
-				if (algorithm()) {
-					cv::Mat drawnWaterShedMask = watershedMask * 0.5 + imageGray * 0.5;
-					cv::namedWindow(resultWindowName, cv::WINDOW_GUI_NORMAL);
-					cv::imshow(resultWindowName, drawnWaterShedMask);
-				}
+				drawWatershedMask = algorithm();
 			}
 		}
 
@@ -202,23 +204,42 @@ namespace providentia {
 		void Watersheder::setTrackbarValues() {
 			cv::setTrackbarPos(posXName, mainWindowName, topLeftCorner.x);
 			cv::setTrackbarPos(posYName, mainWindowName, topLeftCorner.y);
-			cv::setTrackbarPos(widthName, mainWindowName, size.x);
-			cv::setTrackbarPos(heightName, mainWindowName, size.y);
+			cv::setTrackbarPos(zoomLevelName, mainWindowName, zoomLevel);
 			cv::setTrackbarPos(thicknessName, mainWindowName, thickness);
 		}
 
 		cv::Mat Watersheder::draw() const {
 			auto roi = getRoi();
-			cv::Mat result = image(roi) + drawnMarkers(roi);
+			cv::Mat result;
+
+			if (!drawWatershedMask) {
+				result = image;
+			} else {
+				result = (watershedMask * 0.5 + imageGray * 0.5);
+			}
+			result = result(roi) + drawnMarkers(roi);
 			return result.clone();
 		}
 
 		cv::Rect Watersheder::getRoi() const {
 			int _posX = std::min(topLeftCorner.x, getMaxX() - 20);
 			int _posY = std::min(topLeftCorner.y, getMaxY() - 20);
-			int _width = std::max(20, std::min(size.x, getMaxX() - _posX));
-			int _height = std::max(20, std::min(size.y, getMaxY() - _posY));
+
+			int _height = std::max(20, std::min(getZoomHeight(), getMaxY() - _posY));
+			int _width = std::max((int) (20 * getAspect()), std::min(getZoomWidth(), getMaxX() - _posX));
 			return {_posX, _posY, _width, _height};
+		}
+
+		int Watersheder::getZoomWidth() const {
+			return (int) (image.cols * (zoomLevel / 100.));
+		}
+
+		int Watersheder::getZoomHeight() const {
+			return (int) (image.rows * (zoomLevel / 100.));
+		}
+
+		double Watersheder::getAspect() const {
+			return image.cols * 1. / image.rows;
 		}
 	}
 }
