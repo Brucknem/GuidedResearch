@@ -33,19 +33,15 @@ add_executable(VisualizeOpticalFlow VisualizeOpticalFlow.cpp Commons.cpp)
 target_link_libraries(VisualizeOpticalFlow PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeOpticalFlow PUBLIC "${PROJECT_BINARY_DIR}")
 
-add_executable(VisualizeWatershed VisualizeWatershed.cpp Commons.cpp)
-target_link_libraries(VisualizeWatershed PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
-target_include_directories(VisualizeWatershed PUBLIC "${PROJECT_BINARY_DIR}")
-
 add_executable(VisualizeRenderingPipeline VisualizeRenderingPipeline.cpp Commons.cpp)
 target_link_libraries(VisualizeRenderingPipeline PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeRenderingPipeline PUBLIC "${PROJECT_BINARY_DIR}")
 
-add_executable(VisualizeRectangleWatershed VisualizeRectangleWatershed.cpp Commons.cpp)
-target_link_libraries(VisualizeRectangleWatershed PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
-target_include_directories(VisualizeRectangleWatershed PUBLIC "${PROJECT_BINARY_DIR}")
-
-add_executable(VisualizeWatersheder VisualizeWatersheder.cpp Commons.cpp)
+add_executable(VisualizeWatersheder VisualizeWatersheder.cpp)
 target_link_libraries(VisualizeWatersheder PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeWatersheder PUBLIC "${PROJECT_BINARY_DIR}")
+
+add_executable(VisualizeTemplateMatcher VisualizeTemplateMatcher.cpp)
+target_link_libraries(VisualizeTemplateMatcher PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_include_directories(VisualizeTemplateMatcher PUBLIC "${PROJECT_BINARY_DIR}")
 

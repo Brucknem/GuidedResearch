@@ -5,14 +5,12 @@
 #ifndef CAMERASTABILIZATION_FEATUREDETECTION_HPP
 #define CAMERASTABILIZATION_FEATUREDETECTION_HPP
 
-
 #include <opencv2/opencv.hpp>
 #include "opencv2/xfeatures2d.hpp"
 #include "opencv2/xfeatures2d/cuda.hpp"
 #include <opencv2/cudafeatures2d.hpp>
 
 #include "TimeMeasurable.hpp"
-
 
 namespace providentia {
 	namespace features {
@@ -89,7 +87,6 @@ namespace providentia {
 			 */
 			FeatureDetectorBase();
 
-
 		public:
 			/**
 			 * @destructor
@@ -163,6 +160,8 @@ namespace providentia {
 			 * @return The original image with the features drawn.
 			 */
 			cv::Mat draw();
+
+			void detect(const cv::Mat &_frame);
 		};
 
 		/**
