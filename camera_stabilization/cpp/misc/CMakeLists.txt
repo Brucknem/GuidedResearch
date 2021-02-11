@@ -1,4 +1,0 @@
-cmake_minimum_required(VERSION 3.10)
-
-file(GLOB MISCELLANEOUS_FILES "*.png")
-file(COPY ${MISCELLANEOUS_FILES} DESTINATION ./)
