@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/camera_stabilization.iml" filepath="$PROJECT_DIR$/.idea/camera_stabilization.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/DynamicStabilization.iml" filepath="$PROJECT_DIR$/.idea/DynamicStabilization.iml" />
     </modules>
   </component>
 </project>
