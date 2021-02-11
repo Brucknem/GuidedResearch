@@ -16,6 +16,7 @@ namespace providentia {
 
 		/**
 		 * Wrapper for the watershed algorithm to ease the segmentation of objects.
+		 * This is just a small data annotation tool and not yet a direct component of the implementation.
 		 */
 		class Watersheder {
 		private:
