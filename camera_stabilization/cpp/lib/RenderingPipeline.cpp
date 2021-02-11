@@ -9,6 +9,19 @@ namespace providentia {
 	namespace camera {
 
 		template<typename T>
+		Eigen::Matrix<T, 2, 1>
+		render(const T *_translation, const T *_rotation, const T *_frustumParameters, const T *_intrinsics,
+			   const T *_imageSize, const T *vector) {
+			Eigen::Matrix<T, 4, 1> point = toCameraSpace(_translation, _rotation, vector);
+
+			point = toClipSpace(_frustumParameters, _intrinsics, point.data());
+
+			Eigen::Matrix<T, 2, 1> pixel = toNormalizedDeviceCoordinates(point.data());
+			pixel = toImageSpace(_imageSize, pixel.data());
+			return pixel;
+		}
+
+		template<typename T>
 		Eigen::Matrix<T, 4, 4> getCameraRotationMatrix(const T *_rotation) {
 			Eigen::Matrix<T, 3, 1> rotationInRadians{-_rotation[0], -_rotation[1], _rotation[2]};
 			rotationInRadians *= (T) (M_PI / 180);
@@ -44,21 +57,6 @@ namespace providentia {
 					zero, zero, zero, one;
 
 			return (rotation * zAxis * yAxis * xAxis);
-		}
-
-		template<typename T>
-		Eigen::Matrix<T, 2, 1>
-		render(const T *_translation, const T *_rotation, const T *_frustumParameters, const T *_intrinsics,
-			   const T *_imageSize, const T *vector) {
-			Eigen::Matrix<T, 4, 1> point = toCameraSpace(_translation, _rotation, vector);
-//			if (point.z() < _frustumParameters[0]) {
-//				return Eigen::Matrix<T, 2, 1>(_imageSize[0] * (T) 5, _imageSize[1] * (T) 5);
-//			}
-			point = toClipSpace(_frustumParameters, _intrinsics, point.data());
-
-			Eigen::Matrix<T, 2, 1> pixel = toNormalizedDeviceCoordinates(point.data());
-			pixel = toImageSpace(_imageSize, pixel.data());
-			return pixel;
 		}
 
 		template<typename T>

@@ -1,7 +1,6 @@
-
+<
 #ifndef CAMERASTABILIZATION_DYNAMICSTABILIZATION_HPP
 #define CAMERASTABILIZATION_DYNAMICSTABILIZATION_HPP
-
 
 #include "opencv2/opencv.hpp"
 #include "BackgroundSegmentation.hpp"

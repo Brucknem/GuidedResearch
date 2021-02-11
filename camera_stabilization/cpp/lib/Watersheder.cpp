@@ -95,7 +95,8 @@ namespace providentia {
 
 				setTrackbarValues();
 
-				cv::imshow(mainWindowName, draw());
+				auto frame = draw();
+				cv::imshow(mainWindowName, frame);
 			}
 		}
 
