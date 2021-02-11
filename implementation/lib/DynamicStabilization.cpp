@@ -35,8 +35,8 @@ namespace providentia {
 				newCount > oldCount) {
 				this->referenceFeatureDetector->detect(this->getStabilizedFrame(),
 													   this->segmentor->getBackgroundMask(
-																	   getStabilizedFrame().size())
-															   .clone());
+															   getStabilizedFrame().size())
+														   .clone());
 			}
 		}
 
@@ -49,7 +49,7 @@ namespace providentia {
 		}
 
 		DynamicStabilizerBase::DynamicStabilizerBase() : providentia::utils::TimeMeasurable(
-				"DynamicStabilizerBase", 1) {
+			"DynamicStabilizerBase", 1) {
 			warper = std::make_shared<FrameWarper>();
 			segmentor = std::make_shared<providentia::segmentation::MOG2BackgroundSegmentor>(cv::Size(1920, 1200) / 10);
 		}
@@ -102,7 +102,6 @@ namespace providentia {
 			matcher->setShouldUseFundamentalMatrix(shouldUseFundamentalMatrix);
 		}
 
-
 #pragma endregion DynamicStabilizerBase
 
 #pragma region SURFBFDynamicStabilizer
@@ -121,7 +120,6 @@ namespace providentia {
 			matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_L2);
 			setName(typeid(*this).name());
 		}
-
 
 #pragma endregion SURFBFDynamicStabilizer
 
@@ -143,7 +141,6 @@ namespace providentia {
 			matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_HAMMING);
 			setName(typeid(*this).name());
 		}
-
 
 #pragma endregion ORBBFDynamicStabilizer
 
@@ -168,7 +165,6 @@ namespace providentia {
 			matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_HAMMING);
 			setName(typeid(*this).name());
 		}
-
 
 	}// namespace stabilization
 }// namespace providentia

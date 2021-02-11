@@ -5,7 +5,6 @@
 #ifndef CAMERASTABILIZATION_TIMEMEASURABLE_HPP
 #define CAMERASTABILIZATION_TIMEMEASURABLE_HPP
 
-
 #include <vector>
 #include <string>
 #include <sstream>
@@ -48,7 +47,6 @@ namespace providentia {
 			 * This enables different logging verbosities for different algorithms.
 			 */
 			int verbosity;
-
 
 		public:
 			/**

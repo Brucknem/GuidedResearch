@@ -31,10 +31,10 @@ namespace providentia {
 
 			Eigen::Vector2d getPixel(Eigen::Vector3d vector) {
 				return providentia::camera::render(
-						translation.data(), rotation.data(),
-						frustumParameters.data(), intrinsics.data(),
-						imageSize.data(),
-						vector.data());
+					translation.data(), rotation.data(),
+					frustumParameters.data(), intrinsics.data(),
+					imageSize.data(),
+					vector.data());
 			}
 
 			void addPointCorrespondence(const Eigen::Vector3d &pointInWorldSpace) {
@@ -93,11 +93,11 @@ namespace providentia {
 				WorldObject plane;
 				for (int i = 0; i < samples; ++i) {
 					providentia::calibration::ParametricPoint point = ParametricPoint::OnPlane(
-							origin,
-							axisA,
-							axisB,
-							(rand() % 2000) / 100. - 10,
-							(rand() % 2000) / 100.
+						origin,
+						axisA,
+						axisB,
+						(rand() % 2000) / 100. - 10,
+						(rand() % 2000) / 100.
 					);
 					point.setExpectedPixel(getPixel(point.getPosition()));
 					plane.add(point);
@@ -111,9 +111,9 @@ namespace providentia {
 		 */
 		TEST_F(CameraPoseEstimationTests, testCalculateInitialGuess) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-					frustumParameters,
-					intrinsics,
-					imageSize
+				frustumParameters,
+				intrinsics,
+				imageSize
 			);
 
 			addPointCorrespondence({0, 0, 9});
@@ -134,9 +134,9 @@ namespace providentia {
 		 */
 		TEST_F(CameraPoseEstimationTests, testEstimationOnlyWorldPositions) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-					frustumParameters,
-					intrinsics,
-					imageSize
+				frustumParameters,
+				intrinsics,
+				imageSize
 			);
 			addSomePointCorrespondences();
 			assertEstimation();
@@ -148,9 +148,9 @@ namespace providentia {
 		 */
 		TEST_F(CameraPoseEstimationTests, testEstimationPointAndLines) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-					frustumParameters,
-					intrinsics,
-					imageSize
+				frustumParameters,
+				intrinsics,
+				imageSize
 			);
 
 			Eigen::Vector3d origin, axisA, axisB;
@@ -162,9 +162,9 @@ namespace providentia {
 
 			for (int i = 0; i < 5; ++i) {
 				addPost({
-								(rand() % 2000) / 100. - 10,
-								(rand() % 2000) / 100.,
-								(rand() % 2000) / 100.
+							(rand() % 2000) / 100. - 10,
+							(rand() % 2000) / 100.,
+							(rand() % 2000) / 100.
 						});
 			}
 

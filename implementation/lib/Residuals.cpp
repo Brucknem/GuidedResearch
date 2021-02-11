@@ -18,12 +18,12 @@ namespace providentia {
 													   Eigen::Vector3d _intrinsics,
 													   Eigen::Vector2d _imageSize,
 													   double _weight) :
-				expectedPixel(std::move(_expectedPixel)),
-				plane(std::move(_point)),
-				frustumParameters(std::move(_frustumParameters)),
-				intrinsics(std::move(_intrinsics)),
-				imageSize(std::move(_imageSize)),
-				weight(_weight) {}
+			expectedPixel(std::move(_expectedPixel)),
+			plane(std::move(_point)),
+			frustumParameters(std::move(_frustumParameters)),
+			intrinsics(std::move(_intrinsics)),
+			imageSize(std::move(_imageSize)),
+			weight(_weight) {}
 
 		template<typename T>
 		bool CorrespondenceResidual::calculateResidual(const T *_translation, const T *_rotation,
@@ -74,8 +74,8 @@ namespace providentia {
 									   const Eigen::Vector2d &_imageSize,
 									   double _weight) {
 			return new ceres::AutoDiffCostFunction<CorrespondenceResidual, 2, 3, 3, 1, 1>(
-					new CorrespondenceResidual(_expectedPixel, _plane, _frustumParameters, _intrinsics, _imageSize,
-											   _weight)
+				new CorrespondenceResidual(_expectedPixel, _plane, _frustumParameters, _intrinsics, _imageSize,
+										   _weight)
 			);
 		}
 

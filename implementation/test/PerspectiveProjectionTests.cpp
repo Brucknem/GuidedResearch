@@ -111,7 +111,7 @@ namespace providentia {
 
 																		pointInCameraSpace.data());
 			normalizedDeviceCoordinate = providentia::camera::toNormalizedDeviceCoordinates<double>(
-					pointInClipSpace.data());
+				pointInClipSpace.data());
 			assertVectorsNearEqual(normalizedDeviceCoordinate, 0, 0);
 
 			pointInCameraSpace << -1, 1 / intrinsics[1], frustumParameters.x(), 1;
@@ -120,7 +120,7 @@ namespace providentia {
 
 																		pointInCameraSpace.data());
 			normalizedDeviceCoordinate = providentia::camera::toNormalizedDeviceCoordinates<double>(
-					pointInClipSpace.data());
+				pointInClipSpace.data());
 			assertVectorsNearEqual(normalizedDeviceCoordinate, -1, 1);
 
 			pointInCameraSpace << 1, -1 / intrinsics[1], frustumParameters.x(), 1;
@@ -129,7 +129,7 @@ namespace providentia {
 
 																		pointInCameraSpace.data());
 			normalizedDeviceCoordinate = providentia::camera::toNormalizedDeviceCoordinates<double>(
-					pointInClipSpace.data());
+				pointInClipSpace.data());
 			assertVectorsNearEqual(normalizedDeviceCoordinate, 1, -1);
 
 			pointInCameraSpace << 0, 0, frustumParameters.x(), 1;
@@ -140,7 +140,7 @@ namespace providentia {
 
 																		pointInCameraSpace.data());
 			normalizedDeviceCoordinate = providentia::camera::toNormalizedDeviceCoordinates<double>(
-					pointInClipSpace.data());
+				pointInClipSpace.data());
 			assertVectorsNearEqual(normalizedDeviceCoordinate, 0, 0);
 
 			pointInCameraSpace << 1, 1 / intrinsics[1], frustumParameters.x(), 1;
@@ -151,7 +151,7 @@ namespace providentia {
 
 																		pointInCameraSpace.data());
 			normalizedDeviceCoordinate = providentia::camera::toNormalizedDeviceCoordinates<double>(
-					pointInClipSpace.data());
+				pointInClipSpace.data());
 			assertVectorsNearEqual(normalizedDeviceCoordinate, 1, 1);
 
 			pointInCameraSpace << -1, -1 / intrinsics[1], frustumParameters.x(), 1;
@@ -162,7 +162,7 @@ namespace providentia {
 
 																		pointInCameraSpace.data());
 			normalizedDeviceCoordinate = providentia::camera::toNormalizedDeviceCoordinates<double>(
-					pointInClipSpace.data());
+				pointInClipSpace.data());
 			assertVectorsNearEqual(normalizedDeviceCoordinate, -1, -1);
 		}
 	}// namespace toCameraSpace

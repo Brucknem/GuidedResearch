@@ -13,8 +13,8 @@ namespace providentia {
 		CameraPoseEstimator::CameraPoseEstimator(Eigen::Vector2d _frustumParameters,
 												 Eigen::Vector3d _intrinsics,
 												 Eigen::Vector2d _imageSize) :
-				frustumParameters(std::move(_frustumParameters)), intrinsics(std::move(_intrinsics)),
-				imageSize(std::move(_imageSize)) {}
+			frustumParameters(std::move(_frustumParameters)), intrinsics(std::move(_intrinsics)),
+			imageSize(std::move(_imageSize)) {}
 
 		const Eigen::Vector3d &CameraPoseEstimator::getTranslation() const {
 			return translation;
@@ -89,19 +89,19 @@ namespace providentia {
 			for (const auto &worldObject : worldObjects) {
 				for (const auto &point : worldObject.getPoints()) {
 					problem.AddResidualBlock(
-							CorrespondenceResidual::Create(
-									point->getExpectedPixel(),
-									point,
-									frustumParameters,
-									intrinsics,
-									imageSize,
-									worldObject.getWeight()
-							),
-							nullptr,
-							translation.data(),
-							rotation.data(),
-							point->getLambda(),
-							point->getMu());
+						CorrespondenceResidual::Create(
+							point->getExpectedPixel(),
+							point,
+							frustumParameters,
+							intrinsics,
+							imageSize,
+							worldObject.getWeight()
+						),
+						nullptr,
+						translation.data(),
+						rotation.data(),
+						point->getLambda(),
+						point->getMu());
 				}
 			}
 		}

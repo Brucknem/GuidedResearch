@@ -32,29 +32,29 @@ namespace providentia {
 			Eigen::Matrix<T, 4, 4> zAxis;
 			T theta = rotationInRadians.z();
 			zAxis << cos(theta), -sin(theta), zero, zero,
-					sin(theta), cos(theta), zero, zero,
-					zero, zero, one, zero,
-					zero, zero, zero, one;
+				sin(theta), cos(theta), zero, zero,
+				zero, zero, one, zero,
+				zero, zero, zero, one;
 
 			Eigen::Matrix<T, 4, 4> yAxis;
 			theta = rotationInRadians.y();
 			yAxis << cos(theta), zero, sin(theta), zero,
-					zero, one, zero, zero,
-					-sin(theta), zero, cos(theta), zero,
-					zero, zero, zero, one;
+				zero, one, zero, zero,
+				-sin(theta), zero, cos(theta), zero,
+				zero, zero, zero, one;
 
 			Eigen::Matrix<T, 4, 4> xAxis;
 			theta = rotationInRadians.x();
 			xAxis << one, zero, zero, zero,
-					zero, cos(theta), -sin(theta), zero,
-					zero, sin(theta), cos(theta), zero,
-					zero, zero, zero, one;
+				zero, cos(theta), -sin(theta), zero,
+				zero, sin(theta), cos(theta), zero,
+				zero, zero, zero, one;
 
 			Eigen::Matrix<T, 4, 4> rotation;
 			rotation << one, zero, zero, zero,
-					zero, one, zero, zero,
-					zero, zero, -one, zero,
-					zero, zero, zero, one;
+				zero, one, zero, zero,
+				zero, zero, -one, zero,
+				zero, zero, zero, one;
 
 			return (rotation * zAxis * yAxis * xAxis);
 		}
@@ -72,7 +72,7 @@ namespace providentia {
 			Eigen::Matrix<T, 4, 1> pointInCameraSpace{vector[0], vector[1], vector[2],
 													  vector[3]};
 			Eigen::Matrix<T, 4, 1> pointInClipSpace =
-					getClipSpace(_frustumParameters, _intrinsics) * pointInCameraSpace;
+				getClipSpace(_frustumParameters, _intrinsics) * pointInCameraSpace;
 			if (abs(pointInClipSpace.w()) <= (T) 1e-5) {
 				return Eigen::Matrix<T, 4, 1>{(T) 0, (T) 0, (T) 1, (T) 1};
 			}
@@ -94,9 +94,9 @@ namespace providentia {
 			Eigen::Matrix<T, 4, 4> normalization;
 			normalization <<
 						  (T) (2) / (right - -right), zero, zero, -(right + -right) / (right - -right),
-					zero, (T) (2) / (top - -top), zero, -(top + -top) / (top - -top),
-					zero, zero, (T) (2) / (far - near), -(far + near) / (far - near),
-					zero, zero, zero, one;
+				zero, (T) (2) / (top - -top), zero, -(top + -top) / (top - -top),
+				zero, zero, (T) (2) / (far - near), -(far + near) / (far - near),
+				zero, zero, zero, one;
 			Eigen::Matrix<T, 4, 4> clipSpaceMatrix = normalization * getFrustum(_frustumParameters);
 			return clipSpaceMatrix;
 		}
@@ -122,9 +122,9 @@ namespace providentia {
 
 			Eigen::Matrix<T, 4, 4> frustum;
 			frustum << near, zero, zero, zero,
-					zero, near, zero, zero,
-					zero, zero, near + far, -near * far,
-					zero, zero, (T) 1, zero;
+				zero, near, zero, zero,
+				zero, zero, near + far, -near * far,
+				zero, zero, (T) 1, zero;
 			return frustum;
 		}
 
@@ -133,10 +133,10 @@ namespace providentia {
 			// TODO Remove inverse
 			return getCameraRotationMatrix<T>(_rotation).inverse() *
 				   (Eigen::Matrix<T, 4, 1>(
-						   vector[0] - _translation[0],
-						   vector[1] - _translation[1],
-						   vector[2] - _translation[2],
-						   (T) 1));
+					   vector[0] - _translation[0],
+					   vector[1] - _translation[1],
+					   vector[2] - _translation[2],
+					   (T) 1));
 		}
 
 		void render(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation,
@@ -144,10 +144,10 @@ namespace providentia {
 					const Eigen::Vector4d &vector, const cv::Vec3d &color, cv::Mat image) {
 			Eigen::Vector2d imageSize(image.cols, image.rows);
 			Eigen::Vector2d pointInImageSpace = render(
-					_translation.data(), _rotation.data(),
-					_frustumParameters.data(), _intrinsics.data(),
-					imageSize.data(),
-					vector.data());
+				_translation.data(), _rotation.data(),
+				_frustumParameters.data(), _intrinsics.data(),
+				imageSize.data(),
+				vector.data());
 
 			for (int i = 0; i < 2; ++i) {
 				for (int j = 0; j < 2; ++j) {

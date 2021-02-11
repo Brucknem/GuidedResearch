@@ -9,7 +9,6 @@
 #include "FeatureMatching.hpp"
 #include "TimeMeasurable.hpp"
 
-
 namespace providentia {
 	namespace stabilization {
 		/**
@@ -73,6 +72,5 @@ namespace providentia {
 		};
 	}
 }
-
 
 #endif //CAMERASTABILIZATION_FRAMEWARPING_HPP

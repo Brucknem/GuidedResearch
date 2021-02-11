@@ -39,36 +39,31 @@ public:
 	 */
 	Eigen::Vector3d rotation{90, 0, 0};
 
-	explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
-	}
+	explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {}
 
 	void renderScene() {
 		for (int i = -7; i <= 7; i += 2) {
 			for (int j = 0; j < 200; j += 5) {
-				render(
-						providentia::calibration::ParametricPoint::OnPlane(
-								Eigen::Vector3d{0, 0, 0},
-								Eigen::Vector3d{1, 0, 0},
-								Eigen::Vector3d{0, 1, 0},
-								i, j).getPosition(),
-						{1, 1, 1});
+				render(providentia::calibration::ParametricPoint::OnPlane(
+					Eigen::Vector3d{0, 0, 0}, Eigen::Vector3d{1, 0, 0},
+					Eigen::Vector3d{0, 1, 0}, i, j)
+						   .getPosition(),
+					   {1, 1, 1});
 			}
 		}
 
 		for (int i = 0; i < 40; ++i) {
 			for (int j = 0; j < 5; ++j) {
-				render(
-						providentia::calibration::ParametricPoint::OnLine(
-								Eigen::Vector3d{-7.5, i * 5, 0},
-								Eigen::Vector3d{0, 0, 1},
-								j).getPosition(),
-						{1, 1, 0});
-				render(
-						providentia::calibration::ParametricPoint::OnLine(
-								Eigen::Vector3d{7.5, i * 5, 0},
-								Eigen::Vector3d{0, 0, 1},
-								j).getPosition(),
-						{0, 1, 1});
+				render(providentia::calibration::ParametricPoint::OnLine(
+					Eigen::Vector3d{-7.5, (double) i * 5., 0},
+					Eigen::Vector3d{0, 0, 1}, j)
+						   .getPosition(),
+					   {1, 1, 0});
+				render(providentia::calibration::ParametricPoint::OnLine(
+					Eigen::Vector3d{7.5, (double) i * 5., 0},
+					Eigen::Vector3d{0, 0, 1}, j)
+						   .getPosition(),
+					   {0, 1, 1});
 			}
 		}
 	}
@@ -78,24 +73,16 @@ public:
 	}
 
 	void render(double x, double y, double z, const cv::Vec3d &color) {
-		providentia::camera::render(
-				translation, rotation,
-				frustumParameters, intrinsics,
-				Eigen::Vector4d(x, y, z, 1),
-				color, finalFrame);
+		providentia::camera::render(translation, rotation, frustumParameters,
+									intrinsics, Eigen::Vector4d(x, y, z, 1), color,
+									finalFrame);
 	}
 
 	void renderRandom(int amount) {
 		for (int z = 0; z < amount; ++z) {
-			render(
-					getRandom01() * 20 - 10,
-					getRandom01() * 20,
-					getRandom01() * 20 - 5,
-					{
-							getRandom01(),
-							getRandom01(),
-							getRandom01()
-					});
+			render(getRandom01() * 20 - 10, getRandom01() * 20,
+				   getRandom01() * 20 - 5,
+				   {getRandom01(), getRandom01(), getRandom01()});
 		}
 	}
 
@@ -113,7 +100,7 @@ public:
 		}
 	}
 
-	void renderOutlines() {// Vertical
+	void renderOutlines() { // Vertical
 		for (int i = 0; i <= 10; ++i) {
 			render(-8, 0, i, {1, 0, 1});
 			render(0, 0, i, {1, 1, 0});
@@ -129,16 +116,14 @@ public:
 	}
 
 protected:
-
 	void specificMainLoop() override {
 		finalFrame = cv::Mat::zeros(cv::Size(imageSize[0], imageSize[1]), CV_64FC4);
 
 		renderScene();
-//		renderOutlines();
-//		renderRegularGrid(15);
-//		renderRandom(1000);
+		//		renderOutlines();
+		//		renderRegularGrid(15);
+		//		renderRandom(1000);
 	}
-
 };
 
 int main(int argc, char const *argv[]) {

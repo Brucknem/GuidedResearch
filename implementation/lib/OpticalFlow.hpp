@@ -14,7 +14,6 @@
 
 #include "TimeMeasurable.hpp"
 
-
 namespace providentia {
 	namespace opticalflow {
 
@@ -86,7 +85,6 @@ namespace providentia {
 			 */
 			double getMagnitudeMean();
 
-
 			/**
 			 * @get the mean of the angles over the flow field.
 			 */
@@ -138,6 +136,5 @@ namespace providentia {
 
 	}
 }
-
 
 #endif //CAMERASTABILIZATION_OPTICALFLOW_HPP

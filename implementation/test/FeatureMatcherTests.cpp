@@ -25,9 +25,8 @@ namespace providentia {
 			 */
 			void assertMatcher(features::FeatureMatcherBase *matcher) {
 				std::shared_ptr<providentia::features::SURFFeatureDetector> detector = std::make_shared<providentia::features::SURFFeatureDetector>(
-						1000);
+					1000);
 				detector->detect(testImgGPU);
-
 
 				matcher->match(detector, detector);
 

@@ -12,9 +12,9 @@ namespace providentia {
 
 		ParametricPoint::ParametricPoint(Eigen::Vector3d _origin, const Eigen::Vector3d
 		&_axisA, const Eigen::Vector3d &_axisB, double _lambda, double _mu) :
-				expectedPixel({0, 0}), origin(std::move(_origin)), axisA(_axisA.normalized()),
-				axisB(_axisB.normalized()),
-				lambda(_lambda), mu(_mu) {}
+			expectedPixel({0, 0}), origin(std::move(_origin)), axisA(_axisA.normalized()),
+			axisB(_axisB.normalized()),
+			lambda(_lambda), mu(_mu) {}
 
 		Eigen::Vector3d ParametricPoint::getPosition() const {
 			return origin + lambda * axisA + mu * axisB;

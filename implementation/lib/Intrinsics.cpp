@@ -11,8 +11,8 @@ namespace providentia {
 
 		Intrinsics::Intrinsics(float focalX, float focalY, int centerX, int centerY) {
 			matrix << focalX, 0, centerX,
-					0, focalY, centerY,
-					0, 0, 1;
+				0, focalY, centerY,
+				0, 0, 1;
 
 			focalLength << focalX, focalY;
 			center << centerX, centerY;
@@ -24,11 +24,9 @@ namespace providentia {
 			assert(getCenter()(1) == centerY);
 		}
 
-
 		Intrinsics::Intrinsics(const Eigen::Vector4f &intrinsics) : Intrinsics(intrinsics(0), intrinsics(1),
 																			   (int) intrinsics(2),
 																			   (int) intrinsics(3)) {}
-
 
 		const Eigen::Vector2f &Intrinsics::getCenter() const {
 			return center;
@@ -57,13 +55,11 @@ namespace providentia {
 			return os;
 		}
 
-
 #pragma endregion CameraMatrix
 
 #pragma region BlenderCameraMatrix
 
 		BlenderIntrinsics::BlenderIntrinsics() : Intrinsics(0.05, 0.05, 1920 / 2, 1200 / 2) {}
-
 
 #pragma endregion BlenderCameraMatrix
 

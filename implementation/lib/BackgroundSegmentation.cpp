@@ -1,7 +1,3 @@
-//
-// Created by brucknem on 13.01.21.
-//
-
 #include <opencv2/cudawarping.hpp>
 #include <utility>
 #include "BackgroundSegmentation.hpp"
@@ -77,14 +73,13 @@ namespace providentia {
 		}
 
 		BackgroundSegmentorBase::BackgroundSegmentorBase(cv::Size _size)
-				: providentia::utils::TimeMeasurable(
-				"BackgroundSegmentorBase", 1), calculationSize(std::move(_size)) {
+			: providentia::utils::TimeMeasurable(
+			"BackgroundSegmentorBase", 1), calculationSize(std::move(_size)) {
 		}
 
 		void BackgroundSegmentorBase::addFilters() {
 			// Optional filters can be added by overriding this function.
 		}
-
 
 #pragma endregion BackgroundSegmentorBase
 
@@ -94,7 +89,7 @@ namespace providentia {
 														 int history,
 														 double varThreshold,
 														 bool detectShadows)
-				: BackgroundSegmentorBase(std::move(calculationSize)) {
+			: BackgroundSegmentorBase(std::move(calculationSize)) {
 			algorithm = cv::cuda::createBackgroundSubtractorMOG2(history, varThreshold, detectShadows);
 			addFilters();
 		}
@@ -115,22 +110,21 @@ namespace providentia {
 //                                                                       cv::Size(5, 5)), cv::Point(-1, -1), 3
 //            ));
 			filters.emplace_back(
-					cv::cuda::createMorphologyFilter(cv::MORPH_ERODE, CV_8UC1,
-													 cv::getStructuringElement(cv::MORPH_RECT,
-																			   cv::Size(3, 3))
-					));
+				cv::cuda::createMorphologyFilter(cv::MORPH_ERODE, CV_8UC1,
+												 cv::getStructuringElement(cv::MORPH_RECT,
+																		   cv::Size(3, 3))
+				));
 //    filters.emplace_back(
 //            cv::cuda::createMorphologyFilter(cv::MORPH_DILATE, CV_8UC1,
 //                                             cv::getStructuringElement(cv::MORPH_RECT,
 //                                                                       cv::Size(3, 3)), cv::Point(-1, -1), 5
 //            ));
 			filters.emplace_back(
-					cv::cuda::createMorphologyFilter(cv::MORPH_DILATE, CV_8UC1,
-													 cv::getStructuringElement(cv::MORPH_RECT,
-																			   cv::Size(5, 5)), cv::Point(-1, -1), 3
-					));
+				cv::cuda::createMorphologyFilter(cv::MORPH_DILATE, CV_8UC1,
+												 cv::getStructuringElement(cv::MORPH_RECT,
+																		   cv::Size(5, 5)), cv::Point(-1, -1), 3
+				));
 		}
-
 
 #pragma endregion MOG2BackgroundSegmentor
 	}

@@ -53,17 +53,17 @@ public:
 //        addRuntimeToFinalFrame("Optical Flow [Original]", originalOpticalFlow->getTotalMilliseconds(), 5,
 //                               finalFrame.rows / 2 + 20);
 		addTextToFinalFrame(
-				"Optical Flow [Original] - Mean expectedPixel shift - " +
-				std::to_string(originalOpticalFlow->getMagnitudeMean()) + " px", 5,
-				finalFrame.rows / 2 + 20);
+			"Optical Flow [Original] - Mean expectedPixel shift - " +
+			std::to_string(originalOpticalFlow->getMagnitudeMean()) + " px", 5,
+			finalFrame.rows / 2 + 20);
 
 
 //        addRuntimeToFinalFrame("Optical Flow [Stabilized]", stabilizedOpticalFlow->getTotalMilliseconds(),
 //                               finalFrame.cols / 2 + 5, finalFrame.rows / 2 + 20);
 		addTextToFinalFrame(
-				"Optical Flow [Stabilized] - Mean expectedPixel shift - " +
-				std::to_string(stabilizedOpticalFlow->getMagnitudeMean()) + " px", finalFrame.cols / 2 + 5,
-				finalFrame.rows / 2 + 20);
+			"Optical Flow [Stabilized] - Mean expectedPixel shift - " +
+			std::to_string(stabilizedOpticalFlow->getMagnitudeMean()) + " px", finalFrame.cols / 2 + 5,
+			finalFrame.rows / 2 + 20);
 	}
 };
 

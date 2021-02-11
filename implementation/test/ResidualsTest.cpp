@@ -27,13 +27,13 @@ namespace providentia {
 			void assertParametricPoint(ParametricPoint point, Eigen::Vector2d expectedResidual) {
 				Eigen::Vector2d residual;
 				CorrespondenceResidual correspondenceResidual = {
-						point.getExpectedPixel(), std::make_shared<ParametricPoint>(point),
-						frustumParameters,
-						intrinsics, imageSize,
-						1
+					point.getExpectedPixel(), std::make_shared<ParametricPoint>(point),
+					frustumParameters,
+					intrinsics, imageSize,
+					1
 				};
 				correspondenceResidual(translation.data(), rotation.data(), point.getLambda(), point.getMu(), residual
-						.data());
+					.data());
 
 				EXPECT_NEAR(residual.x(), expectedResidual.x(), 1e-6);
 				EXPECT_NEAR(residual.y(), expectedResidual.y(), 1e-6);
@@ -55,8 +55,8 @@ namespace providentia {
 			void assertLineCorrespondenceResidual(Eigen::Vector3d lineOrigin, const Eigen::Vector3d &lineHeading, double
 			lambda, const Eigen::Vector2d &pixel, const Eigen::Vector2d &expectedResidual) {
 				assertParametricPoint(
-						ParametricPoint::OnLine(pixel, std::move(lineOrigin), lineHeading, lambda),
-						expectedResidual);
+					ParametricPoint::OnLine(pixel, std::move(lineOrigin), lineHeading, lambda),
+					expectedResidual);
 			}
 
 			/**

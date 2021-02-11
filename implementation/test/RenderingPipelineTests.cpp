@@ -46,10 +46,10 @@ namespace providentia {
 
 			Eigen::Vector2d render(const Eigen::Vector4d &pointInWorldSpace) {
 				return providentia::camera::render(
-						translation.data(), rotation.data(),
-						frustumParameters.data(), intrinsics.data(),
-						imageSize.data(),
-						pointInWorldSpace.data());
+					translation.data(), rotation.data(),
+					frustumParameters.data(), intrinsics.data(),
+					imageSize.data(),
+					pointInWorldSpace.data());
 			}
 		};
 

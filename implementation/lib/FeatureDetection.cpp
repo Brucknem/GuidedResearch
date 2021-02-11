@@ -59,7 +59,7 @@ namespace providentia {
 		}
 
 		FeatureDetectorBase::FeatureDetectorBase() : providentia::utils::TimeMeasurable(
-				"FeatureDetectorBase", 1) {}
+			"FeatureDetectorBase", 1) {}
 
 		const cv::cuda::GpuMat &FeatureDetectorBase::getCurrentMask(cv::Size _size) {
 			setCurrentMask(std::move(_size));
@@ -87,7 +87,6 @@ namespace providentia {
 			return descriptorsCPU;
 		}
 
-
 #pragma endregion FeatureDetectorBase
 
 #pragma region SURFFeatureDetector
@@ -105,7 +104,6 @@ namespace providentia {
 			detector->downloadKeypoints(keypointsGPU, keypointsCPU);
 			descriptorsGPU.download(descriptorsCPU);
 		}
-
 
 #pragma endregion SURFFeatureDetector
 
@@ -126,7 +124,6 @@ namespace providentia {
 			detector->convert(keypointsGPU, keypointsCPU);
 			descriptorsGPU.download(descriptorsCPU);
 		}
-
 
 #pragma endregion ORBFeatureDetector
 
@@ -152,7 +149,6 @@ namespace providentia {
 			descriptorsGPU.upload(descriptorsCPU);
 		}
 
-
 #pragma endregion FastFREAKFeatureDetector
 
 #pragma region SIFTFeatureDetector
@@ -168,7 +164,6 @@ namespace providentia {
 			detector->detectAndCompute(frameCPU, cv::Mat(getCurrentMask()), keypointsCPU, descriptorsCPU);
 			descriptorsGPU.upload(descriptorsCPU);
 		}
-
 
 #pragma endregion SIFTFeatureDetector
 
@@ -190,7 +185,6 @@ namespace providentia {
 			descriptor->compute(frameCPU, keypointsCPU, descriptorsCPU);
 			descriptorsGPU.upload(descriptorsCPU);
 		}
-
 
 #pragma endregion StarBRIEFFeatureDetector
 

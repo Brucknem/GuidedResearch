@@ -31,8 +31,8 @@ public:
 					 cv::COLOR_GRAY2BGR);
 		cv::cvtColor(cv::Mat(stabilizer->getReferenceframeMask()), referenceMask, cv::COLOR_GRAY2BGR);
 		cv::hconcat(
-				std::vector<cv::Mat>{cv::Mat::zeros(frameGPU.size(), CV_8UC3), currentMask, referenceMask},
-				bufferCPU);
+			std::vector<cv::Mat>{cv::Mat::zeros(frameGPU.size(), CV_8UC3), currentMask, referenceMask},
+			bufferCPU);
 		cv::vconcat(std::vector<cv::Mat>{finalFrame, bufferCPU}, finalFrame);
 
 //        cv::imshow("Test", stabilizer->getMatcher()->draw());

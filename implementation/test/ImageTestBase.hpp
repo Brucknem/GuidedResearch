@@ -43,5 +43,4 @@ namespace providentia {
 	}
 }
 
-
 #endif //CAMERASTABILIZATION_IMAGETESTBASE_HPP

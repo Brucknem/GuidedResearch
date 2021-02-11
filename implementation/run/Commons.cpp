@@ -61,9 +61,9 @@ double providentia::runnable::getRandom01() {
 providentia::runnable::BaseSetup::BaseSetup(std::string _videoFileName,
 											std::string _windowName,
 											double _calculationScaleFactor, double _renderingScaleFactor)
-		: videoFileName(std::move(_videoFileName)), calculationScaleFactor(_calculationScaleFactor),
-		  renderingScaleFactor(_renderingScaleFactor),
-		  windowName(std::move(_windowName)) {
+	: videoFileName(std::move(_videoFileName)), calculationScaleFactor(_calculationScaleFactor),
+	  renderingScaleFactor(_renderingScaleFactor),
+	  windowName(std::move(_windowName)) {
 	init();
 }
 
@@ -71,17 +71,17 @@ providentia::runnable::BaseSetup::BaseSetup(int argc, const char **argv) : provi
 																											  1) {
 	boost::program_options::options_description description("Allowed options");
 	description.add_options()
-			("help", "Produce help message.")
-			("videoFileName",
-			 boost::program_options::value<std::string>(&videoFileName)->default_value(getDefaultVideoFile()),
-			 "The path to the video file.")
-			("mainWindowName",
-			 boost::program_options::value<std::string>(&windowName)->default_value("Camera Stabilization"),
-			 "The window name.")
-			("calcScale", boost::program_options::value<double>(&calculationScaleFactor)->default_value(1.0),
-			 "The scale factor of frame during calculation.")
-			("renderScale", boost::program_options::value<double>(&renderingScaleFactor)->default_value(0.5),
-			 "The scale factor of final frame during rendering.");
+		("help", "Produce help message.")
+		("videoFileName",
+		 boost::program_options::value<std::string>(&videoFileName)->default_value(getDefaultVideoFile()),
+		 "The path to the video file.")
+		("mainWindowName",
+		 boost::program_options::value<std::string>(&windowName)->default_value("Camera Stabilization"),
+		 "The window name.")
+		("calcScale", boost::program_options::value<double>(&calculationScaleFactor)->default_value(1.0),
+		 "The scale factor of frame during calculation.")
+		("renderScale", boost::program_options::value<double>(&renderingScaleFactor)->default_value(0.5),
+		 "The scale factor of final frame during rendering.");
 
 	boost::program_options::variables_map vm;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, description), vm);

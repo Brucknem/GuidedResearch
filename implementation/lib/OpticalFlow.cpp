@@ -62,7 +62,6 @@ namespace providentia {
 			return bgr;
 		}
 
-
 #pragma endregion DenseOpticalFlow
 
 #pragma region FarnebackDenseOpticalFlow
@@ -75,7 +74,6 @@ namespace providentia {
 			opticalFlow = cv::cuda::FarnebackOpticalFlow::create();
 			setName(typeid(*this).name());
 		}
-
 
 #pragma endregion FarnebackDenseOpticalFlow
 	}

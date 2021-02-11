@@ -9,10 +9,9 @@ namespace providentia {
 
 #pragma region FeatureMatchingBase
 
-
 		void FeatureMatcherBase::match(
-				const std::shared_ptr<FeatureDetectorBase> &_frameFeatureDetector,
-				const std::shared_ptr<FeatureDetectorBase> &_referenceFeatureDetector
+			const std::shared_ptr<FeatureDetectorBase> &_frameFeatureDetector,
+			const std::shared_ptr<FeatureDetectorBase> &_referenceFeatureDetector
 		) {
 			clear();
 			frameDetector = _frameFeatureDetector;
@@ -75,11 +74,11 @@ namespace providentia {
 
 		cv::Mat FeatureMatcherBase::draw() {
 			drawMatches(
-					cv::Mat(frameDetector->getOriginalFrame()), frameDetector->getKeypoints(),
-					cv::Mat(referenceFrameDetector->getOriginalFrame()), referenceFrameDetector->getKeypoints(),
-					fundamentalMatches, drawFrame, cv::Scalar::all(-1),
-					cv::Scalar::all(-1), std::vector<char>(),
-					cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+				cv::Mat(frameDetector->getOriginalFrame()), frameDetector->getKeypoints(),
+				cv::Mat(referenceFrameDetector->getOriginalFrame()), referenceFrameDetector->getKeypoints(),
+				fundamentalMatches, drawFrame, cv::Scalar::all(-1),
+				cv::Scalar::all(-1), std::vector<char>(),
+				cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
 			return drawFrame;
 		}
 
@@ -96,14 +95,13 @@ namespace providentia {
 		}
 
 		FeatureMatcherBase::FeatureMatcherBase(float _goodMatchRatioThreshold)
-				: providentia::utils::TimeMeasurable("FeatureMatcherBase", 1), goodMatchRatioThreshold(
-				_goodMatchRatioThreshold) {
+			: providentia::utils::TimeMeasurable("FeatureMatcherBase", 1), goodMatchRatioThreshold(
+			_goodMatchRatioThreshold) {
 		}
 
 		void FeatureMatcherBase::setShouldUseFundamentalMatrix(bool _shouldUseFundamentalMatrix) {
 			shouldUseFundamentalMatrix = _shouldUseFundamentalMatrix;
 		}
-
 
 #pragma endregion FeatureMatchingBase
 
@@ -111,11 +109,10 @@ namespace providentia {
 
 		BruteForceFeatureMatcher::BruteForceFeatureMatcher(cv::NormTypes norm,
 														   float _goodMatchRatioThreshold)
-				: FeatureMatcherBase(_goodMatchRatioThreshold) {
+			: FeatureMatcherBase(_goodMatchRatioThreshold) {
 			matcher = cv::cuda::DescriptorMatcher::createBFMatcher(norm);
 			setName(typeid(*this).name());
 		}
-
 
 		void BruteForceFeatureMatcher::specificMatch() {
 			if (frameDetector->getDescriptorsGPU().empty() || frameDetector->getDescriptorsGPU().empty()) {
@@ -127,15 +124,14 @@ namespace providentia {
 			matcher->knnMatchConvert(knnMatchesGPU, knnMatchesCPU);
 		}
 
-
 #pragma endregion BruteForceFeatureMatching
 
 #pragma region FlannFeatureMatching
 
 		FlannFeatureMatcher::FlannFeatureMatcher(cv::flann::IndexParams *params,
 												 float _goodMatchRatioThreshold)
-				: FeatureMatcherBase(
-				_goodMatchRatioThreshold) {
+			: FeatureMatcherBase(
+			_goodMatchRatioThreshold) {
 			matcher = std::make_shared<cv::FlannBasedMatcher>(params);
 			setName(typeid(*this).name());
 		}
@@ -151,7 +147,7 @@ namespace providentia {
 
 		FlannFeatureMatcher::FlannFeatureMatcher(bool binaryDescriptors,
 												 float _goodMatchRatioThreshold) : FeatureMatcherBase(
-				_goodMatchRatioThreshold) {
+			_goodMatchRatioThreshold) {
 			if (binaryDescriptors) {
 				matcher = std::make_shared<cv::FlannBasedMatcher>(new cv::flann::LshIndexParams(12, 20, 2));
 			} else {

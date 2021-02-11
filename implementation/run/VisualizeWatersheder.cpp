@@ -5,7 +5,7 @@
 
 int main(int argc, char const *argv[]) {
 	auto watersheder = providentia::calibration::Watersheder(
-			"../misc/s40_n_cam_far_calibration_test_image.png"
+		"../misc/s40_n_cam_far_calibration_test_image.png"
 	);
 	watersheder.run();
 
