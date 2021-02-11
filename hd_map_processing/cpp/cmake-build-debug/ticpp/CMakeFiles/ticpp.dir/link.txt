@@ -1,2 +1,0 @@
-/usr/bin/ar qc libticppd.a  CMakeFiles/ticpp.dir/ticpp.cpp.o CMakeFiles/ticpp.dir/tinystr.cpp.o CMakeFiles/ticpp.dir/tinyxml.cpp.o CMakeFiles/ticpp.dir/tinyxmlerror.cpp.o CMakeFiles/ticpp.dir/tinyxmlparser.cpp.o
-/usr/bin/ranlib libticppd.a
