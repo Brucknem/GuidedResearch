@@ -19,3 +19,11 @@ A key challenge lies in the reliable and accurate calibration of the different s
 
 ## [Literature](https://github.com/Brucknem/Graduation/tree/main/literature)
 
+***
+
+# Dependencies
+
+- [Ceres Solver](http://ceres-solver.org/)
+- [CUDA](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html)
+- [OpenCV](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html)
+- [PROJ](https://proj.org/install.html#cmake)
