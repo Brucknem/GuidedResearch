@@ -10,8 +10,9 @@
 #include <exception>
 #include <stdexcept>
 #include <iostream>
+#include <vector>
 
-#include "tinyxml2.h"
+#include "pugixml.hpp"
 
 namespace providentia {
 	namespace calibration {
@@ -30,7 +31,7 @@ namespace providentia {
 			/**
 			 * The parsed XML document.
 			 */
-			tinyxml2::XMLDocument doc;
+			pugi::xml_document doc;
 
 		public:
 
@@ -39,39 +40,36 @@ namespace providentia {
 			 */
 			explicit HDMap(std::string filename);
 
-			tinyxml2::XMLElement *findNode(long id) {
-				return findNode(std::to_string(id));
-			}
+			/**
+			 * Finds all nodes by the given type.
+			 */
+			std::vector<pugi::xml_node> findNodesByType(const std::string &type);
 
-			tinyxml2::XMLElement *findNode(const std::string &id) {
-				tinyxml2::XMLElement *elem = doc.FirstChildElement(); //Tree root
+			/**
+			 * Finds all nodes by the given XPath.
+			 */
+			std::vector<pugi::xml_node> findNodesByXPath(const std::string &path);
 
-				while (elem) {
-					std::cout << "Yeeeeet" << std::endl;
-					std::cout << elem->GetText() << std::endl;
-					std::cout << elem->GetLineNum() << std::endl;
-					if (std::string(elem->Value()) == id) {
-						return elem;
-					}
-					if (elem->FirstChildElement()) {
-						elem = elem->FirstChildElement();
-					} else if (elem->NextSiblingElement()) {
-						elem = elem->NextSiblingElement();
-					} else {
-						if (elem->Parent()->ToElement()->NextSiblingElement()) {
-							elem = elem->Parent()->ToElement()->NextSiblingElement();
-						} else {
-							tinyxml2::XMLElement *childElement = elem->Parent()->ToElement()->FirstChildElement();
-							if (childElement && std::string(elem->Name()) == std::string(childElement->Name())) {
-								elem = childElement;
-							} else {
-								break;
-							}
-						}
-					}
-				}
-				return nullptr;
-			}
+			/**
+			 * @get Gets an iterator over all roads.
+			 */
+			pugi::xml_object_range<pugi::xml_named_node_iterator> getRoads();
+
+			/**
+			 * @get Gets the header definition.
+			 */
+			pugi::xml_node getHeader();
+
+			/**
+			 * @get Gets an attribute of the header.
+			 */
+			std::string getHeader(const std::string &attribute);
+
+			/**
+			 * @get Gets the geo reference string.
+			 */
+			std::string getGeoReference();
+
 		};
 	}
 }

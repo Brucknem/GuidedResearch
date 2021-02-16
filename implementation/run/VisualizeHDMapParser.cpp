@@ -7,8 +7,11 @@
 int main(int argc, char const *argv[]) {
 	providentia::calibration::HDMap hdMap("../misc/test_xml.xodr");
 
-	auto node = hdMap.findNode("cooking");
-	std::cout << node << std::endl;
+	auto nodes = hdMap.findNodes("book");
+
+	for (const auto &node : nodes) {
+		std::cout << node.name() << std::endl;
+	}
 
 	return 0;
 }
