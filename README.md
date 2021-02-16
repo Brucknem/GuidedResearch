@@ -19,3 +19,22 @@ A key challenge lies in the reliable and accurate calibration of the different s
 
 ## [Literature](https://github.com/Brucknem/Graduation/tree/main/literature)
 
+***
+
+# Dependencies
+
+## External Dependencies
+
+These dependencies have to be installed on your system. Follow their instructions on how to install them. 
+
+- [Ceres Solver](http://ceres-solver.org/)
+- [CUDA](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html)
+- [OpenCV](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html)
+- [PROJ](https://proj.org/install.html#cmake)
+
+## Internal Dependencies
+
+These dependencies are pulled by CMake when the project is built. You `do not` have to install them manually.
+
+- [GoogleTest](https://github.com/google/googletest)
+- [TinyXML-2](https://github.com/leethomason/tinyxml2)
