@@ -7,12 +7,13 @@
 
 #include <string>
 #include <proj.h>
-#include <exception>
 #include <stdexcept>
 #include <iostream>
 #include <vector>
 
 #include "pugixml.hpp"
+#include "Geometry.hpp"
+#include "proj.h"
 
 namespace providentia {
 	namespace calibration {
@@ -33,6 +34,16 @@ namespace providentia {
 			 */
 			pugi::xml_document doc;
 
+			/**
+			 * The projectionString defining the coordinate system.
+			 */
+			std::string projectionString;
+
+			/**
+			 * The coordinate transformation.
+			 */
+			PJ *projection;
+
 		public:
 
 			/**
@@ -41,35 +52,51 @@ namespace providentia {
 			explicit HDMap(std::string filename);
 
 			/**
+			 * @destructor
+			 */
+			virtual ~HDMap();
+
+			/**
 			 * Finds all nodes by the given type.
 			 */
-			std::vector<pugi::xml_node> findNodesByType(const std::string &type);
+			pugi::xpath_node_set findNodesByType(const std::string &type);
 
 			/**
 			 * Finds all nodes by the given XPath.
 			 */
-			std::vector<pugi::xml_node> findNodesByXPath(const std::string &path);
+			pugi::xpath_node_set findNodesByXPath(const std::string &path);
 
 			/**
 			 * @get Gets an iterator over all roads.
 			 */
-			pugi::xml_object_range<pugi::xml_named_node_iterator> getRoads();
+			pugi::xpath_node_set getRoads();
 
 			/**
 			 * @get Gets the header definition.
 			 */
-			pugi::xml_node getHeader();
+			pugi::xpath_node getHeader();
 
 			/**
 			 * @get Gets an attribute of the header.
 			 */
 			std::string getHeader(const std::string &attribute);
 
+			pugi::xpath_node_set getObjects(pugi::xpath_node road);
+
+			static std::string getRoadSelector(pugi::xpath_node road);
+
+			static std::string getRoadSelector(std::string id);
+
+			pugi::xpath_node_set getSignals(pugi::xpath_node road);
+
+			std::vector<Geometry> getGeometries(pugi::xpath_node road);
+
+			pugi::xpath_node getRoad(const std::string &id);
+
 			/**
 			 * @get Gets the geo reference string.
 			 */
-			std::string getGeoReference();
-
+			const std::string &getProjectionString() const;
 		};
 	}
 }

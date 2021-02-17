@@ -53,7 +53,8 @@ add_library(libCameraStabilization
         Residuals.cpp
         WorldObjects.cpp
         Watersheder.cpp
-        HDMap.cpp)
+        HDMap.cpp
+        Geometry.cpp)
 
 target_include_directories(libCameraStabilization
         INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}

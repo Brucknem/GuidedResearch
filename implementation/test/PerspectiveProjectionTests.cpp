@@ -11,7 +11,7 @@ namespace providentia {
 	namespace tests {
 
 		/**
-		 * Test setup for the perspective projection.
+		 * Test setup for the perspective projectionString.
 		 */
 		class PerspectiveProjectionTests : public ::testing::Test {
 		protected:

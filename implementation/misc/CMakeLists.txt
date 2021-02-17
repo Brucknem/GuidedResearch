@@ -13,7 +13,6 @@ set(IMAGES
 file(COPY ${IMAGES} DESTINATION ./)
 
 set(OPENDRIVE
-        test_xml.xodr
         map_snippet.xodr
         )
 file(COPY ${OPENDRIVE} DESTINATION ./)
