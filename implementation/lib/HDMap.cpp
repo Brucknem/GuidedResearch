@@ -41,6 +41,16 @@ namespace providentia {
 			return findNodesByXPath("//OpenDRIVE/road");
 		}
 
+		bool HDMap::hasRoad(const std::string &id) {
+			auto roads = getRoads();
+			return std::any_of(roads.begin(), roads.end(), [id](pugi::xpath_node road) {
+				if (std::strcmp(road.node().attribute("id").value(), id.c_str()) == 0) {
+					return true;
+				}
+				return false;
+			});
+		}
+
 		pugi::xpath_node HDMap::getRoad(const std::string &id) {
 			for (const auto &road : getRoads()) {
 				if (std::strcmp(road.node().attribute("id").value(), id.c_str()) == 0) {

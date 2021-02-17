@@ -73,8 +73,11 @@ namespace providentia {
 				}
 			}
 
+			const char *id = "2311000";
+			ASSERT_EQ(hdMap->hasRoad(id), true);
+
 			int i = 0;
-			for (const auto &geometry : hdMap->getGeometries(hdMap->getRoad("2311000"))) {
+			for (const auto &geometry : hdMap->getGeometries(hdMap->getRoad(id))) {
 				EXPECT_NEAR(geometry.s, boost::lexical_cast<double>(ss[i++]), 1e-8);
 			}
 
@@ -101,13 +104,15 @@ namespace providentia {
 				11.6356778613078
 			};
 
+			const char *id = "2311000";
+			ASSERT_EQ(hdMap->hasRoad(id), true);
+
 			int i = 0;
-			for (const auto &geometry : hdMap->getGeometries(hdMap->getRoad("2311000"))) {
+			for (const auto &geometry : hdMap->getGeometries(hdMap->getRoad(id))) {
 				EXPECT_NEAR(geometry.getLat(), lat[i], 1e-8);
 				EXPECT_NEAR(geometry.getLong(), lon[i], 1e-8);
 				i++;
 			}
 		}
-
 	}// namespace tests
 }// namespace providentia

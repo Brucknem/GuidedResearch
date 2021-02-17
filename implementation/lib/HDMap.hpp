@@ -44,6 +44,10 @@ namespace providentia {
 			 */
 			PJ *projection;
 
+			static std::string getRoadSelector(pugi::xpath_node road);
+
+			static std::string getRoadSelector(std::string id);
+
 		public:
 
 			/**
@@ -81,16 +85,30 @@ namespace providentia {
 			 */
 			std::string getHeader(const std::string &attribute);
 
+			/**
+			 * @get Gets the objects of the given road.
+			 */
 			pugi::xpath_node_set getObjects(pugi::xpath_node road);
 
-			static std::string getRoadSelector(pugi::xpath_node road);
-
-			static std::string getRoadSelector(std::string id);
-
+			/**
+			 * @get Gets the signals of the given road.
+			 */
 			pugi::xpath_node_set getSignals(pugi::xpath_node road);
 
+			/**
+			 * @get Gets the geometries of the given road.
+			 */
 			std::vector<Geometry> getGeometries(pugi::xpath_node road);
 
+			/**
+			 * @get Checks if the road with the given id exists.
+			 */
+			bool hasRoad(const std::string &id);
+
+			/**
+			 * @get Gets a specific road with the given id.
+			 * @throws invalid_argument if no road with the given id is found.
+			 */
 			pugi::xpath_node getRoad(const std::string &id);
 
 			/**
