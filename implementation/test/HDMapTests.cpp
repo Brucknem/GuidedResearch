@@ -28,9 +28,9 @@ namespace providentia {
 			const char *id = "2311000";
 
 			/**
-			 * The test road xml node.
+			 * The test road.
 			 */
-			pugi::xml_node road;
+			Road road;
 
 			/**
 			 * @destructor
@@ -42,11 +42,12 @@ namespace providentia {
 			 */
 			virtual void SetUp() {
 				hdMap = std::make_shared<providentia::calibration::HDMap>("../misc/map_snippet.xodr");
+				hdMap->parse();
 
 				ASSERT_EQ(hdMap->getRoads().size(), 1);
 				ASSERT_EQ(hdMap->hasRoad(id), true);
 
-				road = hdMap->getRoads()[0].node();
+				road = hdMap->getRoads()[0];
 			}
 
 		};

@@ -17,15 +17,27 @@ namespace providentia {
 				throw std::invalid_argument("XML file parsing failed: " + std::string(result.description()));
 			}
 
+			parseProjection();
+		}
+
+		void HDMap::parseProjection() {
 			projectionString = getHeader().node().child("geoReference").child_value();
 			projection = proj_create_crs_to_crs(
 				PJ_DEFAULT_CTX,
 				projectionString.c_str(),
 				"+proj=longlat +datum=WGS84",
-				NULL
+				nullptr
 			);
 			if (projection == nullptr) {
 				throw std::invalid_argument("Cannot create projection");
+			}
+		}
+
+		void HDMap::parse() {
+			for (const auto &roadNode : doc.select_nodes("//road")) {
+				auto road = Road(roadNode);
+				road.setType(roadNode.node().select_node("//type"));
+				roads.emplace_back(road);
 			}
 		}
 
@@ -37,23 +49,18 @@ namespace providentia {
 			return doc.select_nodes((path).c_str());
 		}
 
-		pugi::xpath_node_set HDMap::getRoads() {
-			return findNodesByXPath("//OpenDRIVE/road");
-		}
-
 		bool HDMap::hasRoad(const std::string &id) {
-			auto roads = getRoads();
-			return std::any_of(roads.begin(), roads.end(), [id](pugi::xpath_node road) {
-				if (std::strcmp(road.node().attribute("id").value(), id.c_str()) == 0) {
+			return std::any_of(roads.begin(), roads.end(), [id](const Road &road) {
+				if (road.id == id) {
 					return true;
 				}
 				return false;
 			});
 		}
 
-		pugi::xpath_node HDMap::getRoad(const std::string &id) {
+		Road HDMap::getRoad(const std::string &id) const {
 			for (const auto &road : getRoads()) {
-				if (std::strcmp(road.node().attribute("id").value(), id.c_str()) == 0) {
+				if (road.id == id) {
 					return road;
 				}
 			}
@@ -79,10 +86,10 @@ namespace providentia {
 			return findNodesByXPath(getRoadSelector(road) + "/signals/signal");
 		}
 
-		std::vector<Geometry> HDMap::getGeometries(pugi::xpath_node road) {
+		std::vector<OpenDRIVE> HDMap::getGeometries(pugi::xpath_node road) {
 			auto nodes = findNodesByXPath(getRoadSelector(road) + "/planView/geometry");
 
-			std::vector<Geometry> geometries;
+			std::vector<OpenDRIVE> geometries;
 			for (const auto &geometry : nodes) {
 				if (std::strcmp(geometry.node().first_child().name(), "paramPoly3") == 0) {
 					geometries.emplace_back(geometry, projection);
@@ -105,6 +112,10 @@ namespace providentia {
 
 		HDMap::~HDMap() {
 			proj_destroy(projection);
+		}
+
+		const std::vector<Road> &HDMap::getRoads() const {
+			return roads;
 		}
 	}
 }

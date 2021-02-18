@@ -2,12 +2,49 @@
 // Created by brucknem on 17.02.21.
 //
 
-#include "Geometry.hpp"
+#include "OpenDRIVE.hpp"
 
 #include <utility>
+#include <memory>
 
 namespace providentia {
 	namespace calibration {
+#pragma region Road
+
+		Road::Road(std::string name, double length, std::string id, std::string junction,
+				   TrafficRule rule) : name(std::move(name)), length(length), id(std::move(id)),
+									   junction(std::move(junction)), rule(rule) {}
+
+		Road::Road(pugi::xpath_node typeNode) : Road(
+			typeNode.node().attribute("name").value(),
+			boost::lexical_cast<double>(typeNode.node().attribute("length").value()),
+			typeNode.node().attribute("id").value()
+		) {
+			std::string _junction = typeNode.node().attribute("junction").value();
+			if (!_junction.empty()) {
+				junction = std::move(_junction);
+			}
+			std::string _rule = typeNode.node().attribute("rule").value();
+			if (!_rule.empty() && _rule == "LHT") {
+				rule = TrafficRule::LHT;
+			}
+		}
+
+		std::ostream &operator<<(std::ostream &os, const Road &obj) {
+			os << "name=\"" << obj.name << std::endl;
+			os << "length=\"" << obj.length << std::endl;
+			os << "id=\"" << obj.id << std::endl;
+			os << "junction=\"" << obj.junction << std::endl;
+			os << "rule=\"" << obj.rule << std::endl;
+			return os;
+		}
+
+		void Road::setType(pugi::xpath_node typeNode) {
+			type = std::make_shared<Type>(typeNode);
+		}
+
+#pragma endregion Road
+
 #pragma region ParamPoly3
 
 		ParamPoly3::ParamPoly3(double aU, double bU, double cU, double dU, double aV, double bV, double cV, double dV,
@@ -44,9 +81,9 @@ namespace providentia {
 
 #pragma region Geometry
 
-		Geometry::Geometry(double s, double x, double y, double hdg, double length, const ParamPoly3 &paramPoly3,
-						   PJ *projection) : projection(projection), s(s), x(x), y(y), hdg(hdg),
-											 length(length), paramPoly3(paramPoly3) {
+		OpenDRIVE::OpenDRIVE(double s, double x, double y, double hdg, double length, const ParamPoly3 &paramPoly3,
+							 PJ *projection) : projection(projection), s(s), x(x), y(y), hdg(hdg),
+											   length(length), paramPoly3(paramPoly3) {
 			latLong = proj_trans(
 				projection,
 				PJ_FWD,
@@ -54,7 +91,7 @@ namespace providentia {
 			);
 		}
 
-		Geometry::Geometry(pugi::xpath_node geometryNode, PJ *_projection) : Geometry(
+		OpenDRIVE::OpenDRIVE(pugi::xpath_node geometryNode, PJ *_projection) : OpenDRIVE(
 			boost::lexical_cast<double>(geometryNode.node().attribute("s").value()),
 			boost::lexical_cast<double>(geometryNode.node().attribute("x").value()),
 			boost::lexical_cast<double>(geometryNode.node().attribute("y").value()),
@@ -63,7 +100,7 @@ namespace providentia {
 			ParamPoly3{geometryNode.node().child("paramPoly3")},
 			_projection) {}
 
-		std::ostream &operator<<(std::ostream &os, const Geometry &obj) {
+		std::ostream &operator<<(std::ostream &os, const OpenDRIVE &obj) {
 			os << "s=\"" << obj.s << std::endl;
 			os << "x=\"" << obj.x << std::endl;
 			os << "y=\"" << obj.y << std::endl;
@@ -76,15 +113,15 @@ namespace providentia {
 			return os;
 		}
 
-		std::string Geometry::getLatLong() const {
+		std::string OpenDRIVE::getLatLong() const {
 			return std::to_string(getLat()) + std::string(", ") + std::to_string(getLong());
 		}
 
-		double Geometry::getLong() const {
+		double OpenDRIVE::getLong() const {
 			return latLong.lp.lam;
 		}
 
-		double Geometry::getLat() const {
+		double OpenDRIVE::getLat() const {
 			return latLong.lp.phi;
 		}
 
@@ -122,6 +159,28 @@ namespace providentia {
 			return os;
 		}
 
+		Shape::Shape(pugi::xpath_node paramPoly3Node) :
+			Elevation(paramPoly3Node),
+			t(boost::lexical_cast<double>(paramPoly3Node.node().attribute("t").value())) {}
+
 #pragma endregion Shape
+
+#pragma region Type
+
+		Type::Type(double s, std::string type) : s(s), type(std::move(type)) {}
+
+		Type::Type(pugi::xpath_node typeNode) : Type(
+			boost::lexical_cast<double>(typeNode.node().attribute("s").value()),
+			typeNode.node().attribute("type").value()
+		) {}
+
+		std::ostream &operator<<(std::ostream &os, const Type &obj) {
+			os << "s=\"" << obj.s << std::endl;
+			os << "type=\"" << obj.type << std::endl;
+			return os;
+		}
+
+#pragma endregion Type
+
 	}
 }

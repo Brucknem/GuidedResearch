@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "pugixml.hpp"
-#include "Geometry.hpp"
+#include "OpenDRIVE.hpp"
 #include "proj.h"
 
 namespace providentia {
@@ -42,7 +42,12 @@ namespace providentia {
 			/**
 			 * The coordinate transformation.
 			 */
-			PJ *projection;
+			PJ *projection{};
+
+			/**
+			 * The OpenDRIVE roads.
+			 */
+			std::vector<Road> roads;
 
 			static std::string getRoadSelector(pugi::xpath_node road);
 
@@ -61,6 +66,11 @@ namespace providentia {
 			virtual ~HDMap();
 
 			/**
+			 * @get
+			 */
+			const std::vector<Road> &getRoads() const;
+
+			/**
 			 * Finds all nodes by the given type.
 			 */
 			pugi::xpath_node_set findNodesByType(const std::string &type);
@@ -69,11 +79,6 @@ namespace providentia {
 			 * Finds all nodes by the given XPath.
 			 */
 			pugi::xpath_node_set findNodesByXPath(const std::string &path);
-
-			/**
-			 * @get Gets an iterator over all roads.
-			 */
-			pugi::xpath_node_set getRoads();
 
 			/**
 			 * @get Gets the header definition.
@@ -98,7 +103,7 @@ namespace providentia {
 			/**
 			 * @get Gets the geometries of the given road.
 			 */
-			std::vector<Geometry> getGeometries(pugi::xpath_node road);
+			std::vector<OpenDRIVE> getGeometries(pugi::xpath_node road);
 
 			/**
 			 * @get Checks if the road with the given id exists.
@@ -109,12 +114,16 @@ namespace providentia {
 			 * @get Gets a specific road with the given id.
 			 * @throws invalid_argument if no road with the given id is found.
 			 */
-			pugi::xpath_node getRoad(const std::string &id);
+			Road getRoad(const std::string &id) const;
 
 			/**
 			 * @get Gets the geo reference string.
 			 */
 			const std::string &getProjectionString() const;
+
+			void parse();
+
+			void parseProjection();
 		};
 	}
 }
