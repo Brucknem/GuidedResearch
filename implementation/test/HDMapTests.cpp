@@ -23,17 +23,38 @@ namespace providentia {
 			std::shared_ptr<providentia::calibration::HDMap> hdMap;
 
 			/**
+			 * The id of the test road.
+			 */
+			const char *id = "2311000";
+
+			/**
+			 * The test road xml node.
+			 */
+			pugi::xml_node road;
+
+			/**
 			 * @destructor
 			 */
 			~HDMapTests() override = default;
+
+			/**
+			 * @setup
+			 */
+			virtual void SetUp() {
+				hdMap = std::make_shared<providentia::calibration::HDMap>("../misc/map_snippet.xodr");
+
+				ASSERT_EQ(hdMap->getRoads().size(), 1);
+				ASSERT_EQ(hdMap->hasRoad(id), true);
+
+				road = hdMap->getRoads()[0].node();
+			}
+
 		};
 
 		/**
 		 * Tests that parsing the real HD map works.
 		 */
 		TEST_F(HDMapTests, testParsingTestMap) {
-			hdMap = std::make_shared<providentia::calibration::HDMap>("../misc/map_snippet.xodr");
-
 			ASSERT_STREQ(hdMap->getHeader("north").c_str(), "5.350576134016e+06");
 			ASSERT_STREQ(hdMap->getHeader("vendor").c_str(), "3D Mapping Solutions");
 
@@ -44,21 +65,14 @@ namespace providentia {
 				ASSERT_STREQ(road.node().name(), "road");
 			}
 
-			auto road = hdMap->getRoads()[0].node();
-			ASSERT_EQ(hdMap->getSignals(road).size(), 14);
-			ASSERT_EQ(hdMap->getObjects(road).size(), 24);
-
-			road = hdMap->getRoads()[6].node();
-			ASSERT_EQ(hdMap->getSignals(road).size(), 62);
-			ASSERT_EQ(hdMap->getObjects(road).size(), 72);
+			ASSERT_EQ(hdMap->getSignals(road).size(), 21);
+			ASSERT_EQ(hdMap->getObjects(road).size(), 52);
 		}
 
 		/**
 		 * Tests the geometry counts in the map.
 		 */
 		TEST_F(HDMapTests, testGetGeometry) {
-			hdMap = std::make_shared<providentia::calibration::HDMap>("../misc/map_snippet.xodr");
-
 			std::vector<const char *> ss{
 				"0.000000000000e+00",
 				"2.874078777576e+02",
@@ -73,7 +87,6 @@ namespace providentia {
 				}
 			}
 
-			const char *id = "2311000";
 			ASSERT_EQ(hdMap->hasRoad(id), true);
 
 			int i = 0;
@@ -81,11 +94,11 @@ namespace providentia {
 				EXPECT_NEAR(geometry.s, boost::lexical_cast<double>(ss[i++]), 1e-8);
 			}
 
-			ASSERT_EQ(geometries, 1421);
+			ASSERT_EQ(geometries, 4);
 		}
 
 		/**
-		 * Tests finding a pole.
+		 * Tests finding the latitude and longitude calculation.
 		 */
 		TEST_F(HDMapTests, testLatLong) {
 			hdMap = std::make_shared<providentia::calibration::HDMap>("../misc/map_snippet.xodr");
@@ -104,7 +117,6 @@ namespace providentia {
 				11.6356778613078
 			};
 
-			const char *id = "2311000";
 			ASSERT_EQ(hdMap->hasRoad(id), true);
 
 			int i = 0;
