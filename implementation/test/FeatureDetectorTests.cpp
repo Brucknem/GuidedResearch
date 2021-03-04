@@ -65,7 +65,7 @@ namespace providentia {
 		 * Tests the SURF feature detector.
 		 */
 		TEST_F(FeatureDetectorTests, testSURFFeatureDetectorRuns) {
-			getSortedKeypoints(new providentia::features::SURFFeatureDetector(1000), 3108);
+			getSortedKeypoints(new providentia::features::SURFFeatureDetector(1000), 3104);
 
 			assertFirst(13.27, 0.01, 387.006, 0.01);
 			assertLast(1895.82, 0.01, 1051.98, 0.01);
@@ -85,7 +85,7 @@ namespace providentia {
 		 * Tests the SIFT feature detector.
 		 */
 		TEST_F(FeatureDetectorTests, testSIFTFeatureDetectorRuns) {
-			getSortedKeypoints(new providentia::features::SIFTFeatureDetector(1000), 1001);
+			getSortedKeypoints(new providentia::features::SIFTFeatureDetector(1000), 1000);
 
 			assertFirst(13.86, 0.01, 387.17, 0.01);
 			assertLast(1886.65, 0.01, 1047.14, 0.01);
@@ -95,7 +95,7 @@ namespace providentia {
 		 * Tests the fast feature detector with FREAK descriptors.
 		 */
 		TEST_F(FeatureDetectorTests, testFastFREAKFeatureDetectorRuns) {
-			getSortedKeypoints(new providentia::features::FastFREAKFeatureDetector(), 5783);
+			getSortedKeypoints(new providentia::features::FastFREAKFeatureDetector(), 5781);
 
 			assertFirst(24, 0.01, 497, 0.01);
 			assertLast(1895, 0.01, 308, 0.01);
@@ -105,7 +105,7 @@ namespace providentia {
 		 * Tests the Star feature detector with BRIEF descriptors.
 		 */
 		TEST_F(FeatureDetectorTests, testStarBRIEFFeatureDetectorRuns) {
-			getSortedKeypoints(new providentia::features::StarBRIEFFeatureDetector(1000), 1511);
+			getSortedKeypoints(new providentia::features::StarBRIEFFeatureDetector(1000), 1513);
 
 			assertFirst(192, 0.01, 281, 0.01);
 			assertLast(1727, 0.01, 921, 0.01);

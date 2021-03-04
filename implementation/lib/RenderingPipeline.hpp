@@ -28,7 +28,7 @@ namespace providentia {
 		 * https://en.wikipedia.org/wiki/Camera_resectioning
 		 *
 		 * @tparam T double or ceres::Jet
-		 * @param intrinsics [alphaX, skew, u0, 0, 0, alphaY, v0, 0, 0, 0, 1, 0]
+		 * @param intrinsics [alphaX, skew, u0, 0, alphaY, v0, 0, 0, 1]
 		 *
 		 * @return The intrinsics camera matrix.
 		 */

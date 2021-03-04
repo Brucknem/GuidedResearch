@@ -9,7 +9,7 @@ namespace providentia {
 		void ImageTestBase::SetUp() {
 			Test::SetUp();
 			cv::theRNG().state = 123456789;
-			testImgCPU = cv::imread("../misc/feature_detection_test_image.png");
+			testImgCPU = cv::imread("../misc/test_frame.png");
 			testImgGPU.upload(testImgCPU);
 		}
 	}

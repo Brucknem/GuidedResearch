@@ -137,20 +137,21 @@ namespace providentia {
 
 			Eigen::Matrix<T, 2, 1> alpha = focalLength * m.cwiseInverse();
 
-			return getIntrinsicsMatrixFromConfig(new T[12]{
-				alpha(0, 0), skew, principalPoint(0, 0), zero,
-				zero, alpha(1, 0), principalPoint(1, 0), zero,
-				zero, zero, (T) 1, zero
+			return getIntrinsicsMatrixFromConfig(new T[9]{
+				alpha(0, 0), skew, principalPoint(0, 0),
+				zero, alpha(1, 0), principalPoint(1, 0),
+				zero, zero, (T) 1
 			});
 		}
 
 		template<typename T>
 		Eigen::Matrix<T, 3, 4> getIntrinsicsMatrixFromConfig(const T *intrinsics) {
 			Eigen::Matrix<T, 3, 4> matrix;
+			T zero = T(0);
 			matrix <<
-				   intrinsics[0], intrinsics[1], intrinsics[2], intrinsics[3],
-				intrinsics[4], intrinsics[5], intrinsics[6], intrinsics[7],
-				intrinsics[8], intrinsics[9], intrinsics[10], intrinsics[11];
+				   intrinsics[0], intrinsics[1], intrinsics[2], zero,
+				intrinsics[3], intrinsics[4], intrinsics[5], zero,
+				intrinsics[6], intrinsics[7], intrinsics[8], zero;
 			return matrix;
 		}
 
