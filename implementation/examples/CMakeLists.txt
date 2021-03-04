@@ -37,6 +37,6 @@ add_executable(VisualizeRenderingPipeline VisualizeRenderingPipeline.cpp Commons
 target_link_libraries(VisualizeRenderingPipeline PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeRenderingPipeline PUBLIC "${PROJECT_BINARY_DIR}")
 
-add_executable(VisualizeWatersheder VisualizeWatersheder.cpp Commons.cpp)
-target_link_libraries(VisualizeWatersheder PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
-target_include_directories(VisualizeWatersheder PUBLIC "${PROJECT_BINARY_DIR}")
+add_executable(VisualizeStaticCalibration VisualizeStaticCalibration.cpp Commons.cpp)
+target_link_libraries(VisualizeStaticCalibration PUBLIC libCameraStabilization ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_include_directories(VisualizeStaticCalibration PUBLIC "${PROJECT_BINARY_DIR}")

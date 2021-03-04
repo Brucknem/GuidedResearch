@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(pugixml NONE)
+project(yaml-cpp-download NONE)
 
 include(ExternalProject)
-ExternalProject_Add(pugixml
-  GIT_REPOSITORY    https://github.com/zeux/pugixml.git
+ExternalProject_Add(yaml-cpp
+  GIT_REPOSITORY    https://github.com/jbeder/yaml-cpp.git
   GIT_TAG           master
-  SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/pugixml-src"
-  BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/pugixml-build"
+  SOURCE_DIR        "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-src"
+  BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-build"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND     ""
   INSTALL_COMMAND   ""

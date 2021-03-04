@@ -1,25 +1,25 @@
 ########################################################################################################################
-### Tiny XML 2 ###
+### YAML CPP ###
 ########################################################################################################################
 
-# Download and unpack pugixml at configure time
-configure_file(CMakeLists.txt.in pugixml-download/CMakeLists.txt)
+# Download and unpack yaml-cpp at configure time
+configure_file(CMakeLists.txt.in yaml-cpp-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
         RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/pugixml-download)
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-download)
 if (result)
-    message(FATAL_ERROR "CMake step for pugixml failed: ${result}")
+    message(FATAL_ERROR "CMake step for yaml-cpp failed: ${result}")
 endif ()
 execute_process(COMMAND ${CMAKE_COMMAND} --build .
         RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/pugixml-download)
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-download)
 if (result)
-    message(FATAL_ERROR "Build step for pugixml failed: ${result}")
+    message(FATAL_ERROR "Build step for yaml-cpp failed: ${result}")
 endif ()
 
-# Add pugixml directly to our build.
-add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/pugixml-src
-        ${CMAKE_CURRENT_BINARY_DIR}/pugixml-build
+# Add yaml-cpp directly to our build.
+add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-src
+        ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-build
         EXCLUDE_FROM_ALL)
 
 ########################################################################################################################
@@ -53,6 +53,7 @@ add_library(libCameraStabilization
         Residuals.cpp
         WorldObjects.cpp
         Watersheder.cpp
+        ObjectsLoading.cpp
         )
 
 target_include_directories(libCameraStabilization
@@ -66,5 +67,5 @@ target_link_libraries(libCameraStabilization
         ${OpenCV_LIBS}
         ${Boost_LIBRARIES}
         ${PROJ_LIBRARIES}
-        pugixml
+        yaml-cpp
         )

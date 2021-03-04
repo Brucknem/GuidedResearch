@@ -73,7 +73,7 @@ namespace providentia {
 		double getRandom01();
 
 		/**
-		 * Base class for all run setups.
+		 * Base class for all examples setups.
 		 * Wraps the main loop and field initializations.
 		 */
 		class BaseSetup : public providentia::utils::TimeMeasurable {

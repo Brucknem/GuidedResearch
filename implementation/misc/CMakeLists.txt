@@ -12,7 +12,8 @@ set(IMAGES
 
 file(COPY ${IMAGES} DESTINATION ./)
 
-set(OPENDRIVE
-        map_snippet.xodr
+set(YAML
+        objects.yaml
         )
-file(COPY ${OPENDRIVE} DESTINATION ./)
+
+file(COPY ${YAML} DESTINATION ./)
