@@ -5,6 +5,7 @@
 #ifndef CAMERASTABILIZATION_CAMERATESTBASE_HPP
 #define CAMERASTABILIZATION_CAMERATESTBASE_HPP
 
+#include <RenderingPipeline.hpp>
 #include "Eigen/Dense"
 #include "gtest/gtest.h"
 
@@ -41,14 +42,9 @@ namespace providentia {
 		protected:
 
 			/**
-			 * The [near, far] plane distances of the view frustum.
-			 */
-			Eigen::Vector2d frustumParameters{1, 1000};
-
-			/**
 			 * The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
 			 */
-			Eigen::Vector3d intrinsics{32, 1920. / 1200., 20};
+			Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getBlenderCameraIntrinsics<double>();
 
 			/**
 			 * The [width, height] of the image.

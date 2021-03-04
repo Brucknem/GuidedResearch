@@ -10,14 +10,14 @@ namespace providentia {
 
 		template<typename T>
 		Eigen::Matrix<T, 2, 1>
-		render(const T *_translation, const T *_rotation, const T *_frustumParameters, const T *_intrinsics,
-			   const T *_imageSize, const T *vector) {
+		render(const T *_translation, const T *_rotation, const Eigen::Matrix<double, 3, 4> &_intrinsics, const T
+		*vector) {
 			Eigen::Matrix<T, 4, 1> point = toCameraSpace(_translation, _rotation, vector);
 
-			point = toClipSpace(_frustumParameters, _intrinsics, point.data());
+			Eigen::Matrix<T, 3, 1> homogeneousPixel = _intrinsics.template cast<T>() * point;
 
-			Eigen::Matrix<T, 2, 1> pixel = toNormalizedDeviceCoordinates(point.data());
-			pixel = toImageSpace(_imageSize, pixel.data());
+			Eigen::Matrix<T, 2, 1> pixel = perspectiveDivision(homogeneousPixel);
+
 			return pixel;
 		}
 
@@ -60,72 +60,9 @@ namespace providentia {
 		}
 
 		template<typename T>
-		Eigen::Matrix<T, 2, 1> toImageSpace(const T *_imageSize, const T *vector) {
-			Eigen::Matrix<T, 2, 1> pixel{vector[0], vector[1]};
-			pixel += Eigen::Matrix<T, 2, 1>(1, 1);
-			pixel *= (T) 0.5;
-			return Eigen::Matrix<T, 2, 1>(pixel[0] * _imageSize[0], pixel[1] * _imageSize[1]);
-		}
-
-		template<typename T>
-		Eigen::Matrix<T, 4, 1> toClipSpace(const T *_frustumParameters, const T *_intrinsics, const T *vector) {
-			Eigen::Matrix<T, 4, 1> pointInCameraSpace{vector[0], vector[1], vector[2],
-													  vector[3]};
-			Eigen::Matrix<T, 4, 1> pointInClipSpace =
-				getClipSpace(_frustumParameters, _intrinsics) * pointInCameraSpace;
-			if (abs(pointInClipSpace.w()) <= (T) 1e-5) {
-				return Eigen::Matrix<T, 4, 1>{(T) 0, (T) 0, (T) 1, (T) 1};
-			}
-			return normalize(pointInClipSpace);
-		}
-
-		template<typename T>
-		Eigen::Matrix<T, 4, 4> getClipSpace(const T *_frustumParameters, const T *_intrinsics) {
-			T zero = (T) 0;
-			T one = (T) 1;
-
-			T near = _frustumParameters[0];
-			T far = _frustumParameters[1];
-
-			T fieldOfViewX = (T) (2.) * atan((T) (0.5) * (_intrinsics[0] / _intrinsics[2]));
-			T right = near * tan(fieldOfViewX * (T) (0.5));
-			T top = right / _intrinsics[1];
-
-			Eigen::Matrix<T, 4, 4> normalization;
-			normalization <<
-						  (T) (2) / (right - -right), zero, zero, -(right + -right) / (right - -right),
-				zero, (T) (2) / (top - -top), zero, -(top + -top) / (top - -top),
-				zero, zero, (T) (2) / (far - near), -(far + near) / (far - near),
-				zero, zero, zero, one;
-			Eigen::Matrix<T, 4, 4> clipSpaceMatrix = normalization * getFrustum(_frustumParameters);
-			return clipSpaceMatrix;
-		}
-
-		template<typename T>
-		Eigen::Matrix<T, 4, 1> toFrustum(const T *_frustumParameters, const T *vector) {
-			Eigen::Matrix<T, 4, 1> pointInFrustum = getFrustum(_frustumParameters) *
-													Eigen::Matrix<T, 4, 1>{vector[0], vector[1], vector[2],
-																		   vector[3]};
-			return normalize(pointInFrustum);
-		}
-
-		template<typename T>
-		Eigen::Matrix<T, 4, 1> normalize(const Eigen::Matrix<T, 4, 1> &vector) {
-			return vector / (vector[3] + 1e-8);
-		}
-
-		template<typename T>
-		Eigen::Matrix<T, 4, 4> getFrustum(const T *_frustumParameters) {
-			T zero = (T) 0;
-			T near = _frustumParameters[0];
-			T far = _frustumParameters[1];
-
-			Eigen::Matrix<T, 4, 4> frustum;
-			frustum << near, zero, zero, zero,
-				zero, near, zero, zero,
-				zero, zero, near + far, -near * far,
-				zero, zero, (T) 1, zero;
-			return frustum;
+		Eigen::Matrix<T, 2, 1> perspectiveDivision(const Eigen::Matrix<T, 3, 1> &vector) {
+			Eigen::Matrix<T, 3, 1> result = vector / (vector[2] + 1e-51);
+			return Eigen::Matrix<T, 2, 1>{result(0, 0), result(1, 0)};
 		}
 
 		template<typename T>
@@ -140,13 +77,11 @@ namespace providentia {
 		}
 
 		void render(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation,
-					const Eigen::Vector2d &_frustumParameters, const Eigen::Vector3d &_intrinsics,
-					const Eigen::Vector4d &vector, const cv::Vec3d &color, cv::Mat image) {
+					const Eigen::Matrix<double, 3, 4> &_intrinsics, const Eigen::Vector4d &vector,
+					const cv::Vec3d &color, cv::Mat image) {
 			Eigen::Vector2d imageSize(image.cols, image.rows);
 			Eigen::Vector2d pointInImageSpace = render(
-				_translation.data(), _rotation.data(),
-				_frustumParameters.data(), _intrinsics.data(),
-				imageSize.data(),
+				_translation.data(), _rotation.data(), _intrinsics,
 				vector.data());
 
 			for (int i = 0; i < 2; ++i) {
@@ -160,8 +95,6 @@ namespace providentia {
 //					std::cout << "[" << nearestPixel.x() << ", " << nearestPixel.y() << "] - " << distance;
 					if (nearestPixel.x() >= imageSize.x() || nearestPixel.y() >= imageSize.y() ||
 						nearestPixel.x() < 0 || nearestPixel.y() < 0) {
-//						std::cout << " out of frustum";
-//						std::cout << std::endl;
 						continue;
 					}
 //					std::cout << std::endl;
@@ -175,8 +108,50 @@ namespace providentia {
 		}
 
 		template<typename T>
-		Eigen::Matrix<T, 2, 1> toNormalizedDeviceCoordinates(const T *vector) {
-			return Eigen::Matrix<T, 2, 1>(vector[0], vector[1]);
+		Eigen::Matrix<T, 3, 4> getBlenderCameraIntrinsics() {
+			double pixelWidth = 32. / 1920.;
+			std::vector<T> _intrinsics{
+				(T) 20, (T) pixelWidth, (T) (pixelWidth), (T) (1920. / 2), (T) (1200. / 2), (T) 0
+			};
+			return getIntrinsicsMatrix(_intrinsics.data());
+		}
+
+		template<typename T>
+		Eigen::Matrix<T, 3, 4> getIntrinsicsMatrix(const T *intrinsics) {
+			T zero = (T) 0;
+			Eigen::Matrix<T, 3, 4> intrinsicsMatrix = Eigen::Matrix<T, 3, 4>::Zero();
+
+			T focalLength = intrinsics[0];
+
+			Eigen::Matrix<T, 2, 1> m = Eigen::Matrix<T, 2, 1>(
+				intrinsics[1],
+				intrinsics[2]
+			);
+
+			Eigen::Matrix<T, 2, 1> principalPoint = Eigen::Matrix<T, 2, 1>(
+				intrinsics[3],
+				intrinsics[4]
+			);
+
+			T skew = intrinsics[5];
+
+			Eigen::Matrix<T, 2, 1> alpha = focalLength * m.cwiseInverse();
+
+			return getIntrinsicsMatrixFromConfig(new T[12]{
+				alpha(0, 0), skew, principalPoint(0, 0), zero,
+				zero, alpha(1, 0), principalPoint(1, 0), zero,
+				zero, zero, (T) 1, zero
+			});
+		}
+
+		template<typename T>
+		Eigen::Matrix<T, 3, 4> getIntrinsicsMatrixFromConfig(const T *intrinsics) {
+			Eigen::Matrix<T, 3, 4> matrix;
+			matrix <<
+				   intrinsics[0], intrinsics[1], intrinsics[2], intrinsics[3],
+				intrinsics[4], intrinsics[5], intrinsics[6], intrinsics[7],
+				intrinsics[8], intrinsics[9], intrinsics[10], intrinsics[11];
+			return matrix;
 		}
 
 #pragma region TemplateInstances
@@ -186,18 +161,19 @@ namespace providentia {
 		/// implementations of the functions.
 		//////////////////////////////////////////////////////////////////////////////////////////////////
 
-		template Eigen::Matrix<double, 2, 1> render<double>(const double *, const double *, const double *,
-															const double *, const double *, const double *);
+		template Eigen::Matrix<double, 2, 1>
+		render<double>(const double *_translation, const double *_rotation,
+					   const Eigen::Matrix<double, 3, 4> &_intrinsics,
+					   const double *vector);
 
-		template Eigen::Matrix<double, 4, 1> toFrustum(const double *, const double *);
+		template Eigen::Matrix<double, 3, 4> getBlenderCameraIntrinsics();
 
 		/**
 		 * Point correspondences.
 		 */
 		template Eigen::Matrix<ceres::Jet<double, 6>, 2, 1>
 		render<ceres::Jet<double, 6>>(const ceres::Jet<double, 6> *, const ceres::Jet<double, 6> *,
-									  const ceres::Jet<double, 6> *,
-									  const ceres::Jet<double, 6> *, const ceres::Jet<double, 6> *,
+									  const Eigen::Matrix<double, 3, 4> &,
 									  const ceres::Jet<double, 6> *);
 
 		/**
@@ -205,8 +181,7 @@ namespace providentia {
 		 */
 		template Eigen::Matrix<ceres::Jet<double, 7>, 2, 1>
 		render<ceres::Jet<double, 7>>(const ceres::Jet<double, 7> *, const ceres::Jet<double, 7> *,
-									  const ceres::Jet<double, 7> *,
-									  const ceres::Jet<double, 7> *, const ceres::Jet<double, 7> *,
+									  const Eigen::Matrix<double, 3, 4> &,
 									  const ceres::Jet<double, 7> *);
 
 		/**
@@ -214,8 +189,7 @@ namespace providentia {
 		 */
 		template Eigen::Matrix<ceres::Jet<double, 8>, 2, 1>
 		render<ceres::Jet<double, 8>>(const ceres::Jet<double, 8> *, const ceres::Jet<double, 8> *,
-									  const ceres::Jet<double, 8> *,
-									  const ceres::Jet<double, 8> *, const ceres::Jet<double, 8> *,
+									  const Eigen::Matrix<double, 3, 4> &,
 									  const ceres::Jet<double, 8> *);
 
 #pragma endregion TemplateInstances

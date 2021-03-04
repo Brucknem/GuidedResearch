@@ -26,10 +26,8 @@ namespace providentia {
 		 */
 		class RenderingPipelineTests : public ::testing::Test {
 		protected:
-			Eigen::Vector2d imageSize{1920, 1200};
 
-			Eigen::Vector2d frustumParameters{1, 1000};
-			Eigen::Vector3d intrinsics{32, 1920. / 1200., 20};
+			Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getBlenderCameraIntrinsics<double>();
 
 			Eigen::Vector3d rotation{90, 0, 0};
 			Eigen::Vector3d translation{0, -10, 5};
@@ -46,9 +44,7 @@ namespace providentia {
 
 			Eigen::Vector2d render(const Eigen::Vector4d &pointInWorldSpace) {
 				return providentia::camera::render(
-					translation.data(), rotation.data(),
-					frustumParameters.data(), intrinsics.data(),
-					imageSize.data(),
+					translation.data(), rotation.data(), intrinsics,
 					pointInWorldSpace.data());
 			}
 		};
@@ -105,7 +101,7 @@ namespace providentia {
 
 
 		/**
-		 * Tests the world to calibration transformation.
+		 * Tests the world to camera coordinates transformation.
 		 */
 		TEST_F(RenderingPipelineTests, testWorldToCameraTransformation) {
 			Eigen::Vector4d pointInWorldSpace, pointInCameraSpace;
@@ -132,7 +128,7 @@ namespace providentia {
 		}
 
 		/**
-		 * Tests that rendering points in world coordinates results in correct points in expectedPixel coordinates.
+		 * Tests that rendering points in world coordinates results in correct pixels in an image.
 		 */
 		TEST_F(RenderingPipelineTests, testRenderToImage) {
 			Eigen::Vector4d pointInWorldSpace;
@@ -166,23 +162,44 @@ namespace providentia {
 
 
 		/**
-		 * Tests that rendering points in world coordinates results in correct points in expectedPixel coordinates.
+		 * Tests that rendering points at special locations like the direct camera position, or outside the expected
+		 * image plane results in valid pixels.
 		 */
 		TEST_F(RenderingPipelineTests, testRenderPointsOutOfFrustum) {
 			Eigen::Vector4d pointInWorldSpace;
-			Eigen::Vector2d pointInImageSpace;
+			Eigen::Vector2d pixel;
 
 			pointInWorldSpace << 0, 20, 0, 1;
-			assertVectorsNearEqual(render(pointInWorldSpace), 960, 400);
+			pixel = render(pointInWorldSpace);
+			assertVectorsNearEqual(pixel, 960, 400);
+
 			pointInWorldSpace << 0, -20, 0, 1;
-			assertVectorsNearEqual(render(pointInWorldSpace), 960, 1200);
+			pixel = render(pointInWorldSpace);
+			assertVectorsNearEqual(pixel, 960, 1200);
 
 			pointInWorldSpace << translation.x(), translation.y(), translation.z(), 1;
-			assertVectorsNearEqual(render(pointInWorldSpace), 960, 600);
+			pixel = render(pointInWorldSpace);
+			assertVectorsNearEqual(pixel, 0, 0);
 
 			pointInWorldSpace << -100, -9, 5, 1;
-			assertVectorsNearEqual(render(pointInWorldSpace), -119039.99879999, 600);
+			pixel = render(pointInWorldSpace);
+			assertVectorsNearEqual(pixel, -119040, 600);
 
+		}
+
+		/**
+		 * Tests the mock blender camera matrix.
+		 */
+		TEST_F(RenderingPipelineTests, testGetBlenderIntrinsics) {
+			auto intrinsics = providentia::camera::getBlenderCameraIntrinsics<double>();
+
+			ASSERT_EQ(intrinsics(0, 0), 1200);
+			ASSERT_EQ(intrinsics(1, 1), 1200);
+
+			ASSERT_EQ(intrinsics(0, 2), 960);
+			ASSERT_EQ(intrinsics(1, 2), 600);
+
+			ASSERT_EQ(intrinsics(0, 1), 0);
 		}
 	}// namespace toCameraSpace
 }// namespace providentia

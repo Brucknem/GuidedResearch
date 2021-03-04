@@ -12,15 +12,49 @@ namespace providentia {
 	namespace camera {
 
 		/**
-		 * Normalizes a homogeneous vector by dividing by its W component.
+		 * Creates the camera intrinsic matrix.
+		 * https://en.wikipedia.org/wiki/Camera_resectioning
 		 *
 		 * @tparam T double or ceres::Jet
-		 * @param vector The (possibly) unnormalized [x, y, z, w] vector.
+		 * @param intrinsics [focalLength, sensorWidth, sensorHeight, principalX, principalY, skew]
 		 *
-		 * @return The normalized [x/w, y/w, z/w, 1] vector.
+		 * @return The intrinsics camera matrix.
 		 */
 		template<typename T>
-		Eigen::Matrix<T, 4, 1> normalize(const Eigen::Matrix<T, 4, 1> &vector);
+		Eigen::Matrix<T, 3, 4> getIntrinsicsMatrix(const T *intrinsics);
+
+		/**
+		 * Creates the camera intrinsic matrix.
+		 * https://en.wikipedia.org/wiki/Camera_resectioning
+		 *
+		 * @tparam T double or ceres::Jet
+		 * @param intrinsics [alphaX, skew, u0, 0, 0, alphaY, v0, 0, 0, 0, 1, 0]
+		 *
+		 * @return The intrinsics camera matrix.
+		 */
+		template<typename T>
+		Eigen::Matrix<T, 3, 4> getIntrinsicsMatrixFromConfig(const T *intrinsics);
+
+		/**
+		 * Creates the camera intrinsic matrix for the mock blender setup.
+		 *
+		 * @tparam T double or ceres::Jet
+		 *
+		 * @return The intrinsics camera matrix.
+		 */
+		template<typename T>
+		Eigen::Matrix<T, 3, 4> getBlenderCameraIntrinsics();
+
+		/**
+		 * Divides a pixel in homogeneous coordinates by its z component.
+		 *
+		 * @tparam T double or ceres::Jet
+		 * @param vector The (possibly) unnormalized [x, y, z] vector.
+		 *
+		 * @return The normalized [x/z, y/z] vector.
+		 */
+		template<typename T>
+		Eigen::Matrix<T, 2, 1> perspectiveDivision(const Eigen::Matrix<T, 3, 1> &vector);
 
 		/**
 		 * Generates a camera rotation matrix from the euler angle representation.<br>
@@ -51,95 +85,20 @@ namespace providentia {
 		Eigen::Matrix<T, 4, 1> toCameraSpace(const T *_translation, const T *_rotation, const T *vector);
 
 		/**
-		 * Gets the matrix defining the (unnormalized) view frustum.
-		 *
-		 * @tparam T double or ceres::Jet
-		 * @param _frustumParameters The [near, far] plane distances of the frustum.
-		 *
-		 * @return The matrix defining the view frustum.
-		 */
-		template<typename T>
-		Eigen::Matrix<T, 4, 4> getFrustum(const T *_frustumParameters);
-
-		/**
-		 * Transforms the given vector from camera space to the view frustum.
-		 *
-		 * @tparam T double or ceres::Jet
-		 * @param _frustumParameters The [near, far] plane distances of the frustum.
-		 * @param vector The [x, y, z, w] vector in camera space.
-		 *
-		 * @return The [x, y, z, w] vector in the view frustum.
-		 */
-		template<typename T>
-		Eigen::Matrix<T, 4, 1> toFrustum(const T *_frustumParameters, const T *vector);
-
-		/**
-		 * Gets the matrix that transforms vectors from camera space to clip space.
-		 *
-		 * @tparam T double or ceres::Jet
-		 * @param _frustumParameters The [near, far] plane distances of the frustum.
-		 * @param _intrinsics The [sensorWidth, aspectRatio, focalLength] defining the camera intrinsics.
-		 *
-		 * @return The matrix defining the clip space transformation.
-		 */
-		template<typename T>
-		Eigen::Matrix<T, 4, 4>
-		getClipSpace(const T *_frustumParameters, const T *_intrinsics);
-
-		/**
-		 * Transforms the given vectors from camera space to clip space.
-		 *
-		 * @tparam T double or ceres::Jet
-		 * @param _frustumParameters The [near, far] plane distances of the frustum.
-		 * @param _intrinsics The [sensorWidth, aspectRatio, focalLength] defining the camera intrinsics.
-		 * @param vector The [x, y, z, w] vector in camera space.
-		 *
-		 * @return The [x, y, z, w] vector in clip space.
-		 */
-		template<typename T>
-		Eigen::Matrix<T, 4, 1>
-		toClipSpace(const T *_frustumParameters, const T *_intrinsics, const T *vector);
-
-		/**
-		 * Transforms the given vector from clip space to normalized device coordinates.
-		 *
-		 * @tparam T double or ceres::Jet
-		 * @param vector The [x, y, z, w] vector in clip space.
-		 *
-		 * @return The [u, v] vector in normalized device coordinates.
-		 */
-		template<typename T>
-		Eigen::Matrix<T, 2, 1> toNormalizedDeviceCoordinates(const T *vector);
-
-		/**
-		 * Transforms the given vector from normalized device coordinates to image space.
-		 *
-		 * @tparam T double or ceres::Jet
-		 * @param _imageSize The [width, height] of the image.
-		 * @param vector The [u, v] vector in normalized device coordinates.
-		 *
-		 * @return The resulting [u, v] expectedPixel location in image space.
-		 */
-		template<typename T>
-		Eigen::Matrix<T, 2, 1> toImageSpace(const T *_imageSize, const T *vector);
-
-		/**
 		 * Wrapper for the whole rendering pipeline.
 		 *
 		 * @tparam T double or ceres::Jet
 		 * @param _translation The [x, y, z] translation of the camera in world space.
 		 * @param _rotation The [x, y, z] euler angle rotation of the camera around the world axis.
-		 * @param _frustumParameters The [near, far] plane distances of the frustum.
-		 * @param _intrinsics The [sensorWidth, aspectRatio, focalLength] defining the camera intrinsics.
-		 * @param _imageSize The [width, height] of the image.
+		 * @param _intrinsics [focalLength, sensorWidth, sensorHeight, principalX, principalY, skew]
 		 * @param vector The [x, y, z, w] vector in world space.
 		 *
 		 * @return The [u, v] expectedPixel location in image space.
 		 */
 		template<typename T>
 		Eigen::Matrix<T, 2, 1>
-		render(const T *_translation, const T *_rotation, const T *_frustumParameters, const T *_intrinsics,
-			   const T *_imageSize, const T *vector);
+		render(const T *_translation, const T *_rotation, const Eigen::Matrix<double, 3, 4> &_intrinsics,
+			   const T *vector);
 
 		/**
 		 * Renders the given vector with the given color to the given image.
@@ -147,16 +106,15 @@ namespace providentia {
 		 * @tparam T double or ceres::Jet
 		 * @param _translation The [x, y, z] translation of the camera in world space.
 		 * @param _rotation The [x, y, z] euler angle rotation of the camera around the world axis.
-		 * @param _frustumParameters The [near, far] plane distances of the frustum.
-		 * @param _intrinsics The [sensorWidth, aspectRatio, focalLength] defining the camera intrinsics.
-		 * @param _imageSize The [width, height] of the image.
+		 * @param _intrinsics [focalLength, sensorWidth, sensorHeight, principalX, principalY, skew]
 		 * @param vector The [x, y, z, w] vector in world space.
 		 * @param color The color that is assigned to the expectedPixel.
 		 * @param image The image to which the expectedPixel will rendered.
 		 */
 		void render(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation,
-					const Eigen::Vector2d &_frustumParameters, const Eigen::Vector3d &_intrinsics,
-					const Eigen::Vector4d &vector, const cv::Vec3d &color, cv::Mat image);
+					const Eigen::Matrix<double, 3, 4> &_intrinsics, const Eigen::Vector4d &vector, const cv::Vec3d
+					&color,
+					cv::Mat image);
 	}
 }
 

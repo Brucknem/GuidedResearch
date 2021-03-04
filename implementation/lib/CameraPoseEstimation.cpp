@@ -10,11 +10,8 @@
 namespace providentia {
 	namespace calibration {
 
-		CameraPoseEstimator::CameraPoseEstimator(Eigen::Vector2d _frustumParameters,
-												 Eigen::Vector3d _intrinsics,
-												 Eigen::Vector2d _imageSize) :
-			frustumParameters(std::move(_frustumParameters)), intrinsics(std::move(_intrinsics)),
-			imageSize(std::move(_imageSize)) {}
+		CameraPoseEstimator::CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics) :
+			intrinsics(std::move(_intrinsics)) {}
 
 		const Eigen::Vector3d &CameraPoseEstimator::getTranslation() const {
 			return translation;
@@ -43,7 +40,7 @@ namespace providentia {
 //			translation = initialTranslation;
 //			rotation = initialRotation;
 			Eigen::Vector3d mean = calculateMean();
-			double wantedDistance = (0.25 * (frustumParameters.y() - frustumParameters.x())) + frustumParameters.x();
+			double wantedDistance = 500;
 
 			initialTranslation = mean;
 			initialTranslation.z() += wantedDistance;
@@ -92,9 +89,7 @@ namespace providentia {
 						CorrespondenceResidual::Create(
 							point->getExpectedPixel(),
 							point,
-							frustumParameters,
 							intrinsics,
-							imageSize,
 							worldObject.getWeight()
 						),
 						nullptr,

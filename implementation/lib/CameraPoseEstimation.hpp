@@ -58,19 +58,9 @@ namespace providentia {
 			Eigen::Vector3d rotation;
 
 			/**
-			 * The [near, far] plane distances of the view frustum.
+			 * The intrinsics matrix of the pinhole camera model.
 			 */
-			Eigen::Vector2d frustumParameters;
-
-			/**
-			 * The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
-			 */
-			Eigen::Vector3d intrinsics;
-
-			/**
-			 * The [width, height] of the image.
-			 */
-			Eigen::Vector2d imageSize;
+			Eigen::Matrix<double, 3, 4> intrinsics;
 
 			/**
 			 * A buffer for the known world worldObjects.
@@ -83,13 +73,9 @@ namespace providentia {
 			/**
 			 * @constructor
 			 *
-			 * @param _frustumParameters The [near, far] plane distances of the view frustum.
 			 * @param _intrinsics The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
-			 * @param _imageSize The [width, height] of the image.
 			 */
-			CameraPoseEstimator(Eigen::Vector2d _frustumParameters,
-								Eigen::Vector3d _intrinsics,
-								Eigen::Vector2d _imageSize);
+			CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics);
 
 			/**
 			 * @destructor

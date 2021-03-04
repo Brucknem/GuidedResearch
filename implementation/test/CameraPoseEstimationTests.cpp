@@ -32,8 +32,7 @@ namespace providentia {
 			Eigen::Vector2d getPixel(Eigen::Vector3d vector) {
 				return providentia::camera::render(
 					translation.data(), rotation.data(),
-					frustumParameters.data(), intrinsics.data(),
-					imageSize.data(),
+					intrinsics,
 					vector.data());
 			}
 
@@ -107,13 +106,11 @@ namespace providentia {
 		};
 
 		/**
-		 * Tests that the initial guess is half the frustum size above the mean.
+		 * Tests that the initial guess is 500m above the mean.
 		 */
 		TEST_F(CameraPoseEstimationTests, testCalculateInitialGuess) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-				frustumParameters,
-				intrinsics,
-				imageSize
+				intrinsics
 			);
 
 			addPointCorrespondence({0, 0, 9});
@@ -125,7 +122,7 @@ namespace providentia {
 
 			estimator->calculateInitialGuess();
 
-			assertVectorsNearEqual(estimator->getTranslation(), Eigen::Vector3d{0, 0, 250.75});
+			assertVectorsNearEqual(estimator->getTranslation(), Eigen::Vector3d{0, 0, 500});
 			assertVectorsNearEqual(estimator->getRotation(), Eigen::Vector3d{0, 0, 0});
 		}
 
@@ -134,9 +131,7 @@ namespace providentia {
 		 */
 		TEST_F(CameraPoseEstimationTests, testEstimationOnlyWorldPositions) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-				frustumParameters,
-				intrinsics,
-				imageSize
+				intrinsics
 			);
 			addSomePointCorrespondences();
 			assertEstimation();
@@ -148,9 +143,7 @@ namespace providentia {
 		 */
 		TEST_F(CameraPoseEstimationTests, testEstimationPointAndLines) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-				frustumParameters,
-				intrinsics,
-				imageSize
+				intrinsics
 			);
 
 			Eigen::Vector3d origin, axisA, axisB;

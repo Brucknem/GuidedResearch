@@ -26,19 +26,9 @@ namespace providentia {
 			Eigen::Vector2d expectedPixel;
 
 			/**
-			 * The [near, far] plane distances of the view frustum.
+			 * The intrinsics matrix of the pinhole camera model.
 			 */
-			Eigen::Vector2d frustumParameters;
-
-			/**
-			 * The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
-			 */
-			Eigen::Vector3d intrinsics;
-
-			/**
-			 * The [width, height] of the image.
-			 */
-			Eigen::Vector2d imageSize;
+			Eigen::Matrix<double, 3, 4> intrinsics;
 
 			/**
 			 * The plane that contains the correspondence.
@@ -68,15 +58,12 @@ namespace providentia {
 			 *
 			 * @param _expectedPixel The expected [u, v] pixel location.
 			 * @param _point The [x, y, z] point that corresponds to the pixel.
-			 * @param _frustumParameters The [near, far] plane distances of the view frustum.
-			 * @param _intrinsics The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
+			 * @param _intrinsics The intrinsics of the pinhole camera model.
 			 * @param _imageSize The [width, height] of the image.
 			 */
 			CorrespondenceResidual(Eigen::Vector2d _expectedPixel,
 								   std::shared_ptr<providentia::calibration::ParametricPoint> _point,
-								   Eigen::Vector2d _frustumParameters,
-								   Eigen::Vector3d _intrinsics,
-								   Eigen::Vector2d _imageSize,
+								   Eigen::Matrix<double, 3, 4> _intrinsics,
 								   double _weight);
 
 			/**
@@ -104,9 +91,7 @@ namespace providentia {
 			 */
 			static ceres::CostFunction *Create(const Eigen::Vector2d &_expectedPixel,
 											   const std::shared_ptr<providentia::calibration::ParametricPoint> &_plane,
-											   const Eigen::Vector2d &_frustumParameters,
-											   const Eigen::Vector3d &_intrinsics,
-											   const Eigen::Vector2d &_imageSize,
+											   Eigen::Matrix<double, 3, 4> _intrinsics,
 											   double _weight);
 		};
 

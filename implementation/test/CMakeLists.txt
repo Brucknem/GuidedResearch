@@ -53,7 +53,6 @@ add_executable(Tests ImageTestBase.cpp CameraTestBase.cpp
         DynamicStabilizationTests.cpp
         BackgroundSubtractorTests.cpp
         RenderingPipelineTests.cpp
-        PerspectiveProjectionTests.cpp
         CameraPoseEstimationTests.cpp
         ResidualsTests.cpp
         ObjectsLoadingTests.cpp

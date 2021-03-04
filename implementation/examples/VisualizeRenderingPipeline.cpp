@@ -15,14 +15,9 @@ using namespace providentia::runnable;
 class Setup : public providentia::runnable::BaseSetup {
 public:
 	/**
-	 * The [near, far] plane distances of the view frustum.
-	 */
-	Eigen::Vector2d frustumParameters{1, 1000};
-
-	/**
 	 * The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
 	 */
-	Eigen::Vector3d intrinsics{32, 1920. / 1200., 20};
+	Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getBlenderCameraIntrinsics<double>();
 
 	/**
 	 * The [width, height] of the image.
@@ -73,7 +68,7 @@ public:
 	}
 
 	void render(double x, double y, double z, const cv::Vec3d &color) {
-		providentia::camera::render(translation, rotation, frustumParameters,
+		providentia::camera::render(translation, rotation,
 									intrinsics, Eigen::Vector4d(x, y, z, 1), color,
 									finalFrame);
 	}
