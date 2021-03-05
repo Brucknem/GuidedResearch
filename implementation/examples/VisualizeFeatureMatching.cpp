@@ -8,7 +8,7 @@
 /**
  * Setup to visualize the feature matching.
  */
-class Setup : public providentia::runnable::BaseSetup {
+class Setup : public providentia::runnable::VideoSetup {
 private:
 	/**
 	 * The current frame feature detector applied in the main loop.
@@ -21,7 +21,7 @@ private:
 	std::shared_ptr<providentia::features::FeatureMatcherBase> matcher, matcherWithoutFundamental;
 
 public:
-	explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
+	explicit Setup() : VideoSetup() {
 //        providentia::features::SIFTFeatureDetector detector(100);
 //        frameDetector = std::make_shared<providentia::features::SIFTFeatureDetector>(detector);
 //        referenceFrameDetector = std::make_shared<providentia::features::SIFTFeatureDetector>(detector);
@@ -66,7 +66,7 @@ public:
 };
 
 int main(int argc, char const *argv[]) {
-	Setup setup(argc, argv);
+	Setup setup;
 	setup.mainLoop();
 	return 0;
 }

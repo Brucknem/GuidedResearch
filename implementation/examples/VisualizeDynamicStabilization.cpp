@@ -8,7 +8,7 @@
 /**
  * Setup to visualize the total stabilization algorithm.
  */
-class Setup : public providentia::runnable::BaseSetup {
+class Setup : public providentia::runnable::VideoSetup {
 private:
 	/**
 	 * The matcher used to match the features.
@@ -16,7 +16,7 @@ private:
 	std::shared_ptr<providentia::stabilization::DynamicStabilizerBase> stabilizer;
 	cv::Mat referenceMask, currentMask;
 public:
-	explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
+	explicit Setup() : VideoSetup() {
 		stabilizer = std::make_shared<providentia::stabilization::SURFBFDynamicStabilizer>();
 //        stabilizer = std::make_shared<providentia::stabilization::ORBBFDynamicStabilizer>();
 //		stabilizer = std::make_shared<providentia::stabilization::FastFREAKBFDynamicStabilizer>();
@@ -52,7 +52,7 @@ public:
 };
 
 int main(int argc, char const *argv[]) {
-	Setup setup(argc, argv);
+	Setup setup;
 	setup.setRenderingScaleFactor(0.4);
 	setup.mainLoop();
 	return 0;

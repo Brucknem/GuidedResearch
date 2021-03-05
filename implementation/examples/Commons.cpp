@@ -4,6 +4,8 @@
 
 #include "opencv2/opencv.hpp"
 #include "Commons.hpp"
+
+#include <utility>
 #include "boost/program_options.hpp"
 
 #pragma region Helpers
@@ -36,7 +38,7 @@ std::string providentia::runnable::durationInfo(const std::string &message, long
 
 void providentia::runnable::addText(const cv::Mat &frame, const std::string &text, int x, int y) {
 	cv::putText(frame, text, cv::Point(x, y),
-				cv::FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar(255, 255, 0), 2, cv::FONT_HERSHEY_SIMPLEX);
+				cv::FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar(255, 255, 0), 1, cv::FONT_HERSHEY_SIMPLEX);
 }
 
 cv::Mat providentia::runnable::pad(const cv::Mat &frame, int padding) {
@@ -58,73 +60,41 @@ double providentia::runnable::getRandom01() {
 
 #pragma region RunnablesCommons
 
-providentia::runnable::BaseSetup::BaseSetup(std::string _videoFileName,
-											std::string _windowName,
-											double _calculationScaleFactor, double _renderingScaleFactor)
-	: videoFileName(std::move(_videoFileName)), calculationScaleFactor(_calculationScaleFactor),
+providentia::runnable::ImageSetup::ImageSetup(std::string _filename,
+											  std::string _windowName,
+											  double _calculationScaleFactor, double _renderingScaleFactor)
+	: filename(std::move(_filename)), calculationScaleFactor(_calculationScaleFactor),
 	  renderingScaleFactor(_renderingScaleFactor),
 	  windowName(std::move(_windowName)) {
+	frameCPU = cv::imread(filename);
 	init();
 }
 
-providentia::runnable::BaseSetup::BaseSetup(int argc, const char **argv) : providentia::utils::TimeMeasurable("Total",
-																											  1) {
-	boost::program_options::options_description description("Allowed options");
-	description.add_options()
-		("help", "Produce help message.")
-		("videoFileName",
-		 boost::program_options::value<std::string>(&videoFileName)->default_value(getDefaultVideoFile()),
-		 "The path to the video file.")
-		("mainWindowName",
-		 boost::program_options::value<std::string>(&windowName)->default_value("Camera Stabilization"),
-		 "The window name.")
-		("calcScale", boost::program_options::value<double>(&calculationScaleFactor)->default_value(1.0),
-		 "The scale factor of frame during calculation.")
-		("renderScale", boost::program_options::value<double>(&renderingScaleFactor)->default_value(0.5),
-		 "The scale factor of final frame during rendering.");
-
-	boost::program_options::variables_map vm;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, description), vm);
-	boost::program_options::notify(vm);
-
-	if (vm.count("help")) {
-		std::cout << description << "\n";
-		exit(0);
-	}
-	init();
-}
-
-void providentia::runnable::BaseSetup::init() {
-	this->capture = providentia::runnable::openVideoCapture(videoFileName);
-	this->renderingScaleFactor /= this->calculationScaleFactor;
-	cv::namedWindow(this->windowName, cv::WINDOW_AUTOSIZE);
+void providentia::runnable::ImageSetup::init() {
+	renderingScaleFactor /= calculationScaleFactor;
+	cv::namedWindow(windowName, cv::WINDOW_AUTOSIZE);
 	srand(static_cast <unsigned> (time(0)));
 }
 
-void providentia::runnable::BaseSetup::setWindowMode(int flags) {
+void providentia::runnable::ImageSetup::setWindowMode(int flags) {
 	cv::destroyWindow(windowName);
 	cv::namedWindow(windowName, flags);
 }
 
-providentia::runnable::BaseSetup::~BaseSetup() {
-	capture.release();
-	cv::destroyAllWindows();
-}
-
-void providentia::runnable::BaseSetup::addRuntimeToFinalFrame(const std::string &text, long milliseconds, int x,
-															  int y) {
+void providentia::runnable::ImageSetup::addRuntimeToFinalFrame(const std::string &text, long milliseconds, int x,
+															   int y) {
 	addTextToFinalFrame(durationInfo(text, milliseconds), x, y);
 }
 
-void providentia::runnable::BaseSetup::addTextToFinalFrame(const std::string &text, int x, int y) {
+void providentia::runnable::ImageSetup::addTextToFinalFrame(const std::string &text, int x, int y) {
 	addText(finalFrame, text, x, y);
 }
 
-void providentia::runnable::BaseSetup::getNextFrame() {
-	capture >> frameCPU;
+void providentia::runnable::ImageSetup::getNextFrame() {
+//pass
 }
 
-void providentia::runnable::BaseSetup::mainLoop() {
+void providentia::runnable::ImageSetup::mainLoop() {
 	while (true) {
 		clear();
 		getNextFrame();
@@ -132,7 +102,6 @@ void providentia::runnable::BaseSetup::mainLoop() {
 			break;
 		}
 		finalFrame = cv::Mat();
-		cv::Mat originalFrame = frameCPU.clone();
 		cv::resize(frameCPU, frameCPU, cv::Size(), calculationScaleFactor, calculationScaleFactor);
 		frameGPU.upload(frameCPU);
 
@@ -158,23 +127,39 @@ void providentia::runnable::BaseSetup::mainLoop() {
 	}
 }
 
-void providentia::runnable::BaseSetup::specificAddMessages() {
+void providentia::runnable::ImageSetup::specificAddMessages() {
 	// Empty stub for optional override.
 }
 
-void providentia::runnable::BaseSetup::setCalculationScaleFactor(double _calculationScaleFactor) {
+void providentia::runnable::ImageSetup::setCalculationScaleFactor(double _calculationScaleFactor) {
 	calculationScaleFactor = _calculationScaleFactor;
 }
 
-void providentia::runnable::BaseSetup::setRenderingScaleFactor(double _renderingScaleFactor) {
+void providentia::runnable::ImageSetup::setRenderingScaleFactor(double _renderingScaleFactor) {
 	renderingScaleFactor = _renderingScaleFactor;
 }
 
-void providentia::runnable::BaseSetup::setCapture(const std::string &file) {
-	if (BaseSetup::capture.isOpened()) {
-		BaseSetup::capture.release();
+#pragma endregion RunnablesCommons
+
+void providentia::runnable::VideoSetup::setCapture(const std::string &file) {
+	if (capture.isOpened()) {
+		capture.release();
 	}
-	BaseSetup::capture = openVideoCapture(file);
+	capture = openVideoCapture(file);
 }
 
-#pragma endregion RunnablesCommons
+providentia::runnable::VideoSetup::VideoSetup(std::string _videoFileName, std::string _windowName,
+											  double _calculationScaleFactor, double _renderingScaleFactor)
+	: ImageSetup(std::move(_videoFileName), std::move(_windowName), _calculationScaleFactor, _renderingScaleFactor) {
+	capture = providentia::runnable::openVideoCapture(filename);
+	init();
+}
+
+providentia::runnable::VideoSetup::~VideoSetup() {
+	capture.release();
+	cv::destroyAllWindows();
+}
+
+void providentia::runnable::VideoSetup::getNextFrame() {
+	capture >> frameCPU;
+}

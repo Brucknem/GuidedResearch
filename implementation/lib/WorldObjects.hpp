@@ -170,7 +170,13 @@ namespace providentia {
 			 */
 			std::vector<std::shared_ptr<ParametricPoint>> points;
 
+			/**
+			 * An optional id.
+			 */
+			std::string id;
+
 		public:
+
 			/**
 			 * @constructor
 			 */
@@ -202,6 +208,16 @@ namespace providentia {
 			 * @get The mean of the points.
 			 */
 			Eigen::Vector3d getMean() const;
+
+			/**
+			 * @get
+			 */
+			const std::string &getId() const;
+
+			/**
+			 * @set
+			 */
+			void setId(const std::string &id);
 		};
 	}
 }

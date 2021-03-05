@@ -27,7 +27,7 @@ namespace providentia {
 		class RenderingPipelineTests : public ::testing::Test {
 		protected:
 
-			Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getBlenderCameraIntrinsics<double>();
+			Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getBlenderCameraIntrinsics();
 
 			Eigen::Vector3d rotation{90, 0, 0};
 			Eigen::Vector3d translation{0, -10, 5};
@@ -191,7 +191,7 @@ namespace providentia {
 		 * Tests the mock blender camera matrix.
 		 */
 		TEST_F(RenderingPipelineTests, testGetBlenderIntrinsics) {
-			auto intrinsics = providentia::camera::getBlenderCameraIntrinsics<double>();
+			auto intrinsics = providentia::camera::getBlenderCameraIntrinsics();
 
 			ASSERT_EQ(intrinsics(0, 0), 1200);
 			ASSERT_EQ(intrinsics(1, 1), 1200);

@@ -115,6 +115,14 @@ namespace providentia {
 			return mean / points.size();
 		}
 
+		const std::string &WorldObject::getId() const {
+			return id;
+		}
+
+		void WorldObject::setId(const std::string &_id) {
+			id = _id;
+		}
+
 #pragma endregion Objects
 	}
 }

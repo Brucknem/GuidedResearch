@@ -7,7 +7,7 @@
 /**
  * Setup to visualize the background segmentation.
  */
-class Setup : public providentia::runnable::BaseSetup {
+class Setup : public providentia::runnable::VideoSetup {
 private:
 	/**
 	 * The matcher used to match the features.
@@ -15,7 +15,7 @@ private:
 	std::shared_ptr<providentia::segmentation::BackgroundSegmentorBase> segmentor;
 
 public:
-	explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
+	explicit Setup() : VideoSetup() {
 		segmentor = std::make_shared<providentia::segmentation::MOG2BackgroundSegmentor>();
 	}
 
@@ -31,7 +31,7 @@ public:
 };
 
 int main(int argc, char const *argv[]) {
-	Setup setup(argc, argv);
+	Setup setup;
 	setup.mainLoop();
 	return 0;
 }

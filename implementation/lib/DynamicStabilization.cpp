@@ -29,14 +29,14 @@ namespace providentia {
 				return;
 			}
 
-			int newCount = cv::cuda::countNonZero(this->segmentor->getBackgroundMask(getStabilizedFrame().size()));
-			int oldCount = cv::cuda::countNonZero(this->referenceFeatureDetector->getCurrentMask());
-			if (oldCount == this->getStabilizedFrame().size().width * this->getStabilizedFrame().size().height ||
+			int newCount = cv::cuda::countNonZero(segmentor->getBackgroundMask(getStabilizedFrame().size()));
+			int oldCount = cv::cuda::countNonZero(referenceFeatureDetector->getCurrentMask());
+			if (oldCount == getStabilizedFrame().size().width * getStabilizedFrame().size().height ||
 				newCount > oldCount) {
-				this->referenceFeatureDetector->detect(this->getStabilizedFrame(),
-													   this->segmentor->getBackgroundMask(
-															   getStabilizedFrame().size())
-														   .clone());
+				referenceFeatureDetector->detect(getStabilizedFrame(),
+												 segmentor->getBackgroundMask(
+														 getStabilizedFrame().size())
+													 .clone());
 			}
 		}
 

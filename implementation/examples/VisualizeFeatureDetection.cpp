@@ -8,7 +8,7 @@
 /**
  * Setup to visualize the feature detection.
  */
-class Setup : public providentia::runnable::BaseSetup {
+class Setup : public providentia::runnable::VideoSetup {
 private:
 	/**
 	 * The detectors and scaling factors that are applied in the main loop.
@@ -16,7 +16,7 @@ private:
 	std::vector<std::pair<providentia::features::FeatureDetectorBase *, float>> detectors;
 
 public:
-	explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
+	explicit Setup() : VideoSetup() {
 		detectors.emplace_back(std::make_pair(new providentia::features::SURFFeatureDetector(), 1.0));
 		detectors.emplace_back(std::make_pair(new providentia::features::ORBFeatureDetector(), 1.0));
 		detectors.emplace_back(std::make_pair(new providentia::features::SIFTFeatureDetector(), 1.0));
@@ -47,7 +47,7 @@ public:
 };
 
 int main(int argc, char const *argv[]) {
-	Setup setup(argc, argv);
+	Setup setup;
 	setup.setRenderingScaleFactor(1);
 	setup.mainLoop();
 	return 0;

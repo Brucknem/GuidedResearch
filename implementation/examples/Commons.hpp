@@ -73,10 +73,10 @@ namespace providentia {
 		double getRandom01();
 
 		/**
-		 * Base class for all examples setups.
+		 * Base class for all examples setups that run on a video.
 		 * Wraps the main loop and field initializations.
 		 */
-		class BaseSetup : public providentia::utils::TimeMeasurable {
+		class ImageSetup : public providentia::utils::TimeMeasurable {
 		protected:
 			/**
 			 * The current CPU frame.
@@ -105,12 +105,7 @@ namespace providentia {
 			/**
 			 * The file name of the video.
 			 */
-			std::string videoFileName;
-
-			/**
-			 * The video capture device.
-			 */
-			cv::VideoCapture capture;
+			std::string filename;
 
 			/**
 			 * The title name of the window.
@@ -171,11 +166,6 @@ namespace providentia {
 			/**
 			 * @set
 			 */
-			void setCapture(const std::string &file);
-
-			/**
-			 * @set
-			 */
 			void setCalculationScaleFactor(double calculationScaleFactor);
 
 			/**
@@ -184,30 +174,22 @@ namespace providentia {
 			void setRenderingScaleFactor(double renderingScaleFactor);
 
 			/**
-			 * @constructor Parses the given command line arguments and sets the field.
-			 *
-			 * @param argc Number of command line arguments.
-			 * @param argv Command line arguments.
-			 */
-			explicit BaseSetup(int argc, char const *argv[]);
-
-			/**
 			 * @constructor Directly sets the fields.
 			 *
-			 * @param _videoFileName The video file name.
+			 * @param _filename The video file name.
 			 * @param _windowName The name of the rendering window.
 			 * @param _calculationScaleFactor The scale factor of frame during calculation.
 			 * @param _renderingScaleFactor The scale factor of final frame during rendering.
 			 */
-			explicit BaseSetup(std::string _videoFileName = getDefaultVideoFile(),
-							   std::string _windowName = "Camera Stabilization",
-							   double _calculationScaleFactor = 1,
-							   double _renderingScaleFactor = 0.5);
+			explicit ImageSetup(std::string _filename = "../misc/test_frame.png",
+								std::string _windowName = "Camera Stabilization",
+								double _calculationScaleFactor = 1,
+								double _renderingScaleFactor = 0.5);
 
 			/**
 			 * @destructor
 			 */
-			~BaseSetup() override;
+			~ImageSetup() override = default;
 
 			/**
 			 * The main loop of the setup. <br>
@@ -219,6 +201,44 @@ namespace providentia {
 
 			virtual void getNextFrame();
 
+		};
+
+		/**
+		 * Base class for all examples setups that run on a single image.
+		 * Wraps the main loop and field initializations.
+		 */
+		class VideoSetup : public ImageSetup {
+
+			/**
+			 * The video capture device.
+			 */
+			cv::VideoCapture capture;
+		public:
+
+			/**
+			 * @constructor Directly sets the fields.
+			 *
+			 * @param _videoFileName The video file name.
+			 * @param _windowName The name of the rendering window.
+			 * @param _calculationScaleFactor The scale factor of frame during calculation.
+			 * @param _renderingScaleFactor The scale factor of final frame during rendering.
+			 */
+			explicit VideoSetup(std::string _videoFileName = getDefaultVideoFile(),
+								std::string _windowName = "Camera Stabilization",
+								double _calculationScaleFactor = 1,
+								double _renderingScaleFactor = 0.5);
+
+			/**
+			 * @destructor
+			 */
+			~VideoSetup() override;
+
+			/**
+			 * @set
+			 */
+			void setCapture(const std::string &file);
+
+			void getNextFrame() override;
 		};
 
 	}

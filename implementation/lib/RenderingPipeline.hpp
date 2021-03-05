@@ -38,12 +38,16 @@ namespace providentia {
 		/**
 		 * Creates the camera intrinsic matrix for the mock blender setup.
 		 *
-		 * @tparam T double or ceres::Jet
+		 * @return The intrinsics camera matrix.
+		 */
+		Eigen::Matrix<double, 3, 4> getBlenderCameraIntrinsics();
+
+		/**
+		 * Creates the camera intrinsic matrix for the s40 n cam far camera.
 		 *
 		 * @return The intrinsics camera matrix.
 		 */
-		template<typename T>
-		Eigen::Matrix<T, 3, 4> getBlenderCameraIntrinsics();
+		Eigen::Matrix<double, 3, 4> getS40NCamFarIntrinsics();;
 
 		/**
 		 * Divides a pixel in homogeneous coordinates by its z component.
@@ -54,7 +58,7 @@ namespace providentia {
 		 * @return The normalized [x/z, y/z] vector.
 		 */
 		template<typename T>
-		Eigen::Matrix<T, 2, 1> perspectiveDivision(const Eigen::Matrix<T, 3, 1> &vector);
+		Eigen::Matrix<T, 2, 1> perspectiveDivision(const Eigen::Matrix<T, 3, 1> &vector, bool &flipped);
 
 		/**
 		 * Generates a camera rotation matrix from the euler angle representation.<br>
@@ -100,6 +104,11 @@ namespace providentia {
 		render(const T *_translation, const T *_rotation, const Eigen::Matrix<double, 3, 4> &_intrinsics,
 			   const T *vector);
 
+		template<typename T>
+		Eigen::Matrix<T, 2, 1>
+		render(const T *_translation, const T *_rotation, const Eigen::Matrix<double, 3, 4> &_intrinsics,
+			   const T *vector, bool &flipped);
+
 		/**
 		 * Renders the given vector with the given color to the given image.
 		 *
@@ -111,11 +120,18 @@ namespace providentia {
 		 * @param color The color that is assigned to the expectedPixel.
 		 * @param image The image to which the expectedPixel will rendered.
 		 */
-		void render(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation,
-					const Eigen::Matrix<double, 3, 4> &_intrinsics, const Eigen::Vector4d &vector, const cv::Vec3d
-					&color,
-					cv::Mat image);
+
+		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation,
+										   const Eigen::Matrix<double, 3, 4> &_intrinsics,
+										   const Eigen::Vector4d &vector, const cv::Vec3d
+										   &color,
+										   cv::Mat &image, bool &flipped);
+
+		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation,
+										   const Eigen::Matrix<double, 3, 4> &_intrinsics,
+										   const Eigen::Vector4d &vector, const cv::Vec3d
+										   &color,
+										   cv::Mat &image);
 	}
 }
-
 #endif //CAMERASTABILIZATION_RENDERINGPIPELINE_HPP

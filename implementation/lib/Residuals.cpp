@@ -33,7 +33,8 @@ namespace providentia {
 //			std::cout << _rotation[0] << ", " << _rotation[1] << ", " << _rotation[2] << std::endl << std::endl;
 
 			Eigen::Matrix<T, 2, 1> actualPixel;
-			actualPixel = camera::render(_translation, _rotation, intrinsics, point.data());
+			bool flipped;
+			actualPixel = camera::render(_translation, _rotation, intrinsics, point.data(), flipped);
 
 			residual[0] = expectedPixel.x() - actualPixel.x();
 			residual[1] = expectedPixel.y() - actualPixel.y();

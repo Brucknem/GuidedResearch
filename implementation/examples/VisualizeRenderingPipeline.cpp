@@ -12,12 +12,12 @@ using namespace providentia::runnable;
 /**
  * Setup to visualize the rendering pipeline.
  */
-class Setup : public providentia::runnable::BaseSetup {
+class Setup : public providentia::runnable::ImageSetup {
 public:
 	/**
-	 * The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
+	 * The itnrinsics of the pinhole camera model.
 	 */
-	Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getBlenderCameraIntrinsics<double>();
+	Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getBlenderCameraIntrinsics();
 
 	/**
 	 * The [width, height] of the image.
@@ -34,7 +34,7 @@ public:
 	 */
 	Eigen::Vector3d rotation{90, 0, 0};
 
-	explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {}
+	explicit Setup() : ImageSetup() {}
 
 	void renderScene() {
 		for (int i = -7; i <= 7; i += 2) {
@@ -122,7 +122,7 @@ protected:
 };
 
 int main(int argc, char const *argv[]) {
-	Setup setup(argc, argv);
+	Setup setup;
 	setup.setRenderingScaleFactor(1);
 	setup.mainLoop();
 	return 0;

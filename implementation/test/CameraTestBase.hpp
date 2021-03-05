@@ -42,14 +42,9 @@ namespace providentia {
 		protected:
 
 			/**
-			 * The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
+			 * The itnrinsics of the pinhole camera model.
 			 */
-			Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getBlenderCameraIntrinsics<double>();
-
-			/**
-			 * The [width, height] of the image.
-			 */
-			Eigen::Vector2d imageSize{1920, 1200};
+			Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getBlenderCameraIntrinsics();
 
 			/**
 			 * Some [x, y, z] translation of the camera in world space.

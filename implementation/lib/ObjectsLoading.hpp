@@ -70,11 +70,18 @@ namespace providentia {
 		 * @param yaml
 		 * @return
 		 */
-		std::vector<ParametricPoint> LoadObjects(YAML::Node yaml) {
-			std::vector<ParametricPoint> objects;
+		std::vector<WorldObject> LoadObjects(YAML::Node yaml) {
+			std::vector<WorldObject> objects;
 			assert(yaml["objects"].IsSequence());
 
 			for (const auto &object : yaml["objects"]) {
+//				if (object["id"].as<int>() != 4007962) {
+//					continue;
+//				}
+
+				WorldObject worldObject;
+				worldObject.setId(object["id"].as<std::string>());
+
 				if (std::strcmp(object["type"].as<std::string>().c_str(), "pole") == 0 &&
 					std::strcmp(object["name"].as<std::string>().c_str(), "permanentDelineator") == 0
 					) {
@@ -83,13 +90,14 @@ namespace providentia {
 					bool hasPixels = false;
 					for (const auto &pixelNode : object["pixels"]) {
 						const Eigen::Vector2d &pixel = pixelNode.as<Eigen::Vector2d>();
-						objects.emplace_back(ParametricPoint::OnPoint(pixel, worldPosition));
+						worldObject.add(ParametricPoint::OnPoint(pixel, worldPosition));
 						hasPixels = true;
 					}
 
 					if (!hasPixels) {
-						objects.emplace_back(ParametricPoint::OnPoint(worldPosition));
+						worldObject.add(ParametricPoint::OnPoint(worldPosition));
 					}
+					objects.emplace_back(worldObject);
 				}
 			}
 			return objects;
@@ -101,7 +109,7 @@ namespace providentia {
 		 * @param filename
 		 * @return
 		 */
-		std::vector<ParametricPoint> LoadObjects(const std::string &filename) {
+		std::vector<WorldObject> LoadObjects(const std::string &filename) {
 			YAML::Node yaml = LoadYAML(filename);
 			return LoadObjects(yaml);
 		}

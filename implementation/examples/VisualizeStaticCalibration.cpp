@@ -6,20 +6,19 @@
 #include "Eigen/Dense"
 #include "RenderingPipeline.hpp"
 #include "WorldObjects.hpp"
+#include "ObjectsLoading.hpp"
 
 using namespace providentia::runnable;
 
 /**
  * Setup to visualize the rendering pipeline.
  */
-class Setup : public providentia::runnable::BaseSetup {
+class Setup : public providentia::runnable::ImageSetup {
 public:
 	/**
-	 * The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
+	 * The itnrinsics of the pinhole camera model.
 	 */
-	Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getIntrinsicsMatrixFromConfig(new double[9]{
-		9023.482825, 0.000000, 1222.314303, 0.000000, 9014.504360, 557.541182, 0.000000, 0.000000, 1.000000}
-	);
+	Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getS40NCamFarIntrinsics();
 
 	/**
 	 * The [width, height] of the image.
@@ -29,33 +28,111 @@ public:
 	/**
 	 * Some [x, y, z] translation of the camera in world space.
 	 */
-	Eigen::Vector3d translation{0, 0, 5};
+	Eigen::Vector3d initialTranslation{695856.16249748704, 5346096.1679782663, 540.98973892807601};
+	Eigen::Vector3d translation = {initialTranslation};
 
 	/**
 	 * Some [x, y, z] euler angle rotation of the camera around the world axis
 	 */
-	Eigen::Vector3d rotation{90, 0, 0};
+	Eigen::Vector3d initialRotation{87, 0, -16.5};
+	Eigen::Vector3d rotation = {initialRotation};
 
-	explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {}
+	/**
+	 * The trackbar translation values.
+	 */
+	int trackbarTranslationMiddle = 200;
+	int trackbarTranslationX = trackbarTranslationMiddle;
+	int trackbarTranslationY = trackbarTranslationMiddle;
+	int trackbarTranslationZ = trackbarTranslationMiddle;
 
-	void render(Eigen::Vector3d vector, const cv::Vec3d &color) {
-		render(vector.x(), vector.y(), vector.z(), color);
+	/**
+	 * The trackbar rotation values.
+	 */
+	int trackbarRotationMiddle = 100;
+	int trackbarRotationX = trackbarRotationMiddle;
+	int trackbarRotationY = trackbarRotationMiddle;
+	int trackbarRotationZ = trackbarRotationMiddle;
+
+	/**
+	 * Flag for the background.
+	 */
+	int trackbarBackground = 0;
+
+	/**
+	 * The objects from the HD map.
+	 */
+	std::vector<providentia::calibration::WorldObject> objects;
+
+	explicit Setup() : ImageSetup() {
+		objects = providentia::calibration::LoadObjects("../misc/objects.yaml");
+
+		cv::createTrackbar("Translation X", windowName, &trackbarTranslationX, 2 * trackbarTranslationMiddle);
+		cv::createTrackbar("Translation Y", windowName, &trackbarTranslationY, 2 * trackbarTranslationMiddle);
+		cv::createTrackbar("Translation Z", windowName, &trackbarTranslationZ, 2 * trackbarTranslationMiddle);
+
+		cv::createTrackbar("Rotation X", windowName, &trackbarRotationX, 2 * trackbarRotationMiddle);
+		cv::createTrackbar("Rotation Y", windowName, &trackbarRotationY, 2 * trackbarRotationMiddle);
+		cv::createTrackbar("Rotation Z", windowName, &trackbarRotationZ, 2 * trackbarRotationMiddle);
+
+		cv::createTrackbar("Background", windowName, &trackbarBackground, 1);
 	}
 
-	void render(double x, double y, double z, const cv::Vec3d &color) {
-		providentia::camera::render(translation, rotation,
-									intrinsics, Eigen::Vector4d(x, y, z, 1), color,
-									finalFrame);
+	void render(std::string id, Eigen::Vector3d vector, const cv::Vec3d &color) {
+		render(id, vector.x(), vector.y(), vector.z(), color);
+	}
+
+	void render(std::string id, double x, double y, double z, const cv::Vec3d &color) {
+		bool flipped;
+		auto pixel = providentia::camera::render(translation, rotation,
+												 intrinsics, Eigen::Vector4d(x, y, z, 1), color,
+												 finalFrame, flipped);
+
+		if (flipped) {
+			return;
+		}
+
+//		if (pixel.x() >= 0 && pixel.x() < imageSize[0] &&
+//			pixel.y() >= 0 && pixel.y() < imageSize[1]) {
+//			std::cout << id << std::endl;
+//		}
+
+		std::stringstream ss;
+		ss << std::fixed;
+		ss << id << ": " << x << "," << y << "," << z;
+		addTextToFinalFrame(ss.str(), pixel.x(), imageSize[1] - pixel.y());
 	}
 
 protected:
 	void specificMainLoop() override {
-		finalFrame = frameCPU;
+		if (trackbarBackground == 1) {
+			finalFrame = frameCPU.clone();
+		} else {
+			finalFrame = cv::Mat::zeros(cv::Size(imageSize[0], imageSize[1]), CV_64FC4);
+		}
+
+		translation = {
+			initialTranslation.x() + trackbarTranslationX - trackbarTranslationMiddle,
+			initialTranslation.y() + trackbarTranslationY - trackbarTranslationMiddle,
+			initialTranslation.z() + trackbarTranslationZ - trackbarTranslationMiddle,
+		};
+
+		rotation = {
+			initialRotation.x() + (trackbarRotationX - trackbarRotationMiddle) / 10.,
+			initialRotation.y() + (trackbarRotationY - trackbarRotationMiddle) / 10.,
+			initialRotation.z() + (trackbarRotationZ - trackbarRotationMiddle) / 10.,
+		};
+
+		for (const auto &worldObject : objects) {
+			for (const auto &object : worldObject.getPoints()) {
+				Eigen::Vector3d p = object->getPosition();
+				render(worldObject.getId(), p, {1, 1, 1});
+			}
+		}
 	}
 };
 
 int main(int argc, char const *argv[]) {
-	Setup setup(argc, argv);
+	Setup setup;
 	setup.setRenderingScaleFactor(1);
 	setup.mainLoop();
 	return 0;

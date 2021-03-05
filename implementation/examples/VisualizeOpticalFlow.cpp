@@ -9,7 +9,7 @@
 /**
  * Setup to visualize the optical flow.
  */
-class Setup : public providentia::runnable::BaseSetup {
+class Setup : public providentia::runnable::VideoSetup {
 private:
 	/**
 	 * The stabilizer used to stabilize the video.
@@ -22,7 +22,7 @@ private:
 	std::shared_ptr<providentia::opticalflow::DenseOpticalFlow> stabilizedOpticalFlow, originalOpticalFlow;
 
 public:
-	explicit Setup(int argc, char const *argv[]) : BaseSetup(argc, argv) {
+	explicit Setup() : VideoSetup() {
 		stabilizer = std::make_shared<providentia::stabilization::SURFBFDynamicStabilizer>();
 		stabilizer->setShouldUpdateKeyframe(true);
 
@@ -68,7 +68,7 @@ public:
 };
 
 int main(int argc, char const *argv[]) {
-	Setup setup(argc, argv);
+	Setup setup;
 	setup.mainLoop();
 	return 0;
 }

@@ -73,7 +73,7 @@ namespace providentia {
 			/**
 			 * @constructor
 			 *
-			 * @param _intrinsics The [sensorWidth, aspectRatio, focalLength] of the pinhole camera model.
+			 * @param _intrinsics The intrinsics of the pinhole camera model.
 			 */
 			CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics);
 
