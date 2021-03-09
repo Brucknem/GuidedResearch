@@ -102,7 +102,7 @@ namespace providentia {
 										   const Eigen::Matrix<double, 3, 4> &_intrinsics,
 										   const Eigen::Vector4d &vector,
 										   const cv::Vec3d &color, cv::Mat &image, bool &flipped) {
-			Eigen::Vector2d imageSize(image.cols, image.rows);
+			Eigen::Vector2i imageSize(image.cols, image.rows);
 
 			Eigen::Vector2d pointInImageSpace = render(
 				_translation.data(), _rotation.data(), _intrinsics,
@@ -111,6 +111,7 @@ namespace providentia {
 			if (flipped) {
 				return pointInImageSpace;
 			}
+			int imageHeight = imageSize.y() - 1;
 
 			for (int i = 0; i < 2; ++i) {
 				for (int j = 0; j < 2; ++j) {
@@ -118,7 +119,7 @@ namespace providentia {
 					nearestPixel.x() += i;
 					nearestPixel.y() += j;
 					double distance = (nearestPixel.cast<double>() - pointInImageSpace).norm();
-					nearestPixel.y() = imageSize.y() - 1 - nearestPixel.y();
+					nearestPixel.y() = imageHeight - nearestPixel.y();
 
 //					std::cout << "[" << nearestPixel.x() << ", " << nearestPixel.y() << "] - " << distance;
 					if (nearestPixel.x() >= imageSize.x() || nearestPixel.y() >= imageSize.y() ||
@@ -133,6 +134,12 @@ namespace providentia {
 					image.at<cv::Vec4d>(nearestPixel.y(), nearestPixel.x()) = _color;
 				}
 			}
+
+			cv::circle(image,
+					   {(int) pointInImageSpace.x(), (int) (imageHeight - pointInImageSpace.y())},
+					   (int) (imageSize.y() * 0.01),
+					   color
+			);
 			return pointInImageSpace;
 		}
 

@@ -7,6 +7,7 @@
 #include "RenderingPipeline.hpp"
 #include "WorldObjects.hpp"
 #include "ObjectsLoading.hpp"
+#include "CameraPoseEstimation.hpp"
 
 using namespace providentia::runnable;
 
@@ -23,7 +24,7 @@ public:
 	/**
 	 * The [width, height] of the image.
 	 */
-	Eigen::Vector2d imageSize{1920, 1200};
+	Eigen::Vector2i imageSize{1920, 1200};
 
 	/**
 	 * Some [x, y, z] translation of the camera in world space.
@@ -56,7 +57,7 @@ public:
 	/**
 	 * Flag for the background.
 	 */
-	int trackbarBackground = 0;
+	int trackbarBackground = 1;
 
 	/**
 	 * The objects from the HD map.
@@ -64,7 +65,14 @@ public:
 	std::vector<providentia::calibration::WorldObject> objects;
 
 	explicit Setup() : ImageSetup() {
-		objects = providentia::calibration::LoadObjects("../misc/objects.yaml");
+		objects = providentia::calibration::LoadObjects("../misc/objects.yaml", imageSize);
+
+		providentia::calibration::CameraPoseEstimator estimator{intrinsics};
+		estimator.setInitialGuess(initialTranslation, initialRotation);
+		estimator.addWorldObjects(objects);
+		estimator.estimate(true);
+		initialTranslation = estimator.getTranslation();
+		initialRotation = estimator.getRotation();
 
 		cv::createTrackbar("Translation X", windowName, &trackbarTranslationX, 2 * trackbarTranslationMiddle);
 		cv::createTrackbar("Translation Y", windowName, &trackbarTranslationY, 2 * trackbarTranslationMiddle);
@@ -98,17 +106,28 @@ public:
 
 		std::stringstream ss;
 		ss << std::fixed;
-		ss << id << ": " << x << "," << y << "," << z;
-		addTextToFinalFrame(ss.str(), pixel.x(), imageSize[1] - pixel.y());
+		ss << id;
+//		ss << ": " << x << "," << y << "," << z;
+		addTextToFinalFrame(ss.str(), pixel.x(), imageSize[1] - 1 - pixel.y());
 	}
 
 protected:
 	void specificMainLoop() override {
 		if (trackbarBackground == 1) {
 			finalFrame = frameCPU.clone();
+			std::vector<cv::Mat> matChannels;
+			cv::split(finalFrame, matChannels);
+			// create alpha channel
+			cv::Mat alpha = cv::Mat::ones(frameCPU.size(), CV_8UC1);
+			matChannels.push_back(alpha);
+			cv::merge(matChannels, finalFrame);
+			finalFrame.convertTo(finalFrame, CV_64FC4, 1. / 255.);
 		} else {
 			finalFrame = cv::Mat::zeros(cv::Size(imageSize[0], imageSize[1]), CV_64FC4);
 		}
+
+
+//		cv::flip(finalFrame, finalFrame, 0);
 
 		translation = {
 			initialTranslation.x() + trackbarTranslationX - trackbarTranslationMiddle,
@@ -123,9 +142,13 @@ protected:
 		};
 
 		for (const auto &worldObject : objects) {
-			for (const auto &object : worldObject.getPoints()) {
-				Eigen::Vector3d p = object->getPosition();
-				render(worldObject.getId(), p, {1, 1, 1});
+			for (const auto &point : worldObject.getPoints()) {
+				Eigen::Vector3d p = point->getPosition();
+				cv::Vec3d color = {1, 1, 1};
+				if (point->hasExpectedPixel()) {
+					color = {0, 0, 1};
+				}
+				render(worldObject.getId(), p, color);
 			}
 		}
 	}

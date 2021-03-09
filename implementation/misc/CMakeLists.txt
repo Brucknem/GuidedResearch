@@ -9,8 +9,5 @@ set(IMAGES
 
 file(COPY ${IMAGES} DESTINATION ./)
 
-set(YAML
-        objects.yaml
-        )
-
-file(COPY ${YAML} DESTINATION ./)
+configure_file(objects.yaml objects.yaml COPYONLY)
+configure_file(pixels.yaml pixelsg.yaml COPYONLY)

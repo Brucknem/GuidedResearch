@@ -80,11 +80,17 @@ namespace providentia {
 			calculateInitialGuess();
 			createProblem();
 			Solve(options, &problem, &summary);
+			if (_logSummary) {
+				std::cout << *this << std::endl;
+			}
 		}
 
 		void CameraPoseEstimator::createProblem() {
 			for (const auto &worldObject : worldObjects) {
 				for (const auto &point : worldObject.getPoints()) {
+					if (!point->hasExpectedPixel()) {
+						continue;
+					}
 					problem.AddResidualBlock(
 						CorrespondenceResidual::Create(
 							point->getExpectedPixel(),
@@ -105,16 +111,23 @@ namespace providentia {
 			options.callbacks.push_back(callback);
 		}
 
-		void CameraPoseEstimator::setInitialGuess(Eigen::Vector3d _translation, Eigen::Vector3d _rotation) {
+		void
+		CameraPoseEstimator::setInitialGuess(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation) {
 			hasInitialGuessSet = true;
-			initialTranslation = std::move(_translation);
-			initialRotation = std::move(_rotation);
-			translation = std::move(initialTranslation);
-			rotation = std::move(initialRotation);
+			initialTranslation = _translation;
+			initialRotation = _rotation;
+			translation = _translation;
+			rotation = _rotation;
 		}
 
 		void CameraPoseEstimator::addWorldObject(const WorldObject &worldObject) {
 			worldObjects.emplace_back(worldObject);
+		}
+
+		void CameraPoseEstimator::addWorldObjects(const std::vector<WorldObject> &_worldObjects) {
+			for (const auto &worldObject : _worldObjects) {
+				addWorldObject(worldObject);
+			}
 		}
 
 		const std::vector<providentia::calibration::WorldObject> &CameraPoseEstimator::getWorldObjects() const {

@@ -46,6 +46,7 @@ namespace providentia {
 
 		void ParametricPoint::setExpectedPixel(const Eigen::Vector2d &_expectedPixel) {
 			expectedPixel = _expectedPixel;
+			isExpectedPixelSet = true;
 		}
 
 		ParametricPoint ParametricPoint::OnPlane(const Eigen::Vector2d &_expectedPixel, Eigen::Vector3d _origin,
@@ -82,6 +83,10 @@ namespace providentia {
 
 		ParametricPoint ParametricPoint::OnPoint(const Eigen::Vector3d &_worldPosition) {
 			return ParametricPoint::OnLine(_worldPosition, {0, 0, 0}, 0);
+		}
+
+		bool ParametricPoint::hasExpectedPixel() const {
+			return isExpectedPixelSet;
 		}
 
 #pragma endregion Points

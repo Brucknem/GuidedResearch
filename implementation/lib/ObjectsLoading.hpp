@@ -70,9 +70,11 @@ namespace providentia {
 		 * @param yaml
 		 * @return
 		 */
-		std::vector<WorldObject> LoadObjects(YAML::Node yaml) {
+		std::vector<WorldObject> LoadObjects(YAML::Node yaml, Eigen::Vector2i imageSize = {-1, -1}) {
 			std::vector<WorldObject> objects;
 			assert(yaml["objects"].IsSequence());
+
+			auto imageHeight = imageSize[1];
 
 			for (const auto &object : yaml["objects"]) {
 //				if (object["id"].as<int>() != 4007962) {
@@ -89,7 +91,10 @@ namespace providentia {
 
 					bool hasPixels = false;
 					for (const auto &pixelNode : object["pixels"]) {
-						const Eigen::Vector2d &pixel = pixelNode.as<Eigen::Vector2d>();
+						Eigen::Vector2d pixel = pixelNode.as<Eigen::Vector2d>();
+						if (imageHeight > 1) {
+							pixel = {pixel.x(), imageHeight - 1 - pixel.y()};
+						}
 						worldObject.add(ParametricPoint::OnPoint(pixel, worldPosition));
 						hasPixels = true;
 					}
@@ -109,9 +114,9 @@ namespace providentia {
 		 * @param filename
 		 * @return
 		 */
-		std::vector<WorldObject> LoadObjects(const std::string &filename) {
+		std::vector<WorldObject> LoadObjects(const std::string &filename, Eigen::Vector2i imageSize = {-1, -1}) {
 			YAML::Node yaml = LoadYAML(filename);
-			return LoadObjects(yaml);
+			return LoadObjects(yaml, imageSize);
 		}
 	}
 }

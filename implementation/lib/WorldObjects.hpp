@@ -47,6 +47,11 @@ namespace providentia {
 			 */
 			double mu;
 
+			/**
+			 * Flag if the expected pixel is set.
+			 */
+			bool isExpectedPixelSet = false;
+
 		protected:
 			/**
 			 * @constructor
@@ -105,6 +110,11 @@ namespace providentia {
 			 * @set
 			 */
 			void setExpectedPixel(const Eigen::Vector2d &_expectedPixel);
+
+			/**
+			 * @get
+			 */
+			bool hasExpectedPixel() const;
 
 			/**
 			 * Factory for a [x, y, z] world point.

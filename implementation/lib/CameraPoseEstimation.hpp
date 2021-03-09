@@ -7,6 +7,8 @@
 
 #include <utility>
 #include <vector>
+#include <iostream>
+
 #include "ceres/ceres.h"
 #include "glog/logging.h"
 #include "opencv2/opencv.hpp"
@@ -84,6 +86,8 @@ namespace providentia {
 
 			void addWorldObject(const WorldObject &worldObject);
 
+			void addWorldObjects(const std::vector<WorldObject> &worldObjects);
+
 			/**
 			 * Estimates the camera translation and rotation based on the known correspondences between the world and
 			 * image.
@@ -96,7 +100,7 @@ namespace providentia {
 			 */
 			void calculateInitialGuess();
 
-			void setInitialGuess(Eigen::Vector3d translation, Eigen::Vector3d rotation);
+			void setInitialGuess(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation);
 
 			/**
 			 * @get
@@ -123,6 +127,20 @@ namespace providentia {
 			void createProblem();
 
 			Eigen::Vector3d calculateFurthestPoint(Eigen::Vector3d mean);
+
+			friend std::ostream &operator<<(std::ostream &os, const CameraPoseEstimator &estimator) {
+				os << "Translation: " << std::endl;
+				os << "From: " << std::endl << estimator.initialTranslation << std::endl;
+				os << "To: " << std::endl << estimator.translation << std::endl;
+				os << "Difference: " << std::endl << estimator.initialTranslation - estimator.translation << std::endl;
+
+				os << "Rotation: " << std::endl;
+				os << "From: " << std::endl << estimator.initialRotation << std::endl;
+				os << "To: " << std::endl << estimator.rotation << std::endl;
+				os << "Difference: " << std::endl << estimator.initialRotation - estimator.rotation << std::endl;
+				return os;
+			}
+
 		};
 	}
 }
