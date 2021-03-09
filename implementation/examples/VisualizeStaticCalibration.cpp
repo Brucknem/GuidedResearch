@@ -144,9 +144,9 @@ protected:
 		for (const auto &worldObject : objects) {
 			for (const auto &point : worldObject.getPoints()) {
 				Eigen::Vector3d p = point->getPosition();
-				cv::Vec3d color = {1, 1, 1};
+				cv::Vec3d color = {0, 0, 1};
 				if (point->hasExpectedPixel()) {
-					color = {0, 0, 1};
+					color = {0, 1, 0};
 				}
 				render(worldObject.getId(), p, color);
 			}

@@ -58,8 +58,12 @@ namespace providentia {
 //			std::cout << point << std::endl << std::endl;
 			bool result = calculateResidual(_translation, _rotation, point.data(), residual);
 
+//			residual[2] = _lambda[0];
+//			residual[3] = _mu[0];
+
 			residual[2] = _lambda[0] * weight;
 			residual[3] = _mu[0] * weight;
+
 			return result;
 		}
 
