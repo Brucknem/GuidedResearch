@@ -108,7 +108,7 @@ public:
 		ss << std::fixed;
 		ss << id;
 //		ss << ": " << x << "," << y << "," << z;
-		addTextToFinalFrame(ss.str(), pixel.x(), imageSize[1] - 1 - pixel.y());
+//		addTextToFinalFrame(ss.str(), pixel.x(), imageSize[1] - 1 - pixel.y());
 	}
 
 protected:

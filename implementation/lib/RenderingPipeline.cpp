@@ -135,11 +135,11 @@ namespace providentia {
 				}
 			}
 
-			cv::circle(image,
-					   {(int) pointInImageSpace.x(), (int) (imageHeight - pointInImageSpace.y())},
-					   (int) (imageSize.y() * 0.01),
-					   color
-			);
+//			cv::circle(image,
+//					   {(int) pointInImageSpace.x(), (int) (imageHeight - pointInImageSpace.y())},
+//					   (int) (imageSize.y() * 0.01),
+//					   color
+//			);
 			return pointInImageSpace;
 		}
 
