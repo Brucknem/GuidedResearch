@@ -52,7 +52,6 @@ add_library(libCameraStabilization
         RenderingPipeline.cpp
         Residuals.cpp
         WorldObjects.cpp
-        Watersheder.cpp
         ObjectsLoading.cpp
         )
 

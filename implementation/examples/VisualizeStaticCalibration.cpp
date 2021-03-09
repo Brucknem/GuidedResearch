@@ -65,7 +65,7 @@ public:
 	std::vector<providentia::calibration::WorldObject> objects;
 
 	explicit Setup() : ImageSetup() {
-		objects = providentia::calibration::LoadObjects("../misc/objects.yaml", imageSize);
+		objects = providentia::calibration::LoadObjects("../misc/objects.yaml", "../misc/pixels.yaml", imageSize);
 
 		providentia::calibration::CameraPoseEstimator estimator{intrinsics};
 		estimator.setInitialGuess(initialTranslation, initialRotation);

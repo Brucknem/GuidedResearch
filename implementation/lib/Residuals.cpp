@@ -42,7 +42,6 @@ namespace providentia {
 			residual[0] *= (T) weight;
 			residual[1] *= (T) weight;
 
-
 //			LOG(INFO) << std::endl << residual[0] << std::endl << residual[1];
 			return true;
 		}
@@ -57,7 +56,11 @@ namespace providentia {
 //			std::cout << point << std::endl << std::endl;
 			point += plane->getAxisB().cast<T>() * _mu[0];
 //			std::cout << point << std::endl << std::endl;
-			return calculateResidual(_translation, _rotation, point.data(), residual);
+			bool result = calculateResidual(_translation, _rotation, point.data(), residual);
+
+			residual[2] = _lambda[0] * weight;
+			residual[3] = _mu[0] * weight;
+			return result;
 		}
 
 		ceres::CostFunction *
@@ -65,8 +68,8 @@ namespace providentia {
 									   const std::shared_ptr<providentia::calibration::ParametricPoint> &_plane,
 									   Eigen::Matrix<double, 3, 4> _intrinsics,
 									   double _weight) {
-			return new ceres::AutoDiffCostFunction<CorrespondenceResidual, 2, 3, 3, 1, 1>(
-				new CorrespondenceResidual(_expectedPixel, _plane, _intrinsics,
+			return new ceres::AutoDiffCostFunction<CorrespondenceResidual, 4, 3, 3, 1, 1>(
+				new CorrespondenceResidual(_expectedPixel, _plane, std::move(_intrinsics),
 										   _weight)
 			);
 		}

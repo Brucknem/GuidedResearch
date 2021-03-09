@@ -86,11 +86,13 @@ namespace providentia {
 		}
 
 		void CameraPoseEstimator::createProblem() {
+			int i = 0;
 			for (const auto &worldObject : worldObjects) {
 				for (const auto &point : worldObject.getPoints()) {
 					if (!point->hasExpectedPixel()) {
 						continue;
 					}
+					i++;
 					problem.AddResidualBlock(
 						CorrespondenceResidual::Create(
 							point->getExpectedPixel(),
@@ -105,6 +107,7 @@ namespace providentia {
 						point->getMu());
 				}
 			}
+			std::cout << "Added residuals: " << i << std::endl;
 		}
 
 		void CameraPoseEstimator::addIterationCallback(ceres::IterationCallback *callback) {

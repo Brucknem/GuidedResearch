@@ -6,6 +6,7 @@
 #define CAMERASTABILIZATION_OBJECTSLOADING_HPP
 
 #include <string>
+#include <utility>
 #include "yaml-cpp/yaml.h"
 
 #include "WorldObjects.hpp"
@@ -67,36 +68,44 @@ namespace providentia {
 		/**
 		 * Loads the world positions of the objects from a YAML object.
 		 *
-		 * @param yaml
+		 * @param opendriveObjects
 		 * @return
 		 */
-		std::vector<WorldObject> LoadObjects(YAML::Node yaml, Eigen::Vector2i imageSize = {-1, -1}) {
+		std::vector<WorldObject>
+		LoadObjects(YAML::Node opendriveObjects, const YAML::Node &imageObjects, Eigen::Vector2i
+		imageSize = {-1, -1}) {
 			std::vector<WorldObject> objects;
-			assert(yaml["objects"].IsSequence());
+			assert(opendriveObjects["objects"].IsSequence());
 
 			auto imageHeight = imageSize[1];
 
-			for (const auto &object : yaml["objects"]) {
+			for (const auto &object : opendriveObjects["objects"]) {
 //				if (object["id"].as<int>() != 4007962) {
 //					continue;
 //				}
 
 				WorldObject worldObject;
-				worldObject.setId(object["id"].as<std::string>());
+
+				std::string objectId = object["id"].as<std::string>();
+				worldObject.setId(objectId);
 
 				if (std::strcmp(object["type"].as<std::string>().c_str(), "pole") == 0 &&
-					std::strcmp(object["name"].as<std::string>().c_str(), "permanentDelineator") == 0
-					) {
+					std::strcmp(object["name"].as<std::string>().c_str(), "permanentDelineator") == 0) {
 					const Eigen::Vector3d &worldPosition = object["position"].as<Eigen::Vector3d>();
 
 					bool hasPixels = false;
-					for (const auto &pixelNode : object["pixels"]) {
-						Eigen::Vector2d pixel = pixelNode.as<Eigen::Vector2d>();
-						if (imageHeight > 1) {
-							pixel = {pixel.x(), imageHeight - 1 - pixel.y()};
+					for (const auto imageObject : imageObjects) {
+						std::string frameObjectId = imageObject["id"].as<std::string>();
+						if (std::strcmp(frameObjectId.c_str(), objectId.c_str()) == 0) {
+							for (const auto pixelNode : imageObject["pixels"]) {
+								Eigen::Vector2d pixel = pixelNode.as<Eigen::Vector2d>();
+								if (imageHeight > 1) {
+									pixel = {pixel.x(), imageHeight - 1 - pixel.y()};
+								}
+								worldObject.add(ParametricPoint::OnLine(pixel, worldPosition, {0, 0, 1}));
+								hasPixels = true;
+							}
 						}
-						worldObject.add(ParametricPoint::OnPoint(pixel, worldPosition));
-						hasPixels = true;
 					}
 
 					if (!hasPixels) {
@@ -111,12 +120,14 @@ namespace providentia {
 		/**
 		 * Loads the world positions of the objects from a YAML file.
 		 *
-		 * @param filename
+		 * @param opendriveObjectsFile
 		 * @return
 		 */
-		std::vector<WorldObject> LoadObjects(const std::string &filename, Eigen::Vector2i imageSize = {-1, -1}) {
-			YAML::Node yaml = LoadYAML(filename);
-			return LoadObjects(yaml, imageSize);
+		std::vector<WorldObject> LoadObjects(const std::string &opendriveObjectsFile, const std::string
+		&imageObjectsFile, Eigen::Vector2i imageSize = {-1, -1}) {
+			YAML::Node opendriveObjects = LoadYAML(opendriveObjectsFile);
+			YAML::Node imageObjects = LoadYAML(imageObjectsFile);
+			return LoadObjects(opendriveObjects, imageObjects, std::move(imageSize));
 		}
 	}
 }
