@@ -1,0 +1,61 @@
+% This version of CVPR template is provided by Ming-Ming Cheng.
+% Please leave an issue if you found a bug:
+% https://github.com/MCG-NKU/CVPR_Template.
+
+% \documentclass[review]{cvpr}
+\documentclass[final]{cvpr}
+
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Include other packages here, before hyperref.
+
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[pagebackref=true,breaklinks=true,colorlinks,bookmarks=false]{hyperref}
+
+
+\def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
+\def\confYear{CVPR 2021}
+%\setcounter{page}{4321} % For final version only
+
+
+\begin{document}
+
+%%%%%%%%% TITLE
+\title{Automated Camera Stabilization and Calibration \\for Intelligent Transportation Systems}
+
+\author{Marcel Bruckner\\
+% Informatics 6 - Chair of Robotics, Artificial Intelligence and Real-time Systems\\
+% TUM Department of Informatics\\
+Technische Universität München\\
+Boltzmannstraße 15, 85748 Garching\\
+{\tt\small marcel.bruckner@tum.de}
+}
+
+\maketitle
+
+
+%%%%%%%%% ABSTRACT
+\input{abstract}
+
+
+%%%%%%%%% BODY TEXT
+\input{introduction}
+\input{termsAndDefinitions}
+\input{relatedWork}
+\input{approach}
+\input{evaluation}
+\input{futureWork}
+\input{conclusion}
+
+{\small
+\bibliographystyle{ieee_fullname}
+\bibliography{egbib}
+}
+
+\end{document}

@@ -1,3 +1,11 @@
+# Final report
+
+For the grading of my work I have to submit a small report.
+
+I use the CVPR template as it is nicely structured and enables me to submit it as a paper later on.
+
+---
+
 # CVPR Template
 
 This is a new Latex template for IEEE CVPR submission, rebuttal, and final version. The last version of CVPR latex template has been developed by Paolo.Ienne@di.epfl.ch and awf@acm.org about 15 years ago. The previous version suffer from several issues:
