@@ -43,7 +43,7 @@ namespace providentia {
 			residual[1] *= (T) weight;
 
 //			LOG(INFO) << std::endl << residual[0] << std::endl << residual[1];
-			return true;
+			return !flipped;
 		}
 
 		template<typename T>

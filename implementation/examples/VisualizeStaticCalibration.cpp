@@ -29,13 +29,13 @@ public:
 	/**
 	 * Some [x, y, z] translation of the camera in world space.
 	 */
-	Eigen::Vector3d initialTranslation{695856.16249748704, 5346096.1679782663, 540.98973892807601};
+	Eigen::Vector3d initialTranslation{695656.16249748704, 5345096.1679782663, 700.98973892807601};
 	Eigen::Vector3d translation = {initialTranslation};
 
 	/**
 	 * Some [x, y, z] euler angle rotation of the camera around the world axis
 	 */
-	Eigen::Vector3d initialRotation{87, 0, -16.5};
+	Eigen::Vector3d initialRotation{0, 0, 0};
 	Eigen::Vector3d rotation = {initialRotation};
 
 	/**

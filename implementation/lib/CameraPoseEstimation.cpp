@@ -11,7 +11,9 @@ namespace providentia {
 	namespace calibration {
 
 		CameraPoseEstimator::CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics) :
-			intrinsics(std::move(_intrinsics)) {}
+			intrinsics(std::move(_intrinsics)) {
+			google::InitGoogleLogging("Camera Pose Estimation");
+		}
 
 		const Eigen::Vector3d &CameraPoseEstimator::getTranslation() const {
 			return translation;
