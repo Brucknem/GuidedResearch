@@ -139,5 +139,25 @@ namespace providentia {
 		bool CameraPoseEstimator::isOptimizationFinished() const {
 			return optimizationFinished;
 		}
+
+		std::ostream &operator<<(std::ostream &os, const CameraPoseEstimator &estimator) {
+			os << "Translation:" << std::endl;
+			os << "From:       " << printVectorRow(estimator.initialTranslation) << std::endl;
+			os << "To:         " << printVectorRow(estimator.translation) << std::endl;
+			os << "Difference: " << printVectorRow(estimator.translation - estimator.initialTranslation)
+			   << std::endl;
+
+			os << "Rotation:" << std::endl;
+			os << "From:       " << printVectorRow(estimator.initialRotation) << std::endl;
+			os << "To:         " << printVectorRow(estimator.rotation) << std::endl;
+			os << "Difference: " << printVectorRow(estimator.rotation - estimator.initialRotation);
+			return os;
+		}
+
+		std::string printVectorRow(Eigen::Vector3d vector) {
+			std::stringstream ss;
+			ss << "[" << vector.x() << ", " << vector.y() << ", " << vector.z() << "]";
+			return ss.str();
+		}
 	}
 }

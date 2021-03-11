@@ -19,6 +19,12 @@
 
 namespace providentia {
 	namespace calibration {
+
+		/**
+		 * Prints a vector as a row.
+		 */
+		std::basic_string<char, std::char_traits<char>, std::allocator<char>> printVectorRow(Eigen::Vector3d vector);
+
 		/**
 		 * Estimates the camera pose from some known correspondences between the world and image.
 		 */
@@ -135,18 +141,7 @@ namespace providentia {
 
 			Eigen::Vector3d calculateFurthestPoint(Eigen::Vector3d mean);
 
-			friend std::ostream &operator<<(std::ostream &os, const CameraPoseEstimator &estimator) {
-				os << "Translation: " << std::endl;
-				os << "From: " << std::endl << estimator.initialTranslation << std::endl;
-				os << "To: " << std::endl << estimator.translation << std::endl;
-				os << "Difference: " << std::endl << estimator.translation - estimator.initialTranslation << std::endl;
-
-				os << "Rotation: " << std::endl;
-				os << "From: " << std::endl << estimator.initialRotation << std::endl;
-				os << "To: " << std::endl << estimator.rotation << std::endl;
-				os << "Difference: " << std::endl << estimator.rotation - estimator.initialRotation << std::endl;
-				return os;
-			}
+			friend std::ostream &operator<<(std::ostream &os, const CameraPoseEstimator &estimator);
 
 		};
 	}

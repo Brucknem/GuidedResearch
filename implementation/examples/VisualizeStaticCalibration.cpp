@@ -167,6 +167,14 @@ protected:
 		addTextToFinalFrame("RED dots: Unmapped objects", 5, finalFrame.rows - 68);
 		addTextToFinalFrame("GREEN dots: Mapped objects", 5, finalFrame.rows - 44);
 
+		std::stringstream ss;
+		ss << *estimator;
+		std::string line;
+		int i = 0;
+		while (getline(ss, line)) {
+			addTextToFinalFrame(line, 1350, finalFrame.rows - 190 + i++ * 24);
+		}
+
 		if (!renderObjects) {
 			return;
 		}
