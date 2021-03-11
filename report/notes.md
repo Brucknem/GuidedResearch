@@ -79,6 +79,7 @@ https://thesisguide.org/2014/10/13/thesis-architecture/
   - [ ] Calculate ground plane/description from map
   - [ ] Calculate depth
 - [ ] Hough lines flucht punkte
+- [ ] New HD map
 
 # Conclusion
 - [ ] Depends on results
