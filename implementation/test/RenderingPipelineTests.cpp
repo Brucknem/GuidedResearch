@@ -163,7 +163,7 @@ namespace providentia {
 
 		/**
 		 * Tests that rendering points at special locations like the direct camera position, or outside the expected
-		 * image plane results in valid pixels.
+		 * image parametricPoint results in valid pixels.
 		 */
 		TEST_F(RenderingPipelineTests, testRenderPointsOutOfFrustum) {
 			Eigen::Vector4d pointInWorldSpace;

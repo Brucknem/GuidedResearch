@@ -128,6 +128,14 @@ namespace providentia {
 			id = _id;
 		}
 
+		double WorldObject::getHeight() const {
+			return height;
+		}
+
+		void WorldObject::setHeight(double _height) {
+			height = _height;
+		}
+
 #pragma endregion Objects
 	}
 }

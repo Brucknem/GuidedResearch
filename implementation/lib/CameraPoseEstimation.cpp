@@ -96,6 +96,7 @@ namespace providentia {
 							point->getExpectedPixel(),
 							point,
 							intrinsics,
+							worldObject.getHeight(),
 							worldObject.getWeight()
 						),
 						nullptr,

@@ -77,6 +77,7 @@ namespace providentia {
 				int number = 5;
 				double height = 1.5;
 				WorldObject post;
+				post.setHeight(height);
 				for (int i = 0; i < number; ++i) {
 					ParametricPoint point = ParametricPoint::OnLine(origin, {0, 0, 1}, (height / number) * i);
 					point.setExpectedPixel(getPixel(point));
@@ -161,10 +162,9 @@ namespace providentia {
 						});
 			}
 
-//			estimator->setInitialGuess({0, -50, 0}, {80, 10, -10});
+			estimator->setInitialGuess({0, -50, 0}, {80, 10, -10});
 			// TODO refine
-			assertEstimation(false, 0.5);
-			assertEstimation(false, 2.5);
+			assertEstimation(false, 1e-5);
 
 		}
 	}// namespace toCameraSpace

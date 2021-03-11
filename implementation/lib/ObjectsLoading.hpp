@@ -80,18 +80,16 @@ namespace providentia {
 			auto imageHeight = imageSize[1];
 
 			for (const auto &object : opendriveObjects["objects"]) {
-//				if (object["id"].as<int>() != 4007962) {
-//					continue;
-//				}
-
 				WorldObject worldObject;
 
 				std::string objectId = object["id"].as<std::string>();
 				worldObject.setId(objectId);
+				worldObject.setHeight(object["height"].as<double>());
 
 				if (std::strcmp(object["type"].as<std::string>().c_str(), "pole") == 0 &&
 					std::strcmp(object["name"].as<std::string>().c_str(), "permanentDelineator") == 0) {
 					const Eigen::Vector3d &worldPosition = object["position"].as<Eigen::Vector3d>();
+//					auto heading = object["hdg"].as<double>();
 
 					bool hasPixels = false;
 					for (const auto imageObject : imageObjects) {
@@ -102,7 +100,8 @@ namespace providentia {
 								if (imageHeight > 1) {
 									pixel = {pixel.x(), imageHeight - 1 - pixel.y()};
 								}
-								worldObject.add(ParametricPoint::OnLine(pixel, worldPosition, {0, 0, 1}));
+								worldObject.add(
+									ParametricPoint::OnLine(pixel, worldPosition, Eigen::Vector3d::UnitZ()));
 								hasPixels = true;
 							}
 						}

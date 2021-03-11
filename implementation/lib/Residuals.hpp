@@ -31,14 +31,19 @@ namespace providentia {
 			Eigen::Matrix<double, 3, 4> intrinsics;
 
 			/**
-			 * The plane that contains the correspondence.
+			 * The parametricPoint that contains the correspondence.
 			 */
-			std::shared_ptr<providentia::calibration::ParametricPoint> plane;
+			std::shared_ptr<providentia::calibration::ParametricPoint> parametricPoint;
 
 			/**
 			 * The weight factor of the residual.
 			 */
 			double weight;
+
+			/**
+			 * The maximal valid lambda value, i.e. the height of the object.
+			 */
+			double maxLambda;
 
 			/**
 			 * Renders the given point using the current given camera translation and rotation.
@@ -64,6 +69,7 @@ namespace providentia {
 			CorrespondenceResidual(Eigen::Vector2d _expectedPixel,
 								   std::shared_ptr<providentia::calibration::ParametricPoint> _point,
 								   Eigen::Matrix<double, 3, 4> _intrinsics,
+								   double maxLambda,
 								   double _weight);
 
 			/**
@@ -77,8 +83,8 @@ namespace providentia {
 			 * @tparam T Template parameter expected from the ceres-solver.
 			 * @param _translation The [x, y, z] translation of the camera in world space for which we optimize.
 			 * @param _rotation The [x, y, z] euler angle rotation of the camera around the world axis for which we optimize.
-			 * @param _lambda The [l] distance of the point in the direction of one side of the plane from the origin.
-			 * @param _mu The [m] distance of the point in the direction of another side of the plane from the origin.
+			 * @param _lambda The [l] distance of the point in the direction of one side of the parametricPoint from the origin.
+			 * @param _mu The [m] distance of the point in the direction of another side of the parametricPoint from the origin.
 			 * @param residual The [u, v] pixel error between the expected and calculated pixel.
 			 * @return true
 			 */
@@ -90,9 +96,10 @@ namespace providentia {
 			 * Factory method to hide the residual creation.
 			 */
 			static ceres::CostFunction *Create(const Eigen::Vector2d &_expectedPixel,
-											   const std::shared_ptr<providentia::calibration::ParametricPoint> &_plane,
-											   Eigen::Matrix<double, 3, 4> _intrinsics,
-											   double _weight);
+											   const std::shared_ptr<providentia::calibration::ParametricPoint> &point,
+											   const Eigen::Matrix<double, 3, 4> &intrinsics,
+											   double maxLambda,
+											   double weight);
 		};
 
 	}

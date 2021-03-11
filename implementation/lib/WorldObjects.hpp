@@ -13,22 +13,22 @@ namespace providentia {
 	namespace calibration {
 
 		/**
-		 * A point lying in a 2-dimensional plane defined by an origin point lying in the plane and two axis.
+		 * A point lying in a 2-dimensional parametricPoint defined by an origin point lying in the parametricPoint and two axis.
 		 */
 		class ParametricPoint {
 		protected:
 			/**
-			 * The origin of the plane. This point lies within the plane.
+			 * The origin of the parametricPoint. This point lies within the parametricPoint.
 			 */
 			Eigen::Vector3d origin;
 
 			/**
-			 * A normalized axis of the plane.
+			 * A normalized axis of the parametricPoint.
 			 */
 			Eigen::Vector3d axisA;
 
 			/**
-			 * Another normalized axis of the plane.
+			 * Another normalized axis of the parametricPoint.
 			 */
 			Eigen::Vector3d axisB;
 
@@ -56,9 +56,9 @@ namespace providentia {
 			/**
 			 * @constructor
 			 *
-			 * @param _origin The origin of the plane.
-			 * @param _axisA One side of the plane.
-			 * @param _axisB Another side of the plane.
+			 * @param _origin The origin of the parametricPoint.
+			 * @param _axisA One side of the parametricPoint.
+			 * @param _axisB Another side of the parametricPoint.
 			 * @param _lambda Optional distance from the origin in the first axis.
 			 * @param _mu Optional distance from the origin in the second axis.
 			 */
@@ -134,7 +134,7 @@ namespace providentia {
  			 * Factory for a [x, y, z] world point on a parametric line.
  			 *
 			 * @param _expectedPixel The expected pixel.
-			 * @param _origin The origin of the plane.
+			 * @param _origin The origin of the parametricPoint.
 			 * @param _heading The heading of the line.
 			 * @param _lambda Optional distance from the origin in heading direction.
 			 */
@@ -148,12 +148,12 @@ namespace providentia {
 			static ParametricPoint OnLine(Eigen::Vector3d _origin, const Eigen::Vector3d &_heading, double _lambda = 0);
 
 			/**
- 			 * Factory for a [x, y, z] world point on a parametric plane.
+ 			 * Factory for a [x, y, z] world point on a parametric parametricPoint.
 			 *
 			 * @param _expectedPixel The expected pixel.
-			 * @param _origin The origin of the plane.
-			 * @param _axisA One side of the plane.
-			 * @param _axisB Another side of the plane.
+			 * @param _origin The origin of the parametricPoint.
+			 * @param _axisA One side of the parametricPoint.
+			 * @param _axisB Another side of the parametricPoint.
 			 * @param _lambda Optional distance from the origin in the first axis.
 			 * @param _mu Optional distance from the origin in the second axis.
 			 */
@@ -184,6 +184,8 @@ namespace providentia {
 			 * An optional id.
 			 */
 			std::string id;
+
+			double height = 0;
 
 		public:
 
@@ -228,6 +230,26 @@ namespace providentia {
 			 * @set
 			 */
 			void setId(const std::string &id);
+
+			/**
+			 * @get
+			 */
+			double getHeight() const;
+
+			/**
+			 * @set
+			 */
+			void setHeight(double height);
+
+			/**
+			 * @get
+			 */
+			double getHeading() const;
+
+			/**
+			 * @set
+			 */
+			void setHeading(double heading);
 		};
 	}
 }

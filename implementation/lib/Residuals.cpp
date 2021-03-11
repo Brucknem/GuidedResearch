@@ -15,10 +15,12 @@ namespace providentia {
 		CorrespondenceResidual::CorrespondenceResidual(Eigen::Vector2d _expectedPixel,
 													   std::shared_ptr<providentia::calibration::ParametricPoint> _point,
 													   Eigen::Matrix<double, 3, 4> _intrinsics,
+													   double maxLambda,
 													   double _weight) :
 			expectedPixel(std::move(_expectedPixel)),
-			plane(std::move(_point)),
+			parametricPoint(std::move(_point)),
 			intrinsics(std::move(_intrinsics)),
+			maxLambda(maxLambda),
 			weight(_weight) {}
 
 		template<typename T>
@@ -49,21 +51,20 @@ namespace providentia {
 		template<typename T>
 		bool CorrespondenceResidual::operator()(const T *_translation, const T *_rotation, const T *_lambda,
 												const T *_mu, T *residual) const {
-			Eigen::Matrix<T, 3, 1> point = plane->getOrigin().cast<T>();
+			Eigen::Matrix<T, 3, 1> point = parametricPoint->getOrigin().cast<T>();
 //			std::cout << "Point" << std::endl;
 //			std::cout << point << std::endl << std::endl;
-			point += plane->getAxisA().cast<T>() * _lambda[0];
+			point += parametricPoint->getAxisA().cast<T>() * _lambda[0];
 //			std::cout << point << std::endl << std::endl;
-			point += plane->getAxisB().cast<T>() * _mu[0];
+			point += parametricPoint->getAxisB().cast<T>() * _mu[0];
 //			std::cout << point << std::endl << std::endl;
 			bool result = calculateResidual(_translation, _rotation, point.data(), residual);
 
 			// TODO add actual height from object from HD map.
 			const T zero = (T) 0;
-			T height = (T) 1;
 			T lambda = _lambda[0];
-			if (lambda > height) {
-				lambda -= height;
+			if (lambda > (T) maxLambda) {
+				lambda -= (T) maxLambda;
 			} else if (lambda > zero) {
 				lambda = zero;
 			}
@@ -79,12 +80,13 @@ namespace providentia {
 
 		ceres::CostFunction *
 		CorrespondenceResidual::Create(const Eigen::Vector2d &_expectedPixel,
-									   const std::shared_ptr<providentia::calibration::ParametricPoint> &_plane,
-									   Eigen::Matrix<double, 3, 4> _intrinsics,
+									   const std::shared_ptr<providentia::calibration::ParametricPoint> &_point,
+									   const Eigen::Matrix<double, 3, 4> &_intrinsics,
+									   double _maxLambda,
 									   double _weight) {
 			return new ceres::AutoDiffCostFunction<CorrespondenceResidual, 4, 3, 3, 1, 1>(
-				new CorrespondenceResidual(_expectedPixel, _plane, std::move(_intrinsics),
-										   _weight)
+				new CorrespondenceResidual(_expectedPixel, _point, _intrinsics,
+										   _maxLambda, _weight)
 			);
 		}
 

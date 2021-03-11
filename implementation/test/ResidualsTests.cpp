@@ -29,6 +29,7 @@ namespace providentia {
 				CorrespondenceResidual correspondenceResidual = {
 					point.getExpectedPixel(), std::make_shared<ParametricPoint>(point),
 					intrinsics,
+					0,
 					1
 				};
 				correspondenceResidual(translation.data(), rotation.data(), point.getLambda(), point.getMu(), residual
@@ -120,7 +121,7 @@ namespace providentia {
 		}
 
 		/**
-		 * Tests the plane correspondence residual calculation.
+		 * Tests the parametricPoint correspondence residual calculation.
 		 */
 		TEST_F(ResidualsTest, testPlaneCorrespondence) {
 			Eigen::Vector3d planeOrigin{0, 0, 0};
