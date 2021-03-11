@@ -164,6 +164,10 @@ protected:
 			renderObjects = !renderObjects;
 		}
 
+		cv::rectangle(finalFrame, {0, finalFrame.rows - 68 - 24}, {600, finalFrame.rows}, {0, 0, 0}, -1);
+		cv::rectangle(finalFrame, {1345, finalFrame.rows - 190 - 24}, {finalFrame.cols, finalFrame.rows}, {0, 0, 0},
+					  -1);
+
 		addTextToFinalFrame("RED dots: Unmapped objects", 5, finalFrame.rows - 68);
 		addTextToFinalFrame("GREEN dots: Mapped objects", 5, finalFrame.rows - 44);
 
@@ -196,7 +200,7 @@ protected:
 int main(int argc, char const *argv[]) {
 	Setup setup;
 	setup.setRenderingScaleFactor(1);
-	setup.setOutputFolder("./stabilization/");
+//	setup.setOutputFolder("./stabilization/");
 	setup.mainLoop();
 	return 0;
 }
