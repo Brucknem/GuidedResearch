@@ -41,8 +41,8 @@ namespace providentia {
 			residual[0] = expectedPixel.x() - actualPixel.x();
 			residual[1] = expectedPixel.y() - actualPixel.y();
 
-			residual[0] *= (T) weight;
-			residual[1] *= (T) weight;
+//			residual[0] *= (T) weight;
+//			residual[1] *= (T) weight;
 
 //			LOG(INFO) << std::endl << residual[0] << std::endl << residual[1];
 			return !flipped;
