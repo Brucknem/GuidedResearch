@@ -10,9 +10,11 @@
 namespace providentia {
 	namespace calibration {
 
-		CameraPoseEstimator::CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics) :
+		CameraPoseEstimator::CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics, bool initLogging) :
 			intrinsics(std::move(_intrinsics)) {
-			google::InitGoogleLogging("Camera Pose Estimation");
+			if (initLogging) {
+				google::InitGoogleLogging("Camera Pose Estimation");
+			}
 		}
 
 		const Eigen::Vector3d &CameraPoseEstimator::getTranslation() const {
@@ -27,20 +29,6 @@ namespace providentia {
 			if (hasInitialGuessSet) {
 				return;
 			}
-//			Eigen::Vector3d mean = calculateMean();
-//			Eigen::Vector3d furthestPoint = calculateFurthestPoint(mean);
-//			Eigen::Vector3d lookAt = mean - furthestPoint;
-//			initialTranslation = furthestPoint - lookAt.normalized() * (frustumParameters.x() + 1);
-//
-//			lookAt.z() = 0;
-//			lookAt = lookAt.normalized();
-//			double angle = Eigen::Vector3d(0, 1, 0).dot(lookAt);
-//			angle = acos(angle) / M_PI * 180;
-//
-//			initialRotation = {90, 0, angle};
-//
-//			translation = initialTranslation;
-//			rotation = initialRotation;
 			Eigen::Vector3d mean = calculateMean();
 			double wantedDistance = 500;
 
@@ -75,13 +63,21 @@ namespace providentia {
 			return furthestPoint;
 		}
 
+		std::thread CameraPoseEstimator::estimateAsync(bool _logSummary) {
+			auto thread = std::thread(&CameraPoseEstimator::estimate, this, _logSummary);
+			thread.detach();
+			return thread;
+		}
+
 		void CameraPoseEstimator::estimate(bool _logSummary) {
+			optimizationFinished = false;
 			options.linear_solver_type = ceres::DENSE_QR;
 			options.minimizer_progress_to_stdout = _logSummary;
 			options.update_state_every_iteration = true;
 			calculateInitialGuess();
 			createProblem();
 			Solve(options, &problem, &summary);
+			optimizationFinished = true;
 			if (_logSummary) {
 				std::cout << *this << std::endl;
 			}
@@ -137,6 +133,10 @@ namespace providentia {
 
 		const std::vector<providentia::calibration::WorldObject> &CameraPoseEstimator::getWorldObjects() const {
 			return worldObjects;
+		}
+
+		bool CameraPoseEstimator::isOptimizationFinished() const {
+			return optimizationFinished;
 		}
 	}
 }

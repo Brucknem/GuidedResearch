@@ -58,11 +58,21 @@ namespace providentia {
 //			std::cout << point << std::endl << std::endl;
 			bool result = calculateResidual(_translation, _rotation, point.data(), residual);
 
-//			residual[2] = _lambda[0];
-//			residual[3] = _mu[0];
+			// TODO add actual height from object from HD map.
+			const T zero = (T) 0;
+			T height = (T) 1;
+			T lambda = _lambda[0];
+			if (lambda > height) {
+				lambda -= height;
+			} else if (lambda > zero) {
+				lambda = zero;
+			}
 
-			residual[2] = _lambda[0] * weight;
+//			residual[2] = lambda * weight;
+			residual[2] = lambda;
+
 			residual[3] = _mu[0] * weight;
+//			residual[3] = _mu[0];
 
 			return result;
 		}

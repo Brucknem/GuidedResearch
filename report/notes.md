@@ -62,16 +62,23 @@ https://thesisguide.org/2014/10/13/thesis-architecture/
   - [ ] Dynamically pick best feature detector based on optical flow performance
   - [ ] Test on different weather/lighting conditions
   - [ ] IMU based sensor fusion (Only for paper, no real lookout)
+  - [ ] Optical FLow / Warp field stabilization
+  - [ ] ML CNN
+    - [ ] Image MSE for calibration (unsupervised)
+    - [ ] Logistic regression on pose (supervised)
 - [ ] Static calibration
+  - [ ] Object height and heading
   - [ ] Extend to global refinement of multiple cameras
   - [ ] After initial by hand calibration with watersheder: Re-detection in new keyframes:
     - [ ] Automatic recalibration
     - [ ] Per frame pose estimation
   - [ ] Automatic detection of more landmarks after initial calibration
+  - [ ] Automatic mapping pixel <-> object
 - [ ] Vehicle pose estimation
   - [ ] Use HD map roads and camera look-at vector
   - [ ] Calculate ground plane/description from map
   - [ ] Calculate depth
+- [ ] Hough lines flucht punkte
 
 # Conclusion
 - [ ] Depends on results

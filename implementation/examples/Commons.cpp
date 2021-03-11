@@ -7,6 +7,8 @@
 
 #include <utility>
 #include "boost/program_options.hpp"
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 #pragma region Helpers
 
@@ -117,13 +119,21 @@ void providentia::runnable::ImageSetup::mainLoop() {
 		specificAddMessages();
 
 		addTimestamp("End");
-		addRuntimeToFinalFrame("Frame", getTotalMilliseconds(), 5, finalFrame.rows - 20);
+		addRuntimeToFinalFrame("Frame " + std::to_string(frameNumber), getTotalMilliseconds(), 5, finalFrame.rows - 20);
 
 		cv::imshow(windowName, finalFrame);
-
-		if (cv::waitKey(1) == (int) ('q')) {
+		if (!outputFolder.empty()) {
+			finalFrame *= 255;
+			finalFrame.convertTo(finalFrame, CV_8UC4);
+			boost::filesystem::path outFile = outputFolder / ("frame_" + std::to_string(frameNumber) + ".jpg");
+			cv::imwrite(outFile.string(), finalFrame, {cv::IMWRITE_PNG_COMPRESSION, 9});
+		}
+		pressedKey = cv::waitKey(1);
+		if (pressedKey == (int) ('q')) {
 			break;
 		}
+
+		frameNumber++;
 	}
 }
 
@@ -137,6 +147,13 @@ void providentia::runnable::ImageSetup::setCalculationScaleFactor(double _calcul
 
 void providentia::runnable::ImageSetup::setRenderingScaleFactor(double _renderingScaleFactor) {
 	renderingScaleFactor = _renderingScaleFactor;
+}
+
+void providentia::runnable::ImageSetup::setOutputFolder(const std::string &_outputFolder) {
+	outputFolder = _outputFolder;
+	if (!boost::filesystem::is_directory(outputFolder)) {
+		boost::filesystem::create_directories(outputFolder);
+	}
 }
 
 #pragma endregion RunnablesCommons

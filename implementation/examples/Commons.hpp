@@ -10,6 +10,8 @@
 #include "opencv2/opencv.hpp"
 #include "TimeMeasurable.hpp"
 #include "Eigen/Dense"
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 
 namespace providentia {
 	namespace runnable {
@@ -113,6 +115,11 @@ namespace providentia {
 			std::string windowName;
 
 			/**
+			 * Pressed pressedKey.
+			 */
+			int pressedKey = -1;
+
+			/**
 			 * A scaling factor applied to the frame before calculation.
 			 */
 			double calculationScaleFactor = 1;
@@ -126,6 +133,10 @@ namespace providentia {
 			 * The total duration of the algorithms.
 			 */
 			long totalAlgorithmsDuration = 0;
+
+			boost::filesystem::path outputFolder{""};
+
+			int frameNumber = 0;
 
 			/**
 			 * The subclass specific main loop. All calculation is done here. <br>
@@ -198,6 +209,8 @@ namespace providentia {
 			void mainLoop();
 
 			void setWindowMode(int flags);
+
+			void setOutputFolder(const std::string &outputFolder);
 
 			virtual void getNextFrame();
 

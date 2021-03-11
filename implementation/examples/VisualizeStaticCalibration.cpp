@@ -2,6 +2,7 @@
 // Created by brucknem on 02.02.21.
 //
 
+#include <thread>
 #include "Commons.hpp"
 #include "Eigen/Dense"
 #include "RenderingPipeline.hpp"
@@ -20,6 +21,7 @@ public:
 	 * The itnrinsics of the pinhole camera model.
 	 */
 	Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getS40NCamFarIntrinsics();
+	std::shared_ptr<providentia::calibration::CameraPoseEstimator> estimator;
 
 	/**
 	 * The [width, height] of the image.
@@ -29,13 +31,13 @@ public:
 	/**
 	 * Some [x, y, z] translation of the camera in world space.
 	 */
-	Eigen::Vector3d initialTranslation{695656.16249748704, 5345096.1679782663, 700.98973892807601};
+	Eigen::Vector3d initialTranslation{695825, 5.34608e+06, 546.63};
 	Eigen::Vector3d translation = {initialTranslation};
 
 	/**
 	 * Some [x, y, z] euler angle rotation of the camera around the world axis
 	 */
-	Eigen::Vector3d initialRotation{0, 0, 0};
+	Eigen::Vector3d initialRotation{85, 0, -20};
 	Eigen::Vector3d rotation = {initialRotation};
 
 	/**
@@ -57,22 +59,30 @@ public:
 	/**
 	 * Flag for the background.
 	 */
-	int trackbarBackground = 1;
+	int trackbarBackground = 0;
 
 	/**
 	 * The objects from the HD map.
 	 */
 	std::vector<providentia::calibration::WorldObject> objects;
 
+	bool optimizationFinished = false;
+
+	bool renderObjects = true;
+
 	explicit Setup() : ImageSetup() {
 		objects = providentia::calibration::LoadObjects("../misc/objects.yaml", "../misc/pixels.yaml", imageSize);
 
-		providentia::calibration::CameraPoseEstimator estimator{intrinsics};
-		estimator.setInitialGuess(initialTranslation, initialRotation);
-		estimator.addWorldObjects(objects);
-		estimator.estimate(true);
-		initialTranslation = estimator.getTranslation();
-		initialRotation = estimator.getRotation();
+//		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics);
+		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics);
+//		estimator->setInitialGuess(initialTranslation, initialRotation);
+		estimator->addWorldObjects(objects);
+
+//		estimator->estimate(true);
+		estimator->estimateAsync(true);
+
+//		initialTranslation = estimator->getTranslation();
+//		initialRotation = estimator->getRotation();
 
 		cv::createTrackbar("Translation X", windowName, &trackbarTranslationX, 2 * trackbarTranslationMiddle);
 		cv::createTrackbar("Translation Y", windowName, &trackbarTranslationY, 2 * trackbarTranslationMiddle);
@@ -113,7 +123,7 @@ public:
 
 protected:
 	void specificMainLoop() override {
-		if (trackbarBackground == 1) {
+		if (trackbarBackground == 1 || !renderObjects) {
 			finalFrame = frameCPU.clone();
 			std::vector<cv::Mat> matChannels;
 			cv::split(finalFrame, matChannels);
@@ -126,8 +136,17 @@ protected:
 			finalFrame = cv::Mat::zeros(cv::Size(imageSize[0], imageSize[1]), CV_64FC4);
 		}
 
+		if (!optimizationFinished) {
+			optimizationFinished = estimator->isOptimizationFinished();
+			if (optimizationFinished) {
+				trackbarBackground = 1;
+			}
+		}
 
 //		cv::flip(finalFrame, finalFrame, 0);
+
+		initialTranslation = estimator->getTranslation();
+		initialRotation = estimator->getRotation();
 
 		translation = {
 			initialTranslation.x() + trackbarTranslationX - trackbarTranslationMiddle,
@@ -141,6 +160,17 @@ protected:
 			initialRotation.z() + (trackbarRotationZ - trackbarRotationMiddle) / 10.,
 		};
 
+		if (pressedKey == (int) 's') {
+			renderObjects = !renderObjects;
+		}
+
+		addTextToFinalFrame("RED dots: Unmapped objects", 5, finalFrame.rows - 68);
+		addTextToFinalFrame("GREEN dots: Mapped objects", 5, finalFrame.rows - 44);
+
+		if (!renderObjects) {
+			return;
+		}
+
 		for (const auto &worldObject : objects) {
 			for (const auto &point : worldObject.getPoints()) {
 				Eigen::Vector3d p = point->getPosition();
@@ -151,12 +181,14 @@ protected:
 				render(worldObject.getId(), p, color);
 			}
 		}
+
 	}
 };
 
 int main(int argc, char const *argv[]) {
 	Setup setup;
 	setup.setRenderingScaleFactor(1);
+	setup.setOutputFolder("./stabilization/");
 	setup.mainLoop();
 	return 0;
 }

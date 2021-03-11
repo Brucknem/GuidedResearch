@@ -8,11 +8,12 @@
 #include <utility>
 #include <vector>
 #include <iostream>
+#include <thread>
 
 #include "ceres/ceres.h"
 #include "glog/logging.h"
-#include "opencv2/opencv.hpp"
 
+#include "opencv2/opencv.hpp"
 #include "Residuals.hpp"
 #include "WorldObjects.hpp"
 
@@ -71,13 +72,15 @@ namespace providentia {
 
 			bool hasInitialGuessSet = false;
 
+			bool optimizationFinished = false;
+
 		public:
 			/**
 			 * @constructor
 			 *
 			 * @param _intrinsics The intrinsics of the pinhole camera model.
 			 */
-			CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics);
+			CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics, bool initLogging = true);
 
 			/**
 			 * @destructor
@@ -93,6 +96,8 @@ namespace providentia {
 			 * image.
 			 */
 			void estimate(bool _logSummary = false);
+
+			std::thread estimateAsync(bool _logSummary = false);
 
 			/**
 			 * Based on the known world positions calculates and initial guess for the camera translation and rotation.
@@ -114,6 +119,8 @@ namespace providentia {
 
 			const std::vector<providentia::calibration::WorldObject> &getWorldObjects() const;
 
+			bool isOptimizationFinished() const;
+
 			/**
 			 * Calculates the mean of the known world correspondences.
 			 */
@@ -132,12 +139,12 @@ namespace providentia {
 				os << "Translation: " << std::endl;
 				os << "From: " << std::endl << estimator.initialTranslation << std::endl;
 				os << "To: " << std::endl << estimator.translation << std::endl;
-				os << "Difference: " << std::endl << estimator.initialTranslation - estimator.translation << std::endl;
+				os << "Difference: " << std::endl << estimator.translation - estimator.initialTranslation << std::endl;
 
 				os << "Rotation: " << std::endl;
 				os << "From: " << std::endl << estimator.initialRotation << std::endl;
 				os << "To: " << std::endl << estimator.rotation << std::endl;
-				os << "Difference: " << std::endl << estimator.initialRotation - estimator.rotation << std::endl;
+				os << "Difference: " << std::endl << estimator.rotation - estimator.initialRotation << std::endl;
 				return os;
 			}
 

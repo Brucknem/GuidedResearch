@@ -52,10 +52,10 @@ namespace providentia {
 				addPointCorrespondence({-1, 30, -3});
 			}
 
-			void assertEstimation(bool log = false) {
+			void assertEstimation(bool log = false, double maxDifference = 1e-8) {
 				estimator->estimate(log);
-				assertVectorsNearEqual(estimator->getTranslation(), translation);
-				assertVectorsNearEqual(estimator->getRotation(), rotation);
+				assertVectorsNearEqual(estimator->getTranslation(), translation, maxDifference);
+				assertVectorsNearEqual(estimator->getRotation(), rotation, maxDifference);
 
 				if (log) {
 					std::cout << "Translation" << std::endl;
@@ -77,7 +77,7 @@ namespace providentia {
 				int number = 5;
 				double height = 1.5;
 				WorldObject post;
-				for (int i = 0; i < 5; ++i) {
+				for (int i = 0; i < number; ++i) {
 					ParametricPoint point = ParametricPoint::OnLine(origin, {0, 0, 1}, (height / number) * i);
 					point.setExpectedPixel(getPixel(point));
 					post.add(point);
@@ -110,7 +110,7 @@ namespace providentia {
 		 */
 		TEST_F(CameraPoseEstimationTests, testCalculateInitialGuess) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-				intrinsics
+				intrinsics, false
 			);
 
 			addPointCorrespondence({0, 0, 9});
@@ -131,7 +131,7 @@ namespace providentia {
 		 */
 		TEST_F(CameraPoseEstimationTests, testEstimationOnlyWorldPositions) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-				intrinsics
+				intrinsics, false
 			);
 			addSomePointCorrespondences();
 			assertEstimation();
@@ -141,9 +141,9 @@ namespace providentia {
 		/**
 		 * Tests that the optimization converges to the expected extrinsic parameters.
 		 */
-		TEST_F(CameraPoseEstimationTests, testEstimationPointAndLines) {
+		TEST_F(CameraPoseEstimationTests, testEstimationOnlyLines) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-				intrinsics
+				intrinsics, false
 			);
 
 			Eigen::Vector3d origin, axisA, axisB;
@@ -151,9 +151,9 @@ namespace providentia {
 			axisA << 1, 0, 0;
 			axisB << 0, 1, 0;
 
-			addPointCorrespondence({1, 2, 3});
+//			addPointCorrespondence({1, 2, 3});
 
-			for (int i = 0; i < 5; ++i) {
+			for (int i = 0; i < 10; ++i) {
 				addPost({
 							(rand() % 2000) / 100. - 10,
 							(rand() % 2000) / 100.,
@@ -161,8 +161,10 @@ namespace providentia {
 						});
 			}
 
-			estimator->setInitialGuess({0, -50, 0}, {80, 10, -10});
-			assertEstimation();
+//			estimator->setInitialGuess({0, -50, 0}, {80, 10, -10});
+			// TODO refine
+			assertEstimation(false, 0.5);
+			assertEstimation(false, 2.5);
 
 		}
 	}// namespace toCameraSpace
