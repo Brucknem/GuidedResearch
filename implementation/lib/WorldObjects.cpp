@@ -59,7 +59,8 @@ namespace providentia {
 
 		ParametricPoint ParametricPoint::OnPlane(Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA,
 												 const Eigen::Vector3d &_axisB, double _lambda, double _mu) {
-			return ParametricPoint(std::move(_origin), _axisA, _axisB, _lambda, _mu);
+			return ParametricPoint(std::move(_origin), _axisA.stableNormalized(), _axisB.stableNormalized(), _lambda,
+								   _mu);
 		}
 
 		ParametricPoint ParametricPoint::OnLine(const Eigen::Vector2d &_expectedPixel, Eigen::Vector3d _origin, const

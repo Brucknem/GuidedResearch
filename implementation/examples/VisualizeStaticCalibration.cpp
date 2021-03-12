@@ -79,7 +79,7 @@ public:
 		estimator->addWorldObjects(objects);
 
 //		estimator->estimate(true);
-		estimator->estimateAsync(true);
+//		estimator->estimateAsync(true);
 
 //		initialTranslation = estimator->getTranslation();
 //		initialRotation = estimator->getRotation();
@@ -123,7 +123,7 @@ public:
 
 protected:
 	void specificMainLoop() override {
-		if (trackbarBackground == 1 || !renderObjects) {
+		if (trackbarBackground == 1) {
 			finalFrame = frameCPU.clone();
 			std::vector<cv::Mat> matChannels;
 			cv::split(finalFrame, matChannels);
@@ -140,6 +140,7 @@ protected:
 			optimizationFinished = estimator->isOptimizationFinished();
 			if (optimizationFinished) {
 				trackbarBackground = 1;
+				cv::setTrackbarPos("Background", windowName, trackbarBackground);
 			}
 		}
 
@@ -160,8 +161,14 @@ protected:
 			initialRotation.z() + (trackbarRotationZ - trackbarRotationMiddle) / 10.,
 		};
 
-		if (pressedKey == (int) 's') {
+		if (pressedKey == (int) 'b') {
+			trackbarBackground = (trackbarBackground + 1) % 2;
+			cv::setTrackbarPos("Background", windowName, trackbarBackground);
+		} else if (pressedKey == (int) 's') {
 			renderObjects = !renderObjects;
+		} else if (pressedKey == (int) 'e') {
+			optimizationFinished = false;
+			estimator->estimateAsync(true);
 		}
 
 		cv::rectangle(finalFrame, {0, finalFrame.rows - 68 - 24}, {600, finalFrame.rows}, {0, 0, 0}, -1);
