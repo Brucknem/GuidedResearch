@@ -46,6 +46,11 @@ namespace providentia {
 			double maxLambda;
 
 			/**
+			 * The maximal valid lambda value, i.e. the height of the object.
+			 */
+			double maxMu;
+
+			/**
 			 * Renders the given point using the current given camera translation and rotation.
 			 *
 			 * @tparam T Template parameter expected from the ceres-solver.
@@ -70,6 +75,7 @@ namespace providentia {
 								   std::shared_ptr<providentia::calibration::ParametricPoint> _point,
 								   Eigen::Matrix<double, 3, 4> _intrinsics,
 								   double maxLambda,
+								   double maxMu,
 								   double _weight);
 
 			/**
@@ -89,7 +95,8 @@ namespace providentia {
 			 * @return true
 			 */
 			template<typename T>
-			bool operator()(const T *_translation, const T *_rotation, const T *_lambda, const T *_mu, T *residual)
+			bool operator()(const T *_translation, const T *_rotation, const T *_lambda, const T *_mu, const T *
+			angle, T *residual)
 			const;
 
 			/**
@@ -99,6 +106,7 @@ namespace providentia {
 											   const std::shared_ptr<providentia::calibration::ParametricPoint> &point,
 											   const Eigen::Matrix<double, 3, 4> &intrinsics,
 											   double maxLambda,
+											   double maxMu,
 											   double weight);
 		};
 

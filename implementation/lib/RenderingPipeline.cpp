@@ -217,29 +217,10 @@ namespace providentia {
 					   const Eigen::Matrix<double, 3, 4> &_intrinsics,
 					   const double *vector);
 
-		/**
-		 * Point correspondences.
-		 */
-		template Eigen::Matrix<ceres::Jet<double, 6>, 2, 1>
-		render<ceres::Jet<double, 6>>(const ceres::Jet<double, 6> *, const ceres::Jet<double, 6> *,
+		template Eigen::Matrix<ceres::Jet<double, 9>, 2, 1>
+		render<ceres::Jet<double, 9>>(const ceres::Jet<double, 9> *, const ceres::Jet<double, 9> *,
 									  const Eigen::Matrix<double, 3, 4> &,
-									  const ceres::Jet<double, 6> *, bool &);
-
-		/**
-		 * PointOnLine correspondences.
-		 */
-		template Eigen::Matrix<ceres::Jet<double, 7>, 2, 1>
-		render<ceres::Jet<double, 7>>(const ceres::Jet<double, 7> *, const ceres::Jet<double, 7> *,
-									  const Eigen::Matrix<double, 3, 4> &,
-									  const ceres::Jet<double, 7> *, bool &);
-
-		/**
-		 * ParametricPoint correspondences.
-		 */
-		template Eigen::Matrix<ceres::Jet<double, 8>, 2, 1>
-		render<ceres::Jet<double, 8>>(const ceres::Jet<double, 8> *, const ceres::Jet<double, 8> *,
-									  const Eigen::Matrix<double, 3, 4> &,
-									  const ceres::Jet<double, 8> *, bool &);
+									  const ceres::Jet<double, 9> *, bool &);
 
 #pragma endregion TemplateInstances
 

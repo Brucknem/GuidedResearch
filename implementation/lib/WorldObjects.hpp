@@ -38,14 +38,20 @@ namespace providentia {
 			Eigen::Vector2d expectedPixel;
 
 			/**
-			 * The distance from the origin in the first axis.
+			 * The distance from the origin along the first axis.
 			 */
 			double lambda;
 
 			/**
-			 * The distance from the origin in the second axis.
+			 * The distance from the center line along the second axis.
 			 */
 			double mu;
+
+			/**
+			 * The angle of the second axis around the first axis, i.e. in the case of a cylinder the angle from the
+			 * middle to the surface.
+			 */
+			double angle;
 
 			/**
 			 * Flag if the expected pixel is set.
@@ -56,14 +62,14 @@ namespace providentia {
 			/**
 			 * @constructor
 			 *
-			 * @param _origin The origin of the parametricPoint.
-			 * @param _axisA One side of the parametricPoint.
-			 * @param _axisB Another side of the parametricPoint.
-			 * @param _lambda Optional distance from the origin in the first axis.
-			 * @param _mu Optional distance from the origin in the second axis.
+			 * @param origin The origin of the parametricPoint.
+			 * @param axisA One side of the parametricPoint.
+			 * @param axisB Another side of the parametricPoint.
+			 * @param lambda Optional distance from the origin in the first axis.
+			 * @param mu Optional distance from the origin in the second axis.
 			 */
-			ParametricPoint(Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA, const Eigen::Vector3d &_axisB,
-							double _lambda = 0, double _mu = 0);
+			ParametricPoint(Eigen::Vector3d origin, const Eigen::Vector3d &_axisA, const Eigen::Vector3d &_axisB,
+							double lambda = 0, double mu = 0, double angle = 0);
 
 		public:
 			/**
@@ -119,8 +125,8 @@ namespace providentia {
 			/**
 			 * Factory for a [x, y, z] world point.
 			 *
-			 * @param _expectedPixel The expected pixel.
- 			 * @param _worldPosition The world position of the point.
+			 * @param expectedPixel The expected pixel.
+ 			 * @param worldPosition The world position of the point.
 			 */
 			static ParametricPoint
 			OnPoint(const Eigen::Vector2d &_expectedPixel, const Eigen::Vector3d &_worldPosition);
@@ -133,41 +139,43 @@ namespace providentia {
 			/**
  			 * Factory for a [x, y, z] world point on a parametric line.
  			 *
-			 * @param _expectedPixel The expected pixel.
-			 * @param _origin The origin of the parametricPoint.
-			 * @param _heading The heading of the line.
-			 * @param _lambda Optional distance from the origin in heading direction.
+			 * @param expectedPixel The expected pixel.
+			 * @param origin The origin of the parametricPoint.
+			 * @param heading The heading of the line.
+			 * @param lambda Optional distance from the origin in heading direction.
 			 */
 			static ParametricPoint
-			OnLine(const Eigen::Vector2d &_expectedPixel, Eigen::Vector3d _origin, const Eigen::Vector3d &_heading,
-				   double _lambda = 0);
+			OnLine(const Eigen::Vector2d &_expectedPixel, Eigen::Vector3d origin, const Eigen::Vector3d &_heading,
+				   double lambda = 0);
 
 			/**
 			 * @copydoc
 			 */
-			static ParametricPoint OnLine(Eigen::Vector3d _origin, const Eigen::Vector3d &_heading, double _lambda = 0);
+			static ParametricPoint OnLine(Eigen::Vector3d origin, const Eigen::Vector3d &_heading, double lambda = 0);
 
 			/**
  			 * Factory for a [x, y, z] world point on a parametric parametricPoint.
 			 *
-			 * @param _expectedPixel The expected pixel.
-			 * @param _origin The origin of the parametricPoint.
-			 * @param _axisA One side of the parametricPoint.
-			 * @param _axisB Another side of the parametricPoint.
-			 * @param _lambda Optional distance from the origin in the first axis.
-			 * @param _mu Optional distance from the origin in the second axis.
+			 * @param expectedPixel The expected pixel.
+			 * @param origin The origin of the parametricPoint.
+			 * @param axisA One side of the parametricPoint.
+			 * @param axisB Another side of the parametricPoint.
+			 * @param lambda Optional distance from the origin in the first axis.
+			 * @param mu Optional distance from the origin in the second axis.
 			 */
 			static ParametricPoint
-			OnPlane(const Eigen::Vector2d &_expectedPixel, Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA,
-					const Eigen::Vector3d &_axisB,
-					double _lambda = 0, double _mu = 0);
+			OnCylinder(const Eigen::Vector2d &expectedPixel, Eigen::Vector3d origin, const Eigen::Vector3d &axisA,
+					   const Eigen::Vector3d &axisB,
+					   double lambda = 0, double mu = 0, double angle = 0);
 
 			/**
 			 * @copydoc
 			 */
 			static ParametricPoint
-			OnPlane(Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA, const Eigen::Vector3d &_axisB,
-					double _lambda = 0, double _mu = 0);
+			OnCylinder(Eigen::Vector3d origin, const Eigen::Vector3d &axisA, const Eigen::Vector3d &axisB,
+					   double lambda = 0, double mu = 0, double angle = 0);
+
+			double *getAngle();
 		};
 
 		/**
@@ -186,6 +194,8 @@ namespace providentia {
 			std::string id;
 
 			double height = 0;
+
+			double radius = 0;
 
 		public:
 
@@ -241,15 +251,9 @@ namespace providentia {
 			 */
 			void setHeight(double height);
 
-			/**
-			 * @get
-			 */
-			double getHeading() const;
+			double getRadius() const;
 
-			/**
-			 * @set
-			 */
-			void setHeading(double heading);
+			void setRadius(double _radius);
 		};
 	}
 }

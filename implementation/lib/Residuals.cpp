@@ -6,6 +6,8 @@
 
 #include <utility>
 #include "glog/logging.h"
+#include "ceres/ceres.h"
+#include "ceres/rotation.h"
 
 namespace providentia {
 	namespace calibration {
@@ -16,11 +18,13 @@ namespace providentia {
 													   std::shared_ptr<providentia::calibration::ParametricPoint> _point,
 													   Eigen::Matrix<double, 3, 4> _intrinsics,
 													   double maxLambda,
+													   double maxMu,
 													   double _weight) :
 			expectedPixel(std::move(_expectedPixel)),
 			parametricPoint(std::move(_point)),
 			intrinsics(std::move(_intrinsics)),
 			maxLambda(maxLambda),
+			maxMu(maxMu),
 			weight(_weight) {}
 
 		template<typename T>
@@ -49,31 +53,51 @@ namespace providentia {
 		}
 
 		template<typename T>
+		T Clamp(T value, T maxValue) {
+			const T zero = (T) 0;
+
+			if (value > maxValue) {
+				return value - maxValue;
+			} else if (value > zero) {
+				return zero;
+			}
+			return value;
+		}
+
+//		template double Clamp(double, double);
+//		template double Clamp(double, double);
+
+		template<typename T>
 		bool CorrespondenceResidual::operator()(const T *_translation, const T *_rotation, const T *_lambda,
-												const T *_mu, T *residual) const {
+												const T *_mu, const T *_angle, T *residual) const {
 			Eigen::Matrix<T, 3, 1> point = parametricPoint->getOrigin().cast<T>();
 //			std::cout << "Point" << std::endl;
 //			std::cout << point << std::endl << std::endl;
 			point += parametricPoint->getAxisA().cast<T>() * _lambda[0];
 //			std::cout << point << std::endl << std::endl;
-			point += parametricPoint->getAxisB().cast<T>() * _mu[0];
+
+			Eigen::Matrix<T, 3, 1> angleAxis = parametricPoint->getAxisA().template cast<T>() * _angle[0];
+//			std::cout << angleAxis << std::endl << std::endl;
+			Eigen::Matrix<T, 3, 1> direction = parametricPoint->getAxisB().template cast<T>();
+//			std::cout << direction << std::endl << std::endl;
+
+			Eigen::Matrix<T, 3, 1> rotationResult;
+			ceres::AngleAxisRotatePoint(angleAxis.data(), direction.data(), rotationResult.data());
+//			std::cout << rotationResult << std::endl << std::endl;
+
+			point += rotationResult * _mu[0];
 //			std::cout << point << std::endl << std::endl;
+
 			bool result = calculateResidual(_translation, _rotation, point.data(), residual);
 
 			// TODO add actual height from object from HD map.
 			const T zero = (T) 0;
-			T lambda = _lambda[0];
-			if (lambda > (T) maxLambda) {
-				lambda -= (T) maxLambda;
-			} else if (lambda > zero) {
-				lambda = zero;
-			}
+			T lambda = Clamp(_lambda[0], (T) maxLambda);
+			T mu = Clamp(_mu[0], (T) maxMu);
 
 //			residual[2] = lambda * weight;
 			residual[2] = lambda;
-
-			residual[3] = _mu[0] * weight;
-//			residual[3] = _mu[0];
+			residual[3] = mu;
 
 			return result;
 		}
@@ -83,10 +107,11 @@ namespace providentia {
 									   const std::shared_ptr<providentia::calibration::ParametricPoint> &_point,
 									   const Eigen::Matrix<double, 3, 4> &_intrinsics,
 									   double _maxLambda,
+									   double _maxMu,
 									   double _weight) {
-			return new ceres::AutoDiffCostFunction<CorrespondenceResidual, 4, 3, 3, 1, 1>(
+			return new ceres::AutoDiffCostFunction<CorrespondenceResidual, 4, 3, 3, 1, 1, 1>(
 				new CorrespondenceResidual(_expectedPixel, _point, _intrinsics,
-										   _maxLambda, _weight)
+										   _maxLambda, _maxMu, _weight)
 			);
 		}
 

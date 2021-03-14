@@ -11,10 +11,10 @@ namespace providentia {
 #pragma region Points
 
 		ParametricPoint::ParametricPoint(Eigen::Vector3d _origin, const Eigen::Vector3d
-		&_axisA, const Eigen::Vector3d &_axisB, double _lambda, double _mu) :
+		&_axisA, const Eigen::Vector3d &_axisB, double _lambda, double _mu, double _angle) :
 			expectedPixel({0, 0}), origin(std::move(_origin)), axisA(_axisA.normalized()),
 			axisB(_axisB.normalized()),
-			lambda(_lambda), mu(_mu) {}
+			lambda(_lambda), mu(_mu), angle(_angle) {}
 
 		Eigen::Vector3d ParametricPoint::getPosition() const {
 			return origin + lambda * axisA + mu * axisB;
@@ -40,6 +40,10 @@ namespace providentia {
 			return &mu;
 		}
 
+		double *ParametricPoint::getAngle() {
+			return &angle;
+		}
+
 		const Eigen::Vector2d &ParametricPoint::getExpectedPixel() const {
 			return expectedPixel;
 		}
@@ -49,18 +53,20 @@ namespace providentia {
 			isExpectedPixelSet = true;
 		}
 
-		ParametricPoint ParametricPoint::OnPlane(const Eigen::Vector2d &_expectedPixel, Eigen::Vector3d _origin,
-												 const Eigen::Vector3d &_axisA, const Eigen::Vector3d &_axisB,
-												 double _lambda, double _mu) {
-			ParametricPoint point = OnPlane(std::move(_origin), _axisA, _axisB, _lambda, _mu);
+		ParametricPoint ParametricPoint::OnCylinder(const Eigen::Vector2d &_expectedPixel, Eigen::Vector3d _origin,
+													const Eigen::Vector3d &_axisA, const Eigen::Vector3d &_axisB,
+													double _lambda, double _mu, double
+													_angle) {
+			ParametricPoint point = OnCylinder(std::move(_origin), _axisA, _axisB, _lambda, _mu, _angle);
 			point.setExpectedPixel(_expectedPixel);
 			return point;
 		}
 
-		ParametricPoint ParametricPoint::OnPlane(Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA,
-												 const Eigen::Vector3d &_axisB, double _lambda, double _mu) {
+		ParametricPoint ParametricPoint::OnCylinder(Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA,
+													const Eigen::Vector3d &_axisB, double _lambda, double _mu, double
+													_angle) {
 			return ParametricPoint(std::move(_origin), _axisA.stableNormalized(), _axisB.stableNormalized(), _lambda,
-								   _mu);
+								   _mu, _angle);
 		}
 
 		ParametricPoint ParametricPoint::OnLine(const Eigen::Vector2d &_expectedPixel, Eigen::Vector3d _origin, const
@@ -72,7 +78,7 @@ namespace providentia {
 
 		ParametricPoint ParametricPoint::OnLine(Eigen::Vector3d _origin, const Eigen::Vector3d &_heading,
 												double _lambda) {
-			return ParametricPoint::OnPlane(std::move(_origin), _heading, {0, 0, 0}, _lambda, 0);
+			return ParametricPoint::OnCylinder(std::move(_origin), _heading, {0, 0, 0}, _lambda, 0);
 		}
 
 		ParametricPoint
@@ -135,6 +141,14 @@ namespace providentia {
 
 		void WorldObject::setHeight(double _height) {
 			height = _height;
+		}
+
+		double WorldObject::getRadius() const {
+			return radius;
+		}
+
+		void WorldObject::setRadius(double _radius) {
+			radius = _radius;
 		}
 
 #pragma endregion Objects

@@ -85,25 +85,6 @@ namespace providentia {
 				}
 				estimator->addWorldObject(post);
 			}
-
-			void addPlane(int samples) {
-				Eigen::Vector3d origin(0, 0, 0);
-				Eigen::Vector3d axisA(1, 0, 0);
-				Eigen::Vector3d axisB(0, 1, 0);
-				WorldObject plane;
-				for (int i = 0; i < samples; ++i) {
-					providentia::calibration::ParametricPoint point = ParametricPoint::OnPlane(
-						origin,
-						axisA,
-						axisB,
-						(rand() % 2000) / 100. - 10,
-						(rand() % 2000) / 100.
-					);
-					point.setExpectedPixel(getPixel(point.getPosition()));
-					plane.add(point);
-				}
-				estimator->addWorldObject(plane);
-			}
 		};
 
 		/**

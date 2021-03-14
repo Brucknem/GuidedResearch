@@ -15,6 +15,7 @@ using namespace providentia::runnable;
 /**
  * Setup to visualize the rendering pipeline.
  */
+//class Setup : public providentia::runnable::VideoSetup {
 class Setup : public providentia::runnable::ImageSetup {
 public:
 	/**
@@ -70,6 +71,7 @@ public:
 
 	bool renderObjects = true;
 
+//	explicit Setup() : VideoSetup() {
 	explicit Setup() : ImageSetup() {
 		objects = providentia::calibration::LoadObjects("../misc/objects.yaml", "../misc/pixels.yaml", imageSize);
 

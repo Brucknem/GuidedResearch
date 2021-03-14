@@ -75,7 +75,7 @@ providentia::runnable::ImageSetup::ImageSetup(std::string _filename,
 void providentia::runnable::ImageSetup::init() {
 	renderingScaleFactor /= calculationScaleFactor;
 	cv::namedWindow(windowName, cv::WINDOW_AUTOSIZE);
-	cv::moveWindow(windowName, 50, 10);
+	cv::moveWindow(windowName, 250, 10);
 	srand(static_cast <unsigned> (time(0)));
 }
 

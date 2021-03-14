@@ -84,6 +84,8 @@ namespace providentia {
 		}
 
 		void CameraPoseEstimator::createProblem() {
+			problem = ceres::Problem{};
+
 			int i = 0;
 			for (const auto &worldObject : worldObjects) {
 				for (const auto &point : worldObject.getPoints()) {
@@ -97,13 +99,16 @@ namespace providentia {
 							point,
 							intrinsics,
 							worldObject.getHeight(),
+							worldObject.getRadius(),
 							worldObject.getWeight()
 						),
 						nullptr,
 						translation.data(),
 						rotation.data(),
 						point->getLambda(),
-						point->getMu());
+						point->getMu(),
+						point->getAngle()
+					);
 				}
 			}
 			std::cout << "Added residuals: " << i << std::endl;

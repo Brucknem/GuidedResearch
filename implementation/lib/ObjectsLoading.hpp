@@ -85,6 +85,7 @@ namespace providentia {
 				std::string objectId = object["id"].as<std::string>();
 				worldObject.setId(objectId);
 				worldObject.setHeight(object["height"].as<double>());
+				worldObject.setRadius(object["radius"].as<double>());
 
 				if (std::strcmp(object["type"].as<std::string>().c_str(), "pole") == 0 &&
 					std::strcmp(object["name"].as<std::string>().c_str(), "permanentDelineator") == 0) {
@@ -101,7 +102,8 @@ namespace providentia {
 									pixel = {pixel.x(), imageHeight - 1 - pixel.y()};
 								}
 								worldObject.add(
-									ParametricPoint::OnLine(pixel, worldPosition, Eigen::Vector3d::UnitZ()));
+									ParametricPoint::OnCylinder(pixel, worldPosition, Eigen::Vector3d::UnitZ(),
+																Eigen::Vector3d::UnitX()));
 								hasPixels = true;
 							}
 						}
