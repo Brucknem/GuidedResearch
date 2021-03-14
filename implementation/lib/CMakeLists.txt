@@ -47,7 +47,6 @@ add_library(libCameraStabilization
         OpticalFlow.cpp
         TimeMeasurable.cpp
         CSVWriter.cpp
-        Intrinsics.cpp
         CameraPoseEstimation.cpp
         RenderingPipeline.cpp
         Residuals.cpp

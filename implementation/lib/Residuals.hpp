@@ -9,7 +9,6 @@
 #include "ceres/ceres.h"
 
 #include "RenderingPipeline.hpp"
-#include "CameraPoseEstimation.hpp"
 #include "WorldObjects.hpp"
 
 namespace providentia {
