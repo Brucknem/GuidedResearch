@@ -126,7 +126,11 @@ void providentia::runnable::ImageSetup::mainLoop() {
 		if (!outputFolder.empty()) {
 			finalFrame *= 255;
 			finalFrame.convertTo(finalFrame, CV_8UC4);
-			boost::filesystem::path outFile = outputFolder / ("frame_" + std::to_string(frameNumber) + ".jpg");
+			std::stringstream frameId;
+			frameId.fill('0');
+			frameId.width(5);
+			frameId << frameNumber;
+			boost::filesystem::path outFile = outputFolder / ("frame_" + frameId.str() + ".jpg");
 			cv::imwrite(outFile.string(), finalFrame, {cv::IMWRITE_PNG_COMPRESSION, 9});
 		}
 		pressedKey = cv::waitKey(1);

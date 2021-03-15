@@ -100,9 +100,17 @@ public:
 	}
 
 	void render(std::string id, double x, double y, double z, const cv::Vec3d &color) {
+		Eigen::Vector4d vector{x, y, z, 1};
+		Eigen::Vector4d vectorInCameraSpace = providentia::camera::toCameraSpace(
+			translation.data(), rotation.data(), vector.data());
+
+		if (std::abs(vectorInCameraSpace.z()) > 2000) {
+			return;
+		}
+
 		bool flipped;
 		auto pixel = providentia::camera::render(translation, rotation,
-												 intrinsics, Eigen::Vector4d(x, y, z, 1), color,
+												 intrinsics, vector, color,
 												 finalFrame, flipped);
 
 		if (flipped) {
@@ -207,7 +215,7 @@ protected:
 int main(int argc, char const *argv[]) {
 	Setup setup;
 	setup.setRenderingScaleFactor(1);
-//	setup.setOutputFolder("./stabilization/");
+	setup.setOutputFolder("./stabilization/");
 	setup.mainLoop();
 	return 0;
 }
