@@ -67,7 +67,6 @@ https://thesisguide.org/2014/10/13/thesis-architecture/
     - [ ] Image MSE for calibration (unsupervised)
     - [ ] Logistic regression on pose (supervised)
 - [ ] Static calibration
-  - [ ] Object height and heading
   - [ ] Extend to global refinement of multiple cameras
   - [ ] After initial by hand calibration with watersheder: Re-detection in new keyframes:
     - [ ] Automatic recalibration

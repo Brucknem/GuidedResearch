@@ -1,1 +1,43 @@
+% !TEX root=./report.tex
+
 \section{Introduction}
+\AD{} is redefining the role of the automobile.
+It will not only enhance safety and comfort, but also provide us with more free time which was previously spent driving. (Remove as taken from daimler) 
+
+As the main focus of the research in the field of \AD{} is on enabling single vehicles to participate in the traffic,
+\ITS{} (ITS) aim to provide them with additional information outside of their perceptional scopes.
+
+The \Providentia{} project is one of the first realizations of ITS and quickly expanding its functionalities. These include the visual perception of vehicles using multiple cameras joined with Radar and Lidar measurements providing spatial and motional measurements.
+Robust vehicle detection and tracking enable the system to accurately estimate the position and velocities of the vehicles in the sensor ranges.
+
+A key challenge of ITS lies in the reliable and accurate calibration of the different sensors.
+The calibration is especially challenging when the sensor is subject to real-life disturbances like vibration of its mounting pole caused by wind or displacements due to temperature expansion.
+These disturbances introduce noise to the measurements. We focus on the implications of this noise for the vision system built upon the cameras.
+\\
+
+The focus of the project is not to accurately view and measure the vehicles in the sensor ranges, but rather to build upon these measurements. 
+The backend tracking the vehicles are sensible noise in the measurements despite the strong efforts of to extend the robustness using extended filtering techniques. 
+These filters already mitigate a broad range of noise but nonetheless cannot remove all.
+
+The projects main focus is to provide accurate inter-vehicle information and to predict the future traffic development.
+The digital twin modeling the state of the traffic and environment drifts over time and the calibration between the nodes and of the nodes gets less accurate.
+\\
+
+To tackle real-life disturbances and to remove noise from the system we provide two vision based frameworks. 
+The problems arising from disturbances can be roughly grouped into problems concerning the Dynamic Stabilization of the video feed and the Static Calibration of the camera pose.
+
+\paragraph{Dynamic stabilization}
+The dynamic shaky motions of the camera due to wind and vibrations from passing vehicles are stabilized using a digital image stabilization approach.
+The DIS approach is based on visual image features that are matched between the current and a keyframe. 
+Using the feature matching the homographic transformation between the frames is computed and the current frame is warped to minimize the pixel distances between the static background scene.
+This enables us to mitigate the real-world motions of the camera in the image space.
+
+\paragraph{Static calibration}
+Within the project high definition maps (\HDmaps) of the enclosed environment are heavily used. 
+These \HDmaps{} offer the real-world positions of the highway lanes, the gantry bridges, objects like poles and permanent delineators and traffic signals like speed limits or exit markers.
+
+Due to the environmental influences on the mounting constructions as well as the gantry bridges (Explain these earlier) and the natural wear of the materials the cameras positional and rotational parameters are changing over time. 
+
+Using the spatial information of the \HDmaps{} and a mapping to pixels in the video frame the reprojection error is minimized to find the optimal camera pose for the observations.\\
+
+The code for the dynamic stabilization, static calibration and object position retrieval from the \HDmaps{} are accessible via the two GitHub repositories: \url{https://github.com/Brucknem/GuidedResearch} and \url{https://github.com/Brucknem/OpenDRIVE}.
