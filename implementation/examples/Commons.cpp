@@ -120,7 +120,7 @@ void providentia::runnable::ImageSetup::mainLoop() {
 		specificAddMessages();
 
 		addTimestamp("End");
-		addRuntimeToFinalFrame("Frame " + std::to_string(frameNumber), getTotalMilliseconds(), 5, finalFrame.rows - 20);
+//		addRuntimeToFinalFrame("Frame " + std::to_string(frameNumber), getTotalMilliseconds(), 5, finalFrame.rows - 20);
 
 		cv::imshow(windowName, finalFrame);
 		if (!outputFolder.empty()) {

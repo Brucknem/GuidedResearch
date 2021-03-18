@@ -58,8 +58,6 @@ namespace providentia {
 			const cv::Mat &essentialMatrix = cv::findFundamentalMat(frameMatchedPoints, referenceMatchedPoints,
 																	cv::FM_RANSAC, 1.0, 0.975,
 																	fundamentalMatrixInlierMask);
-			cv::decomposeEssentialMat();
-			std::cout << essentialMatrix << std::endl;
 			fundamentalMatches.clear();
 			for (int i = 0; i < goodMatches.size(); i++) {
 				if (fundamentalMatrixInlierMask.at<bool>(i, 0)) {

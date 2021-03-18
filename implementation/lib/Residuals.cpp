@@ -69,11 +69,9 @@ namespace providentia {
 				lambda = zero;
 			}
 
-//			residual[2] = lambda * weight;
 			residual[2] = lambda;
-
-			residual[3] = _mu[0] * weight;
-//			residual[3] = _mu[0];
+			residual[3] = zero;
+//			_mu[0] * weight;
 
 			return result;
 		}

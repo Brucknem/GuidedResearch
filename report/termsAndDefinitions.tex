@@ -12,10 +12,17 @@ We group parts of the world seen by the cameras into the two groups of dynamic f
 Dynamic foreground describes all pixels that represent objects that are meant to be moving, \eg{} vehicles on the roads.
 On the other hand the static scene are all pixels that are not dynamic foreground, \eg{} the road, guardrails or bridges.
 
-\subsection{Parametric cubic polynomial}
-To calculate a parametric cubic polynomial the following equation is used.
-\begin{equation}
-    \begin{split}
-        para(U, s) &= para(U_a, U_b, U_c, U_d, s) \\ &= U_a + U_b * s + U_c * s^2 + U_d * s^3
-    \end{split}
-\end{equation}
+% \subsection{Parametric cubic polynomial}
+% To calculate a parametric cubic polynomial the following equation is used.
+% \begin{equation}
+%     \begin{split}
+%         para(U, s) &= para(U_a, U_b, U_c, U_d, s) \\ &= U_a + U_b * s + U_c * s^2 + U_d * s^3
+%     \end{split}
+% \end{equation}
+
+
+\subsection{High definition road maps (\HDmaps{})}
+\label{sec:hd_maps}
+Several HD maps are used to generate the \DigitalTwin{}.
+The HD maps adhere to the \OD{} standard V1.4. 
+They contain spatial and relational information between the world, roads, the road coordinate frames and objects within these frames.

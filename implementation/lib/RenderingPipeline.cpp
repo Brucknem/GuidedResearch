@@ -137,8 +137,9 @@ namespace providentia {
 
 			cv::circle(image,
 					   {(int) pointInImageSpace.x(), (int) (imageHeight - pointInImageSpace.y())},
-					   std::min(3, std::max(0, (int) (imageSize.y() * 0.01))),
-					   color
+					   std::min(5, std::max(0, (int) (imageSize.y() * 0.01))),
+					   color,
+					   cv::FILLED
 			);
 			return pointInImageSpace;
 		}

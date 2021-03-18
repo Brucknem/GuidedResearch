@@ -59,7 +59,7 @@ public:
 	/**
 	 * Flag for the background.
 	 */
-	int trackbarBackground = 0;
+	int trackbarBackground = 4;
 
 	/**
 	 * The objects from the HD map.
@@ -75,7 +75,7 @@ public:
 
 //		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics);
 		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics);
-//		estimator->setInitialGuess(initialTranslation, initialRotation);
+		estimator->setInitialGuess(initialTranslation, initialRotation);
 		estimator->addWorldObjects(objects);
 
 //		estimator->estimate(true);
@@ -92,7 +92,7 @@ public:
 		cv::createTrackbar("Rotation Y", windowName, &trackbarRotationY, 2 * trackbarRotationMiddle);
 		cv::createTrackbar("Rotation Z", windowName, &trackbarRotationZ, 2 * trackbarRotationMiddle);
 
-		cv::createTrackbar("Background", windowName, &trackbarBackground, 1);
+		cv::createTrackbar("Background", windowName, &trackbarBackground, 10);
 	}
 
 	void render(std::string id, Eigen::Vector3d vector, const cv::Vec3d &color) {
@@ -131,23 +131,20 @@ public:
 
 protected:
 	void specificMainLoop() override {
-		if (trackbarBackground == 1) {
-			finalFrame = frameCPU.clone();
-			std::vector<cv::Mat> matChannels;
-			cv::split(finalFrame, matChannels);
-			// create alpha channel
-			cv::Mat alpha = cv::Mat::ones(frameCPU.size(), CV_8UC1);
-			matChannels.push_back(alpha);
-			cv::merge(matChannels, finalFrame);
-			finalFrame.convertTo(finalFrame, CV_64FC4, 1. / 255.);
-		} else {
-			finalFrame = cv::Mat::zeros(cv::Size(imageSize[0], imageSize[1]), CV_64FC4);
-		}
+		finalFrame = frameCPU.clone();
+		std::vector<cv::Mat> matChannels;
+		cv::split(finalFrame, matChannels);
+		// create alpha channel
+		cv::Mat alpha = cv::Mat::ones(frameCPU.size(), CV_8UC1);
+		matChannels.push_back(alpha);
+		cv::merge(matChannels, finalFrame);
+		finalFrame.convertTo(finalFrame, CV_64FC4, 1. / 255.);
+		finalFrame = finalFrame * (trackbarBackground / 10.);
 
 		if (!optimizationFinished) {
 			optimizationFinished = estimator->isOptimizationFinished();
 			if (optimizationFinished) {
-				trackbarBackground = 1;
+				trackbarBackground = 4;
 				cv::setTrackbarPos("Background", windowName, trackbarBackground);
 			}
 		}
@@ -169,36 +166,38 @@ protected:
 			initialRotation.z() + (trackbarRotationZ - trackbarRotationMiddle) / 10.,
 		};
 
-		if (pressedKey == (int) 'b') {
-			trackbarBackground = (trackbarBackground + 1) % 2;
-			cv::setTrackbarPos("Background", windowName, trackbarBackground);
-		} else if (pressedKey == (int) 's') {
+		if (pressedKey == (int) 's') {
 			renderObjects = !renderObjects;
 		} else if (pressedKey == (int) 'e') {
 			optimizationFinished = false;
 			estimator->estimateAsync(true);
 		}
-
-		cv::rectangle(finalFrame, {0, finalFrame.rows - 68 - 24}, {600, finalFrame.rows}, {0, 0, 0}, -1);
-		cv::rectangle(finalFrame, {1345, finalFrame.rows - 190 - 24}, {finalFrame.cols, finalFrame.rows}, {0, 0, 0},
-					  -1);
-
-		addTextToFinalFrame("RED dots: Unmapped objects", 5, finalFrame.rows - 68);
-		addTextToFinalFrame("GREEN dots: Mapped objects", 5, finalFrame.rows - 44);
+//
+//		cv::rectangle(finalFrame, {0, finalFrame.rows - 68 - 24}, {600, finalFrame.rows}, {0, 0, 0}, -1);
+//		cv::rectangle(finalFrame, {1345, finalFrame.rows - 190 - 24}, {finalFrame.cols, finalFrame.rows}, {0, 0, 0},
+//					  -1);
+//
+//		addTextToFinalFrame("RED dots: Unmapped objects", 5, finalFrame.rows - 68);
+//		addTextToFinalFrame("GREEN dots: Mapped objects", 5, finalFrame.rows - 44);
 
 		std::stringstream ss;
-		ss << *estimator;
+		ss << *
+			estimator;
 		std::string line;
 		int i = 0;
-		while (getline(ss, line)) {
-			addTextToFinalFrame(line, 1350, finalFrame.rows - 190 + i++ * 24);
+		while (
+			getline(ss, line
+			)) {
+//			addTextToFinalFrame(line, 1350, finalFrame.rows - 190 + i++ * 24);
 		}
 
 		if (!renderObjects) {
 			return;
 		}
 
-		for (const auto &worldObject : objects) {
+		for (
+			const auto &worldObject: objects
+			) {
 			for (const auto &point : worldObject.getPoints()) {
 				Eigen::Vector3d p = point->getPosition();
 				cv::Vec3d color = {0, 0, 1};
@@ -210,6 +209,7 @@ protected:
 		}
 
 	}
+
 };
 
 int main(int argc, char const *argv[]) {
