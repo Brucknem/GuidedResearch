@@ -2,7 +2,6 @@
 #include <iostream>
 #include <utility>
 
-#include "Intrinsics.hpp"
 #include "CameraTestBase.hpp"
 #include "CameraPoseEstimation.hpp"
 #include "RenderingPipeline.hpp"

@@ -3,8 +3,19 @@
 \section{Terms and Definitions}
 This section provides explanations of extensively used terms and definitions. 
 
-\subsection{Dynamic foreground and \Sc{}}
+\subsection{Digital Twin}
+\label{sec:digital_twin}
+
+\subsection{Dynamic foreground and static scene}
 \label{sec:dynamic_foreground_static_scene}
-We group parts of the world seen by the cameras into the two groups of dynamic foreground and \Sc{}.
+We group parts of the world seen by the cameras into the two groups of dynamic foreground and static scene.
 Dynamic foreground describes all pixels that represent objects that are meant to be moving, \eg{} vehicles on the roads.
-On the other hand the \Sc{} are all pixels that are not dynamic foreground, \eg{} the road, guardrails or bridges.
+On the other hand the static scene are all pixels that are not dynamic foreground, \eg{} the road, guardrails or bridges.
+
+\subsection{Parametric cubic polynomial}
+To calculate a parametric cubic polynomial the following equation is used.
+\begin{equation}
+    \begin{split}
+        para(U, s) &= para(U_a, U_b, U_c, U_d, s) \\ &= U_a + U_b * s + U_c * s^2 + U_d * s^3
+    \end{split}
+\end{equation}
