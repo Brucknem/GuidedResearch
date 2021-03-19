@@ -14,7 +14,7 @@
 namespace providentia {
 	namespace calibration {
 
-		/**
+		gs        /**
 		 * A residual term used in the optimization process to find the camera pose.
 		 */
 		class CorrespondenceResidual {
