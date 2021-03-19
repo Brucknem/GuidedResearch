@@ -14,7 +14,42 @@
 namespace providentia {
 	namespace calibration {
 
-		gs        /**
+		class DistanceResidual {
+		protected:
+			double expectedValue;
+
+		public:
+			explicit DistanceResidual(double expectedValue);
+
+			template<typename T>
+			bool operator()(const T *value, T *residual) const;;
+
+			static ceres::CostFunction *Create(const double expectedValue);;
+
+		};
+
+		class DistanceFromIntervalResidual {
+		protected:
+			double lowerBound;
+			double upperBound;
+
+		public:
+			explicit DistanceFromIntervalResidual(double upperBound);
+
+			DistanceFromIntervalResidual(double lowerBound, double upperBound);
+
+			template<typename T>
+			bool operator()(const T *value, T *residual) const;
+
+			/**
+			 * Factory method to hide the residual creation.
+			 */
+			static ceres::CostFunction *Create(const double lowerBound, const double upperBound);
+
+			static ceres::CostFunction *Create(const double upperBound);
+		};
+
+		/**
 		 * A residual term used in the optimization process to find the camera pose.
 		 */
 		class CorrespondenceResidual {
@@ -34,28 +69,6 @@ namespace providentia {
 			 */
 			std::shared_ptr<providentia::calibration::ParametricPoint> parametricPoint;
 
-			/**
-			 * The weight factor of the residual.
-			 */
-			double weight;
-
-			/**
-			 * The maximal valid lambda value, i.e. the height of the object.
-			 */
-			double maxLambda;
-
-			/**
-			 * Renders the given point using the current given camera translation and rotation.
-			 *
-			 * @tparam T Template parameter expected from the ceres-solver.
-			 * @param _translation The [x, y, z] translation of the camera in world space for which we optimize.
-			 * @param _rotation The [x, y, z] euler angle rotation of the camera around the world axis for which we optimize.
-			 * @param _point The [x, y, z] world position vector.
-			 * @param residual The [u, v] pixel error between the expected and calculated pixel.
-			 */
-			template<typename T>
-			bool calculateResidual(const T *_translation, const T *_rotation, const T *_point, T *residual) const;
-
 		public:
 			/**
 			 * @constructor
@@ -67,9 +80,7 @@ namespace providentia {
 			 */
 			CorrespondenceResidual(Eigen::Vector2d _expectedPixel,
 								   std::shared_ptr<providentia::calibration::ParametricPoint> _point,
-								   Eigen::Matrix<double, 3, 4> _intrinsics,
-								   double maxLambda,
-								   double _weight);
+								   Eigen::Matrix<double, 3, 4> _intrinsics);
 
 			/**
 			 * @destructor
@@ -88,7 +99,8 @@ namespace providentia {
 			 * @return true
 			 */
 			template<typename T>
-			bool operator()(const T *_translation, const T *_rotation, const T *_lambda, const T *_mu, T *residual)
+			bool operator()(const T *_translation, const T *_rotation, const T *_lambda, const T *_mu, const T
+			*_weight, T *residual)
 			const;
 
 			/**
@@ -96,9 +108,7 @@ namespace providentia {
 			 */
 			static ceres::CostFunction *Create(const Eigen::Vector2d &_expectedPixel,
 											   const std::shared_ptr<providentia::calibration::ParametricPoint> &point,
-											   const Eigen::Matrix<double, 3, 4> &intrinsics,
-											   double maxLambda,
-											   double weight);
+											   const Eigen::Matrix<double, 3, 4> &intrinsics);
 		};
 
 	}

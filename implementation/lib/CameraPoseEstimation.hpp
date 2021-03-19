@@ -80,6 +80,8 @@ namespace providentia {
 
 			bool optimizationFinished = false;
 
+			std::vector<double *> weights;
+
 		public:
 			/**
 			 * @constructor

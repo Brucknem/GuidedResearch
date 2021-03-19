@@ -6,6 +6,7 @@
 
 #include <utility>
 #include "ceres/autodiff_cost_function.h"
+#include <limits>
 
 namespace providentia {
 	namespace calibration {
@@ -86,25 +87,65 @@ namespace providentia {
 		void CameraPoseEstimator::createProblem() {
 			int i = 0;
 			for (const auto &worldObject : worldObjects) {
+
+//				weights.emplace_back(new double(1));
+//				bool hasPoints = false;
 				for (const auto &point : worldObject.getPoints()) {
 					if (!point->hasExpectedPixel()) {
 						continue;
 					}
 					i++;
+//					hasPoints = true;
+					weights.emplace_back(new double(1));
 					problem.AddResidualBlock(
 						CorrespondenceResidual::Create(
 							point->getExpectedPixel(),
 							point,
-							intrinsics,
-							worldObject.getHeight(),
-							worldObject.getWeight()
+							intrinsics
 						),
 						nullptr,
 						translation.data(),
 						rotation.data(),
 						point->getLambda(),
-						point->getMu());
+						point->getMu(),
+						weights[weights.size() - 1]
+					);
+
+					problem.AddResidualBlock(
+						DistanceFromIntervalResidual::Create(worldObject.getHeight()),
+						nullptr,
+						point->getLambda()
+					);
+
+					problem.AddResidualBlock(
+						DistanceResidual::Create(1),
+						new ceres::ScaledLoss(
+							nullptr,
+//						std::numeric_limits<double>::max(),
+//							1e2,
+							3,
+//							std::sqrt(2),
+							ceres::TAKE_OWNERSHIP
+						),
+						weights[weights.size() - 1]
+					);
 				}
+
+//				if (!hasPoints) {
+//					weights.pop_back();
+//					continue;
+//				}
+//
+//				problem.AddResidualBlock(
+//					DistanceResidual::Create(1),
+//					new ceres::ScaledLoss(
+//						nullptr,
+////						std::numeric_limits<double>::max(),
+//						1e5,
+//						ceres::TAKE_OWNERSHIP
+//					),
+//					weights[weights.size() - 1]
+//				);
 			}
 			std::cout << "Added residuals: " << i << std::endl;
 		}
@@ -150,7 +191,12 @@ namespace providentia {
 			os << "Rotation:" << std::endl;
 			os << "From:       " << printVectorRow(estimator.initialRotation) << std::endl;
 			os << "To:         " << printVectorRow(estimator.rotation) << std::endl;
-			os << "Difference: " << printVectorRow(estimator.rotation - estimator.initialRotation);
+			os << "Difference: " << printVectorRow(estimator.rotation - estimator.initialRotation) << std::endl;
+
+			os << "Weights:" << std::endl;
+			for (const auto &weight : estimator.weights) {
+				os << *weight << ", ";
+			}
 			return os;
 		}
 
