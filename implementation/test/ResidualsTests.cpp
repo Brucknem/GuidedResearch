@@ -29,11 +29,9 @@ namespace providentia {
 				CorrespondenceResidual correspondenceResidual = {
 					point.getExpectedPixel(), std::make_shared<ParametricPoint>(point),
 					intrinsics,
-					0,
-					1
 				};
-				correspondenceResidual(translation.data(), rotation.data(), point.getLambda(), point.getMu(), residual
-					.data());
+				correspondenceResidual(translation.data(), rotation.data(), point.getLambda(), point.getMu(), new
+					double(1), residual.data());
 
 				EXPECT_NEAR(residual.x(), expectedResidual.x(), 1e-6);
 				EXPECT_NEAR(residual.y(), expectedResidual.y(), 1e-6);

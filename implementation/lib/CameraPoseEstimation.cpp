@@ -11,8 +11,9 @@
 namespace providentia {
 	namespace calibration {
 
-		CameraPoseEstimator::CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics, bool initLogging) :
-			intrinsics(std::move(_intrinsics)) {
+		CameraPoseEstimator::CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics, bool initLogging,
+												 bool allowWeighting) :
+			intrinsics(std::move(_intrinsics)), allowWeighting(allowWeighting) {
 			if (initLogging) {
 				google::InitGoogleLogging("Camera Pose Estimation");
 			}
@@ -86,6 +87,15 @@ namespace providentia {
 
 		void CameraPoseEstimator::createProblem() {
 			int i = 0;
+
+			double weightScale;
+			if (!allowWeighting) {
+				weightScale = std::numeric_limits<double>::max();
+			} else {
+//			weightScale = 1e2;
+				weightScale = 3;
+//			weightScale = std::sqrt(2);
+			}
 			for (const auto &worldObject : worldObjects) {
 
 //				weights.emplace_back(new double(1));
@@ -121,10 +131,7 @@ namespace providentia {
 						DistanceResidual::Create(1),
 						new ceres::ScaledLoss(
 							nullptr,
-//						std::numeric_limits<double>::max(),
-//							1e2,
-							3,
-//							std::sqrt(2),
+							weightScale,
 							ceres::TAKE_OWNERSHIP
 						),
 						weights[weights.size() - 1]

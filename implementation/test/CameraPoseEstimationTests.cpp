@@ -84,25 +84,6 @@ namespace providentia {
 				}
 				estimator->addWorldObject(post);
 			}
-
-			void addPlane(int samples) {
-				Eigen::Vector3d origin(0, 0, 0);
-				Eigen::Vector3d axisA(1, 0, 0);
-				Eigen::Vector3d axisB(0, 1, 0);
-				WorldObject plane;
-				for (int i = 0; i < samples; ++i) {
-					providentia::calibration::ParametricPoint point = ParametricPoint::OnPlane(
-						origin,
-						axisA,
-						axisB,
-						(rand() % 2000) / 100. - 10,
-						(rand() % 2000) / 100.
-					);
-					point.setExpectedPixel(getPixel(point.getPosition()));
-					plane.add(point);
-				}
-				estimator->addWorldObject(plane);
-			}
 		};
 
 		/**
@@ -110,7 +91,7 @@ namespace providentia {
 		 */
 		TEST_F(CameraPoseEstimationTests, testCalculateInitialGuess) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-				intrinsics, false
+				intrinsics, false, false
 			);
 
 			addPointCorrespondence({0, 0, 9});
@@ -131,7 +112,7 @@ namespace providentia {
 		 */
 		TEST_F(CameraPoseEstimationTests, testEstimationOnlyWorldPositions) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-				intrinsics, false
+				intrinsics, false, false
 			);
 			addSomePointCorrespondences();
 			assertEstimation();
@@ -143,7 +124,7 @@ namespace providentia {
 		 */
 		TEST_F(CameraPoseEstimationTests, testEstimationOnlyLines) {
 			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
-				intrinsics, false
+				intrinsics, false, false
 			);
 
 			Eigen::Vector3d origin, axisA, axisB;
