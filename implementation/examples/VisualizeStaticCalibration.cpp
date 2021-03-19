@@ -61,6 +61,10 @@ public:
 	 */
 	int trackbarBackground = 4;
 
+	int trackbarWeightScale = 1;
+
+	int trackbarNumOutlier = 0;
+
 	/**
 	 * The objects from the HD map.
 	 */
@@ -73,16 +77,9 @@ public:
 	explicit Setup() : ImageSetup() {
 		objects = providentia::calibration::LoadObjects("../misc/objects.yaml", "../misc/pixels.yaml", imageSize);
 
-//		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics);
-		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics);
-		estimator->setInitialGuess(initialTranslation, initialRotation);
-		estimator->addWorldObjects(objects);
-
-//		estimator->estimate(true);
-//		estimator->estimateAsync(true);
-
-//		initialTranslation = estimator->getTranslation();
-//		initialRotation = estimator->getRotation();
+		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics, true,
+																					std::pow(2, trackbarWeightScale));
+//		estimator->setInitialGuess(initialTranslation, initialRotation);
 
 		cv::createTrackbar("Translation X", windowName, &trackbarTranslationX, 2 * trackbarTranslationMiddle);
 		cv::createTrackbar("Translation Y", windowName, &trackbarTranslationY, 2 * trackbarTranslationMiddle);
@@ -93,6 +90,8 @@ public:
 		cv::createTrackbar("Rotation Z", windowName, &trackbarRotationZ, 2 * trackbarRotationMiddle);
 
 		cv::createTrackbar("Background", windowName, &trackbarBackground, 10);
+		cv::createTrackbar("Weight Scale", windowName, &trackbarWeightScale, 100);
+		cv::createTrackbar("Num Outliers", windowName, &trackbarNumOutlier, 100);
 	}
 
 	void render(std::string id, Eigen::Vector3d vector, const cv::Vec3d &color) {
@@ -169,6 +168,23 @@ protected:
 		if (pressedKey == (int) 's') {
 			renderObjects = !renderObjects;
 		} else if (pressedKey == (int) 'e') {
+			estimator->setWeightScale(std::pow(2, trackbarWeightScale));
+			estimator->clearWorldObjects();
+			estimator->addWorldObjects(objects);
+
+//			for (int i = 0; i < trackbarNumOutlier; ++i) {
+//				estimator->addWorldObject(
+//					providentia::calibration::WorldObject(
+//						providentia::calibration::ParametricPoint::OnLine(
+//							{getRandom01() * imageSize.x(), getRandom01() * imageSize.y()},
+//							Eigen::Vector3d{getRandom01(), getRandom01(), getRandom01()} * 1000,
+//							{getRandom01(), getRandom01(), getRandom01()},
+//							0
+//						)
+//					)
+//				);
+//			}
+
 			optimizationFinished = false;
 			estimator->estimateAsync(true);
 		}

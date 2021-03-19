@@ -12,8 +12,8 @@ namespace providentia {
 	namespace calibration {
 
 		CameraPoseEstimator::CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics, bool initLogging,
-												 bool allowWeighting) :
-			intrinsics(std::move(_intrinsics)), allowWeighting(allowWeighting) {
+												 double weightScale) :
+			intrinsics(std::move(_intrinsics)), weightScale(weightScale) {
 			if (initLogging) {
 				google::InitGoogleLogging("Camera Pose Estimation");
 			}
@@ -78,7 +78,7 @@ namespace providentia {
 			options.update_state_every_iteration = true;
 			calculateInitialGuess();
 			createProblem();
-			Solve(options, &problem, &summary);
+			Solve(options, &(*problem), &summary);
 			optimizationFinished = true;
 			if (_logSummary) {
 				std::cout << *this << std::endl;
@@ -86,28 +86,18 @@ namespace providentia {
 		}
 
 		void CameraPoseEstimator::createProblem() {
-			int i = 0;
+			problem = std::make_shared<ceres::Problem>(ceres::Problem());
 
-			double weightScale;
-			if (!allowWeighting) {
-				weightScale = std::numeric_limits<double>::max();
-			} else {
-//			weightScale = 1e2;
-				weightScale = 3;
-//			weightScale = std::sqrt(2);
-			}
 			for (const auto &worldObject : worldObjects) {
-
 //				weights.emplace_back(new double(1));
 //				bool hasPoints = false;
 				for (const auto &point : worldObject.getPoints()) {
 					if (!point->hasExpectedPixel()) {
 						continue;
 					}
-					i++;
 //					hasPoints = true;
 					weights.emplace_back(new double(1));
-					problem.AddResidualBlock(
+					problem->AddResidualBlock(
 						CorrespondenceResidual::Create(
 							point->getExpectedPixel(),
 							point,
@@ -121,13 +111,13 @@ namespace providentia {
 						weights[weights.size() - 1]
 					);
 
-					problem.AddResidualBlock(
+					problem->AddResidualBlock(
 						DistanceFromIntervalResidual::Create(worldObject.getHeight()),
 						nullptr,
 						point->getLambda()
 					);
 
-					problem.AddResidualBlock(
+					problem->AddResidualBlock(
 						DistanceResidual::Create(1),
 						new ceres::ScaledLoss(
 							nullptr,
@@ -154,7 +144,7 @@ namespace providentia {
 //					weights[weights.size() - 1]
 //				);
 			}
-			std::cout << "Added residuals: " << i << std::endl;
+			std::cout << "Residuals: " << problem->NumResidualBlocks() << std::endl;
 		}
 
 		void CameraPoseEstimator::addIterationCallback(ceres::IterationCallback *callback) {
@@ -205,6 +195,14 @@ namespace providentia {
 				os << *weight << ", ";
 			}
 			return os;
+		}
+
+		double CameraPoseEstimator::getWeightScale() const {
+			return weightScale;
+		}
+
+		void CameraPoseEstimator::setWeightScale(double weightScale) {
+			CameraPoseEstimator::weightScale = weightScale;
 		}
 
 		std::string printVectorRow(Eigen::Vector3d vector) {

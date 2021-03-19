@@ -9,6 +9,7 @@
 #include <vector>
 #include <iostream>
 #include <thread>
+#include <limits>
 
 #include "ceres/ceres.h"
 #include "glog/logging.h"
@@ -34,7 +35,7 @@ namespace providentia {
 			/**
 			 * The ceres internal minimization problem definition.
 			 */
-			ceres::Problem problem;
+			std::shared_ptr<ceres::Problem> problem;
 
 			/**
 			 * Some options passed to the ceres solver.
@@ -80,18 +81,19 @@ namespace providentia {
 
 			bool optimizationFinished = false;
 
-			bool allowWeighting = true;
+			double weightScale;
 
 			std::vector<double *> weights;
 
+			std::vector<ceres::ResidualBlockId> residualBlockIds;
 		public:
 			/**
 			 * @constructor
 			 *
 			 * @param _intrinsics The intrinsics of the pinhole camera model.
 			 */
-			CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics, bool initLogging = true, bool allowWeighting
-			= true);
+			CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics, bool initLogging = true,
+								double weightScale = std::numeric_limits<double>::max());
 
 			/**
 			 * @destructor
@@ -148,6 +150,13 @@ namespace providentia {
 
 			friend std::ostream &operator<<(std::ostream &os, const CameraPoseEstimator &estimator);
 
+			double getWeightScale() const;
+
+			void setWeightScale(double weightScale);
+
+			void clearWorldObjects() {
+				worldObjects = std::vector<providentia::calibration::WorldObject>{};
+			};
 		};
 	}
 }
