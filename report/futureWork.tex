@@ -1,29 +1,101 @@
+% !TEX root=./report.tex
+
 \section{Future Work}
+The project leaves us with the opportunities to research in a broad range of directions.
+
+\subsection{Test on different weather/lighting conditions}
+The implementations are currently only tested on good weather and lighting conditions. 
+A next step is to test the implementations in bad weather and lighting conditions, \eg by night, rain and snow.
+As far as we can tell by now the feature based dynamic stabilization approach will suffer in performance as the detected features will be compromised.
+The static calibration nonetheless wont be impacted as we have the human-in-the-loop approach for correspondence mapping. 
+When we switch to an automatic landmark detection algorithm the weather conditions will impact the detection and thus the calibration.
 
 \subsection{Dynamic stabilization}
-\begin{itemize}
-  \item Dynamically pick best feature detector based on optical flow performance
-  \item Test on different weather/lighting conditions
-  \item IMU based sensor fusion (Only for paper, no real lookout)
-  \item Optical FLow / Warp field stabilization
-  \item ML CNN
-    \item Image MSE for calibration (unsupervised)
-    \item Logistic regression on pose (supervised)
-\end{itemize}
+In the subfield of the dynamic stabilization we have until now implemented the visual feature based approach.
+
+\subsubsection{Dynamically pick best feature detector based on optical flow performance}
+Currently we empirically picked the SURF feature detector to have the best stabilization performance.
+We do measure the performance of the feature based dynamic stabilization approach based on the mean pixel deviation of the optical flow.
+As multiple feature detectors are already implemented together with the optical flow to measure the performance.
+To test would be to run all detectors in parallel and use the one with the most stabilize video output.
+
+\subsubsection{IMU based sensor fusion}
+Previous by-hand calibrations have shown that an inertia measurement unit (IMU) can be used to initially find a camera pose, but the lack of performance and huge time needed makes this not feasible.
+This is just empirical knowledge, not backed up by research. 
+This should be looked into further.
+
+\subsubsection{Warp field stabilization based on Optical Flow}
+Currently the optical flow is only used to measure performance but could be used as an alternative approach to the dynamic stabilization problem.
+The optical flow is modelled as a vector field over the image and contains the pixel movement as direction vector and distance per pixel.
+By inverting this vector field and thus applying the inverse of the jitter the image could be stabilized using image warping.  
+
+\subsubsection{Deep Learning based approaches}
+With the recent emerge of deep learning based approaches in computer vision, especially with convolutional neural networks (CNN), a self-learning stabilization procedure might be developed.
+This might speed up the procedure and would inherently add a measure for the uncertainty of the results when finding the homographic transform.
+Additionally the feature detection, matching and warping steps could be fused into one step and optimized jointly.
+
+As far as we can tell this can be broken down into two approaches based on different loss functions.
+
+\paragraph{Image MSE for calibration (unsupervised)}
+Input the current frame and reference frame, output the homographic transformation. 
+Learning is done by minimizing the mean squared error of pixel distances between the frames with the current transformation.
+
+\paragraph{Logistic regression on pose (supervised)}
+Input the current frame and reference frame, output the homographic transformation. 
+Learning is done by logistic regression over the expected and predicted transform.
+
 \subsection{Static calibration}
-\begin{itemize}
-  \item Extend to global refinement of multiple cameras
-  \item After initial by hand calibration with watersheder: Re-detection in new keyframes:
-    \item Automatic recalibration
-    \item Per frame pose estimation
-  \item Automatic detection of more landmarks after initial calibration
-  \item Automatic mapping pixel to object
-\end{itemize}
-\subsection{Vehicle pose estimation}
-\begin{itemize}
-\item Use HD map roads and camera look-at vector
-  \item Calculate ground plane/description from map
-  \item Calculate depth
-\end{itemize}
-\subsection{Hough lines flucht punkte}
-\subsection{New HD map}
+For the static calibration there are several improvements possible.
+
+\subsubsection{Extend to global refinement of multiple cameras}
+Currently the reprojection error as described in Eq. \ref{eq:reprojection_error} optimizes the pose of one camera \wrt the \HDmaps{}.
+By extending the optimization to jointly optimize over all cameras and their mappings a global calibration procedure can be established.
+The procedure might be formulated as
+formulated as
+\begin{equation}
+  \begin{split}
+  E(P, S, T, R, \Lambda, W ) =& 
+  \sum_{i \in Cams} \sum_{c \in C_i} 
+  \left\lVert 
+    w_c * [ p_{i,c} - \pi(T_i * R_i * s_c) ]
+  \right\rVert_2^2 \\ 
+  +& 
+  \sum_{i \in Cams} \sum_{c \in C_i} 
+  \left\lVert 
+  penalize(\lambda_c, h_c)
+  \right\rVert_2^2 \\ 
+  +& 
+  \sum_{i \in Cams} \sum_{c \in C_i} 
+  \left\lVert 
+  \alpha * (1 - w_c)
+  \right\rVert_2^2 
+\end{split}
+\label{eq:reprojection_error_global}
+\end{equation}
+where one should optimize over all cameras $i \in \text{Cameras}$ and the seen seen correspondences $c \in C_i$.
+This would finally give a per camera transformation $T_i$ and rotation $R_i$ that would be globally optimal also in relation to the other cameras.
+
+\subsubsection{Automatic detection of more landmarks after initial calibration}
+\label{sec:auto_detection_landmarks}
+Currently the detection and mapping of landmarks is done by hand using a watershed algorithm \cite{meyer1992color,opencv_library} based external tool.
+This tool relies on a by hand marking of landmarks as the markers used to find the segmentation.
+By applying template, color or gradient matching approaches the detection of the markers might be automated.
+This automated detection would speed up the mapping procedure. 
+
+\subsubsection{Automatic mapping of pixels to objects}
+\label{sec:auto_mapping_landmarks}
+To establish the mapping of the correspondences a human has to look up the ids of the landmarks in the \HDmaps{}.
+After an initial calibration an image region based approach might be used to automate this mapping.
+This positions of the known objects from the \HDmaps{} can be projected into the camera image with the current camera pose.
+Starting from the resulting pixel locations one could search in a defined enclosing region to search for pixels that clearly correspond to the objects.
+This automatic detection of more landmarks could further improve the robustness an can be used to mitigate drift in the cameras.  
+
+\subsubsection{Machine learning based pose estimation}
+A machine learning based approach for the bundle adjustment problem we faced and the resulting camera pose estimation problem can be formulated.
+As Aravkin \etal \cite{students_t_bundle_adjustment} have shown a Student's-t distribution based approach can be used to estimate and robustify the procedure against outliers.
+  
+\subsubsection{New HD map}
+The newer OpenDRIVE standards also provide the possibility to include lane markings.
+These lane markings are easily detectable and can then be used for the calibration procedure in conjunction with the object landmarks.
+This would greatly simplify the automatic detection and mapping procedures as described in Sec. \ref{sec:auto_detection_landmarks} and Sec. \ref{sec:auto_mapping_landmarks} as they are spatially more extend and thus easier to detect.
+Additionally with the color information, as the lane markings are always white (Germany) and yellow (USA) the detection is simplified a lot.

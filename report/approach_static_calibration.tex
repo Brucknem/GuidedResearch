@@ -36,6 +36,8 @@ To calibrate the camera we need to establish a mapping
 \end{equation}
 from pixels $p_c~=~(u,v)^T \in P$ from the video stream to the corresponding sampled points $s_c$ from the object they belong to.
 
+This leaves us with a set $C$ of correspondences $\{p_c,s_c\}$.
+
 This mapping is currently done by human interaction and not fully automated. 
 To minimize the work an aiding system to mark pixels was implemented that outputs a list of pixels that can easily be mapped to the list of objects.
 
@@ -86,21 +88,29 @@ The translation and rotation are unknown, for them we optimize.
 
 We estimate the camera pose by minimizing a modified version of the reprojection error 
 \begin{equation}
-  \min_{T, R, \Lambda} E(P, S, T, R, \Lambda) 
+  \min_{T, R, \Lambda, W} E(P, S, T, R, \Lambda, W) 
 \end{equation}
 formulated as
 \begin{equation}
   \begin{split}
     s_c =& o_c + \lambda_c * h_c \\
-  E(P, S, T, R, \Lambda ) =& 
-  \sum_{c} 
+  E(P, S, T, R, \Lambda, W ) =& 
+  \sum_{c \in C} 
   \left\lVert 
-  \begin{pmatrix}
-    p_c - \pi(T * R * s_c)\\
-    penalize(\lambda_c, h_c)
-  \end{pmatrix}
+    w_c * [ p_c - \pi(T * R * s_c) ]
+  \right\rVert_2^2 \\ 
+  +& 
+  \sum_{c \in C} 
+  \left\lVert 
+  penalize(\lambda_i, h_i)
+  \right\rVert_2^2 \\ 
+  +& 
+  \sum_{c \in C} 
+  \left\lVert 
+  \alpha * (1 - w_i)
   \right\rVert_2^2 
 \end{split}
+\label{eq:reprojection_error}
 \end{equation}
 where $P$ is the set of mapped pixels in the image, $S$ is the set of mapped corresponding sampled points from the objects and $\Lambda$ is the set of $\lambda$ values associated with the sampled points.
 This formulation allows the optimization over the line approximations of the objects and jointly optimizes for the camera parameters $T, R$ and the $\lambda \in \Lambda$ parameters of the line objects.
@@ -119,8 +129,24 @@ This regularization enables a robust estimation procedure that can flexibly adju
 
 \paragraph{Initialization}
 In contrast to most pose estimation problems our approach drops the need for good initialization. 
-By regularization of the $\lambda$ values enough flexibility is given to move over an infinite space of values, 
+By regularization of the $\lambda$ values enough flexibility is given to optimize over an infinite space of values, 
 but enforces the solution of the $\lambda$ to lie within the interval of $\lambda \in [0, h]$.
+
+\begin{equation}
+  \begin{split}
+  \bar{s} =& \frac{1}{\left\lvert C \right\rvert } \sum_{c \in C} o_c \\
+  T_0 =& \begin{pmatrix}
+    1, 0, 0, \bar{s}_x \\   
+    0, 1, 0, \bar{s}_y \\   
+    0, 0, 1, \bar{s}_z \\   
+    0, 0, 0, 1   
+  \end{pmatrix}
+\end{split}
+\end{equation}
+
+\begin{equation}
+  R_0 = \mathbb{I} ^ {4 \times 4}
+\end{equation}
 
 It is sufficient to initialize with $\lambda_c = 0$ for all correspondences.
 The camera rotation is defined to be zero with the camera facing in negative world $z$ axis.
