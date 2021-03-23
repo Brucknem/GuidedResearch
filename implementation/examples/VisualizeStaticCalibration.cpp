@@ -65,6 +65,8 @@ public:
 
 	int trackbarNumOutlier = 0;
 
+	int trackbarShowIds = 0;
+
 	/**
 	 * The objects from the HD map.
 	 */
@@ -75,31 +77,39 @@ public:
 	bool renderObjects = true;
 
 	explicit Setup() : ImageSetup() {
-		objects = providentia::calibration::LoadObjects("../misc/objects.yaml", "../misc/pixels_sorted_by_y.yaml",
+		std::string pixelsFile;
+		pixelsFile = "../misc/pixels_sorted_by_y.yaml";
+//		pixelsFile = "../misc/pixels_min_num.yaml";
+//		pixelsFile = "../misc/pixels_undetermined.yaml";
+//		pixelsFile = "../misc/pixels_only_top_bottom.yaml";
+//		pixelsFile = "../misc/pixels_only_bottom.yaml";
+//		pixelsFile = "../misc/pixels_only_top.yaml";
+		objects = providentia::calibration::LoadObjects("../misc/objects.yaml", pixelsFile,
 														imageSize);
 
 		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics, true,
 																					std::pow(2, trackbarWeightScale));
 //		estimator->setInitialGuess(initialTranslation, initialRotation);
 
-		cv::createTrackbar("Translation X", windowName, &trackbarTranslationX, 2 * trackbarTranslationMiddle);
-		cv::createTrackbar("Translation Y", windowName, &trackbarTranslationY, 2 * trackbarTranslationMiddle);
-		cv::createTrackbar("Translation Z", windowName, &trackbarTranslationZ, 2 * trackbarTranslationMiddle);
+//		cv::createTrackbar("Translation X", windowName, &trackbarTranslationX, 2 * trackbarTranslationMiddle);
+//		cv::createTrackbar("Translation Y", windowName, &trackbarTranslationY, 2 * trackbarTranslationMiddle);
+//		cv::createTrackbar("Translation Z", windowName, &trackbarTranslationZ, 2 * trackbarTranslationMiddle);
 
-		cv::createTrackbar("Rotation X", windowName, &trackbarRotationX, 2 * trackbarRotationMiddle);
-		cv::createTrackbar("Rotation Y", windowName, &trackbarRotationY, 2 * trackbarRotationMiddle);
-		cv::createTrackbar("Rotation Z", windowName, &trackbarRotationZ, 2 * trackbarRotationMiddle);
+//		cv::createTrackbar("Rotation X", windowName, &trackbarRotationX, 2 * trackbarRotationMiddle);
+//		cv::createTrackbar("Rotation Y", windowName, &trackbarRotationY, 2 * trackbarRotationMiddle);
+//		cv::createTrackbar("Rotation Z", windowName, &trackbarRotationZ, 2 * trackbarRotationMiddle);
 
 		cv::createTrackbar("Background", windowName, &trackbarBackground, 10);
 		cv::createTrackbar("Weight Scale", windowName, &trackbarWeightScale, 100);
-		cv::createTrackbar("Num Outliers", windowName, &trackbarNumOutlier, 100);
+//		cv::createTrackbar("Num Outliers", windowName, &trackbarNumOutlier, 100);
+		cv::createTrackbar("Show Ids", windowName, &trackbarShowIds, 1);
 	}
 
-	void render(std::string id, Eigen::Vector3d vector, const cv::Vec3d &color) {
-		render(id, vector.x(), vector.y(), vector.z(), color);
+	void render(std::string id, Eigen::Vector3d vector, const cv::Vec3d &color, bool showId) {
+		render(id, vector.x(), vector.y(), vector.z(), color, showId);
 	}
 
-	void render(std::string id, double x, double y, double z, const cv::Vec3d &color) {
+	void render(std::string id, double x, double y, double z, const cv::Vec3d &color, bool showId) {
 		Eigen::Vector4d vector{x, y, z, 1};
 		Eigen::Vector4d vectorInCameraSpace = providentia::camera::toCameraSpace(
 			translation.data(), rotation.data(), vector.data());
@@ -126,7 +136,10 @@ public:
 		ss << std::fixed;
 		ss << id;
 //		ss << ": " << x << "," << y << "," << z;
-//		addTextToFinalFrame(ss.str(), pixel.x(), imageSize[1] - 1 - pixel.y());
+
+		if (showId && trackbarShowIds == 1) {
+			addTextToFinalFrame(ss.str(), pixel.x(), imageSize[1] - 1 - pixel.y());
+		}
 	}
 
 protected:
@@ -213,15 +226,16 @@ protected:
 		}
 
 		for (
-			const auto &worldObject: objects
-			) {
+			const auto &worldObject: objects) {
+			bool idShown = false;
 			for (const auto &point : worldObject.getPoints()) {
 				Eigen::Vector3d p = point->getPosition();
 				cv::Vec3d color = {0, 0, 1};
 				if (point->hasExpectedPixel()) {
 					color = {0, 1, 0};
 				}
-				render(worldObject.getId(), p, color);
+				render(worldObject.getId(), p, color, !idShown);
+				idShown = true;
 			}
 		}
 
