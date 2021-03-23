@@ -10,4 +10,4 @@ set(IMAGES
 file(COPY ${IMAGES} DESTINATION ./)
 
 configure_file(objects.yaml objects.yaml COPYONLY)
-configure_file(pixels.yaml pixels.yaml COPYONLY)
+configure_file(pixels_sorted_by_y.yaml pixels_sorted_by_y.yaml COPYONLY)

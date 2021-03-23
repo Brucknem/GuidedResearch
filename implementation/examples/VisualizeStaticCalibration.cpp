@@ -75,7 +75,8 @@ public:
 	bool renderObjects = true;
 
 	explicit Setup() : ImageSetup() {
-		objects = providentia::calibration::LoadObjects("../misc/objects.yaml", "../misc/pixels.yaml", imageSize);
+		objects = providentia::calibration::LoadObjects("../misc/objects.yaml", "../misc/pixels_sorted_by_y.yaml",
+														imageSize);
 
 		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics, true,
 																					std::pow(2, trackbarWeightScale));
