@@ -61,7 +61,7 @@ public:
 	 */
 	int trackbarBackground = 4;
 
-	int trackbarWeightScale = 1;
+	int trackbarWeightScale = 100;
 
 	int trackbarNumOutlier = 0;
 

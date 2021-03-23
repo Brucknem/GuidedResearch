@@ -78,7 +78,8 @@ namespace providentia {
 			options.update_state_every_iteration = true;
 			calculateInitialGuess();
 			createProblem();
-			Solve(options, &(*problem), &summary);
+			Solve(options, &problem, &summary);
+			Solve(options, &problem, &summary);
 			optimizationFinished = true;
 			if (_logSummary) {
 				std::cout << *this << std::endl;
@@ -86,7 +87,7 @@ namespace providentia {
 		}
 
 		void CameraPoseEstimator::createProblem() {
-			problem = std::make_shared<ceres::Problem>(ceres::Problem());
+			problem = ceres::Problem();
 
 			for (const auto &worldObject : worldObjects) {
 //				weights.emplace_back(new double(1));
@@ -97,13 +98,13 @@ namespace providentia {
 					}
 //					hasPoints = true;
 					weights.emplace_back(new double(1));
-					problem->AddResidualBlock(
+					problem.AddResidualBlock(
 						CorrespondenceResidual::Create(
 							point->getExpectedPixel(),
 							point,
 							intrinsics
 						),
-						nullptr,
+						new ceres::HuberLoss(1.0),
 						translation.data(),
 						rotation.data(),
 						point->getLambda(),
@@ -111,16 +112,16 @@ namespace providentia {
 						weights[weights.size() - 1]
 					);
 
-					problem->AddResidualBlock(
+					problem.AddResidualBlock(
 						DistanceFromIntervalResidual::Create(worldObject.getHeight()),
-						nullptr,
+						new ceres::HuberLoss(1.0),
 						point->getLambda()
 					);
 
-					problem->AddResidualBlock(
+					problem.AddResidualBlock(
 						DistanceResidual::Create(1),
 						new ceres::ScaledLoss(
-							nullptr,
+							new ceres::HuberLoss(1.0),
 							weightScale,
 							ceres::TAKE_OWNERSHIP
 						),
@@ -144,7 +145,7 @@ namespace providentia {
 //					weights[weights.size() - 1]
 //				);
 			}
-			std::cout << "Residuals: " << problem->NumResidualBlocks() << std::endl;
+			std::cout << "Residuals: " << problem.NumResidualBlocks() << std::endl;
 		}
 
 		void CameraPoseEstimator::addIterationCallback(ceres::IterationCallback *callback) {

@@ -1,17 +1,29 @@
 \section{Related Work}
-\begin{itemize}
-\item Where differs?
-  \item Mostly at usage in ITS on highway for traffic control
-  \item Not huge movements as in most papers, but small scale disturbances
-  \item Mostly stationary cameras, but huge frustums
-  \item HD map for calibration
-\item Compare to feature detector studies in literature
-\item Literature research ongoing, I have to search through my list of references which was relevant for my work
-\end{itemize}
+There are many \ITS{} projects emerging, \eg{} Koster \etal{} at the \emph{Testfeld für Autonomes und vernetztes Fahren in Niedersachsen} \cite{koster2017testfeld}. See \eg{} this and that \dots
+Also the cooperative perception using infrastructure sensors is an emerging field \cite{arnold2020cooperative}.
 
+None of these provide public information about their camera calibration and stabilization approaches.
 
-Within the PROVIDENTIA project, a section of the highway A9 between Munich and Nuremberg was converted to a testing site for autonomous driving. 
-As part of this, a large sensor network system has been set up along the highway to allow monitoring and steering of traffic as well as to improve the coordination between autonomous and traditional cars. 
-The primary task of the intelligent system is to create a digital traffic twin that accurately represents the physical road situation in real-time. 
-Based on this digital twin, the smart infrastructure can provide a far-reaching and comprehensive view to the drivers and autonomous cars in order to improve their situational awareness within the current traffic environment.
-(Taken from the description) 
+Within the \TAADBW{} project one of the other projects provided information about their calibration techniques.
+They are too facing the problems of dynamic stabilization and static calibration.
+Among their test area near Karlsruhe, Germany they have built a system mostly consisting of cameras.
+Multiple optical camera sensors are attached to large poles with overlapping fields ov view \cite{fleck2018towards}.
+
+They too use a high-precision map to calibrate the cameras. 
+They differ by assuming the calibration to be static, whereas we present the foundations for an automated approach to self-calibration.
+Our approach differs that we are able to recalibrate at runtime, opposed to the a-priori approach they presented.
+
+The approach of using landmarks like lane markings and poles is similar to ours.
+They also do a manual selection of landmarks beforehand.
+
+The calibration procedure itself differs as they assume to have the exact world positions of their landmarks.
+We optimize for the world positions using the approximation of objects by their center lines. 
+A common approach in this field is to minimize the squared distances between objects in the camera stream and their real world objects projections.
+
+A drawback we face currently is that we only optimize the camera pose per pose, opposed to an global optimization strategy. 
+This is mostly due to small overlaps in the fields of view \cite{kraemmer2020providentia} between the cameras.
+Additionally we face the problem of data association within the multi-view setup. 
+Matching pixels over multiple views between the cameras is inherently hard problem \cite{agrawal2008censure},
+assigning samples along the center line of the objects to the exact corresponding pixel over multiple views is not feasible.
+
+Additionally solving the camera calibration problem to radar sensors has been solved previously by Schöller \etal{} within our \Providentia{}.

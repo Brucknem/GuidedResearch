@@ -133,15 +133,16 @@ By regularization of the $\lambda$ values enough flexibility is given to optimiz
 but enforces the solution of the $\lambda$ to lie within the interval of $\lambda \in [0, h]$.
 
 \begin{equation}
-  \begin{split}
-  \bar{s} =& \frac{1}{\left\lvert C \right\rvert } \sum_{c \in C} o_c \\
-  T_0 =& \begin{pmatrix}
-    1, 0, 0, \bar{s}_x \\   
-    0, 1, 0, \bar{s}_y \\   
-    0, 0, 1, \bar{s}_z \\   
-    0, 0, 0, 1   
+  \bar{s} = \frac{1}{\left\lvert C \right\rvert } \sum_{c \in C} o_c 
+\end{equation}
+
+\begin{equation}
+  T_0 = \begin{pmatrix}
+    1, 0, 0,& \bar{s}_x \\   
+    0, 1, 0,& \bar{s}_y \\   
+    0, 0, 1,& \bar{s}_z + 1000 \\   
+    0, 0, 0,& 1   
   \end{pmatrix}
-\end{split}
 \end{equation}
 
 \begin{equation}

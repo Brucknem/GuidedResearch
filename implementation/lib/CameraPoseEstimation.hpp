@@ -35,7 +35,7 @@ namespace providentia {
 			/**
 			 * The ceres internal minimization problem definition.
 			 */
-			std::shared_ptr<ceres::Problem> problem;
+			ceres::Problem problem;
 
 			/**
 			 * Some options passed to the ceres solver.
@@ -86,6 +86,9 @@ namespace providentia {
 			std::vector<double *> weights;
 
 			std::vector<ceres::ResidualBlockId> residualBlockIds;
+
+			std::vector<ceres::LossFunctionWrapper *> lossFunctions;
+
 		public:
 			/**
 			 * @constructor
