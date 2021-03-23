@@ -37,4 +37,4 @@ These dependencies have to be installed on your system. Follow their instruction
 These dependencies are pulled by CMake when the project is built. You `do not` have to install them manually.
 
 - [GoogleTest](https://github.com/google/googletest)
-- [TinyXML-2](https://github.com/leethomason/tinyxml2)
+- [YAML-CPP](https://github.com/jbeder/yaml-cpp.git)
