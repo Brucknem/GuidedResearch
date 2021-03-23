@@ -40,6 +40,8 @@ There is no way to automate this proces as it is dependend on your system.
 To facilitate the setup of CMake, Ceres and OpenCV you can use the [setup script](../main/setup_ceres_opencv.sh). This should install all necessary dependencies and pull & compile the libraries from source. 
 This might be outdated by now. If compile errors arise, the CMake output is a good start to debug.
 
+- [Boost](https://www.boost.org/)
+
 ## Internal Dependencies
 
 These dependencies are pulled by CMake when the project is built. You `do not` have to install them manually.
