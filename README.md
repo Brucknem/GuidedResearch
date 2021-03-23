@@ -29,6 +29,8 @@ These dependencies have to be installed on your system. Follow their instruction
 
 - [CUDA](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html) - You have to install CUDA and the Nvidia drivers according to your GPU.
 
+There is no way to automate this proces as it is dependend on your system.
+
 - [CMake](https://cmake.org/) - For building the libraries
 - [Ceres Solver](http://ceres-solver.org/) - The non-linear solver for the static calibration
 - [OpenCV](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html) - With CUDA support for the dynamic stabilization
