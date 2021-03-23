@@ -27,10 +27,14 @@ A key challenge lies in the reliable and accurate calibration of the different s
 
 These dependencies have to be installed on your system. Follow their instructions on how to install them. 
 
-- [Ceres Solver](http://ceres-solver.org/)
-- [CUDA](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html)
-- [OpenCV](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html)
-- [PROJ](https://proj.org/install.html#cmake)
+- [CUDA](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html) - You have to install CUDA and the Nvidia drivers according to your GPU.
+
+- [CMake](https://cmake.org/) - For building the libraries
+- [Ceres Solver](http://ceres-solver.org/) - The non-linear solver for the static calibration
+- [OpenCV](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html) - With CUDA support for the dynamic stabilization
+
+To facilitate the setup of CMake, Ceres and OpenCV you can use the [setup script](../main/setup_ceres_opencv.sh). This should install all necessary dependencies and pull & compile the libraries from source. 
+This might be outdated by now. If compile errors arise, the CMake output is a good start to debug.
 
 ## Internal Dependencies
 
