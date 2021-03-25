@@ -7,12 +7,12 @@
 #include "RenderingPipeline.hpp"
 #include "WorldObjects.hpp"
 
-using namespace providentia::runnable;
+using namespace providentia::evaluation;
 
 /**
  * Setup to visualize the rendering pipeline.
  */
-class Setup : public providentia::runnable::ImageSetup {
+class Setup : public providentia::evaluation::ImageSetup {
 public:
 	/**
 	 * The itnrinsics of the pinhole camera model.

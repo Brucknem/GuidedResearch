@@ -48,6 +48,10 @@ namespace providentia {
 			return warper->getWarpedFrame();
 		}
 
+		const cv::cuda::GpuMat &DynamicStabilizerBase::getOriginalFrame() const {
+			return frameFeatureDetector->getOriginalFrame();
+		}
+
 		DynamicStabilizerBase::DynamicStabilizerBase() : providentia::utils::TimeMeasurable(
 			"DynamicStabilizerBase", 1) {
 			warper = std::make_shared<FrameWarper>();
@@ -83,6 +87,10 @@ namespace providentia {
 		const std::shared_ptr<providentia::segmentation::BackgroundSegmentorBase> &
 		DynamicStabilizerBase::getSegmentor() const {
 			return segmentor;
+		}
+
+		cv::cuda::GpuMat DynamicStabilizerBase::getBackgroundMask(const cv::Size &_size) const {
+			return segmentor->getBackgroundMask(_size);
 		}
 
 		const std::shared_ptr<FrameWarper> &

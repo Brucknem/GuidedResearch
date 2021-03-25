@@ -10,11 +10,12 @@
 #include "opencv2/opencv.hpp"
 #include "TimeMeasurable.hpp"
 #include "Eigen/Dense"
+#include "OpticalFlow.hpp"
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
 namespace providentia {
-	namespace runnable {
+	namespace evaluation {
 
 		/**
 		 * Gets the default video file path.
@@ -47,7 +48,7 @@ namespace providentia {
 		 * @param x The left starting expectedPixel location.
 		 * @param y The upper starting expectedPixel location.
 		 */
-		void addText(const cv::Mat &frame, const std::string &text, int x, int y);
+		cv::Mat addText(const cv::Mat &frame, const std::string &text, double fontSize, int x, int y);
 
 		/**
 		 * Adds runtime info to the frame.
@@ -58,7 +59,9 @@ namespace providentia {
 		 * @param x The left starting expectedPixel location.
 		 * @param y The upper starting expectedPixel location.
 		 */
-		void addRuntimeToFrame(const cv::Mat &_frame, const std::string &message, long milliseconds, int x, int y);
+		cv::Mat
+		addRuntimeToFrame(const cv::Mat &_frame, const std::string &message, long milliseconds, double fontSize, int x,
+						  int y);
 
 		/**
 		 * Removes the padding pixels from the frame.
@@ -75,7 +78,25 @@ namespace providentia {
 		double getRandom01();
 
 		/**
-		 * Base class for all examples setups that run on a video.
+		 * Concatenates the given frames into a vector.
+		 */
+		template<typename T>
+		std::vector<cv::Mat> concatenate(const std::initializer_list<T> &frames, cv::Size size);
+
+		template<typename T>
+		cv::Mat vconcat(const std::initializer_list<T> &frames, cv::Size size = cv::Size());
+
+		template<typename T>
+		cv::Mat hconcat(const std::initializer_list<T> &frames, cv::Size size = cv::Size());
+
+		cv::Mat MatOfSize(cv::Size size, int type = CV_8UC3);
+
+		cv::cuda::GpuMat GpuMatOfSize(cv::Size size, int type = CV_8UC3);
+
+		cv::cuda::GpuMat cvtColor(cv::cuda::GpuMat frame, int colorSpace = cv::COLOR_BGR2GRAY);
+
+		/**
+		 * Base class for all evaluation setups that run on a video.
 		 * Wraps the main loop and field initializations.
 		 */
 		class ImageSetup : public providentia::utils::TimeMeasurable {
@@ -217,7 +238,7 @@ namespace providentia {
 		};
 
 		/**
-		 * Base class for all examples setups that run on a single image.
+		 * Base class for all evaluation setups that run on a single image.
 		 * Wraps the main loop and field initializations.
 		 */
 		class VideoSetup : public ImageSetup {

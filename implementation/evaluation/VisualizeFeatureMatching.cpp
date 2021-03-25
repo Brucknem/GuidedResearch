@@ -8,7 +8,7 @@
 /**
  * Setup to visualize the feature matching.
  */
-class Setup : public providentia::runnable::VideoSetup {
+class Setup : public providentia::evaluation::VideoSetup {
 private:
 	/**
 	 * The current frame feature detector applied in the main loop.

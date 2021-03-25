@@ -38,15 +38,33 @@ include_directories(${Boost_INCLUDE_DIRS})
 find_package(PROJ)
 
 
-add_library(libCameraStabilization
+########################################################################################################################
+### Dynamic Stabilization ###
+########################################################################################################################
+add_library(DynamicStabilization
         FeatureDetection.cpp
         DynamicStabilization.cpp
         FeatureMatching.cpp
         BackgroundSegmentation.cpp
         FrameWarping.cpp
-        OpticalFlow.cpp
         TimeMeasurable.cpp
-        CSVWriter.cpp
+        )
+
+target_include_directories(DynamicStabilization
+        INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+        PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+        )
+
+target_link_libraries(DynamicStabilization
+        ${OpenCV_LIBS}
+        ${Boost_LIBRARIES}
+        )
+
+########################################################################################################################
+### Static Calibration ###
+########################################################################################################################
+
+add_library(StaticCalibration
         CameraPoseEstimation.cpp
         RenderingPipeline.cpp
         Residuals.cpp
@@ -54,16 +72,17 @@ add_library(libCameraStabilization
         ObjectsLoading.cpp
         )
 
-target_include_directories(libCameraStabilization
+target_include_directories(StaticCalibration
         INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
         PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
         )
 
-target_link_libraries(libCameraStabilization
+target_link_libraries(StaticCalibration
         Eigen3::Eigen
         Ceres::ceres
         ${OpenCV_LIBS}
         ${Boost_LIBRARIES}
-        ${PROJ_LIBRARIES}
         yaml-cpp
         )
+
+

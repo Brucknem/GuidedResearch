@@ -7,7 +7,7 @@
 /**
  * Setup to visualize the background segmentation.
  */
-class Setup : public providentia::runnable::VideoSetup {
+class Setup : public providentia::evaluation::VideoSetup {
 private:
 	/**
 	 * The matcher used to match the features.

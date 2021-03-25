@@ -84,6 +84,11 @@ namespace providentia {
 			const std::shared_ptr<providentia::features::FeatureMatcherBase> &getMatcher() const;
 
 			/**
+			 * @get The current frame.
+			 */
+			const cv::cuda::GpuMat &getOriginalFrame() const;
+
+			/**
 			 * @get The current frame stabilized with the found homography.
 			 */
 			const cv::cuda::GpuMat &getStabilizedFrame() const;
@@ -138,6 +143,8 @@ namespace providentia {
 			 * Updates the keyframe.
 			 */
 			void updateKeyframe();
+
+			cv::cuda::GpuMat getBackgroundMask(const cv::Size &_size) const;
 		};
 
 		/**

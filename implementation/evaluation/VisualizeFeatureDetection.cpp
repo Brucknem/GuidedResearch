@@ -8,7 +8,7 @@
 /**
  * Setup to visualize the feature detection.
  */
-class Setup : public providentia::runnable::VideoSetup {
+class Setup : public providentia::evaluation::VideoSetup {
 private:
 	/**
 	 * The detectors and scaling factors that are applied in the main loop.
@@ -31,11 +31,11 @@ public:
 			totalAlgorithmsDuration += entry.first->getTotalMilliseconds();
 			bufferCPU = entry.first->draw();
 			cv::resize(bufferCPU, bufferCPU, frameCPU.size());
-			providentia::runnable::addRuntimeToFrame(bufferCPU,
-													 std::string(typeid(*entry.first).name()) + " [" +
-													 std::to_string(entry.second) + "]",
-													 entry.first->getTotalMilliseconds(),
-													 5, 20);
+			providentia::evaluation::addRuntimeToFrame(bufferCPU,
+													   std::string(typeid(*entry.first).name()) + " [" +
+													   std::to_string(entry.second) + "]",
+													   entry.first->getTotalMilliseconds(),
+													   5, 20);
 
 			if (finalFrame.empty()) {
 				finalFrame = bufferCPU.clone();

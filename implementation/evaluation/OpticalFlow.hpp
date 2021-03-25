@@ -12,20 +12,18 @@
 #include "opencv2/cudaarithm.hpp"
 #include "opencv2/cudaoptflow.hpp"
 
-#include "TimeMeasurable.hpp"
-
 namespace providentia {
 	namespace opticalflow {
 
 		/**
 		 * Base class for dense optical flow algorithms
 		 */
-		class DenseOpticalFlow : public providentia::utils::TimeMeasurable {
+		class DenseOpticalFlow {
 		protected:
 			/**
 			 * The current and previous GPU frame.
 			 */
-			cv::cuda::GpuMat currentFrame, previousFrame;
+			cv::cuda::GpuMat currentFrame, previousFrame, mask;
 
 			/**
 			 * The calculated dense optical flow.
@@ -61,7 +59,7 @@ namespace providentia {
 			/**
 			 * @constructor
 			 */
-			explicit DenseOpticalFlow() : providentia::utils::TimeMeasurable("Dense Optical Flow", 1) {}
+			explicit DenseOpticalFlow() = default;
 
 			/**
 			 * Initializes the frame buffers on the first input frame.
@@ -78,7 +76,7 @@ namespace providentia {
 			/**
 			 * @destructor
 			 */
-			~DenseOpticalFlow() override = default;
+			virtual ~DenseOpticalFlow() = default;
 
 			/**
 			 * @get the mean of the magnitudes over the flow field.
@@ -101,7 +99,7 @@ namespace providentia {
 			 *
 			 * @param _frame The frame to process.
 			 */
-			void calculate(const cv::cuda::GpuMat &_frame);
+			void calculate(const cv::cuda::GpuMat &_frame, const cv::cuda::GpuMat &mask = cv::cuda::GpuMat());
 		};
 
 		/**

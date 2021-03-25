@@ -19,7 +19,7 @@ Contains mostly images.
 
 ## run
 
-Some runnable scripts that exemplary show the algorithms.
+Some evaluation scripts that exemplary show the algorithms.
 
 ---
 

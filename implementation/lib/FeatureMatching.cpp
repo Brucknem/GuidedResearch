@@ -53,8 +53,13 @@ namespace providentia {
 		}
 
 		void FeatureMatcherBase::filterUsingFundamentalMatrix() {
-			fundamentalMatrix = cv::findFundamentalMat(frameMatchedPoints, referenceMatchedPoints,
-													   cv::FM_RANSAC, 1.0, 0.975, fundamentalMatrixInlierMask);
+			try {
+				fundamentalMatrix = cv::findFundamentalMat(frameMatchedPoints, referenceMatchedPoints,
+														   cv::FM_RANSAC, 1.0, 0.975, fundamentalMatrixInlierMask);
+			} catch (const std::exception &e) {
+				std::cout << "Error in fundamental matrix calculation: " << e.what() << std::endl;
+				return;
+			}
 			const cv::Mat &essentialMatrix = cv::findFundamentalMat(frameMatchedPoints, referenceMatchedPoints,
 																	cv::FM_RANSAC, 1.0, 0.975,
 																	fundamentalMatrixInlierMask);

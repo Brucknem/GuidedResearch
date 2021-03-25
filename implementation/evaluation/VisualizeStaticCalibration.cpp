@@ -10,12 +10,12 @@
 #include "ObjectsLoading.hpp"
 #include "CameraPoseEstimation.hpp"
 
-using namespace providentia::runnable;
+using namespace providentia::evaluation;
 
 /**
  * Setup to visualize the rendering pipeline.
  */
-class Setup : public providentia::runnable::ImageSetup {
+class Setup : public providentia::evaluation::ImageSetup {
 public:
 	/**
 	 * The itnrinsics of the pinhole camera model.
@@ -78,7 +78,7 @@ public:
 
 	explicit Setup() : ImageSetup() {
 		std::string pixelsFile;
-		pixelsFile = "../misc/pixels_sorted_by_y.yaml";
+		pixelsFile = "../misc/pixels.yaml";
 //		pixelsFile = "../misc/pixels_min_num.yaml";
 //		pixelsFile = "../misc/pixels_undetermined.yaml";
 //		pixelsFile = "../misc/pixels_only_top_bottom.yaml";

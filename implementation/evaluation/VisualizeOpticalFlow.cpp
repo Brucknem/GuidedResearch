@@ -9,7 +9,7 @@
 /**
  * Setup to visualize the optical flow.
  */
-class Setup : public providentia::runnable::VideoSetup {
+class Setup : public providentia::evaluation::VideoSetup {
 private:
 	/**
 	 * The stabilizer used to stabilize the video.

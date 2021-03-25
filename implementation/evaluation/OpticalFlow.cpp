@@ -11,14 +11,13 @@ namespace providentia {
 
 		void DenseOpticalFlow::initialize() {
 			previousFrame = currentFrame.clone();
-			hsv = cv::Mat(currentFrame.size(), CV_8UC3, cv::Scalar(255));
-			bgr = cv::Mat(currentFrame.size(), CV_8UC3, cv::Scalar(255));
+			hsv = cv::Mat(currentFrame.size(), CV_8UC3, cv::Scalar(0, 0, 0, 0));
+			bgr = cv::Mat(currentFrame.size(), CV_8UC3, cv::Scalar(0, 0, 0, 0));
 		}
 
-		void DenseOpticalFlow::calculate(const cv::cuda::GpuMat &_frame) {
-			clear();
-
+		void DenseOpticalFlow::calculate(const cv::cuda::GpuMat &_frame, const cv::cuda::GpuMat &_mask) {
 			cv::cuda::cvtColor(_frame, currentFrame, cv::COLOR_BGR2GRAY);
+			mask = _mask;
 
 			if (previousFrame.empty()) {
 				initialize();
@@ -47,7 +46,6 @@ namespace providentia {
 			cvtColor(hsv8, bgr, cv::COLOR_HSV2BGR);
 
 			previousFrame = currentFrame.clone();
-			addTimestamp("Optical Flow calculation finished, 0");
 		}
 
 		double DenseOpticalFlow::getMagnitudeMean() {
@@ -67,12 +65,17 @@ namespace providentia {
 #pragma region FarnebackDenseOpticalFlow
 
 		void FarnebackDenseOpticalFlow::specificCalculate() {
-			opticalFlow->calc(previousFrame, currentFrame, denseOpticalFlowGPU, stream);
+			cv::cuda::GpuMat previousFrameMasked = previousFrame.clone();
+			cv::cuda::GpuMat currentFrameMasked = currentFrame.clone();
+			if (!mask.empty()) {
+				previousFrameMasked.copyTo(previousFrameMasked, mask);
+				previousFrameMasked.copyTo(currentFrameMasked, mask);
+			}
+			opticalFlow->calc(previousFrameMasked, currentFrameMasked, denseOpticalFlowGPU, stream);
 		}
 
 		FarnebackDenseOpticalFlow::FarnebackDenseOpticalFlow() : DenseOpticalFlow() {
 			opticalFlow = cv::cuda::FarnebackOpticalFlow::create();
-			setName(typeid(*this).name());
 		}
 
 #pragma endregion FarnebackDenseOpticalFlow
