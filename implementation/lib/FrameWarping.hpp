@@ -29,7 +29,7 @@ namespace providentia {
 
 			/**
 			 * The found homography between the matched keypoints.
-			 * Minimizer for the reprojection error between the frames.
+			 * Minimizer for the reprojection error between the writeFrames.
 			 */
 			cv::Mat homography;
 

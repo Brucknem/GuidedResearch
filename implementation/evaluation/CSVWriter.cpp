@@ -55,6 +55,22 @@ namespace providentia {
 			return *this;
 		}
 
+		CSVWriter &CSVWriter::operator<<(const cv::Rect &val) {
+			*this << val.x << val.y << val.width << val.height;
+			return *this;
+		}
+
+		CSVWriter &CSVWriter::operator<<(const cv::Point2d &val) {
+			*this << val.x << val.y;
+			return *this;
+		}
+
+		CSVWriter::CSVWriter(const boost::filesystem::path &filename, const std::string &separator) :
+			CSVWriter(filename.string(), separator) {}
+
+		CSVWriter::CSVWriter(const boost::filesystem::path &filename, bool append, std::string separator) :
+			CSVWriter(filename.string(), append, separator) {}
+
 		template CSVWriter &CSVWriter::operator<<(const int &);
 
 		template CSVWriter &CSVWriter::operator<<(const double &);

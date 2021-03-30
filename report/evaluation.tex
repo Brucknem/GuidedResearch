@@ -1,8 +1,16 @@
 \section{Evaluation}
+\subsection{Study objects}
+    \begin{itemize}
+        \item 4 cameras
+        \item 60 sec videos
+        \item time synchronized
+    \end{itemize}
 \subsection{Dynamic stabilization}
 \begin{itemize}
     \item Compare different feature detectors
-    \item Compare optical flow: Mean \& std
+    \subitem Graphs optical flow: Mean \& std
+    \subitem Graphs Difference original $\leftrightarrow$  stabilizer
+    \subitem Calculate probability approach better $\frac{\text{frames stabilizer worse}}{\text{all frames}}$
     \item Track features and calculate path smoothness
 \end{itemize}
 \subsection{Static calibration}

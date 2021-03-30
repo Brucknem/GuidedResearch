@@ -68,8 +68,8 @@ namespace providentia {
 			cv::cuda::GpuMat previousFrameMasked = previousFrame.clone();
 			cv::cuda::GpuMat currentFrameMasked = currentFrame.clone();
 			if (!mask.empty()) {
-				previousFrameMasked.copyTo(previousFrameMasked, mask);
-				previousFrameMasked.copyTo(currentFrameMasked, mask);
+				cv::cuda::bitwise_and(previousFrameMasked, mask, previousFrameMasked);
+				cv::cuda::bitwise_and(currentFrameMasked, mask, currentFrameMasked);
 			}
 			opticalFlow->calc(previousFrameMasked, currentFrameMasked, denseOpticalFlowGPU, stream);
 		}

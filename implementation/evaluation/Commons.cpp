@@ -44,6 +44,12 @@ cv::Mat providentia::evaluation::addText(const cv::Mat &frame, const std::string
 	return frame;
 }
 
+cv::cuda::GpuMat providentia::evaluation::pad(const cv::cuda::GpuMat &frame, int padding) {
+	cv::cuda::GpuMat result;
+	result.upload(pad(cv::Mat(frame), padding));
+	return result;
+}
+
 cv::Mat providentia::evaluation::pad(const cv::Mat &frame, int padding) {
 	return cv::Mat(frame,
 				   cv::Rect(padding, padding, frame.cols - 2 * padding, frame.rows - 2 * padding));
@@ -59,7 +65,8 @@ double providentia::evaluation::getRandom01() {
 }
 
 template<typename T>
-std::vector<cv::Mat> providentia::evaluation::concatenate(const std::initializer_list<T> &frames, cv::Size size) {
+std::vector<cv::Mat> providentia::evaluation::concatenate(const std::initializer_list<T> &frames, int padding, cv::Size
+size) {
 	std::vector<cv::Mat> concatenated;
 	cv::Mat resizeBuffer;
 
@@ -76,32 +83,36 @@ std::vector<cv::Mat> providentia::evaluation::concatenate(const std::initializer
 		if (!size.empty()) {
 			cv::resize(concatenated[concatenated.size() - 1], concatenated[concatenated.size() - 1], _size);
 		}
+
+		concatenated[concatenated.size() - 1] = pad(concatenated[concatenated.size() - 1], padding);
 	}
 
 	return concatenated;
 }
 
 template<typename T>
-cv::Mat providentia::evaluation::vconcat(const std::initializer_list<T> &frames, cv::Size size) {
+cv::Mat providentia::evaluation::vconcat(const std::initializer_list<T> &frames, int padding, cv::Size size) {
 	cv::Mat result;
-	cv::vconcat(concatenate<T>(frames, size), result);
+	cv::vconcat(concatenate<T>(frames, padding, size), result);
 	return result;
 }
 
-template cv::Mat providentia::evaluation::vconcat(const std::initializer_list<cv::Mat> &, cv::Size size);
+template cv::Mat providentia::evaluation::vconcat(const std::initializer_list<cv::Mat> &, int padding, cv::Size size);
 
-template cv::Mat providentia::evaluation::vconcat(const std::initializer_list<cv::cuda::GpuMat> &, cv::Size size);
+template cv::Mat
+providentia::evaluation::vconcat(const std::initializer_list<cv::cuda::GpuMat> &, int padding, cv::Size size);
 
 template<typename T>
-cv::Mat providentia::evaluation::hconcat(const std::initializer_list<T> &frames, cv::Size size) {
+cv::Mat providentia::evaluation::hconcat(const std::initializer_list<T> &frames, int padding, cv::Size size) {
 	cv::Mat result;
-	cv::hconcat(concatenate<T>(frames, size), result);
+	cv::hconcat(concatenate<T>(frames, padding, size), result);
 	return result;
 }
 
-template cv::Mat providentia::evaluation::hconcat(const std::initializer_list<cv::Mat> &, cv::Size size);
+template cv::Mat providentia::evaluation::hconcat(const std::initializer_list<cv::Mat> &, int padding, cv::Size size);
 
-template cv::Mat providentia::evaluation::hconcat(const std::initializer_list<cv::cuda::GpuMat> &, cv::Size size);
+template cv::Mat
+providentia::evaluation::hconcat(const std::initializer_list<cv::cuda::GpuMat> &, int padding, cv::Size size);
 
 cv::Mat providentia::evaluation::MatOfSize(cv::Size size, int type) {
 	return cv::Mat(cv::Mat::zeros(std::move(size), type));
@@ -123,21 +134,22 @@ cv::cuda::GpuMat providentia::evaluation::cvtColor(cv::cuda::GpuMat frame, int c
 
 #pragma region RunnablesCommons
 
-providentia::evaluation::ImageSetup::ImageSetup(std::string _filename,
-												std::string _windowName,
-												double _calculationScaleFactor, double _renderingScaleFactor)
-	: filename(std::move(_filename)), calculationScaleFactor(_calculationScaleFactor),
+providentia::evaluation::ImageSetup::ImageSetup(std::string inputFrame,
+												std::string outputFolder,
+												std::string windowName,
+												double _calculationScaleFactor,
+												double _renderingScaleFactor)
+	: inputResource(std::move(inputFrame)), calculationScaleFactor(_calculationScaleFactor),
 	  renderingScaleFactor(_renderingScaleFactor),
-	  windowName(std::move(_windowName)) {
-	frameCPU = cv::imread(filename);
-	init();
-}
+	  windowName(std::move(windowName)),
+	  outputFolder(outputFolder) {}
 
 void providentia::evaluation::ImageSetup::init() {
 	renderingScaleFactor /= calculationScaleFactor;
 	cv::namedWindow(windowName, cv::WINDOW_AUTOSIZE);
 	cv::moveWindow(windowName, 50, 10);
 	srand(static_cast <unsigned> (time(0)));
+	frameCPU = cv::imread(inputResource);
 }
 
 void providentia::evaluation::ImageSetup::setWindowMode(int flags) {
@@ -163,6 +175,7 @@ void providentia::evaluation::ImageSetup::mainLoop() {
 		clear();
 		getNextFrame();
 		if (frameCPU.empty()) {
+			std::cout << "No new frame available. Stopped rendering loop." << std::endl;
 			break;
 		}
 		finalFrame = cv::Mat();
@@ -184,7 +197,7 @@ void providentia::evaluation::ImageSetup::mainLoop() {
 //		addRuntimeToFinalFrame("Frame " + std::to_string(frameNumber), getTotalMilliseconds(), 5, finalFrame.rows - 20);
 
 		cv::imshow(windowName, finalFrame);
-		if (!outputFolder.empty()) {
+		if (!framesOutputFolder.empty()) {
 			finalFrame *= 255;
 			finalFrame.convertTo(finalFrame, CV_8UC4);
 			std::stringstream frameId;
@@ -220,6 +233,50 @@ void providentia::evaluation::ImageSetup::setOutputFolder(const std::string &_ou
 	if (!boost::filesystem::is_directory(outputFolder)) {
 		boost::filesystem::create_directories(outputFolder);
 	}
+
+	if (!writeFrames) {
+		return;
+	}
+	framesOutputFolder = outputFolder / "frames";
+	if (!boost::filesystem::is_directory(framesOutputFolder)) {
+		boost::filesystem::create_directories(framesOutputFolder);
+	}
+}
+
+void providentia::evaluation::ImageSetup::fromCLI(int argc, const char **argv) {
+	po::options_description desc("Allowed options");
+	desc.add_options()
+		("help,h", "produce help message");
+	addInputOption(&desc);
+	desc.add_options()
+		("output,o", po::value<std::string>()->default_value("./results"), "The output folder.")
+		("csf,c", po::value<double>()->default_value(1), "The calculation scale factor.")
+		("rsf,r", po::value<double>()->default_value(0.5), "The rendering scale factor.")
+		("writeFrames,f", po::bool_switch(&writeFrames), "Write the writeFrames to the output folder.")
+		("window-name,w", po::value<std::string>()->default_value("Camera Stabilization"),
+		 "The name of the OpenCV window.");
+
+	po::variables_map vm;
+	po::store(po::parse_command_line(argc, argv, desc), vm);
+	po::notify(vm);
+
+	if (vm.count("help") > 0) {
+		std::cout << desc << std::endl;
+		exit(EXIT_SUCCESS);
+	}
+
+	inputResource = vm["input"].as<std::string>();
+	setOutputFolder(vm["output"].as<std::string>());
+	windowName = vm["window-name"].as<std::string>();
+	renderingScaleFactor = vm["rsf"].as<double>();
+	calculationScaleFactor = vm["csf"].as<double>();
+	frameCPU = cv::imread(inputResource);
+	init();
+}
+
+void providentia::evaluation::ImageSetup::addInputOption(po::options_description *desc) {
+	desc->add_options()("input,i", po::value<std::string>()->default_value("../misc/test_frame.png"),
+						"The input resource.");
 }
 
 #pragma endregion RunnablesCommons
@@ -231,12 +288,13 @@ void providentia::evaluation::VideoSetup::setCapture(const std::string &file) {
 	capture = openVideoCapture(file);
 }
 
-providentia::evaluation::VideoSetup::VideoSetup(std::string _videoFileName, std::string _windowName,
-												double _calculationScaleFactor, double _renderingScaleFactor)
-	: ImageSetup(std::move(_videoFileName), std::move(_windowName), _calculationScaleFactor, _renderingScaleFactor) {
-	capture = providentia::evaluation::openVideoCapture(filename);
-	init();
-}
+providentia::evaluation::VideoSetup::VideoSetup(std::string _videoFileName,
+												std::string outputFolder,
+												std::string _windowName,
+												double _calculationScaleFactor,
+												double _renderingScaleFactor)
+	: ImageSetup(std::move(_videoFileName), std::move(outputFolder), std::move(_windowName), _calculationScaleFactor,
+				 _renderingScaleFactor) {}
 
 providentia::evaluation::VideoSetup::~VideoSetup() {
 	capture.release();
@@ -246,3 +304,18 @@ providentia::evaluation::VideoSetup::~VideoSetup() {
 void providentia::evaluation::VideoSetup::getNextFrame() {
 	capture >> frameCPU;
 }
+
+void providentia::evaluation::VideoSetup::fromCLI(int argc, const char **argv) {
+	ImageSetup::fromCLI(argc, argv);
+}
+
+void providentia::evaluation::VideoSetup::addInputOption(po::options_description *desc) {
+	desc->add_options()("input,i", po::value<std::string>()->default_value(getDefaultVideoFile()),
+						"The input resource.");
+}
+
+void providentia::evaluation::VideoSetup::init() {
+	ImageSetup::init();
+	capture = openVideoCapture(inputResource);
+}
+

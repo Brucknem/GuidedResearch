@@ -17,7 +17,7 @@ private:
 	std::shared_ptr<providentia::stabilization::DynamicStabilizerBase> stabilizer;
 
 	/**
-	 * The optical flow algorithms for the original and stabilized frames.
+	 * The optical flow algorithms for the original and stabilized writeFrames.
 	 */
 	std::shared_ptr<providentia::opticalflow::DenseOpticalFlow> stabilizedOpticalFlow, originalOpticalFlow;
 

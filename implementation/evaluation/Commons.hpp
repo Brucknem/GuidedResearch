@@ -13,6 +13,9 @@
 #include "OpticalFlow.hpp"
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/program_options.hpp>
+
+namespace po = boost::program_options;
 
 namespace providentia {
 	namespace evaluation {
@@ -73,21 +76,22 @@ namespace providentia {
 		cv::Mat pad(const cv::Mat &frame, int padding);
 
 		/**
-		 * @get a random float [0, 1)
+		 * @get a random double [0, 1)
 		 */
 		double getRandom01();
 
 		/**
-		 * Concatenates the given frames into a vector.
+		 * Concatenates the given writeFrames into a vector.
 		 */
 		template<typename T>
-		std::vector<cv::Mat> concatenate(const std::initializer_list<T> &frames, cv::Size size);
+		std::vector<cv::Mat> concatenate(const std::initializer_list<T> &frames, int padding = 0, cv::Size size =
+		cv::Size());
 
 		template<typename T>
-		cv::Mat vconcat(const std::initializer_list<T> &frames, cv::Size size = cv::Size());
+		cv::Mat vconcat(const std::initializer_list<T> &frames, int padding = 0, cv::Size size = cv::Size());
 
 		template<typename T>
-		cv::Mat hconcat(const std::initializer_list<T> &frames, cv::Size size = cv::Size());
+		cv::Mat hconcat(const std::initializer_list<T> &frames, int padding = 0, cv::Size size = cv::Size());
 
 		cv::Mat MatOfSize(cv::Size size, int type = CV_8UC3);
 
@@ -128,7 +132,7 @@ namespace providentia {
 			/**
 			 * The file name of the video.
 			 */
-			std::string filename;
+			std::string inputResource;
 
 			/**
 			 * The title name of the window.
@@ -156,8 +160,10 @@ namespace providentia {
 			long totalAlgorithmsDuration = 0;
 
 			boost::filesystem::path outputFolder{""};
+			boost::filesystem::path framesOutputFolder{""};
 
 			int frameNumber = 0;
+			bool writeFrames = false;
 
 			/**
 			 * The subclass specific main loop. All calculation is done here. <br>
@@ -189,12 +195,13 @@ namespace providentia {
 			 */
 			void addRuntimeToFinalFrame(const std::string &text, long milliseconds, int x, int y);
 
-			/**
+		public:
+
+			virtual /**
 			 * Initializer for the fields that are derived from the arguments.
 			 */
 			void init();
 
-		public:
 			/**
 			 * @set
 			 */
@@ -208,15 +215,21 @@ namespace providentia {
 			/**
 			 * @constructor Directly sets the fields.
 			 *
-			 * @param _filename The video file name.
+			 * @param inputFrame The video file name.
 			 * @param _windowName The name of the rendering window.
 			 * @param _calculationScaleFactor The scale factor of frame during calculation.
 			 * @param _renderingScaleFactor The scale factor of final frame during rendering.
 			 */
-			explicit ImageSetup(std::string _filename = "../misc/test_frame.png",
-								std::string _windowName = "Camera Stabilization",
-								double _calculationScaleFactor = 1,
-								double _renderingScaleFactor = 0.5);
+			explicit ImageSetup(
+				std::string inputFrame = "../misc/test_frame.png",
+				std::string outputFolder = "./results",
+				std::string _windowName = "Camera Stabilization",
+				double _calculationScaleFactor = 1,
+				double _renderingScaleFactor = 0.5);
+
+			virtual void fromCLI(int argc, const char **argv);;
+
+			virtual void addInputOption(po::options_description *desc);
 
 			/**
 			 * @destructor
@@ -258,9 +271,14 @@ namespace providentia {
 			 * @param _renderingScaleFactor The scale factor of final frame during rendering.
 			 */
 			explicit VideoSetup(std::string _videoFileName = getDefaultVideoFile(),
+								std::string outputFolder = "./results",
 								std::string _windowName = "Camera Stabilization",
 								double _calculationScaleFactor = 1,
 								double _renderingScaleFactor = 0.5);
+
+			void fromCLI(int argc, const char **argv) override;;
+
+			void addInputOption(po::options_description *desc) override;
 
 			/**
 			 * @destructor
@@ -273,8 +291,11 @@ namespace providentia {
 			void setCapture(const std::string &file);
 
 			void getNextFrame() override;
+
+			void init() override;
 		};
 
+		cv::cuda::GpuMat pad(const cv::cuda::GpuMat &frame, int padding);
 	}
 }
 

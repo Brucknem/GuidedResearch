@@ -47,12 +47,12 @@ namespace providentia {
 			cv::cuda::Stream stream;
 
 			/**
-			 * Color frames for visualization.
+			 * Color writeFrames for visualization.
 			 */
 			cv::Mat hsv8, bgr;
 
 			/**
-			 * Color frames for merging the channels.
+			 * Color writeFrames for merging the channels.
 			 */
 			std::array<cv::Mat, 3> _hsv;
 

@@ -6,6 +6,7 @@
 #include "OpticalFlow.hpp"
 #include "Commons.hpp"
 #include "CSVWriter.hpp"
+#include <boost/filesystem/convenience.hpp>
 
 using namespace providentia::evaluation;
 
@@ -25,6 +26,8 @@ private:
 	std::shared_ptr<::CSVWriter> csvWriter;
 	int frameId = 0;
 	bool withMask = false;
+	int padding = 10;
+	boost::filesystem::path evaluationPath;
 
 public:
 	explicit Setup() : VideoSetup() {
@@ -32,22 +35,35 @@ public:
 		opticalFlows.emplace_back();
 		opticalFlows.emplace_back();
 		opticalFlows.emplace_back();
+	}
 
-		csvWriter = std::make_shared<::CSVWriter>("./evaluateDynamicStabilization.csv");
-		*csvWriter << "FrameId" << "Original" << "SURF" << "ORB" << "FAST" << newline;
+	void init() override {
+		VideoSetup::init();
+
+		evaluationPath =
+			outputFolder / "DynamicStabilization" / boost::filesystem::path(inputResource).filename().string();
+		if (!boost::filesystem::is_directory(evaluationPath)) {
+			boost::filesystem::create_directories(evaluationPath);
+		}
+
+		csvWriter = std::make_shared<::CSVWriter>(evaluationPath / (boost::filesystem::path(inputResource).filename()
+																		.string() + ".csv"));
+		*csvWriter << "Frame" << "Original" << "SURF" << "ORB" << "FAST" << newline;
 	}
 
 	void calculateOpticalFlows() {
 		if (withMask) {
-			opticalFlows[0].calculate(frameGPU, surf.getBackgroundMask(frameGPU.size()));
-			opticalFlows[1].calculate(surf.getStabilizedFrame(), surf.getBackgroundMask(frameGPU.size()));
-			opticalFlows[2].calculate(orb.getStabilizedFrame(), orb.getBackgroundMask(frameGPU.size()));
-			opticalFlows[3].calculate(fast.getStabilizedFrame(), fast.getBackgroundMask(frameGPU.size()));
+			auto size = pad(frameGPU, padding).size();
+			opticalFlows[0].calculate(pad(frameGPU, padding), surf.getBackgroundMask(size));
+			opticalFlows[1].calculate(pad(surf.getStabilizedFrame(), padding), surf.getBackgroundMask(size));
+			opticalFlows[2].calculate(pad(orb.getStabilizedFrame(), padding), orb.getBackgroundMask(size));
+			opticalFlows[3].calculate(pad(fast.getStabilizedFrame(), padding), fast.getBackgroundMask(size));
 		} else {
-			opticalFlows[0].calculate(frameGPU);
-			opticalFlows[1].calculate(surf.getStabilizedFrame());
-			opticalFlows[2].calculate(orb.getStabilizedFrame());
-			opticalFlows[3].calculate(fast.getStabilizedFrame());
+			opticalFlows[0].calculate(pad(frameGPU, padding));
+			opticalFlows[1].calculate(pad(surf.getStabilizedFrame(), padding));
+			opticalFlows[2].calculate(pad(orb.getStabilizedFrame(), padding));
+			opticalFlows[3].calculate(pad(fast.getStabilizedFrame(), padding));
+
 		}
 	}
 
@@ -60,14 +76,14 @@ public:
 
 		finalFrame = ::hconcat(
 			{
-				frameCPU,
+				::addText(frameCPU, "Frame: " + std::to_string(frameId), 2, 5, 5),
 				::addRuntimeToFrame(cv::Mat(surf.getStabilizedFrame()), "SURF + BF", surf.getTotalMilliseconds(), 2, 5,
 									5),
 				::addRuntimeToFrame(cv::Mat(orb.getStabilizedFrame()), "ORB + BF", orb.getTotalMilliseconds(), 2, 5,
 									5),
 				::addRuntimeToFrame(cv::Mat(fast.getStabilizedFrame()), "FAST + BF", fast.getTotalMilliseconds(), 2,
 									5, 5)
-			}
+			}, padding
 		);
 
 		bufferCPU = ::hconcat(
@@ -91,16 +107,46 @@ public:
 					::cvtColor(surf.getBackgroundMask(frameGPU.size()), cv::COLOR_GRAY2BGR),
 					::cvtColor(orb.getBackgroundMask(frameGPU.size()), cv::COLOR_GRAY2BGR),
 					::cvtColor(fast.getBackgroundMask(frameGPU.size()), cv::COLOR_GRAY2BGR),
-				}
+				}, padding
 			);
 			finalFrame = ::vconcat({finalFrame, bufferCPU});
 		}
 
-		*csvWriter << frameId++;
+		double originalMagnitudeMean = opticalFlows[0].getMagnitudeMean();
+
+		*csvWriter << frameId;
+		bool write = false;
+		std::string frameName = "frame_" + std::to_string(frameId);
+
+		int flowNumber = 0;
 		for (auto &opticalFlow: opticalFlows) {
-			*csvWriter << opticalFlow.getMagnitudeMean();
+			double currentMagnitudeMean = opticalFlow.getMagnitudeMean();
+			*csvWriter << currentMagnitudeMean;
+
+			if (originalMagnitudeMean - currentMagnitudeMean < 0) {
+				frameName += "_";
+				switch (flowNumber) {
+					case 1:
+						frameName += "surf";
+						break;
+					case 2:
+						frameName += "orb";
+						break;
+					case 3:
+						frameName += "fast";
+						break;
+					default:
+						break;
+				}
+				write = true;
+			}
+			flowNumber++;
+		}
+		if (write) {
+			cv::imwrite((evaluationPath / (frameName + ".png")).string(), finalFrame);
 		}
 		*csvWriter << newline;
+		frameId++;
 	}
 
 	void specificAddMessages() override {
@@ -119,7 +165,9 @@ public:
 
 int main(int argc, char const *argv[]) {
 	Setup setup;
+	setup.fromCLI(argc, argv);
 	setup.setRenderingScaleFactor(0.4);
+	setup.init();
 	setup.mainLoop();
 	return 0;
 }

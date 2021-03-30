@@ -117,7 +117,7 @@ namespace providentia {
 			void setShouldUseFundamentalMatrix(bool shouldUseFundamentalMatrix);
 
 			/**
-			 * Matches the detected features of two frames.
+			 * Matches the detected features of two writeFrames.
 			 *
 			 * @param frameFeatureDetector The feature detector of the frame.
 			 * @param referenceFeatureDetector  The feature detector of the reference frame.
@@ -126,7 +126,7 @@ namespace providentia {
 					   const std::shared_ptr<providentia::features::FeatureDetectorBase> &_referenceFeatureDetector);
 
 			/**
-			 * Horizontally stacks the frames and draws the matched features.
+			 * Horizontally stacks the writeFrames and draws the matched features.
 			 */
 			cv::Mat draw();
 

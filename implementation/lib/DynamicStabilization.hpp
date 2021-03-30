@@ -69,7 +69,7 @@ namespace providentia {
 			const std::shared_ptr<providentia::stabilization::FrameWarper> &getWarper() const;
 
 			/**
-			 * @get The background segmentor used to mask the frames.
+			 * @get The background segmentor used to mask the writeFrames.
 			 */
 			const std::shared_ptr<providentia::segmentation::BackgroundSegmentorBase> &getSegmentor() const;
 
@@ -126,7 +126,7 @@ namespace providentia {
 			/**
 			 * Main algorithm. <br>
 			 * 1. Detects features in the current frame and reference frame. <br>
-			 * 2. Matches features of the frames. <br>
+			 * 2. Matches features of the writeFrames. <br>
 			 * 3. Finds homography by minimizing the reprojection error. <br>
 			 * 4. Warps the frame using the found homography. <br>
 			 *

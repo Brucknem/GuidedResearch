@@ -79,7 +79,7 @@ namespace providentia {
 			~BackgroundSegmentorBase() override = default;
 
 			/**
-			 * Appends the given frame to the internal history of frames and calculates the background segmentation.
+			 * Appends the given frame to the internal history of writeFrames and calculates the background segmentation.
 			 *
 			 * @param _frame The new frame to apply.
 			 */
