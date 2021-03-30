@@ -185,8 +185,6 @@ void providentia::evaluation::ImageSetup::mainLoop() {
 		totalAlgorithmsDuration = 0;
 		specificMainLoop();
 
-		cv::resize(finalFrame, finalFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
-
 		if (totalAlgorithmsDuration > 0) {
 			addRuntimeToFinalFrame("Algorithms total", totalAlgorithmsDuration, 5, finalFrame.rows - 40);
 		}
@@ -196,17 +194,21 @@ void providentia::evaluation::ImageSetup::mainLoop() {
 		addTimestamp("End");
 //		addRuntimeToFinalFrame("Frame " + std::to_string(frameNumber), getTotalMilliseconds(), 5, finalFrame.rows - 20);
 
-		cv::imshow(windowName, finalFrame);
-		if (!framesOutputFolder.empty()) {
-			finalFrame *= 255;
+		if (writeFrames) {
 			finalFrame.convertTo(finalFrame, CV_8UC4);
 			std::stringstream frameId;
-			frameId.fill('0');
-			frameId.width(5);
+			frameId << std::setw(4) << std::setfill('0');
 			frameId << frameNumber;
-			boost::filesystem::path outFile = outputFolder / ("frame_" + frameId.str() + ".jpg");
+			if (!boost::filesystem::is_directory(outputFolder / "frames")) {
+				boost::filesystem::create_directories(outputFolder / "frames");
+			}
+			boost::filesystem::path outFile = outputFolder / "frames" / ("frame_" + frameId.str() + ".jpg");
 			cv::imwrite(outFile.string(), finalFrame, {cv::IMWRITE_PNG_COMPRESSION, 9});
 		}
+
+		cv::resize(finalFrame, finalFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
+		cv::imshow(windowName, finalFrame);
+
 		pressedKey = cv::waitKey(1);
 		if (pressedKey == (int) ('q')) {
 			break;
@@ -233,17 +235,9 @@ void providentia::evaluation::ImageSetup::setOutputFolder(const std::string &_ou
 	if (!boost::filesystem::is_directory(outputFolder)) {
 		boost::filesystem::create_directories(outputFolder);
 	}
-
-	if (!writeFrames) {
-		return;
-	}
-	framesOutputFolder = outputFolder / "frames";
-	if (!boost::filesystem::is_directory(framesOutputFolder)) {
-		boost::filesystem::create_directories(framesOutputFolder);
-	}
 }
 
-void providentia::evaluation::ImageSetup::fromCLI(int argc, const char **argv) {
+boost::program_options::variables_map providentia::evaluation::ImageSetup::fromCLI(int argc, const char **argv) {
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("help,h", "produce help message");
@@ -255,6 +249,7 @@ void providentia::evaluation::ImageSetup::fromCLI(int argc, const char **argv) {
 		("writeFrames,f", po::bool_switch(&writeFrames), "Write the writeFrames to the output folder.")
 		("window-name,w", po::value<std::string>()->default_value("Camera Stabilization"),
 		 "The name of the OpenCV window.");
+	addAdditionalOptions(&desc);
 
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -271,12 +266,16 @@ void providentia::evaluation::ImageSetup::fromCLI(int argc, const char **argv) {
 	renderingScaleFactor = vm["rsf"].as<double>();
 	calculationScaleFactor = vm["csf"].as<double>();
 	frameCPU = cv::imread(inputResource);
-	init();
+	return vm;
 }
 
 void providentia::evaluation::ImageSetup::addInputOption(po::options_description *desc) {
 	desc->add_options()("input,i", po::value<std::string>()->default_value("../misc/test_frame.png"),
 						"The input resource.");
+}
+
+void providentia::evaluation::ImageSetup::addAdditionalOptions(po::options_description *desc) {
+	// Empty for override
 }
 
 #pragma endregion RunnablesCommons
@@ -305,8 +304,8 @@ void providentia::evaluation::VideoSetup::getNextFrame() {
 	capture >> frameCPU;
 }
 
-void providentia::evaluation::VideoSetup::fromCLI(int argc, const char **argv) {
-	ImageSetup::fromCLI(argc, argv);
+boost::program_options::variables_map providentia::evaluation::VideoSetup::fromCLI(int argc, const char **argv) {
+	return ImageSetup::fromCLI(argc, argv);
 }
 
 void providentia::evaluation::VideoSetup::addInputOption(po::options_description *desc) {

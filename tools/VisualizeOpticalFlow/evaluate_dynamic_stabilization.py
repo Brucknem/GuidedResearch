@@ -6,12 +6,20 @@ import inspect
 import numpy as np
 import pandas as pd
 from bokeh.io import save, show
+from bokeh.models import Legend
 from bokeh.palettes import mpl
 from bokeh.plotting import figure, output_file
 
 from main import *
 
 display = True
+
+filename = sys.argv[1]
+if not filename or not filename.endswith('.csv'):
+    print("Please specify .csv input file")
+    exit(-1)
+
+df = pd.read_csv(filename)
 
 x = df['Frame']
 
@@ -55,8 +63,9 @@ def get_output_filename(foldername, window_size):
 def setup(window_size):
     output_file(get_output_filename(inspect.stack()[1].function, window_size))
 
-    p = figure(plot_width=1600, plot_height=1000, tools=tools)
+    p = figure(plot_width=plot_width, plot_height=plot_height, tools=tools)
     p.title.text = 'Damping of mean pixel shifts after dynamic stabilization [' + title_suffix + ']'
+    p.add_layout(Legend(), 'right')
 
     columns, columns_names, means, stds = get_statistics(window_size)
     # colors = ["#DA4167", "#F5853F", "#313D5A", "#87B38D"]
@@ -75,6 +84,9 @@ def compare_of_mean_pixel_shift(window_size):
     set_plot_settings(p)
     p.xaxis.axis_label = "Frame"
     p.yaxis.axis_label = "Mean pixel shift [px]"
+
+    p.legend.location = "top"
+
     show_or_save(p, display)
 
 

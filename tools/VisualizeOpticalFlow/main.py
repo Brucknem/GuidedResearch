@@ -9,13 +9,6 @@ from bokeh.io import save, show
 from bokeh.palettes import mpl
 from bokeh.plotting import figure, output_file
 
-filename = sys.argv[1]
-if not filename or not filename.endswith('.csv'):
-    print("Please specify .csv input file")
-    exit(-1)
-
-df = pd.read_csv(filename)
-
 font = "Times"
 
 font_size = '28pt'
@@ -24,6 +17,8 @@ title_font_size = '32pt'
 title_suffix = sys.argv[2]
 
 tools = "save,crosshair,pan,wheel_zoom,box_zoom,undo,redo,reset"
+plot_width = 1600
+plot_height = 1000
 
 
 def get_colors(amount):
@@ -31,7 +26,6 @@ def get_colors(amount):
 
 
 def set_plot_settings(p):
-    p.legend.location = "top"
     p.legend.click_policy = "hide"
     p.legend.label_text_font = font
     p.legend.label_text_font_size = font_size

@@ -19,9 +19,9 @@ namespace providentia {
 			return cv::TrackerCSRT::create();
 		}
 
-		ObjectTracking::ObjectTracking(int trackerType, std::string trackerName, int y)
+		ObjectTracking::ObjectTracking(int trackerType, std::string trackerName, int y, cv::Scalar color)
 			: trackerType(TRACKER_TYPES[trackerType]), tracker(getTracker(TRACKER_TYPES[trackerType])),
-			  trackerName(std::move(trackerName)), y(y) {}
+			  trackerName(std::move(trackerName)), y(y), color(color) {}
 
 		void ObjectTracking::init(cv::Mat frame, const cv::Rect2d &_bbox) {
 			bbox = _bbox;
@@ -50,7 +50,6 @@ namespace providentia {
 				message += "Not initialized.";
 			} else {
 				if (trackingSuccessful) {
-					auto color = cv::Scalar(255, 0, 0);
 					cv::rectangle(result, bbox, color, 2, 1);
 
 					cv::Point2d midpoint = getMidpoint();

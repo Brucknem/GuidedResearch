@@ -160,7 +160,6 @@ namespace providentia {
 			long totalAlgorithmsDuration = 0;
 
 			boost::filesystem::path outputFolder{""};
-			boost::filesystem::path framesOutputFolder{""};
 
 			int frameNumber = 0;
 			bool writeFrames = false;
@@ -227,7 +226,7 @@ namespace providentia {
 				double _calculationScaleFactor = 1,
 				double _renderingScaleFactor = 0.5);
 
-			virtual void fromCLI(int argc, const char **argv);;
+			virtual boost::program_options::variables_map fromCLI(int argc, const char **argv);;
 
 			virtual void addInputOption(po::options_description *desc);
 
@@ -248,6 +247,7 @@ namespace providentia {
 
 			virtual void getNextFrame();
 
+			virtual void addAdditionalOptions(po::options_description *desc);
 		};
 
 		/**
@@ -276,7 +276,7 @@ namespace providentia {
 								double _calculationScaleFactor = 1,
 								double _renderingScaleFactor = 0.5);
 
-			void fromCLI(int argc, const char **argv) override;;
+			boost::program_options::variables_map fromCLI(int argc, const char **argv) override;;
 
 			void addInputOption(po::options_description *desc) override;
 

@@ -3,11 +3,12 @@
 //
 #include <opencv2/cudawarping.hpp>
 #include "DynamicStabilization.hpp"
-#include "OpticalFlow.hpp"
 #include "Commons.hpp"
 #include "CSVWriter.hpp"
 #include <boost/filesystem/convenience.hpp>
 #include "ObjectTracking.hpp"
+#include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
 
 using namespace providentia::evaluation;
 
@@ -28,31 +29,69 @@ private:
 	std::vector<ObjectTracking> orbTrackers;
 	std::vector<ObjectTracking> fastTrackers;
 
-	std::vector<cv::Rect2d> originalBoundingBoxes{
-		cv::Rect2d{540., 175., 100., 145.},
-	};
+	std::vector<cv::Rect2d> originalBoundingBoxes;
+	std::vector<cv::Scalar> boundingBoxColors;
+	std::vector<std::string> objectNames;
 
 	std::vector<::CSVWriter *> csvWriters;
-	boost::filesystem::path evaluationPath;
 	int frameId = 0;
 	int trackerType = 2;
+
+	int lineHeight = 42;
+
 public:
-	explicit Setup() : VideoSetup() {
-		for (int i = 0; i < originalBoundingBoxes.size(); i++) {
-			originalTrackers.emplace_back(trackerType, "Original", 5 + 24 * i);
-			surfTrackers.emplace_back(trackerType, "SURF", 5 + 24 * i);
-			orbTrackers.emplace_back(trackerType, "ORB", 5 + 24 * i);
-			fastTrackers.emplace_back(trackerType, "FAST", 5 + 24 * i);
+	explicit Setup() : VideoSetup() {}
+
+	boost::program_options::variables_map fromCLI(int argc, const char **argv) override {
+		auto vm = VideoSetup::fromCLI(argc, argv);
+
+		cv::RNG rng(1253434493);
+		std::vector<std::string> rawBboxes;
+		boost::split(rawBboxes, vm["bboxes"].as<std::string>(), [](char c) { return c == ','; });
+		boost::split(objectNames, vm["names"].as<std::string>(), [](char c) { return c == ','; });
+
+		if (rawBboxes.size() % 4 != 0) {
+			std::cout << "The bounding boxes have to be defined as packs of 4 [x, y, w, h] values." << std::endl;
+			exit(EXIT_FAILURE);
 		}
+		if (rawBboxes.size() / 4 != objectNames.size()) {
+			std::cout << "There must be given exactly the same number of names and bounding boxes." << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		std::vector<int> rawBboxValues;
+		BOOST_FOREACH(std::string value, rawBboxes) { rawBboxValues.emplace_back(std::stoi(value)); };
+		for (int i = 0; i < rawBboxes.size(); i += 4) {
+			originalBoundingBoxes.emplace_back(
+				rawBboxValues[i + 0], rawBboxValues[i + 1],
+				rawBboxValues[i + 2], rawBboxValues[i + 3]
+			);
+		}
+
+		for (int i = 0; i < originalBoundingBoxes.size(); i++) {
+			boundingBoxColors.emplace_back(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255), 1);
+
+			originalTrackers.emplace_back(trackerType, "Original", 5 + lineHeight * i, boundingBoxColors[i]);
+			surfTrackers.emplace_back(trackerType, "SURF", 5 + lineHeight * i, boundingBoxColors[i]);
+			orbTrackers.emplace_back(trackerType, "ORB", 5 + lineHeight * i, boundingBoxColors[i]);
+			fastTrackers.emplace_back(trackerType, "FAST", 5 + lineHeight * i, boundingBoxColors[i]);
+		}
+		return vm;
+	}
+
+	void addAdditionalOptions(po::options_description *desc) override {
+		desc->add_options()
+			("bboxes,b", po::value<std::string>()->default_value(""), "The initial bounding boxes of the vehicles to "
+																	  "track.")
+			("names,n", po::value<std::string>()->default_value(""), "The names of the vehicles to track.");
 	}
 
 	void init() override {
 		VideoSetup::init();
 
-		evaluationPath =
-			outputFolder / "ObjectTracking" / boost::filesystem::path(inputResource).filename().string();
-		if (!boost::filesystem::is_directory(evaluationPath)) {
-			boost::filesystem::create_directories(evaluationPath);
+		outputFolder = outputFolder / "ObjectTracking" / boost::filesystem::path(inputResource).filename().string();
+		if (!boost::filesystem::is_directory(outputFolder)) {
+			boost::filesystem::create_directories(outputFolder);
 		}
 
 		getNextFrame();
@@ -63,10 +102,7 @@ public:
 			orbTrackers[i].init(frameCPU, originalBoundingBoxes[i]);
 			fastTrackers[i].init(frameCPU, originalBoundingBoxes[i]);
 
-			csvWriters.emplace_back(new CSVWriter(evaluationPath /
-												  (boost::filesystem::path(inputResource).filename().string() +
-												   "_object_" +
-												   std::to_string(i) + ".csv")));
+			csvWriters.emplace_back(new CSVWriter(outputFolder / (objectNames[i] + ".csv")));
 			*csvWriters.back() << "Frame" <<
 							   "Original [x]" << "Original [y]" << "Original [w]" << "Original [h]" << "Original [mx]"
 							   << "Original [my]" <<
@@ -77,7 +113,7 @@ public:
 		}
 	}
 
-	void addTrackingResult(CSVWriter *csvWriter, const ObjectTracking &tracker) {
+	static void addTrackingResult(CSVWriter *csvWriter, const ObjectTracking &tracker) {
 		if (tracker.isTrackingSuccessful()) {
 			*csvWriter << tracker.getBbox() << tracker.getMidpoint();
 		} else {
@@ -126,22 +162,7 @@ public:
 			}
 		);
 
-
-//		*csvWriter << newline;
 		frameId++;
-	}
-
-	void specificAddMessages() override {
-//		addRuntimeToFinalFrame("Feature detection",
-//							   stabilizer->getFrameFeatureDetector()->getTotalMilliseconds(), 5, 20);
-//		addRuntimeToFinalFrame("Feature matching",
-//							   stabilizer->getMatcher()->getTotalMilliseconds(), 5, 40);
-//		addRuntimeToFinalFrame("Frame warping ",
-//							   stabilizer->getWarper()->getTotalMilliseconds(), 5, 60);
-//		addRuntimeToFinalFrame("Background segmentation",
-//							   stabilizer->getSegmentor()->getTotalMilliseconds(), 5, 80);
-//		addRuntimeToFinalFrame("Total stabilization",
-//							   stabilizer->getTotalMilliseconds(), 5, 100);
 	}
 };
 

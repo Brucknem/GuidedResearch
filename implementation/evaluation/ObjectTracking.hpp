@@ -24,9 +24,12 @@ namespace providentia {
 			std::string trackerName;
 
 			int y;
+
+			cv::Scalar color;
+
 		public:
 
-			explicit ObjectTracking(int trackerType, std::string trackerName, int y);
+			explicit ObjectTracking(int trackerType, std::string trackerName, int y, cv::Scalar color);
 
 			bool isInitialized();
 
