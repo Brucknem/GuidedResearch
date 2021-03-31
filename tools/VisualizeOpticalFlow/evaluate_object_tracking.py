@@ -1,20 +1,8 @@
-import sys
-from math import sqrt
-from os.path import join
-from pathlib import Path
-import inspect
 import os
-
-import numpy as np
-import pandas as pd
-from bokeh.io import save, show
-from bokeh.models import Legend, Ellipse, LinearAxis, ColumnDataSource, Whisker, LabelSet
-from bokeh.palettes import mpl, Inferno
-from bokeh.plotting import figure, output_file
-
+from bokeh.models import ColumnDataSource
 from commons import *
 
-display = True
+display = False
 
 folder = sys.argv[1]
 if not folder or not Path(folder).is_dir():

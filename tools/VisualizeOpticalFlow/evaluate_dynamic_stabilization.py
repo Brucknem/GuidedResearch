@@ -1,18 +1,7 @@
-import sys
-from os.path import join
-from pathlib import Path
-import inspect
-
-import numpy as np
-import pandas as pd
-from bokeh.io import save, show
 from bokeh.models import Legend
-from bokeh.palettes import mpl
-from bokeh.plotting import figure, output_file
-
 from commons import *
 
-display = True
+display = False
 
 filename = sys.argv[1]
 if not filename or not filename.endswith('.csv'):
@@ -137,7 +126,7 @@ def calculate_percentage_of_better_frames():
 
     result_df = pd.DataFrame(data=data)
 
-    folder = Path(join('evaluation', Path(filename).name))
+    folder = Path(join('evaluate_dynamic_stabilization', Path(filename).name))
     folder.mkdir(exist_ok=True, parents=True)
     result_df.to_csv(join(str(folder), 'stats.csv'))
 
@@ -145,6 +134,8 @@ def calculate_percentage_of_better_frames():
 calculate_percentage_of_better_frames()
 
 # create_plot(1)
-for window_size in [1, int(25 / 8), int(25 / 4), int(25 / 2), 25, 50, 75, 100, 125]:
+sizes = [1, int(25 / 8), int(25 / 4), int(25 / 2), 25, 50, 75, 100, 125]
+sizes = [25]
+for window_size in sizes:
     deltas_of_mean_pixel_shift(window_size)
     compare_of_mean_pixel_shift(window_size)
