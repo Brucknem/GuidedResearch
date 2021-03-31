@@ -6,7 +6,7 @@ import inspect
 import numpy as np
 import pandas as pd
 from bokeh.io import save, show
-from bokeh.palettes import mpl
+from bokeh.palettes import mpl, Inferno
 from bokeh.plotting import figure, output_file
 
 font = "Times"
@@ -22,7 +22,7 @@ plot_height = 1000
 
 
 def get_colors(amount):
-    return mpl['Inferno'][amount]
+    return Inferno[amount + 1][:amount]
 
 
 def set_plot_settings(p):
@@ -47,6 +47,9 @@ def set_plot_settings(p):
 
     p.xaxis.axis_label_text_font_style = "normal"
     p.yaxis.axis_label_text_font_style = "normal"
+
+    p.legend.orientation = "vertical"
+    p.legend.location = "top_right"
 
 
 def show_or_save(p, display):

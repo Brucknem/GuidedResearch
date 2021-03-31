@@ -10,7 +10,7 @@ from bokeh.models import Legend
 from bokeh.palettes import mpl
 from bokeh.plotting import figure, output_file
 
-from main import *
+from commons import *
 
 display = True
 
@@ -68,13 +68,13 @@ def setup(window_size):
     p.add_layout(Legend(), 'right')
 
     columns, columns_names, means, stds = get_statistics(window_size)
-    # colors = ["#DA4167", "#F5853F", "#313D5A", "#87B38D"]
 
-    return p, columns, columns_names, means, stds, get_colors(columns + 1)
+    return p, columns, columns_names, means, stds
 
 
 def compare_of_mean_pixel_shift(window_size):
-    p, columns, columns_names, means, stds, colors = setup(window_size)
+    p, columns, columns_names, means, stds = setup(window_size)
+    colors = get_colors(len(columns_names))
     for i in range(columns):
         add_stds(p, means[i], stds[i], colors[i], columns_names[i])
 
@@ -85,13 +85,12 @@ def compare_of_mean_pixel_shift(window_size):
     p.xaxis.axis_label = "Frame"
     p.yaxis.axis_label = "Mean pixel shift [px]"
 
-    p.legend.location = "top"
-
     show_or_save(p, display)
 
 
 def deltas_of_mean_pixel_shift(window_size):
-    p, columns, columns_names, means, stds, colors = setup(window_size)
+    p, columns, columns_names, means, stds = setup(window_size)
+    colors = get_colors(len(columns_names))
 
     deltas = [means[0] - means[i] for i in range(columns)]
     stds = [abs(stds[0] - stds[i]) for i in range(columns)]

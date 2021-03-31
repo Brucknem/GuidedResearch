@@ -8,11 +8,11 @@ import os
 import numpy as np
 import pandas as pd
 from bokeh.io import save, show
-from bokeh.models import Legend
-from bokeh.palettes import mpl
+from bokeh.models import Legend, Ellipse, LinearAxis, ColumnDataSource, Whisker, LabelSet
+from bokeh.palettes import mpl, Inferno
 from bokeh.plotting import figure, output_file
 
-from main import *
+from commons import *
 
 display = True
 
@@ -28,17 +28,17 @@ def get_output_filename(foldername, filename):
     return str(join(directory, filename + ".html"))
 
 
-def setup(foldername, filename):
-    output_file(get_output_filename(foldername, filename))
+def setup(foldername, filename, title):
+    output_file(get_output_filename(foldername, filename + "_" + title))
 
     p = figure(plot_width=plot_width, plot_height=plot_height, tools=tools)
-    p.title.text = 'Tracking of ' + filename.replace('.csv', '') + ' [' + title_suffix + ']'
+    p.title.text = title + ' of ' + filename.replace('.csv', '') + ' [' + title_suffix + ']'
     # p.add_layout(Legend(), 'right')
 
     return p
 
 
-def xy_plot(df, p, name, color):
+def get_values(df, name):
     x = df[name + " [mx]"]
     y = df[name + " [my]"]
 
@@ -60,27 +60,60 @@ def xy_plot(df, p, name, color):
 
     x = x.rolling(window).mean()
     y = y.rolling(window).mean()
-
-    # p.triangle_pin(x, y, size=10, color=color, alpha=0.5, legend_label=name)
-    p.line(x, y, line_width=2, color=color, alpha=0.5, legend_label=name)
+    return x, y
 
 
-def xy_plots(df, foldername, filename):
-    p = setup(foldername, filename)
+def generate_xy_plots(df, foldername, filename, column_names):
+    xy_plot = setup(foldername, filename, "Tracking")
+    colors = get_colors(len(column_names))
+    for i, name in enumerate(column_names):
+        x, y = get_values(df, name)
+        xy_plot.line(x, y, line_width=2, color=colors[i], alpha=0.5, legend_label=name)
+        xy_plot.varea(x=x, y1=y, y2=y, color=colors[i], alpha=0.2, legend_label=name)
 
-    colors = get_colors(4 + 1)
-    xy_plot(df, p, "Original", color=colors[0])
-    xy_plot(df, p, "FAST", color=colors[1])
-    xy_plot(df, p, "ORB", color=colors[2])
-    xy_plot(df, p, "SURF", color=colors[3])
+    xy_plot.y_range.flipped = True
+    xy_plot.xaxis.axis_label = "X [px]"
+    xy_plot.yaxis.axis_label = "Y [px]"
 
-    p.y_range.flipped = True
-    p.xaxis.axis_label = "X [px]"
-    p.yaxis.axis_label = "Y [px]"
-    # p.legend.location = "right"
+    set_plot_settings(xy_plot)
+    show_or_save(xy_plot, display)
 
-    set_plot_settings(p)
-    show_or_save(p, display)
+
+def distances(values):
+    return [np.linalg.norm(np.array(values[i]) - np.array(values[i - 1])) for i in range(1, len(values))]
+
+
+def generate_curvature_plots(df, foldername, filename, column_names):
+    title = "Arc length"
+    output_file(get_output_filename(foldername, filename + "_" + title))
+
+    curvature_plot = figure(
+        x_range=column_names,
+        plot_width=plot_width,
+        plot_height=plot_height,
+        tools=tools,
+    )
+    curvature_plot.title.text = title + ' of ' + filename.replace('.csv', '') + ' [' + title_suffix + ']'
+
+    means = []
+    for i, name in enumerate(column_names):
+        x, y = get_values(df, name)
+        dist = distances(list(zip(x, y)))
+        mean = np.sum(dist)
+        means.append(mean)
+    means = [mean / means[0] for mean in means]
+
+    source = ColumnDataSource(data=dict(x=column_names, means=means, color=get_colors(len(column_names))))
+    curvature_plot.vbar(x='x', top='means', width=0.9, color='color', legend_field='x', fill_alpha=0.5, source=source)
+
+    set_plot_settings(curvature_plot)
+    show_or_save(curvature_plot, display)
+
+
+def generate_plots(df, foldername, filename):
+    column_names = ["Original", "FAST", "ORB", "SURF"]
+    generate_xy_plots(df, foldername, filename, column_names)
+    generate_curvature_plots(df, foldername, filename, column_names)
 
 
 window = 1
@@ -89,4 +122,4 @@ for csv in os.listdir(folder):
     if csv.endswith(".csv"):
         print(os.path.join(folder, csv))
         df = pd.read_csv(os.path.join(folder, csv))
-        xy_plots(df, Path(folder).name, csv)
+        generate_plots(df, Path(folder).name, csv)
