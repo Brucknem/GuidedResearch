@@ -1,8 +1,8 @@
 import os
-from bokeh.models import ColumnDataSource
+from bokeh.models import ColumnDataSource, LabelSet
 from commons import *
 
-display = False
+display = True
 
 folder = sys.argv[1]
 if not folder or not Path(folder).is_dir():
@@ -21,7 +21,6 @@ def setup(foldername, filename, title):
 
     p = figure(plot_width=plot_width, plot_height=plot_height, tools=tools)
     p.title.text = title + ' of ' + filename.replace('.csv', '') + ' [' + title_suffix + ']'
-    # p.add_layout(Legend(), 'right')
 
     return p
 
@@ -72,7 +71,7 @@ def distances(values):
 
 
 def generate_curvature_plots(df, foldername, filename, column_names):
-    title = "Arc length"
+    title = "Normalized arc length"
     output_file(get_output_filename(foldername, filename + "_" + title))
 
     curvature_plot = figure(
@@ -92,7 +91,14 @@ def generate_curvature_plots(df, foldername, filename, column_names):
     means = [mean / means[0] for mean in means]
 
     source = ColumnDataSource(data=dict(x=column_names, means=means, color=get_colors(len(column_names))))
+    source.data['means_formatted'] = [round(mean, 3) for mean in means]
+
     curvature_plot.vbar(x='x', top='means', width=0.9, color='color', legend_field='x', fill_alpha=0.5, source=source)
+
+    labels = LabelSet(x='x', y='means', text='means_formatted',
+                      y_offset=5, source=source, render_mode='canvas', text_align='center', text_font=font,
+                      text_font_size=font_size)
+    curvature_plot.add_layout(labels)
 
     set_plot_settings(curvature_plot)
     show_or_save(curvature_plot, display)
