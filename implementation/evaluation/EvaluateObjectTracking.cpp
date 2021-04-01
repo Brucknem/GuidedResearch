@@ -9,6 +9,8 @@
 #include "ObjectTracking.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
+#include "FrameWarping.hpp"
+#include "Color.hpp"
 
 using namespace providentia::evaluation;
 
@@ -24,20 +26,17 @@ private:
 	providentia::stabilization::ORBBFDynamicStabilizer orb;
 	providentia::stabilization::FastFREAKBFDynamicStabilizer fast;
 
-	std::vector<ObjectTracking> originalTrackers;
-	std::vector<ObjectTracking> surfTrackers;
-	std::vector<ObjectTracking> orbTrackers;
-	std::vector<ObjectTracking> fastTrackers;
+	ObjectTracking tracking;
 
 	std::vector<cv::Rect2d> originalBoundingBoxes;
 	std::vector<cv::Scalar> boundingBoxColors;
 	std::vector<std::string> objectNames;
+	std::vector<std::string> stabilizerNames = {"Original", "SURF", "ORB", "FAST"};
 
 	std::vector<::CSVWriter *> csvWriters;
 	int frameId = 0;
 	int trackerType = 2;
-
-	int lineHeight = 42;
+	int warmUp = 25;
 
 public:
 	explicit Setup() : VideoSetup() {}
@@ -45,7 +44,7 @@ public:
 	boost::program_options::variables_map fromCLI(int argc, const char **argv) override {
 		auto vm = VideoSetup::fromCLI(argc, argv);
 
-		cv::RNG rng(1253434493);
+		cv::RNG rng(43);
 		std::vector<std::string> rawBboxes;
 		boost::split(rawBboxes, vm["bboxes"].as<std::string>(), [](char c) { return c == ','; });
 		boost::split(objectNames, vm["names"].as<std::string>(), [](char c) { return c == ','; });
@@ -69,12 +68,7 @@ public:
 		}
 
 		for (int i = 0; i < originalBoundingBoxes.size(); i++) {
-			boundingBoxColors.emplace_back(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255), 1);
-
-			originalTrackers.emplace_back(trackerType, "Original", 5 + lineHeight * i, boundingBoxColors[i]);
-			surfTrackers.emplace_back(trackerType, "SURF", 5 + lineHeight * i, boundingBoxColors[i]);
-			orbTrackers.emplace_back(trackerType, "ORB", 5 + lineHeight * i, boundingBoxColors[i]);
-			fastTrackers.emplace_back(trackerType, "FAST", 5 + lineHeight * i, boundingBoxColors[i]);
+			boundingBoxColors.emplace_back(Color::any(rng));
 		}
 		return vm;
 	}
@@ -97,65 +91,81 @@ public:
 		getNextFrame();
 
 		for (int i = 0; i < originalBoundingBoxes.size(); i++) {
-			originalTrackers[i].init(frameCPU, originalBoundingBoxes[i]);
-			surfTrackers[i].init(frameCPU, originalBoundingBoxes[i]);
-			orbTrackers[i].init(frameCPU, originalBoundingBoxes[i]);
-			fastTrackers[i].init(frameCPU, originalBoundingBoxes[i]);
+			tracking.addTracker(frameCPU, trackerType, originalBoundingBoxes[i], boundingBoxColors[i]);
 
 			csvWriters.emplace_back(new CSVWriter(outputFolder / (objectNames[i] + ".csv")));
-			*csvWriters.back() << "Frame" <<
-							   "Original [x]" << "Original [y]" << "Original [w]" << "Original [h]" << "Original [mx]"
-							   << "Original [my]" <<
-							   "SURF [x]" << "SURF [y]" << "SURF [w]" << "SURF [h]" << "SURF [mx]" << "SURF [my]" <<
-							   "ORB [x]" << "ORB [y]" << "ORB [w]" << "ORB [h]" << "ORB [mx]" << "ORB [my]" <<
-							   "FAST [x]" << "FAST [y]" << "FAST [w]" << "FAST [h]" << "FAST [mx]" << "FAST [my]" <<
-							   newline;
-		}
-	}
-
-	static void addTrackingResult(CSVWriter *csvWriter, const ObjectTracking &tracker) {
-		if (tracker.isTrackingSuccessful()) {
-			*csvWriter << tracker.getBbox() << tracker.getMidpoint();
-		} else {
-			for (int i = 0; i < 6; i++) {
-				*csvWriter << -1;
+			*csvWriters.back() << "Frame";
+			for (const auto &name : stabilizerNames) {
+				TrackerWrapper::addHeader(csvWriters.back(), name);
 			}
+			*csvWriters.back() << newline;
 		}
 	}
 
 	void specificMainLoop() override {
+		bufferCPU = tracking.track(frameCPU);
+
+		if (tracking.isTrackingLost()) {
+			exit(EXIT_SUCCESS);
+		}
+
+		bufferGPU.upload(bufferCPU);
+
 		surf.stabilize(frameGPU);
 		orb.stabilize(frameGPU);
 		fast.stabilize(frameGPU);
 
-		std::vector<cv::Mat> resultFrames{
-			frameCPU.clone(),
-			cv::Mat(surf.getStabilizedFrame()),
-			cv::Mat(orb.getStabilizedFrame()),
-			cv::Mat(fast.getStabilizedFrame())
-		};
-		for (int i = 0; i < originalBoundingBoxes.size(); i++) {
-			originalTrackers[i].track(resultFrames[0]);
-			surfTrackers[i].track(resultFrames[1]);
-			orbTrackers[i].track(resultFrames[2]);
-			fastTrackers[i].track(resultFrames[3]);
+		std::vector<cv::Mat> homographies;
+		homographies.emplace_back(cv::Mat::eye(3, 3, CV_64F));
+		homographies.emplace_back(surf.getHomography());
+		homographies.emplace_back(orb.getHomography());
+		homographies.emplace_back(fast.getHomography());
 
-			resultFrames[0] = originalTrackers[i].draw(resultFrames[0]);
-			resultFrames[1] = surfTrackers[i].draw(resultFrames[1]);
-			resultFrames[2] = orbTrackers[i].draw(resultFrames[2]);
-			resultFrames[3] = fastTrackers[i].draw(resultFrames[3]);
+		std::vector<cv::Mat> resultFrames;
+		for (int i = 0; i < homographies.size(); i++) {
+			resultFrames.emplace_back(
+				::addText(
+					(tracking * homographies[i]).draw(
+						cv::Mat(providentia::stabilization::FrameWarper::warp(frameGPU, homographies[i]))
+					), stabilizerNames[i] + " - Frame: " + std::to_string(frameId), 2, 5,
+					frameCPU.rows - 50)
+			);
+		}
 
-			*csvWriters[i] << frameId;
-			addTrackingResult(csvWriters[i], originalTrackers[i]);
-			addTrackingResult(csvWriters[i], surfTrackers[i]);
-			addTrackingResult(csvWriters[i], orbTrackers[i]);
-			addTrackingResult(csvWriters[i], fastTrackers[i]);
-			*csvWriters[i] << newline;
+		if (frameId > warmUp) {
+			for (auto csvWriter : csvWriters) {
+				*csvWriter << frameId;
+			}
+
+			for (int j = 0; j < homographies.size(); j++) {
+				auto warpedTracker = tracking * homographies[j];
+				std::vector<cv::Point2d> midPoints = warpedTracker.getMidpoints();
+
+				bufferCPU = resultFrames[j];
+				for (int i = 0; i < midPoints.size(); i++) {
+					std::stringstream ss;
+					ss << "[";
+					ss << std::setw(7) << midPoints[i].x;
+					ss << ", ";
+					ss << std::setw(7) << midPoints[i].y;
+					ss << "]";
+					bufferCPU = ::addText(bufferCPU, ss.str(), 2, 5, (int) (5. + frameCPU.rows * 0.05 * i),
+										  boundingBoxColors[i]);
+
+					*(csvWriters[i]) << warpedTracker.getTrackers()[i];
+				}
+
+				resultFrames[j] = bufferCPU;
+			}
+
+			for (auto csvWriter : csvWriters) {
+				*csvWriter << newline;
+			}
 		}
 
 		finalFrame = ::hconcat(
 			{
-				::addText(resultFrames[0], "Frame: " + std::to_string(frameId), 2, 5, frameCPU.rows - 50),
+				resultFrames[0],
 				resultFrames[1],
 				resultFrames[2],
 				resultFrames[3],
@@ -163,6 +173,7 @@ public:
 		);
 
 		frameId++;
+
 	}
 };
 

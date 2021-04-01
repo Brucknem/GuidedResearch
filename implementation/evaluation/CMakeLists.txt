@@ -14,7 +14,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 ### Utils lib ###
 ########################################################################################################################
 
-add_library(Utils OpticalFlow.cpp CSVWriter.cpp ObjectTracking.cpp Commons.cpp)
+add_library(Utils OpticalFlow.cpp CSVWriter.cpp ObjectTracking.cpp Commons.cpp Color.cpp)
 
 target_include_directories(Utils
         INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}

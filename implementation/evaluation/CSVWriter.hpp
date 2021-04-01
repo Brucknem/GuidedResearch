@@ -6,12 +6,14 @@
 #include <utility>
 #include <boost/filesystem.hpp>
 #include <opencv2/opencv.hpp>
+#include "ObjectTracking.hpp"
 /**
  * https://stackoverflow.com/questions/25201131/writing-csv-files-from-c
  */
 
 namespace providentia {
 	namespace evaluation {
+		class TrackerWrapper;
 
 		class CSVWriter {
 			std::ofstream fs_;
@@ -33,10 +35,6 @@ namespace providentia {
 
 			void newline();
 
-			void rect(std::string name);
-
-			void point(std::string name);
-
 			CSVWriter &operator<<(CSVWriter &(*val)(CSVWriter &));
 
 			CSVWriter &operator<<(const char *val);
@@ -46,6 +44,8 @@ namespace providentia {
 			CSVWriter &operator<<(const cv::Rect &val);
 
 			CSVWriter &operator<<(const cv::Point2d &val);
+
+			CSVWriter &operator<<(const providentia::evaluation::TrackerWrapper &val);
 
 			template<typename T>
 			CSVWriter &operator<<(const T &val);

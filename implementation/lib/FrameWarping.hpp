@@ -69,6 +69,8 @@ namespace providentia {
 			warp(const cv::cuda::GpuMat &_frame,
 				 const std::shared_ptr<providentia::features::FeatureMatcherBase> &matcher);
 
+			static cv::cuda::GpuMat warp(const cv::cuda::GpuMat &_frame, const cv::Mat &homography, int
+			perspectiveWarpFlags = cv::INTER_LINEAR);
 		};
 	}
 }

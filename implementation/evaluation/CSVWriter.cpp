@@ -71,6 +71,11 @@ namespace providentia {
 		CSVWriter::CSVWriter(const boost::filesystem::path &filename, bool append, std::string separator) :
 			CSVWriter(filename.string(), append, separator) {}
 
+		CSVWriter &CSVWriter::operator<<(const TrackerWrapper &val) {
+			*this << val.getBbox() << val.getMidpoint();
+			return *this;
+		}
+
 		template CSVWriter &CSVWriter::operator<<(const int &);
 
 		template CSVWriter &CSVWriter::operator<<(const double &);

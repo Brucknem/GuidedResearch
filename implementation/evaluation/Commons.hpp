@@ -51,7 +51,8 @@ namespace providentia {
 		 * @param x The left starting expectedPixel location.
 		 * @param y The upper starting expectedPixel location.
 		 */
-		cv::Mat addText(const cv::Mat &frame, const std::string &text, double fontSize, int x, int y);
+		cv::Mat addText(const cv::Mat &frame, const std::string &text, double fontSize, int x, int y, cv::Scalar
+		color = cv::Scalar(255, 255, 0));
 
 		/**
 		 * Adds runtime info to the frame.

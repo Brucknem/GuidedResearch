@@ -38,9 +38,10 @@ std::string providentia::evaluation::durationInfo(const std::string &message, lo
 	return ss.str();
 }
 
-cv::Mat providentia::evaluation::addText(const cv::Mat &frame, const std::string &text, double fontSize, int x, int y) {
+cv::Mat providentia::evaluation::addText(const cv::Mat &frame, const std::string &text, double fontSize, int x, int y,
+										 cv::Scalar color) {
 	cv::putText(frame, text, cv::Point(x, y + 20 * fontSize),
-				cv::FONT_HERSHEY_COMPLEX_SMALL, fontSize, cv::Scalar(255, 255, 0), fontSize, cv::FONT_HERSHEY_SIMPLEX);
+				cv::FONT_HERSHEY_COMPLEX_SMALL, fontSize, color, fontSize, cv::FONT_HERSHEY_SIMPLEX);
 	return frame;
 }
 

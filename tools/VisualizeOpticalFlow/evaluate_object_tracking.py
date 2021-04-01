@@ -29,21 +29,25 @@ def get_values(df, name):
     x = df[name + " [mx]"]
     y = df[name + " [my]"]
 
-    indices = x >= int(sys.argv[3])
+    indices = x >= 0
     x = x[indices]
     y = y[indices]
 
-    indices = y >= int(sys.argv[4])
-    x = x[indices]
-    y = y[indices]
-
-    indices = x < 1920 - int(sys.argv[5])
-    x = x[indices]
-    y = y[indices]
-
-    indices = y < 1200 - int(sys.argv[6])
-    x = x[indices]
-    y = y[indices]
+    # indices = x >= int(sys.argv[3])
+    # x = x[indices]
+    # y = y[indices]
+    #
+    # indices = y >= int(sys.argv[4])
+    # x = x[indices]
+    # y = y[indices]
+    #
+    # indices = x < 1920 - int(sys.argv[5])
+    # x = x[indices]
+    # y = y[indices]
+    #
+    # indices = y < 1200 - int(sys.argv[6])
+    # x = x[indices]
+    # y = y[indices]
 
     x = x.rolling(window).mean()
     y = y.rolling(window).mean()
@@ -67,7 +71,7 @@ def generate_xy_plots(df, foldername, filename, column_names):
 
 
 def distances(values):
-    return [np.linalg.norm(np.array(values[i]) - np.array(values[i - 1])) for i in range(1, len(values))]
+    return np.array([np.linalg.norm(np.array(values[i]) - np.array(values[i - 1])) for i in range(1, len(values))])
 
 
 def generate_curvature_plots(df, foldername, filename, column_names):
@@ -86,9 +90,9 @@ def generate_curvature_plots(df, foldername, filename, column_names):
     for i, name in enumerate(column_names):
         x, y = get_values(df, name)
         dist = distances(list(zip(x, y)))
-        mean = np.sum(dist)
+        mean = np.nansum(dist)
         means.append(mean)
-    means = [mean / means[0] for mean in means]
+    means = [mean / means[0] if means[0] > 0 else mean for mean in means]
 
     source = ColumnDataSource(data=dict(x=column_names, means=means, color=get_colors(len(column_names))))
     source.data['means_formatted'] = [round(mean, 3) for mean in means]
