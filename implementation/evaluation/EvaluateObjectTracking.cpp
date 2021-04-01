@@ -22,21 +22,26 @@ private:
 	/**
 	 * The matcher used to match the features.
 	 */
-	providentia::stabilization::SURFBFDynamicStabilizer surf;
-	providentia::stabilization::ORBBFDynamicStabilizer orb;
-	providentia::stabilization::FastFREAKBFDynamicStabilizer fast;
+	std::vector<providentia::stabilization::DynamicStabilizerBase> stabilizers;
+	std::vector<std::string> stabilizerNames = {"Original"};
+	std::vector<double> skewValuesToTest = {
+//		0.75e-4,
+//		1e-4,
+//		1.25e-4,
+//		5e-4,
+//		1e1,
+		1e2,
+//		1e3,
+	};
 
 	ObjectTracking tracking;
-
 	std::vector<cv::Rect2d> originalBoundingBoxes;
 	std::vector<cv::Scalar> boundingBoxColors;
 	std::vector<std::string> objectNames;
-	std::vector<std::string> stabilizerNames = {"Original", "SURF", "ORB", "FAST"};
 
 	std::vector<::CSVWriter *> csvWriters;
 	int frameId = 0;
 	int trackerType = 2;
-	int warmUp = 25;
 
 public:
 	explicit Setup() : VideoSetup() {}
@@ -83,6 +88,24 @@ public:
 	void init() override {
 		VideoSetup::init();
 
+		for (int i = 0; i < 5; i++) {
+			stabilizers.emplace_back(providentia::stabilization::SURFBFDynamicStabilizer());
+			stabilizers.emplace_back(providentia::stabilization::ORBBFDynamicStabilizer());
+			stabilizers.emplace_back(providentia::stabilization::FastFREAKBFDynamicStabilizer());
+			for (const auto &skewValues : skewValuesToTest) {
+				std::stringstream ss;
+				if (skewValuesToTest.size() > 1) {
+					ss << " (Skew: ";
+					ss << std::scientific << std::setprecision(2);
+					ss << skewValues;
+					ss << ")";
+				}
+				stabilizerNames.emplace_back("SURF" + ss.str());
+				stabilizerNames.emplace_back("ORB" + ss.str());
+				stabilizerNames.emplace_back("Fast" + ss.str());
+			}
+		}
+
 		outputFolder = outputFolder / "ObjectTracking" / boost::filesystem::path(inputResource).filename().string();
 		if (!boost::filesystem::is_directory(outputFolder)) {
 			boost::filesystem::create_directories(outputFolder);
@@ -111,15 +134,14 @@ public:
 
 		bufferGPU.upload(bufferCPU);
 
-		surf.stabilize(frameGPU);
-		orb.stabilize(frameGPU);
-		fast.stabilize(frameGPU);
-
 		std::vector<cv::Mat> homographies;
 		homographies.emplace_back(cv::Mat::eye(3, 3, CV_64F));
-		homographies.emplace_back(surf.getHomography());
-		homographies.emplace_back(orb.getHomography());
-		homographies.emplace_back(fast.getHomography());
+		for (const auto &skewThreshold : skewValuesToTest) {
+			for (auto &stabilizer : stabilizers) {
+				stabilizer.stabilize(frameGPU);
+				homographies.emplace_back(stabilizer.getHomography(skewThreshold));
+			}
+		}
 
 		std::vector<cv::Mat> resultFrames;
 		for (int i = 0; i < homographies.size(); i++) {
@@ -132,45 +154,38 @@ public:
 			);
 		}
 
-		if (frameId > warmUp) {
-			for (auto csvWriter : csvWriters) {
-				*csvWriter << frameId;
-			}
-
-			for (int j = 0; j < homographies.size(); j++) {
-				auto warpedTracker = tracking * homographies[j];
-				std::vector<cv::Point2d> midPoints = warpedTracker.getMidpoints();
-
-				bufferCPU = resultFrames[j];
-				for (int i = 0; i < midPoints.size(); i++) {
-					std::stringstream ss;
-					ss << "[";
-					ss << std::setw(7) << midPoints[i].x;
-					ss << ", ";
-					ss << std::setw(7) << midPoints[i].y;
-					ss << "]";
-					bufferCPU = ::addText(bufferCPU, ss.str(), 2, 5, (int) (5. + frameCPU.rows * 0.05 * i),
-										  boundingBoxColors[i]);
-
-					*(csvWriters[i]) << warpedTracker.getTrackers()[i];
-				}
-
-				resultFrames[j] = bufferCPU;
-			}
-
-			for (auto csvWriter : csvWriters) {
-				*csvWriter << newline;
-			}
+//		if (frameId > warmUp) {
+		for (auto csvWriter : csvWriters) {
+			*csvWriter << frameId;
 		}
 
-		finalFrame = ::hconcat(
-			{
-				resultFrames[0],
-				resultFrames[1],
-				resultFrames[2],
-				resultFrames[3],
+		for (int j = 0; j < homographies.size(); j++) {
+			auto warpedTracker = tracking * homographies[j];
+			std::vector<cv::Point2d> midPoints = warpedTracker.getMidpoints();
+
+			bufferCPU = resultFrames[j];
+			for (int i = 0; i < midPoints.size(); i++) {
+				std::stringstream ss;
+				ss << "[";
+				ss << std::setw(7) << midPoints[i].x;
+				ss << ", ";
+				ss << std::setw(7) << midPoints[i].y;
+				ss << "]";
+				bufferCPU = ::addText(bufferCPU, ss.str(), 2, 5, (int) (5. + frameCPU.rows * 0.05 * i),
+									  boundingBoxColors[i]);
+
+				*(csvWriters[i]) << warpedTracker.getTrackers()[i];
 			}
-		);
+
+			resultFrames[j] = bufferCPU;
+		}
+
+		for (auto csvWriter : csvWriters) {
+			*csvWriter << newline;
+		}
+//		}
+
+		cv::hconcat(resultFrames, finalFrame);
 
 		frameId++;
 

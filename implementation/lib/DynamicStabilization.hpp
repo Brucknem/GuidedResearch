@@ -106,7 +106,7 @@ namespace providentia {
 			/**
 			 * @get The found homography minimizing the reprojection error between the frame and reference frame.
 			 */
-			const cv::Mat &getHomography() const;
+			cv::Mat getHomography(double _skewThreshold = 1e-4) const;
 
 			/**
 			 * @get
@@ -145,6 +145,8 @@ namespace providentia {
 			void updateKeyframe();
 
 			cv::cuda::GpuMat getBackgroundMask(const cv::Size &_size) const;
+
+			void setSkewThreshold(double skewThreshold);
 		};
 
 		/**

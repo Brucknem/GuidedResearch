@@ -28,30 +28,7 @@ namespace providentia {
 												homographyCalculationAlgorithm);
 			}
 
-//			cv::Vec2d translation = {homography.at<double>(0, 2), homography.at<double>(1, 2)};
-//			cv::Vec4d rotation = {
-//				homography.at<double>(0, 0), homography.at<double>(0, 1),
-//				homography.at<double>(1, 0), homography.at<double>(1, 1)
-//			};
-			cv::Vec2d skew = {homography.at<double>(2, 0), homography.at<double>(2, 1)};
-
-//			if (cv::norm(translation) > 10 ||
-//				abs(sqrt(2) - cv::norm(rotation)) > 0.10 ||
-			// TODO Evaluate skew threshold
-			if (cv::norm(skew) > 1e-4) {
-//				std::cout << "translation" << std::endl;
-//				std::cout << translation << std::endl;
-//				std::cout << cv::norm(translation) << std::endl;
-//				std::cout << "rotation" << std::endl;
-//				std::cout << rotation << std::endl;
-//				std::cout << abs(sqrt(2) - cv::norm(rotation)) << std::endl;
-//				std::cout << "skew" << std::endl;
-//				std::cout << skew << std::endl;
-//				std::cout << cv::norm(skew) << std::endl;
-//				std::cout << homography << std::endl;
-
-				homography = cv::Mat::eye(3, 3, CV_64F);
-			}
+			homography = getHomography(skewThreshold);
 
 			cv::cuda::warpPerspective(_frame, warpedFrame, homography, _frame.size(), perspectiveWarpFlags);
 			addTimestamp("Frame warping finished", 0);
@@ -65,8 +42,40 @@ namespace providentia {
 			return warpedFrame;
 		}
 
-		const cv::Mat &providentia::stabilization::FrameWarper::getHomography() const {
+		cv::Mat providentia::stabilization::FrameWarper::getHomography(double _skewThreshold) const {
+//			cv::Vec2d translation = {homography.at<double>(0, 2), homography.at<double>(1, 2)};
+//			cv::Vec4d rotation = {
+//				homography.at<double>(0, 0), homography.at<double>(0, 1),
+//				homography.at<double>(1, 0), homography.at<double>(1, 1)
+//			};
+			cv::Vec2d skew = {homography.at<double>(2, 0), homography.at<double>(2, 1)};
+
+//			if (cv::norm(translation) > 10 ||
+//				abs(sqrt(2) - cv::norm(rotation)) > 0.10 ||
+			// TODO Evaluate skew threshold
+			if (cv::norm(skew) > _skewThreshold) {
+//				std::cout << "translation" << std::endl;
+//				std::cout << translation << std::endl;
+//				std::cout << cv::norm(translation) << std::endl;
+//				std::cout << "rotation" << std::endl;
+//				std::cout << rotation << std::endl;
+//				std::cout << abs(sqrt(2) - cv::norm(rotation)) << std::endl;
+//				std::cout << "skew" << std::endl;
+//				std::cout << skew << std::endl;
+//				std::cout << cv::norm(skew) << std::endl;
+//				std::cout << homography << std::endl;
+
+				return cv::Mat::eye(3, 3, CV_64F);
+			}
 			return homography;
+		}
+
+		double FrameWarper::getMaxSkew() const {
+			return skewThreshold;
+		}
+
+		void FrameWarper::setSkewThreshold(double _skewThreshold) {
+			skewThreshold = _skewThreshold;
 		}
 
 	}

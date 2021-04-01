@@ -38,6 +38,8 @@ namespace providentia {
 			 */
 			cv::cuda::GpuMat warpedFrame;
 
+			double skewThreshold = 1e-4;
+
 		public:
 
 			/**
@@ -53,7 +55,11 @@ namespace providentia {
 			/**
 			 * @get The homography that minimizes the reprojection error.
 			 */
-			const cv::Mat &getHomography() const;
+			cv::Mat getHomography(double _skewThreshold = 1e-4) const;
+
+			double getMaxSkew() const;
+
+			void setSkewThreshold(double _skewThreshold);
 
 			/**
 			 * @constructor

@@ -40,8 +40,8 @@ namespace providentia {
 			}
 		}
 
-		const cv::Mat &DynamicStabilizerBase::getHomography() const {
-			return warper->getHomography();
+		cv::Mat DynamicStabilizerBase::getHomography(double _skewThreshold) const {
+			return warper->getHomography(_skewThreshold);
 		}
 
 		const cv::cuda::GpuMat &DynamicStabilizerBase::getStabilizedFrame() const {
@@ -108,6 +108,10 @@ namespace providentia {
 
 		void DynamicStabilizerBase::setShouldUseFundamentalMatrix(bool shouldUseFundamentalMatrix) {
 			matcher->setShouldUseFundamentalMatrix(shouldUseFundamentalMatrix);
+		}
+
+		void DynamicStabilizerBase::setSkewThreshold(double skewThreshold) {
+			warper->setSkewThreshold(skewThreshold);
 		}
 
 #pragma endregion DynamicStabilizerBase

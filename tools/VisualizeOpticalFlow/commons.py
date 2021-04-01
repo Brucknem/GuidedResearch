@@ -6,7 +6,7 @@ import inspect
 import numpy as np
 import pandas as pd
 from bokeh.io import save, show
-from bokeh.palettes import mpl, Inferno
+from bokeh.palettes import mpl, Inferno, Cividis256, Turbo256
 from bokeh.plotting import figure, output_file
 
 font = "Times"
@@ -22,7 +22,7 @@ plot_height = 1000
 
 
 def get_colors(amount):
-    return Inferno[amount + 1][:amount]
+    return Turbo256[::int(256 / amount)]
 
 
 def set_plot_settings(p):

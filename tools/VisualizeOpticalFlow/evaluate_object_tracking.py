@@ -1,5 +1,6 @@
+import math
 import os
-from bokeh.models import ColumnDataSource, LabelSet
+from bokeh.models import ColumnDataSource, LabelSet, Whisker
 from commons import *
 
 display = True
@@ -26,40 +27,34 @@ def setup(foldername, filename, title):
 
 
 def get_values(df, name):
-    x = df[name + " [mx]"]
-    y = df[name + " [my]"]
+    xes = []
+    yes = []
 
-    indices = x >= 0
-    x = x[indices]
-    y = y[indices]
+    for column in df.columns:
+        if str(column).startswith(name + " [mx]"):
+            xes.append(df[name + " [mx]"])
+        if str(column).startswith(name + " [my]"):
+            yes.append(df[name + " [my]"])
 
-    # indices = x >= int(sys.argv[3])
-    # x = x[indices]
-    # y = y[indices]
-    #
-    # indices = y >= int(sys.argv[4])
-    # x = x[indices]
-    # y = y[indices]
-    #
-    # indices = x < 1920 - int(sys.argv[5])
-    # x = x[indices]
-    # y = y[indices]
-    #
-    # indices = y < 1200 - int(sys.argv[6])
-    # x = x[indices]
-    # y = y[indices]
+    for i in range(len(xes)):
+        indices = xes[i] >= 0
+        xes[i] = xes[i][indices]
+        yes[i] = yes[i][indices]
 
-    x = x.rolling(window).mean()
-    y = y.rolling(window).mean()
-    return x, y
+        xes[i] = xes[i].rolling(window).mean()
+        yes[i] = yes[i].rolling(window).mean()
+
+    return np.array(xes), np.array(yes)
 
 
 def generate_xy_plots(df, foldername, filename, column_names):
     xy_plot = setup(foldername, filename, "Tracking")
     colors = get_colors(len(column_names))
     for i, name in enumerate(column_names):
-        x, y = get_values(df, name)
-        xy_plot.line(x, y, line_width=2, color=colors[i], alpha=0.5, legend_label=name)
+        xes, yes = get_values(df, name)
+        x = np.mean(xes, axis=0)
+        y = np.mean(yes, axis=0)
+        xy_plot.line(x, y, line_width=3, color=colors[i], alpha=0.65, legend_label=name)
         xy_plot.varea(x=x, y1=y, y2=y, color=colors[i], alpha=0.2, legend_label=name)
 
     xy_plot.y_range.flipped = True
@@ -88,11 +83,14 @@ def generate_curvature_plots(df, foldername, filename, column_names):
 
     means = []
     for i, name in enumerate(column_names):
-        x, y = get_values(df, name)
-        dist = distances(list(zip(x, y)))
-        mean = np.nansum(dist)
-        means.append(mean)
-    means = [mean / means[0] if means[0] > 0 else mean for mean in means]
+        xes, yes = get_values(df, name)
+        total = []
+        for run in range(len(xes)):
+            dist = distances(list(zip(xes[run], yes[run])))
+            total.append(np.nansum(dist))
+        means.append(np.mean(total))
+
+    means = np.array([mean / means[0] if means[0] > 0 else mean for mean in means])
 
     source = ColumnDataSource(data=dict(x=column_names, means=means, color=get_colors(len(column_names))))
     source.data['means_formatted'] = [round(mean, 3) for mean in means]
@@ -105,11 +103,20 @@ def generate_curvature_plots(df, foldername, filename, column_names):
     curvature_plot.add_layout(labels)
 
     set_plot_settings(curvature_plot)
+    curvature_plot.legend.items = []
+    curvature_plot.xaxis.major_label_orientation = math.pi / 4
+
     show_or_save(curvature_plot, display)
 
 
 def generate_plots(df, foldername, filename):
-    column_names = ["Original", "FAST", "ORB", "SURF"]
+    df.dropna(how='all', axis=1, inplace=True)
+    column_names = list(set([str(name).split(' [')[0] for name in df.columns]))
+    column_names.remove("Frame")
+    column_names.remove("Original")
+    column_names.sort()
+    column_names = ["Original", *column_names]
+    # column_names = ["Original", "FAST", "ORB", "SURF", "FAST (No skew)", "ORB (No skew)", "SURF (No skew)"]
     generate_xy_plots(df, foldername, filename, column_names)
     generate_curvature_plots(df, foldername, filename, column_names)
 
