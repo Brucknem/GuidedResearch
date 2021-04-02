@@ -1,7 +1,7 @@
 from bokeh.models import Legend
 from commons import *
 
-display = False
+display = True
 
 filename = sys.argv[1]
 if not filename or not filename.endswith('.csv'):
@@ -18,7 +18,8 @@ def add_means(plot, means, color, legend_label):
               y=means,
               color=color,
               legend_label=legend_label,
-              line_width=2)
+              line_width=2,
+              alpha=0.7)
 
 
 def add_stds(plot, means, stds, color, legend_label):
@@ -49,20 +50,20 @@ def get_output_filename(foldername, window_size):
     return str(join(folder, "window_size_" + str(window_size) + ".html"))
 
 
-def setup(window_size):
+def setup(window_size, title):
     output_file(get_output_filename(inspect.stack()[1].function, window_size))
 
-    p = figure(plot_width=plot_width, plot_height=plot_height, tools=tools)
-    p.title.text = 'Damping of mean pixel shifts after dynamic stabilization [' + title_suffix + ']'
-    p.add_layout(Legend(), 'right')
+    p = figure(plot_width=plot_width, plot_height=plot_height, tools=tools, y_range=y_range)
+    p.title.text = title + ' after dynamic stabilization [' + title_suffix + ']'
+    # p.add_layout(Legend(), 'right')
 
     columns, columns_names, means, stds = get_statistics(window_size)
 
     return p, columns, columns_names, means, stds
 
 
-def compare_of_mean_pixel_shift(window_size):
-    p, columns, columns_names, means, stds = setup(window_size)
+def compare_of_mean_pixel_displacement(window_size):
+    p, columns, columns_names, means, stds = setup(window_size, 'Mean pixel displacement')
     colors = get_colors(len(columns_names))
     for i in range(columns):
         add_stds(p, means[i], stds[i], colors[i], columns_names[i])
@@ -72,13 +73,13 @@ def compare_of_mean_pixel_shift(window_size):
 
     set_plot_settings(p)
     p.xaxis.axis_label = "Frame"
-    p.yaxis.axis_label = "Mean pixel shift [px]"
+    p.yaxis.axis_label = "Mean pixel displacement [px]"
 
     show_or_save(p, display)
 
 
-def deltas_of_mean_pixel_shift(window_size):
-    p, columns, columns_names, means, stds = setup(window_size)
+def deltas_of_mean_pixel_displacement(window_size):
+    p, columns, columns_names, means, stds = setup(window_size, 'Damping of mean pixel displacement')
     colors = get_colors(len(columns_names))
 
     deltas = [means[0] - means[i] for i in range(columns)]
@@ -92,7 +93,7 @@ def deltas_of_mean_pixel_shift(window_size):
 
     set_plot_settings(p)
     p.xaxis.axis_label = "Frame"
-    p.yaxis.axis_label = "Mean pixel shift [px]"
+    p.yaxis.axis_label = "Mean pixel displacement [px]"
     show_or_save(p, display)
 
 
@@ -115,7 +116,7 @@ def calculate_percentage_of_better_frames():
 
     data = {
         'Stabilizer': columns_names,
-        'Mean pixel shift': means_means,
+        'Mean pixel displacement': means_means,
         'Better [abs]': better_frames,
         'Better [frac]': better_frames_fractions,
         'Better [%]': better_frames_percentages,
@@ -134,8 +135,10 @@ def calculate_percentage_of_better_frames():
 calculate_percentage_of_better_frames()
 
 # create_plot(1)
-sizes = [1, int(25 / 8), int(25 / 4), int(25 / 2), 25, 50, 75, 100, 125]
-sizes = [25]
+# sizes = [1, int(25 / 8), int(25 / 4), int(25 / 2), 25, 50, 75, 100, 125]
+# sizes = [25]
+y_range = (-5, 15)
+sizes = [12]
 for window_size in sizes:
-    deltas_of_mean_pixel_shift(window_size)
-    compare_of_mean_pixel_shift(window_size)
+    deltas_of_mean_pixel_displacement(window_size)
+    compare_of_mean_pixel_displacement(window_size)

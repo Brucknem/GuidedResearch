@@ -1,0 +1,100 @@
+% !TEX root=./report.tex
+
+\section{Evaluation}
+
+We assure the correctness and quantify the visual improvements resulting from the algorithms by an empirical study on the video streams of the highway cameras.
+
+\subsection{Study objects}
+\begin{figure}[t]
+    \begin{center}
+    % \fbox{\rule{0pt}{2in} \rule{0.9\linewidth}{0pt}}
+       \includegraphics[width=\linewidth]{images/cameras_schema.png}
+    \end{center}
+       \caption{The schematic camera setup along the highway A9.
+       The cameras \camsf{4} and \camsn{4} are facing north,
+       the cameras \camsf{5} and \camsn{5} are facing south.}
+    \label{fig:cameras_schema}
+    \end{figure}
+
+We use video recordings from the four cameras mounted to the two gantry bridges internally named S40 and S50. The schematic camera setup is displayed in \autoref{fig:cameras_schema}.
+
+The dataset consists of four recordings, each with of a length of $1495$ frames over $\sim 60$ seconds at $25$ frames per second.
+
+The recordings are taken on a day with strong winds to ensure high jitter in the video feed to optimally test the Dynamic Stabilization algorithm described in \autoref{sec:dynamic_stabilization}. 
+
+\subsection{Dynamic stabilization}
+To evaluate the Dynamic Stabilization algorithm described in \autoref{sec:dynamic_stabilization} we have come up with two metrics to quantify the environmental influences.
+
+\subsubsection{Optical Flow}
+The Optical Flow describes the apparent motion of image objects between two consecutive frames. 
+It is a 2D vector field where each vector is a displacement vector showing the movement of points between the frames caused by movement of the objects or cameras.
+
+We use the dense Optical Flow estimation algorithm proposed by Farnebäck \cite{farnback10.1007/3-540-45103-X_50,opencv_library} to measure the displacement of each pixel between the frames. 
+We calculate the mean displacement over the whole image to get the overall displacement. 
+We see that the dynamically stabilized video feed exhibit a substantially lower mean displacement between frames as the displacement from camera jitter is removed.
+This leaves us with only the expected displacement resulting from moving objects, \eg{} vehicles on the highway or shaking trees.
+
+\begin{figure*}[!ht]
+    \begin{tabular}{cc}
+      \includegraphics[width=0.5\linewidth]{diagrams/mean_pixel_shifts_after_dynamic_stabilization_s40_far.png}    &  
+      \includegraphics[width=0.5\linewidth]{diagrams/damping_mean_pixel_shifts_after_dynamic_stabilization_s40_far.png}    
+\end{tabular}
+    \caption{Left: 
+        Comparison of the three implemented dynamic stabilizers and the original not stabilized video feed using Optical Flow as metric (lower is better).
+        The stabilizers are based on the 
+        FAST \cite{Ghahremani_2021,opencv_library} feature detector with FREAK \cite{alahi6247715,opencv_library} feature descriptors,
+        SURF \cite{bay10.1007/11744023_32,opencv_library} feature detector and
+        ORB \cite{rublee6126544, opencv_library} feature detector.
+        The graphs display the mean pixel shift at each frame. 
+        Right: 
+        The damping capabilities of the same three stabilizers (higher is better). 
+        The graphs approximate the removed jitter in the mean pixel shift between the original video and the stabilizer at each frame.\\
+        For visualization the values are filtered using the rolling mean over 12 frames. 
+        The light areas display the standard deviation within the window.
+    }
+    \label{fig:dynamic_stabilization_s40_far}
+\end{figure*}
+
+\autoref{fig:dynamic_stabilization_s40_far} displays the mean pixel displacement per frame.
+It shows that the displacement with especially the SURF \cite{bay10.1007/11744023_32,opencv_library} feature detector is lowered greatly. 
+The damping approximates the removed jitter and also displays a huge lowering in mean displacement.
+
+\begin{table}
+    \centering
+    \begin{tabular}{ |l|l|r|r|r| } 
+     \hline
+     \textbf{Stabilizer} & \textbf{Camera} & \textbf{Disp.}  & \textbf{Better} & \textbf{Better [\%]} \\ 
+     \hline
+     Original   & \camsf{4} & 3.515 & 0     &  0.0      \\
+     FAST       & \camsf{4} & 1.999 & 1279  &  85.552   \\
+     ORB        & \camsf{4} & 1.632 & 1396  &  93.378   \\
+     SURF       & \camsf{4} & 1.273 & 1478  &  \textbf{98.863}   \\
+     \hline
+
+     Original   & \camsn{4} & 5.084 & 0     &  0.0      \\
+     FAST       & \camsn{4} & 4.371 & 983   &  65.753   \\
+     ORB        & \camsn{4} & 4.222 & 1024  &  68.495   \\
+     SURF       & \camsn{4} & 2.495 & 1403  &  \textbf{93.846}   \\
+     \hline
+
+     Original   & \camsf{5} & 2.624 & 0  &    0.0    \\
+     FAST       & \camsf{5} & 2.749 & 983  &  65.753   \\
+     ORB        & \camsf{5} & 1.510 & 1258  & 84.147    \\
+     SURF       & \camsf{5} & 1.550 & 1273  & \textbf{85.151}    \\
+     \hline
+
+     Original   & \camsn{5} & 2.212 &   0   &  0.0      \\
+     FAST       & \camsn{5} & 1.847 & 1028   &  68.993   \\
+     ORB        & \camsn{5} & 1.671 &  1234 &    82.819 \\
+     SURF       & \camsn{5} & 1.543 & 1290  &   \textbf{86.577}  \\
+     \hline
+    \end{tabular}
+    \caption{
+            Comparison of the implemented dynamic stabilizers and the original not stabilized video feed using Optical Flow as metric.
+            It shows that most of the stabilizers exhibit a lower mean displacement (Disp.) after dynamic stabilization. 
+            In terms of the number of frames the stabilizers all show a high number of total (Better) and relative (Better \%) frames where they have a lower mean displacement. 
+            Especially for the SURF \cite{bay10.1007/11744023_32,opencv_library} feature detector (bold) the improvement is substantially.
+        }
+\end{table}
+
+\subsubsection{Track features and calculate path smoothness}

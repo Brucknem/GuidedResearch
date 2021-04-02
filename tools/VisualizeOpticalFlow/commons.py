@@ -18,7 +18,7 @@ title_suffix = sys.argv[2]
 
 tools = "save,crosshair,pan,wheel_zoom,box_zoom,undo,redo,reset"
 plot_width = 1600
-plot_height = 1000
+plot_height = 800
 
 
 def get_colors(amount):
@@ -48,7 +48,7 @@ def set_plot_settings(p):
     p.xaxis.axis_label_text_font_style = "normal"
     p.yaxis.axis_label_text_font_style = "normal"
 
-    p.legend.orientation = "vertical"
+    p.legend.orientation = "horizontal"
     p.legend.location = "top_right"
 
 

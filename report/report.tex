@@ -18,6 +18,7 @@
 \def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
 \def\confYear{CVPR 2021}
 %\setcounter{page}{4321} % For final version only
+\pdfminorversion=7
 
 \begin{document}
 
@@ -46,7 +47,8 @@ Boltzmannstraße 15, 85748 Garching\\
 \input{relatedWork}
 \input{approach_dynamic_stabilization}
 \input{approach_static_calibration}
-\input{evaluation}
+\input{evaluation_dynamic_stabilization}
+\input{evaluation_static_calibration}
 \input{futureWork}
 \input{conclusion}
 
@@ -54,5 +56,8 @@ Boltzmannstraße 15, 85748 Garching\\
 \bibliographystyle{ieee_fullname}
 \bibliography{bib_literature}
 }
+
+\input{appendix}
+
 
 \end{document}

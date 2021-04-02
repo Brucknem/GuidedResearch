@@ -28,6 +28,7 @@ private:
 	bool withMask = false;
 	int padding = 10;
 	boost::filesystem::path evaluationPath;
+	bool writeBadFrames = false;
 
 public:
 	explicit Setup() : VideoSetup() {
@@ -142,24 +143,11 @@ public:
 			}
 			flowNumber++;
 		}
-		if (write) {
+		if (write && writeBadFrames) {
 			cv::imwrite((evaluationPath / (frameName + ".png")).string(), finalFrame);
 		}
 		*csvWriter << newline;
 		frameId++;
-	}
-
-	void specificAddMessages() override {
-//		addRuntimeToFinalFrame("Feature detection",
-//							   stabilizer->getFrameFeatureDetector()->getTotalMilliseconds(), 5, 20);
-//		addRuntimeToFinalFrame("Feature matching",
-//							   stabilizer->getMatcher()->getTotalMilliseconds(), 5, 40);
-//		addRuntimeToFinalFrame("Frame warping ",
-//							   stabilizer->getWarper()->getTotalMilliseconds(), 5, 60);
-//		addRuntimeToFinalFrame("Background segmentation",
-//							   stabilizer->getSegmentor()->getTotalMilliseconds(), 5, 80);
-//		addRuntimeToFinalFrame("Total stabilization",
-//							   stabilizer->getTotalMilliseconds(), 5, 100);
 	}
 };
 

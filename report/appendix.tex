@@ -1,0 +1,36 @@
+% \pagebreak
+\newpage
+
+\section{Appendix}
+To declutter the paper we moved some of the images here.
+
+\begin{figure*}[!ht]
+    \begin{tabular}{cc}
+      \includegraphics[width=0.5\linewidth]{diagrams/mean_pixel_shifts_after_dynamic_stabilization_s40_far.png}    &  
+      \includegraphics[width=0.5\linewidth]{diagrams/damping_mean_pixel_shifts_after_dynamic_stabilization_s40_far.png}   \\ 
+
+      \includegraphics[width=0.5\linewidth]{diagrams/mean_pixel_shifts_after_dynamic_stabilization_s40_near.png}    &  
+      \includegraphics[width=0.5\linewidth]{diagrams/damping_mean_pixel_shifts_after_dynamic_stabilization_s40_near.png}      \\
+
+      \includegraphics[width=0.5\linewidth]{diagrams/mean_pixel_shifts_after_dynamic_stabilization_s50_far.png}    &  
+      \includegraphics[width=0.5\linewidth]{diagrams/damping_mean_pixel_shifts_after_dynamic_stabilization_s50_far.png}    \\
+
+      \includegraphics[width=0.5\linewidth]{diagrams/mean_pixel_shifts_after_dynamic_stabilization_s50_near.png}    &  
+      \includegraphics[width=0.5\linewidth]{diagrams/damping_mean_pixel_shifts_after_dynamic_stabilization_s50_near.png}    
+    \end{tabular}
+    \caption{
+        Left: 
+        Comparison of the three implemented dynamic stabilizers and the original not stabilized video feed using Optical Flow as metric (lower is better).
+        The stabilizers are based on the 
+        FAST \cite{Ghahremani_2021,opencv_library} feature detector with FREAK \cite{alahi6247715,opencv_library} feature descriptors,
+        SURF \cite{bay10.1007/11744023_32,opencv_library} feature detector and
+        ORB \cite{rublee6126544, opencv_library} feature detector.
+        The graphs display the mean pixel shift at each frame. 
+        Right: 
+        The damping capabilities of the same three stabilizers (higher is better). 
+        The graphs approximate the removed jitter in the mean pixel shift between the original video and the stabilizer at each frame.\\
+        For visualization the values are filtered using the rolling mean over 12 frames. 
+        The light areas display the standard deviation within the window.
+    }
+    \label{fig:dynamic_stabilization_appendix}
+    \end{figure*}

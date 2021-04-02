@@ -38,7 +38,7 @@ namespace providentia {
 			 */
 			cv::cuda::GpuMat warpedFrame;
 
-			double skewThreshold = 1e-4;
+			double skewThreshold = 2e-4;
 
 		public:
 
