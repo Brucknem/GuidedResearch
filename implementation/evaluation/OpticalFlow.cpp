@@ -3,6 +3,9 @@
 //
 
 #include "OpticalFlow.hpp"
+#include <opencv2/cudaimgproc.hpp>
+#include <opencv2/cudaarithm.hpp>
+#include "opencv2/cudaoptflow.hpp"
 
 namespace providentia {
 	namespace opticalflow {
@@ -18,6 +21,8 @@ namespace providentia {
 		void DenseOpticalFlow::calculate(const cv::cuda::GpuMat &_frame, const cv::cuda::GpuMat &_mask) {
 			cv::cuda::cvtColor(_frame, currentFrame, cv::COLOR_BGR2GRAY);
 			mask = _mask;
+
+			gaussianBlur->apply(currentFrame, currentFrame);
 
 			if (previousFrame.empty()) {
 				initialize();
@@ -59,6 +64,9 @@ namespace providentia {
 		const cv::Mat &DenseOpticalFlow::draw() const {
 			return bgr;
 		}
+
+		DenseOpticalFlow::DenseOpticalFlow() :
+			gaussianBlur(cv::cuda::createGaussianFilter(CV_8UC1, CV_8UC1, cv::Size(5, 5), 75)) {}
 
 #pragma endregion DenseOpticalFlow
 

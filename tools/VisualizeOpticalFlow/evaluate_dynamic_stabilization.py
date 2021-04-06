@@ -137,7 +137,7 @@ calculate_percentage_of_better_frames()
 # create_plot(1)
 # sizes = [1, int(25 / 8), int(25 / 4), int(25 / 2), 25, 50, 75, 100, 125]
 # sizes = [25]
-y_range = (-5, 15)
+y_range = (-2, 6)
 sizes = [12]
 for window_size in sizes:
     deltas_of_mean_pixel_displacement(window_size)

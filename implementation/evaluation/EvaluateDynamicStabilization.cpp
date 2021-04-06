@@ -18,9 +18,10 @@ private:
 	/**
 	 * The matcher used to match the features.
 	 */
-	providentia::stabilization::SURFBFDynamicStabilizer surf;
-	providentia::stabilization::ORBBFDynamicStabilizer orb;
-	providentia::stabilization::FastFREAKBFDynamicStabilizer fast;
+	std::vector<providentia::stabilization::DynamicStabilizerBase> stabilizers;
+	std::vector<std::string> stabilizerNames = {
+		"SURF", "ORB", "FAST"
+	};
 	std::vector<providentia::opticalflow::FarnebackDenseOpticalFlow> opticalFlows;
 
 	std::shared_ptr<::CSVWriter> csvWriter;
@@ -32,10 +33,13 @@ private:
 
 public:
 	explicit Setup() : VideoSetup() {
-		opticalFlows.emplace_back();
-		opticalFlows.emplace_back();
-		opticalFlows.emplace_back();
-		opticalFlows.emplace_back();
+		stabilizers.emplace_back(providentia::stabilization::SURFBFDynamicStabilizer{});
+		stabilizers.emplace_back(providentia::stabilization::ORBBFDynamicStabilizer{});
+		stabilizers.emplace_back(providentia::stabilization::FastFREAKBFDynamicStabilizer{});
+
+		for (int i = 0; i <= stabilizers.size(); i++) {
+			opticalFlows.emplace_back();
+		}
 	}
 
 	void init() override {
@@ -53,63 +57,64 @@ public:
 	}
 
 	void calculateOpticalFlows() {
-		if (withMask) {
-			auto size = pad(frameGPU, padding).size();
-			opticalFlows[0].calculate(pad(frameGPU, padding), surf.getBackgroundMask(size));
-			opticalFlows[1].calculate(pad(surf.getStabilizedFrame(), padding), surf.getBackgroundMask(size));
-			opticalFlows[2].calculate(pad(orb.getStabilizedFrame(), padding), orb.getBackgroundMask(size));
-			opticalFlows[3].calculate(pad(fast.getStabilizedFrame(), padding), fast.getBackgroundMask(size));
-		} else {
-			opticalFlows[0].calculate(pad(frameGPU, padding));
-			opticalFlows[1].calculate(pad(surf.getStabilizedFrame(), padding));
-			opticalFlows[2].calculate(pad(orb.getStabilizedFrame(), padding));
-			opticalFlows[3].calculate(pad(fast.getStabilizedFrame(), padding));
+		std::vector<cv::cuda::GpuMat> frames{pad(frameGPU, padding)};
+		auto size = pad(frameGPU, padding).size();
 
+		std::vector<cv::cuda::GpuMat> backgroundMasks{stabilizers[0].getBackgroundMask(size)};
+
+		for (const auto &stabilizer :stabilizers) {
+			frames.emplace_back(pad(stabilizer.getStabilizedFrame(), padding));
+			backgroundMasks.emplace_back(pad(stabilizer.getBackgroundMask(size), padding));
+		}
+
+		int i = 0;
+		for (auto &opticalFlow : opticalFlows) {
+			if (withMask) {
+				opticalFlow.calculate(frames[i], backgroundMasks[i]);
+			} else {
+				opticalFlow.calculate(frames[i]);
+			}
+			i++;
 		}
 	}
 
 	void specificMainLoop() override {
-		surf.stabilize(frameGPU);
-		orb.stabilize(frameGPU);
-		fast.stabilize(frameGPU);
+		std::vector<cv::Mat> frames{
+			::pad(::addText(frameCPU, "Frame: " + std::to_string(frameId), 2, 5, 5), padding)
+		};
+
+		int i = 0;
+		for (auto &stabilizer :stabilizers) {
+			stabilizer.stabilize(frameGPU);
+			frames.emplace_back(::pad(
+				::addRuntimeToFrame(cv::Mat(stabilizer.getStabilizedFrame()), stabilizerNames[i], stabilizer
+					.getTotalMilliseconds(), 2, 5, 5), padding)
+			);
+			i++;
+		}
 
 		calculateOpticalFlows();
+		cv::hconcat(frames, finalFrame);
 
-		finalFrame = ::hconcat(
-			{
-				::addText(frameCPU, "Frame: " + std::to_string(frameId), 2, 5, 5),
-				::addRuntimeToFrame(cv::Mat(surf.getStabilizedFrame()), "SURF + BF", surf.getTotalMilliseconds(), 2, 5,
-									5),
-				::addRuntimeToFrame(cv::Mat(orb.getStabilizedFrame()), "ORB + BF", orb.getTotalMilliseconds(), 2, 5,
-									5),
-				::addRuntimeToFrame(cv::Mat(fast.getStabilizedFrame()), "FAST + BF", fast.getTotalMilliseconds(), 2,
-									5, 5)
-			}, padding
-		);
+		frames.clear();
+		for (auto &opticalFlow : opticalFlows) {
+			frames.emplace_back(
+				::addText(opticalFlow.draw(),
+						  "Mean pixel shift: " + std::to_string(opticalFlow.getMagnitudeMean()), 2, 5, 5)
+			);
+		}
 
-		bufferCPU = ::hconcat(
-			{
-				::addText(opticalFlows[0].draw(),
-						  "Mean pixel shift: " + std::to_string(opticalFlows[0].getMagnitudeMean()), 2, 5, 5),
-				::addText(opticalFlows[1].draw(),
-						  "Mean pixel shift: " + std::to_string(opticalFlows[1].getMagnitudeMean()), 2, 5, 5),
-				::addText(opticalFlows[2].draw(),
-						  "Mean pixel shift: " + std::to_string(opticalFlows[2].getMagnitudeMean()), 2, 5, 5),
-				::addText(opticalFlows[3].draw(),
-						  "Mean pixel shift: " + std::to_string(opticalFlows[3].getMagnitudeMean()), 2, 5, 5),
-			}
-		);
+		cv::hconcat(frames, bufferCPU);
 		finalFrame = ::vconcat({finalFrame, bufferCPU});
 
 		if (withMask) {
-			bufferCPU = ::hconcat(
-				{
-					::cvtColor(surf.getBackgroundMask(frameGPU.size()), cv::COLOR_GRAY2BGR),
-					::cvtColor(surf.getBackgroundMask(frameGPU.size()), cv::COLOR_GRAY2BGR),
-					::cvtColor(orb.getBackgroundMask(frameGPU.size()), cv::COLOR_GRAY2BGR),
-					::cvtColor(fast.getBackgroundMask(frameGPU.size()), cv::COLOR_GRAY2BGR),
-				}, padding
-			);
+			frames.clear();
+			frames.emplace_back(::cvtColor(stabilizers[0].getBackgroundMask(frameGPU.size()), cv::COLOR_GRAY2BGR));
+
+			for (auto &stabilizer :stabilizers) {
+				::pad(::cvtColor(stabilizer.getBackgroundMask(frameGPU.size()), cv::COLOR_GRAY2BGR), padding);
+			}
+			cv::hconcat(frames, bufferCPU);
 			finalFrame = ::vconcat({finalFrame, bufferCPU});
 		}
 

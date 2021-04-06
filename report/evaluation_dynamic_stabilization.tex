@@ -26,18 +26,40 @@ The recordings are taken on a day with strong winds to ensure high jitter in the
 To evaluate the Dynamic Stabilization algorithm described in \autoref{sec:dynamic_stabilization} we have come up with two metrics to quantify the environmental influences.
 
 \subsubsection{Optical Flow}
+\begin{figure*}[!ht]
+    \centering
+    \begin{tabular}{cc}
+      \includegraphics[width=0.95\linewidth]{images/frame_1317_cropped.png}    &  
+    \end{tabular}
+    \caption{
+        The dense Optical Flow displaying the pixel displacement.
+        The lighter the color the further the displacement. 
+        The angle of displacement is color coded according to the HSV color circle.  
+        From left to right: Original frame, 
+        stabilized using SURF \cite{bay10.1007/11744023_32,opencv_library} feature detector,
+        ORB \cite{rublee6126544, opencv_library} feature detector and
+        FAST \cite{Ghahremani_2021,opencv_library} feature detector with FREAK \cite{alahi6247715,opencv_library} feature descriptors.
+        In the original frame the violet background color indicates a jittery camera movement. 
+        The car in the lower half is driving in the opposite direction as the camera jitters. 
+    }
+    \label{fig:optical_flow_example}
+\end{figure*}
+
 The Optical Flow describes the apparent motion of image objects between two consecutive frames. 
 It is a 2D vector field where each vector is a displacement vector showing the movement of points between the frames caused by movement of the objects or cameras.
 
 We use the dense Optical Flow estimation algorithm proposed by Farnebäck \cite{farnback10.1007/3-540-45103-X_50,opencv_library} to measure the displacement of each pixel between the frames. 
 We calculate the mean displacement over the whole image to get the overall displacement. 
+\autoref{fig:optical_flow_example} shows one frame of Optical Flow calculated.
+
 We see that the dynamically stabilized video feed exhibit a substantially lower mean displacement between frames as the displacement from camera jitter is removed.
 This leaves us with only the expected displacement resulting from moving objects, \eg{} vehicles on the highway or shaking trees.
 
 \begin{figure*}[!ht]
+    \centering
     \begin{tabular}{cc}
-      \includegraphics[width=0.5\linewidth]{diagrams/mean_pixel_shifts_after_dynamic_stabilization_s40_far.png}    &  
-      \includegraphics[width=0.5\linewidth]{diagrams/damping_mean_pixel_shifts_after_dynamic_stabilization_s40_far.png}    
+      \includegraphics[width=0.475\linewidth]{diagrams/mean_pixel_shifts_after_dynamic_stabilization_s40_far.png}    &  
+      \includegraphics[width=0.475\linewidth]{diagrams/damping_mean_pixel_shifts_after_dynamic_stabilization_s40_far.png}    
 \end{tabular}
     \caption{Left: 
         Comparison of the three implemented dynamic stabilizers and the original not stabilized video feed using Optical Flow as metric (lower is better).
@@ -59,42 +81,26 @@ This leaves us with only the expected displacement resulting from moving objects
 It shows that the displacement with especially the SURF \cite{bay10.1007/11744023_32,opencv_library} feature detector is lowered greatly. 
 The damping approximates the removed jitter and also displays a huge lowering in mean displacement.
 
-\begin{table}
-    \centering
-    \begin{tabular}{ |l|l|r|r|r| } 
-     \hline
-     \textbf{Stabilizer} & \textbf{Camera} & \textbf{Disp.}  & \textbf{Better} & \textbf{Better [\%]} \\ 
-     \hline
-     Original   & \camsf{4} & 3.515 & 0     &  0.0      \\
-     FAST       & \camsf{4} & 1.999 & 1279  &  85.552   \\
-     ORB        & \camsf{4} & 1.632 & 1396  &  93.378   \\
-     SURF       & \camsf{4} & 1.273 & 1478  &  \textbf{98.863}   \\
-     \hline
 
-     Original   & \camsn{4} & 5.084 & 0     &  0.0      \\
-     FAST       & \camsn{4} & 4.371 & 983   &  65.753   \\
-     ORB        & \camsn{4} & 4.222 & 1024  &  68.495   \\
-     SURF       & \camsn{4} & 2.495 & 1403  &  \textbf{93.846}   \\
-     \hline
-
-     Original   & \camsf{5} & 2.624 & 0  &    0.0    \\
-     FAST       & \camsf{5} & 2.749 & 983  &  65.753   \\
-     ORB        & \camsf{5} & 1.510 & 1258  & 84.147    \\
-     SURF       & \camsf{5} & 1.550 & 1273  & \textbf{85.151}    \\
-     \hline
-
-     Original   & \camsn{5} & 2.212 &   0   &  0.0      \\
-     FAST       & \camsn{5} & 1.847 & 1028   &  68.993   \\
-     ORB        & \camsn{5} & 1.671 &  1234 &    82.819 \\
-     SURF       & \camsn{5} & 1.543 & 1290  &   \textbf{86.577}  \\
-     \hline
-    \end{tabular}
+\begin{figure}[!ht]
+      \includegraphics[width=\linewidth]{diagrams/stats.png}    
     \caption{
-            Comparison of the implemented dynamic stabilizers and the original not stabilized video feed using Optical Flow as metric.
-            It shows that most of the stabilizers exhibit a lower mean displacement (Disp.) after dynamic stabilization. 
-            In terms of the number of frames the stabilizers all show a high number of total (Better) and relative (Better \%) frames where they have a lower mean displacement. 
-            Especially for the SURF \cite{bay10.1007/11744023_32,opencv_library} feature detector (bold) the improvement is substantially.
-        }
-\end{table}
+        Comparison of the percentages of more stable frames after dynamic stabilization per camera and stabilizer.
+        A frame is classified as more stable if the mean pixel displacement is lower as in the original video feed. 
+        The comparison shows that the stabilizers all improve the video stability, but the SURF \cite{bay10.1007/11744023_32,opencv_library} feature detector based stabilizer outperforms the others.          
+    }
+    \label{fig:dynamic_stabilization}
+\end{figure}
+
+\autoref{fig:dynamic_stabilization} further quantifies the stabilization of the frames.
+
+\paragraph{Problem of Optical Flow as a metric}
+Unfortunately, Optical Flow exhibits one major problem as a metric: 
+It cannot distinguish between dynamically moving objects and static scene.
+This especially introduces a problem when a jitter of the camera moves the pixels in the same direction as the vehicles path is pointing in image space.
+By this jitter the movement of the camera blurs the movement of the dynamic objects into the background and thus removes some of the real movement.
+This shows some frames after stabilization to be worse than before. 
+This should be taken with caution as the Optical Flow cannot detect the relative motion and thus is not a definite measure for the jitter.
+Nonetheless it gives a good hint at the overall stabilization capabilities and can become a measure together with the following measure of the path length of a pixel on a dynamic object. 
 
 \subsubsection{Track features and calculate path smoothness}

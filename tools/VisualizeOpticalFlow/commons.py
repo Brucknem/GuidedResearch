@@ -1,3 +1,4 @@
+import math
 import sys
 from os.path import join
 from pathlib import Path
@@ -22,7 +23,9 @@ plot_height = 800
 
 
 def get_colors(amount):
-    return Turbo256[::int(256 / amount)]
+    if int(amount) == amount:
+        return Turbo256[::int(256 / amount)]
+    return Turbo256[::int(256 / math.ceil(amount))]
 
 
 def set_plot_settings(p):

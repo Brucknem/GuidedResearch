@@ -10,6 +10,7 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/cudaimgproc.hpp"
 #include "opencv2/cudaarithm.hpp"
+#include "opencv2/cudafilters.hpp"
 #include "opencv2/cudaoptflow.hpp"
 
 namespace providentia {
@@ -24,6 +25,8 @@ namespace providentia {
 			 * The current and previous GPU frame.
 			 */
 			cv::cuda::GpuMat currentFrame, previousFrame, mask;
+
+			cv::Ptr<cv::cuda::Filter> gaussianBlur;
 
 			/**
 			 * The calculated dense optical flow.
@@ -59,7 +62,7 @@ namespace providentia {
 			/**
 			 * @constructor
 			 */
-			explicit DenseOpticalFlow() = default;
+			explicit DenseOpticalFlow();
 
 			/**
 			 * Initializes the frame buffers on the first input frame.
@@ -89,6 +92,11 @@ namespace providentia {
 			double getAngleMean();
 
 			/**
+			 * Calculates the image moments of the optical flow magnitude mat.
+			 */
+			std::vector<double> getFlowMoments();
+
+			/**
 			 * Draws the optical flow field as BGR image.
 			 * @return
 			 */
@@ -100,6 +108,7 @@ namespace providentia {
 			 * @param _frame The frame to process.
 			 */
 			void calculate(const cv::cuda::GpuMat &_frame, const cv::cuda::GpuMat &mask = cv::cuda::GpuMat());
+
 		};
 
 		/**
