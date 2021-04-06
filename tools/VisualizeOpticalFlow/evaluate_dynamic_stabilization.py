@@ -3,13 +3,6 @@ from commons import *
 
 display = True
 
-filename = sys.argv[1]
-if not filename or not filename.endswith('.csv'):
-    print("Please specify .csv input file")
-    exit(-1)
-
-df = pd.read_csv(filename)
-
 x = df['Frame']
 
 

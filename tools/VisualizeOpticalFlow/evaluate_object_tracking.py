@@ -1,14 +1,11 @@
 import math
 import os
-from bokeh.models import ColumnDataSource, LabelSet, Whisker
+from bokeh.models import ColumnDataSource, LabelSet, Whisker, FactorRange
+from bokeh.transform import dodge
+
 from commons import *
 
 display = True
-
-folder = sys.argv[1]
-if not folder or not Path(folder).is_dir():
-    print("Please specify an input directory containing the pixel paths as .csv")
-    exit(-1)
 
 
 def get_output_filename(foldername, filename):
@@ -71,60 +68,74 @@ def distances(values):
 
 def generate_curvature_plots(df, foldername, filename, column_names):
     title = "Normalized arc length"
-    output_file(get_output_filename(foldername, filename + "_" + title))
+    output_file(get_output_filename(foldername, 'normalized_arc_lengths'))
+    data = {
+        'Vehicles': vehicles
+    }
 
-    curvature_plot = figure(
-        x_range=column_names,
+    for vehicle in vehicles:
+        df_vehicle = df[df["Vehicle"] == vehicle]
+        for stabilizer in column_names:
+            xes, yes = get_values(df_vehicle, stabilizer)
+            total = []
+            for run in range(len(xes)):
+                dist = distances(list(zip(xes[run], yes[run])))
+                total.append(np.nansum(dist))
+
+            if stabilizer not in data:
+                data[stabilizer] = []
+            data[stabilizer].append(np.mean(total))
+
+    data_original = np.array(data["Original"])
+    for stabilizer in column_names:
+        data[stabilizer] = np.array(data[stabilizer]) / data_original
+        data[stabilizer + formatted_suffix] = [str(round(val, 2)) for val in data[stabilizer]]
+
+    source = ColumnDataSource(data=data)
+    p = figure(
+        x_range=FactorRange(*vehicles),
+        y_range=(-0.03, 1.20),
         plot_width=plot_width,
         plot_height=plot_height,
         tools=tools,
     )
-    curvature_plot.title.text = title + ' of ' + filename.replace('.csv', '') + ' [' + title_suffix + ']'
+    p.title.text = title + ' of ' + filename.replace('.csv', '') + ' [' + title_suffix + ']'
 
-    means = []
-    for i, name in enumerate(column_names):
-        xes, yes = get_values(df, name)
-        total = []
-        for run in range(len(xes)):
-            dist = distances(list(zip(xes[run], yes[run])))
-            total.append(np.nansum(dist))
-        means.append(np.mean(total))
+    colors = get_colors(len(column_names))
+    # colors = colors[]
+    colors = colors * 4
 
-    means = np.array([mean / means[0] if means[0] > 0 else mean for mean in means])
+    distance = 0.9 / len(column_names)
+    for i, stabilizer in enumerate(column_names):
+        xdodge = dodge('Vehicles', -0.34 + i * distance, range=p.x_range)
+        p.vbar(x=xdodge, top=stabilizer, width=distance * 0.9, source=source,
+               color=colors[i], legend_label=stabilizer, alpha=0.7)
+        labels = LabelSet(x=xdodge, y=stabilizer, text=stabilizer + formatted_suffix,
+                          y_offset=5, source=source, render_mode='canvas', text_align='center', text_font=font,
+                          text_font_size=tick_font_size)
+        p.add_layout(labels)
+    set_plot_settings(p)
+    p.xgrid.grid_line_alpha = 0
 
-    source = ColumnDataSource(data=dict(x=column_names, means=means, color=get_colors(len(column_names))))
-    source.data['means_formatted'] = [round(mean, 3) for mean in means]
-
-    curvature_plot.vbar(x='x', top='means', width=0.9, color='color', legend_field='x', fill_alpha=0.5, source=source)
-
-    labels = LabelSet(x='x', y='means', text='means_formatted',
-                      y_offset=5, source=source, render_mode='canvas', text_align='center', text_font=font,
-                      text_font_size=font_size)
-    curvature_plot.add_layout(labels)
-
-    set_plot_settings(curvature_plot)
-    curvature_plot.legend.items = []
-    curvature_plot.xaxis.major_label_orientation = math.pi / 4
-
-    show_or_save(curvature_plot, display)
-
-
-def generate_plots(df, foldername, filename):
-    df.dropna(how='all', axis=1, inplace=True)
-    column_names = list(set([str(name).split(' [')[0] for name in df.columns]))
-    column_names.remove("Frame")
-    column_names.remove("Original")
-    column_names.sort()
-    column_names = ["Original", *column_names]
-    # column_names = ["Original", "FAST", "ORB", "SURF", "FAST (No skew)", "ORB (No skew)", "SURF (No skew)"]
-    generate_xy_plots(df, foldername, filename, column_names)
-    generate_curvature_plots(df, foldername, filename, column_names)
+    show_or_save(p, display)
 
 
 window = 1
 
-for csv in os.listdir(folder):
-    if csv.endswith(".csv"):
-        print(os.path.join(folder, csv))
-        df = pd.read_csv(os.path.join(folder, csv))
-        generate_plots(df, Path(folder).name, csv)
+df.dropna(how='all', axis=1, inplace=True)
+column_names = list(set([str(name).split(' [')[0] for name in df.columns]))
+vehicles = list(set(df["Vehicle"]))
+foldername = Path(filename).parent.name
+filename = Path(filename).name
+
+column_names.remove("Frame")
+column_names.remove("Vehicle")
+column_names.remove("Original")
+column_names.sort()
+column_names = ["Original", *column_names]
+# column_names = ["Original", "FAST", "ORB", "SURF", "FAST (No skew)", "ORB (No skew)", "SURF (No skew)"]
+for vehicle in vehicles:
+    df_vehicle = df[df["Vehicle"] == vehicle]
+    generate_xy_plots(df_vehicle, foldername, vehicle, column_names)
+
+generate_curvature_plots(df, foldername, "tracking", column_names)

@@ -20,6 +20,14 @@ title_suffix = sys.argv[2]
 tools = "save,crosshair,pan,wheel_zoom,box_zoom,undo,redo,reset"
 plot_width = 1600
 plot_height = 800
+formatted_suffix = "_formatted"
+
+filename = sys.argv[1]
+if not filename or not filename.endswith('.csv'):
+    print("Please specify .csv input file")
+    exit(-1)
+
+df = pd.read_csv(filename)
 
 
 def get_colors(amount):

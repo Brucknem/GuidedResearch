@@ -6,15 +6,8 @@ from commons import *
 
 display = True
 
-filename = sys.argv[1]
-if not filename or not filename.endswith('.csv'):
-    print("Please specify .csv input file")
-    exit(-1)
-
-df = pd.read_csv(filename)
 # df = df[df["Stabilizer"] != "Original"]
 
-formatted_suffix = "_formatted"
 
 cameras = list(set(df["Camera"]))
 cameras.sort()
@@ -63,7 +56,7 @@ def plot():
 
     for i, stabilizer in enumerate(stabilizers):
         xdodge = dodge('Cameras', -0.34 + i * distance, range=p.x_range)
-        p.vbar(x=xdodge, top=stabilizer, width=0.2, source=source,
+        p.vbar(x=xdodge, top=stabilizer, width=distance * 0.9, source=source,
                color=colors[i], legend_label=stabilizer, alpha=0.7)
         labels = LabelSet(x=xdodge, y=stabilizer, text=stabilizer + formatted_suffix,
                           y_offset=5, source=source, render_mode='canvas', text_align='center', text_font=font,
@@ -75,11 +68,6 @@ def plot():
     set_plot_settings(p)
     p.yaxis.axis_label = "More stable frames"
     p.xgrid.grid_line_alpha = 0
-    # p.legend.visible = False
-    # p.xaxis.major_label_orientation = np.deg2rad(45)
-    # p.xaxis[0].major_label_orientation = np.deg2rad(45)
-
-    # p.xaxis.axis_label_rotation = "vertical"
     show_or_save(p, display)
 
 

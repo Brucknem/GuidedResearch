@@ -40,8 +40,7 @@ namespace providentia {
 		}
 
 		cv::Point2d ObjectTracking::getMidpoint(int i) const {
-			auto bbox = trackers[i].getBbox();
-			return {bbox.x + 0.5 * bbox.width, bbox.y + 0.5 * bbox.height};
+			return trackers[i].getMidpoint();
 		}
 
 		cv::Mat ObjectTracking::track(const cv::Mat &frame) {
@@ -162,7 +161,7 @@ namespace providentia {
 				cv::rectangle(result, getBbox(), color, 8, 1);
 
 				cv::Point2d midpoint = getMidpoint();
-				cv::circle(result, midpoint, 10, color, -1);
+				cv::circle(result, midpoint, 3, color, -1);
 			}
 			return result;
 		}
