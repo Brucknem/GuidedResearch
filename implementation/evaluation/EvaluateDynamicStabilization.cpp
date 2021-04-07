@@ -25,11 +25,12 @@ private:
 	std::vector<providentia::opticalflow::FarnebackDenseOpticalFlow> opticalFlows;
 
 	std::shared_ptr<::CSVWriter> csvWriter;
-	int frameId = 0;
+	int frameId = -1;
 	bool withMask = false;
 	int padding = 10;
 	boost::filesystem::path evaluationPath;
 	bool writeBadFrames = false;
+	int warmup = 30;
 
 public:
 	explicit Setup() : VideoSetup() {
@@ -79,6 +80,8 @@ public:
 	}
 
 	void specificMainLoop() override {
+		frameId++;
+
 		std::vector<cv::Mat> frames{
 			::pad(::addText(frameCPU, "Frame: " + std::to_string(frameId), 2, 5, 5), padding)
 		};
@@ -118,6 +121,10 @@ public:
 			finalFrame = ::vconcat({finalFrame, bufferCPU});
 		}
 
+		if (frameId < warmup) {
+			return;
+		}
+
 		double originalMagnitudeMean = opticalFlows[0].getMagnitudeMean();
 
 		*csvWriter << frameId;
@@ -152,7 +159,6 @@ public:
 			cv::imwrite((evaluationPath / (frameName + ".png")).string(), finalFrame);
 		}
 		*csvWriter << newline;
-		frameId++;
 	}
 };
 

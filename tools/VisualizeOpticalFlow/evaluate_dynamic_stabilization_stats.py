@@ -35,7 +35,7 @@ def setup():
     output_file(get_output_filename())
 
     p = figure(x_range=FactorRange(*source.data["Cameras"]),
-               y_range=(-0.03, 1.07),
+               y_range=(-0.03, 1.15),
                plot_width=plot_width,
                plot_height=plot_height,
                tools=tools)

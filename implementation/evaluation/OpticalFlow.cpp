@@ -37,6 +37,8 @@ namespace providentia {
 
 			cv::cartToPolar(flowParts[0], flowParts[1], flowParts[0], flowParts[1], true);
 			magnitude = flowParts[0];
+			cv::threshold(magnitude, magnitude, 2, 1e10, cv::ThresholdTypes::THRESH_TOZERO);
+
 			angle = flowParts[1];
 			normalize(flowParts[0], flowParts[2], 0.0f, 1.0f, cv::NORM_MINMAX);
 			flowParts[1] *= ((1.f / 360.f) * (180.f / 255.f));

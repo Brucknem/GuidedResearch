@@ -96,7 +96,8 @@ def calculate_percentage_of_better_frames():
 
     deltas = [means[0] - means[i] for i in range(columns)]
 
-    better_frames = [np.where(delta >= 0)[0].shape[0] for delta in deltas]
+    better_frames = [np.where(delta >= (-np.mean(delta) * 0.1))[0].shape[0] for delta in deltas]
+    # better_frames = [np.where(delta >= 0)[0].shape[0] for delta in deltas]
     better_frames_fractions = [better_frame / total_number_frames for better_frame in better_frames]
     better_frames_percentages = [better_frames_fraction * 100 for better_frames_fraction in better_frames_fractions]
 

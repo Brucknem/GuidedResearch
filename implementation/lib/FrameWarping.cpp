@@ -21,6 +21,9 @@ namespace providentia {
 		void FrameWarper::warp(const cv::cuda::GpuMat &_frame,
 							   const std::shared_ptr<providentia::features::FeatureMatcherBase> &matcher) {
 			clear();
+//			std::cout << matcher->getFrameMatchedPoints().size() << ", "
+//					  << matcher->getReferenceMatchedPoints().size()
+//					  << std::endl;
 			if (matcher->getFrameMatchedPoints().size() < 4) {
 				homography = cv::Mat::eye(3, 3, CV_64F);
 			} else {

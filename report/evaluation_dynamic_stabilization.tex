@@ -23,6 +23,7 @@ The dataset consists of four recordings, each with of a length of $1495$ frames 
 The recordings are taken on a day with strong winds to ensure high jitter in the video feed to optimally test the Dynamic Stabilization algorithm described in \autoref{sec:dynamic_stabilization}. 
 
 \subsection{Dynamic stabilization}
+\label{sec:evaluation_dynamic_stabilization}
 To evaluate the Dynamic Stabilization algorithm described in \autoref{sec:dynamic_stabilization} we have come up with two metrics to quantify the environmental influences.
 
 \subsubsection{Optical Flow}
@@ -83,7 +84,7 @@ The damping approximates the removed jitter and also displays a huge lowering in
 
 
 \begin{figure}[!ht]
-      \includegraphics[width=\linewidth]{diagrams/stats.png}    
+      \includegraphics[width=\linewidth]{diagrams/optical_flow/stats.png}    
     \caption{
         Comparison of the percentages of more stable frames after dynamic stabilization per camera and stabilizer.
         A frame is classified as more stable if the mean pixel displacement is lower as in the original video feed. 
@@ -95,6 +96,7 @@ The damping approximates the removed jitter and also displays a huge lowering in
 \autoref{fig:dynamic_stabilization} further quantifies the stabilization of the frames.
 
 \paragraph{Problem of Optical Flow as a metric}
+\label{sec:evaluation_dynamic_stabilization_optical_flow_problem}
 Unfortunately, Optical Flow exhibits one major problem as a metric: 
 It cannot distinguish between dynamically moving objects and static scene.
 This especially introduces a problem when a jitter of the camera moves the pixels in the same direction as the vehicles path is pointing in image space.

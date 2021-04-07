@@ -13,16 +13,17 @@ When we switch to an automatic landmark detection algorithm the weather conditio
 \subsection{Dynamic stabilization}
 In the subfield of the dynamic stabilization we have until now implemented the visual feature based approach.
 
-\subsubsection{Dynamically pick best feature detector based on optical flow performance}
-Currently we empirically picked the SURF feature detector to have the best stabilization performance.
-We do measure the performance of the feature based dynamic stabilization approach based on the mean pixel deviation of the optical flow.
-As multiple feature detectors are already implemented together with the optical flow to measure the performance.
-To test would be to run all detectors in parallel and use the one with the most stabilize video output.
+\subsubsection{Dropping stabilization if not enough correspondences found}
+We showed in \autoref{sec:evaluation_dynamic_stabilization} that the number of better frames is not at 100\%.
+This is partially due to the shortcomings of the optical flow used as a metric as described in \autoref{sec:evaluation_dynamic_stabilization_optical_flow_problem}.
+Another problem arises when the feature matching does not give enough matches. 
+Finding the homographic transformation is not well defined in this case anymore and the found solution can make the image stability worse.  
 
-\subsubsection{IMU based sensor fusion}
-Previous by-hand calibrations have shown that an inertia measurement unit (IMU) can be used to initially find a camera pose, but the lack of performance and huge time needed makes this not feasible.
-This is just empirical knowledge, not backed up by research. 
-This should be looked into further.
+% \subsubsection{Dynamically pick best feature detector based on optical flow performance}
+% Currently we empirically picked the SURF feature detector to have the best stabilization performance.
+% We do measure the performance of the feature based dynamic stabilization approach based on the mean pixel deviation of the optical flow.
+% As multiple feature detectors are already implemented together with the optical flow to measure the performance.
+% To test would be to run all detectors in parallel and use the one with the most stabilize video output.
 
 \subsubsection{Warp field stabilization based on Optical Flow}
 Currently the optical flow is only used to measure performance but could be used as an alternative approach to the dynamic stabilization problem.
@@ -47,33 +48,38 @@ Learning is done by logistic regression over the expected and predicted transfor
 \subsection{Static calibration}
 For the static calibration there are several improvements possible.
 
-\subsubsection{Extend to global refinement of multiple cameras}
-Currently the reprojection error as described in Eq. \ref{eq:reprojection_error} optimizes the pose of one camera \wrt the \HDmaps{}.
-By extending the optimization to jointly optimize over all cameras and their mappings a global calibration procedure can be established.
-The procedure might be formulated as
-formulated as
-\begin{equation}
-  \begin{split}
-  E(P, S, T, R, \Lambda, W ) =& 
-  \sum_{i \in Cams} \sum_{c \in C_i} 
-  \left\lVert 
-    w_c * [ p_{i,c} - \pi(T_i * R_i * s_c) ]
-  \right\rVert_2^2 \\ 
-  +& 
-  \sum_{i \in Cams} \sum_{c \in C_i} 
-  \left\lVert 
-  penalize(\lambda_c, h_c)
-  \right\rVert_2^2 \\ 
-  +& 
-  \sum_{i \in Cams} \sum_{c \in C_i} 
-  \left\lVert 
-  \alpha * (1 - w_c)
-  \right\rVert_2^2 
-\end{split}
-\label{eq:reprojection_error_global}
-\end{equation}
-where one should optimize over all cameras $i \in \text{Cameras}$ and the seen seen correspondences $c \in C_i$.
-This would finally give a per camera transformation $T_i$ and rotation $R_i$ that would be globally optimal also in relation to the other cameras.
+\subsubsection{IMU based sensor fusion}
+Previous by-hand calibrations have shown that an inertia measurement unit (IMU) can be used to initially find a camera pose, but the lack of performance and huge time needed makes this not feasible.
+This is just empirical knowledge, not backed up by research. 
+This should be looked into further.
+
+% \subsubsection{Extend to global refinement of multiple cameras}
+% Currently the reprojection error as described in Eq. \ref{eq:reprojection_error} optimizes the pose of one camera \wrt the \HDmaps{}.
+% By extending the optimization to jointly optimize over all cameras and their mappings a global calibration procedure can be established.
+% The procedure might be formulated as
+% formulated as
+% \begin{equation}
+%   \begin{split}
+%   E(P, S, T, R, \Lambda, W ) =& 
+%   \sum_{i \in Cams} \sum_{c \in C_i} 
+%   \left\lVert 
+%     w_c * [ p_{i,c} - \pi(T_i * R_i * s_c) ]
+%   \right\rVert_2^2 \\ 
+%   +& 
+%   \sum_{i \in Cams} \sum_{c \in C_i} 
+%   \left\lVert 
+%   penalize(\lambda_c, h_c)
+%   \right\rVert_2^2 \\ 
+%   +& 
+%   \sum_{i \in Cams} \sum_{c \in C_i} 
+%   \left\lVert 
+%   \alpha * (1 - w_c)
+%   \right\rVert_2^2 
+% \end{split}
+% \label{eq:reprojection_error_global}
+% \end{equation}
+% where one should optimize over all cameras $i \in \text{Cameras}$ and the seen seen correspondences $c \in C_i$.
+% This would finally give a per camera transformation $T_i$ and rotation $R_i$ that would be globally optimal also in relation to the other cameras.
 
 \subsubsection{Automatic detection of more landmarks after initial calibration}
 \label{sec:auto_detection_landmarks}

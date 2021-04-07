@@ -20,7 +20,7 @@ namespace providentia {
 			/**
 			 * The algorithm used to find the homography.
 			 */
-			int homographyCalculationAlgorithm = cv::RANSAC;
+			int homographyCalculationAlgorithm = cv::LMEDS;
 
 			/**
 			 * The interpolation algorithm used to warp the frame.
