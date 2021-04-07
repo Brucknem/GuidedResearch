@@ -1,6 +1,29 @@
 %!TEX root = ../report.tex
 \begin{abstract}
 
+In the emerging field of Intelligent Transportation Systems one main challenge is the fusion of different sensor types.
+To fuse the measurements correctly each sensor needs to be free from noise and calibrated accurately.
 
-    
+In this work we focus on two problems resulting from environmental influences on RGB cameras within the Providentia++~project.
+
+First we propose an online vision-based framework to remove jitter from shaky camera streams to dynamically stabilize the video feed.
+We show that our approach based on visual features and an image space homographic transformation gives good stabilization results regarding the optical flow in the image. 
+By exemplary tracking objects and measuring their travelled pixel distance we show a substantial decrease of the jittery image motion. 
+
+Second we propose an online reprojection-error based algorithm to statically calibrate the camera setup \wrt{} a high definition map and to mitigate drift of the extrinsic camera parameters over time.
+By relaxing the minimization problem using a 1D-approximation of road signs we achieve high accuracy in the calibration of the cameras.
+We show the minimal number of needed correspondences between the video and the map, the structure they have to exceed and give a lower bound on the remaining calibration error. 
+
 \end{abstract}
+
+
+\keywords{
+    Intelligent Transportation Systems,
+    Computer Vision,
+    Video stabilization,
+    Feature detection,
+    Feature matching,
+    Camera calibration,
+    Reprojection-error,
+    OpenDRIVE
+}
