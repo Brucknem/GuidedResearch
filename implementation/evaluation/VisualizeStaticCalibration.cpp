@@ -91,6 +91,11 @@ public:
 																					std::pow(2, trackbarWeightScale));
 //		estimator->setInitialGuess(initialTranslation, initialRotation);
 
+	}
+
+	void init() override {
+		ImageSetup::init();
+
 //		cv::createTrackbar("Translation X", windowName, &trackbarTranslationX, 2 * trackbarTranslationMiddle);
 //		cv::createTrackbar("Translation Y", windowName, &trackbarTranslationY, 2 * trackbarTranslationMiddle);
 //		cv::createTrackbar("Translation Z", windowName, &trackbarTranslationZ, 2 * trackbarTranslationMiddle);
@@ -246,7 +251,7 @@ protected:
 int main(int argc, char const *argv[]) {
 	Setup setup;
 	setup.setRenderingScaleFactor(1);
-	setup.setOutputFolder("./stabilization/");
+//	setup.setOutputFolder("./stabilization/");
 	setup.mainLoop();
 	return 0;
 }

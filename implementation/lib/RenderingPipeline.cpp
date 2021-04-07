@@ -182,7 +182,7 @@ namespace providentia {
 				   intrinsics[0], intrinsics[1], intrinsics[2], zero,
 				intrinsics[3], intrinsics[4], intrinsics[5], zero,
 				intrinsics[6], intrinsics[7], intrinsics[8], zero;
-//			std::cout << matrix << std::endl;
+			std::cout << matrix << std::endl;
 			return matrix;
 		}
 
@@ -198,7 +198,8 @@ namespace providentia {
 
 		Eigen::Matrix<double, 3, 4> getS40NCamFarIntrinsics() {
 			return getIntrinsicsMatrixFromConfig<double>(new double[9]{
-				9023.482825, 0.000000, 1222.314303, 0.000000, 9014.504360, 557.541182, 0.000000, 0.000000, 1.000000});
+				9023.482825, 0.000000, 1222.314303, 0.000000, 9014.504360, 557.541182, 0.000000, 0.000000, 1.000000
+			});
 		}
 
 #pragma region TemplateInstances

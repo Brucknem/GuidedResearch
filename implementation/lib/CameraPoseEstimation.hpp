@@ -79,7 +79,7 @@ namespace providentia {
 
 			bool hasInitialGuessSet = false;
 
-			bool optimizationFinished = false;
+			bool optimizationFinished = true;
 
 			double weightScale;
 
@@ -157,9 +157,9 @@ namespace providentia {
 
 			void setWeightScale(double weightScale);
 
-			void clearWorldObjects() {
-				worldObjects = std::vector<providentia::calibration::WorldObject>{};
-			};
+			void clearWorldObjects();
+
+			std::vector<double> getWeights();
 		};
 	}
 }

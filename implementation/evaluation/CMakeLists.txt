@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.10)
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-find_package(Boost REQUIRED COMPONENTS program_options REQUIRED filesystem REQUIRED)
+find_package(Boost REQUIRED COMPONENTS program_options REQUIRED filesystem REQUIRED date_time)
 include_directories(${Boost_INCLUDE_DIRS})
 
 
@@ -28,31 +28,31 @@ target_link_libraries(Utils ${OpenCV_LIBS} ${Boost_LIBRARIES} DynamicStabilizati
 ########################################################################################################################
 
 add_executable(VisualizeFeatureDetection VisualizeFeatureDetection.cpp)
-target_link_libraries(VisualizeFeatureDetection DynamicStabilization StaticCalibration Util ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(VisualizeFeatureDetection DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeFeatureDetection PUBLIC "${PROJECT_BINARY_DIR}")
 
 add_executable(VisualizeFeatureMatching VisualizeFeatureMatching.cpp)
-target_link_libraries(VisualizeFeatureMatching DynamicStabilization StaticCalibration Util ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(VisualizeFeatureMatching DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeFeatureMatching PUBLIC "${PROJECT_BINARY_DIR}")
 
 add_executable(VisualizeBackgroundSegmentation VisualizeBackgroundSegmentation.cpp)
-target_link_libraries(VisualizeBackgroundSegmentation DynamicStabilization StaticCalibration Util ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(VisualizeBackgroundSegmentation DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeBackgroundSegmentation PUBLIC "${PROJECT_BINARY_DIR}")
 
 add_executable(VisualizeDynamicStabilization VisualizeDynamicStabilization.cpp)
-target_link_libraries(VisualizeDynamicStabilization DynamicStabilization StaticCalibration Util ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(VisualizeDynamicStabilization DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeDynamicStabilization PUBLIC "${PROJECT_BINARY_DIR}")
 
 add_executable(VisualizeOpticalFlow VisualizeOpticalFlow.cpp)
-target_link_libraries(VisualizeOpticalFlow DynamicStabilization StaticCalibration Util ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(VisualizeOpticalFlow DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeOpticalFlow PUBLIC "${PROJECT_BINARY_DIR}")
 
 add_executable(VisualizeRenderingPipeline VisualizeRenderingPipeline.cpp)
-target_link_libraries(VisualizeRenderingPipeline DynamicStabilization StaticCalibration Util ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(VisualizeRenderingPipeline DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeRenderingPipeline PUBLIC "${PROJECT_BINARY_DIR}")
 
 add_executable(VisualizeStaticCalibration VisualizeStaticCalibration.cpp)
-target_link_libraries(VisualizeStaticCalibration DynamicStabilization StaticCalibration Util ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(VisualizeStaticCalibration DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeStaticCalibration PUBLIC "${PROJECT_BINARY_DIR}")
 
 
@@ -67,3 +67,7 @@ target_include_directories(EvaluateDynamicStabilization PUBLIC "${PROJECT_BINARY
 add_executable(EvaluateObjectTracking EvaluateObjectTracking.cpp)
 target_link_libraries(EvaluateObjectTracking DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(EvaluateObjectTracking PUBLIC "${PROJECT_BINARY_DIR}")
+
+add_executable(EvaluateStaticCalibration EvaluateStaticCalibration.cpp)
+target_link_libraries(EvaluateStaticCalibration DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_include_directories(EvaluateStaticCalibration PUBLIC "${PROJECT_BINARY_DIR}")

@@ -131,6 +131,24 @@ cv::cuda::GpuMat providentia::evaluation::cvtColor(cv::cuda::GpuMat frame, int c
 	return result;
 }
 
+std::string providentia::evaluation::getNowSuffix() {
+	auto now = getNow();
+	auto date = now.date();
+	auto day = now.time_of_day();
+	std::stringstream ss;
+	ss << "_";
+	ss << boost::gregorian::to_iso_extended_string(date);
+	ss << "_";
+	ss << std::setw(2) << std::setfill('0') << day.hours() << "-";
+	ss << std::setw(2) << std::setfill('0') << day.minutes() << "-";
+	ss << std::setw(2) << std::setfill('0') << day.seconds();
+	return ss.str();
+}
+
+boost::posix_time::ptime providentia::evaluation::getNow() {
+	return boost::posix_time::second_clock::local_time();
+}
+
 #pragma endregion Helpers
 
 #pragma region RunnablesCommons
@@ -147,9 +165,11 @@ providentia::evaluation::ImageSetup::ImageSetup(std::string inputFrame,
 
 void providentia::evaluation::ImageSetup::init() {
 	renderingScaleFactor /= calculationScaleFactor;
-	cv::namedWindow(windowName, cv::WINDOW_AUTOSIZE);
-	cv::moveWindow(windowName, 50, 10);
-	srand(static_cast <unsigned> (time(0)));
+	if (!dontRenderFinalFrame) {
+		cv::namedWindow(windowName, cv::WINDOW_AUTOSIZE);
+		cv::moveWindow(windowName, 50, 10);
+		srand(static_cast <unsigned> (time(0)));
+	}
 	frameCPU = cv::imread(inputResource);
 }
 
@@ -172,6 +192,7 @@ void providentia::evaluation::ImageSetup::getNextFrame() {
 }
 
 void providentia::evaluation::ImageSetup::mainLoop() {
+	init();
 	while (true) {
 		clear();
 		getNextFrame();
@@ -207,9 +228,10 @@ void providentia::evaluation::ImageSetup::mainLoop() {
 			cv::imwrite(outFile.string(), finalFrame, {cv::IMWRITE_PNG_COMPRESSION, 9});
 		}
 
-		cv::resize(finalFrame, finalFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
-		cv::imshow(windowName, finalFrame);
-
+		if (!dontRenderFinalFrame) {
+			cv::resize(finalFrame, finalFrame, cv::Size(), renderingScaleFactor, renderingScaleFactor);
+			cv::imshow(windowName, finalFrame);
+		}
 		pressedKey = cv::waitKey(1);
 		if (pressedKey == (int) ('q')) {
 			break;
@@ -247,7 +269,9 @@ boost::program_options::variables_map providentia::evaluation::ImageSetup::fromC
 		("output,o", po::value<std::string>()->default_value("./results"), "The output folder.")
 		("csf,c", po::value<double>()->default_value(1), "The calculation scale factor.")
 		("rsf,r", po::value<double>()->default_value(0.5), "The rendering scale factor.")
-		("writeFrames,f", po::bool_switch(&writeFrames), "Write the writeFrames to the output folder.")
+		("render,d", po::bool_switch(&dontRenderFinalFrame),
+		 "Flag: Render the final frame or a black placeholder window.")
+		("writeFrames,f", po::bool_switch(&writeFrames), "Flag: Write the writeFrames to the output folder.")
 		("window-name,w", po::value<std::string>()->default_value("Camera Stabilization"),
 		 "The name of the OpenCV window.");
 	addAdditionalOptions(&desc);

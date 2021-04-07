@@ -78,8 +78,9 @@ namespace providentia {
 			options.update_state_every_iteration = true;
 			calculateInitialGuess();
 			createProblem();
-			Solve(options, &problem, &summary);
-			Solve(options, &problem, &summary);
+			for (int i = 0; i < 5; ++i) {
+				Solve(options, &problem, &summary);
+			}
 			optimizationFinished = true;
 			if (_logSummary) {
 				std::cout << *this << std::endl;
@@ -88,7 +89,7 @@ namespace providentia {
 
 		void CameraPoseEstimator::createProblem() {
 			problem = ceres::Problem();
-
+			weights.clear();
 			for (const auto &worldObject : worldObjects) {
 //				weights.emplace_back(new double(1));
 //				bool hasPoints = false;
@@ -204,6 +205,19 @@ namespace providentia {
 
 		void CameraPoseEstimator::setWeightScale(double weightScale) {
 			CameraPoseEstimator::weightScale = weightScale;
+		}
+
+		void CameraPoseEstimator::clearWorldObjects() {
+			worldObjects = std::vector<providentia::calibration::WorldObject>{};
+		}
+
+		std::vector<double> CameraPoseEstimator::getWeights() {
+			std::vector<double> result;
+			result.reserve(weights.size());
+			std::transform(std::begin(weights), std::end(weights),
+						   std::back_inserter(result), [](const double *weight) { return *weight; }
+			);
+			return result;
 		}
 
 		std::string printVectorRow(Eigen::Vector3d vector) {

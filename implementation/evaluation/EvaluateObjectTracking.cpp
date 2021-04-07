@@ -196,7 +196,6 @@ int main(int argc, char const *argv[]) {
 	setup.fromCLI(argc, argv);
 	setup.setRenderingScaleFactor(0.4);
 //	setup.setRenderingScaleFactor(1);
-	setup.init();
 	setup.mainLoop();
 	return 0;
 }

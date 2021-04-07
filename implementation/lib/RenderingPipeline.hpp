@@ -47,7 +47,7 @@ namespace providentia {
 		 *
 		 * @return The intrinsics camera matrix.
 		 */
-		Eigen::Matrix<double, 3, 4> getS40NCamFarIntrinsics();;
+		Eigen::Matrix<double, 3, 4> getS40NCamFarIntrinsics();
 
 		/**
 		 * Divides a pixel in homogeneous coordinates by its z component.

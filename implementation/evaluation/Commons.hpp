@@ -15,10 +15,17 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
+#include "boost/date_time/gregorian/gregorian.hpp"
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 namespace po = boost::program_options;
 
 namespace providentia {
 	namespace evaluation {
+
+		boost::posix_time::ptime getNow();
+
+		std::string getNowSuffix();
 
 		/**
 		 * Gets the default video file path.
@@ -164,6 +171,8 @@ namespace providentia {
 
 			int frameNumber = 0;
 			bool writeFrames = false;
+
+			bool dontRenderFinalFrame = false;
 
 			/**
 			 * The subclass specific main loop. All calculation is done here. <br>

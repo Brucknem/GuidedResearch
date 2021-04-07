@@ -6,6 +6,7 @@
 #include <utility>
 #include <boost/filesystem.hpp>
 #include <opencv2/opencv.hpp>
+#include "Eigen/Dense"
 #include "ObjectTracking.hpp"
 /**
  * https://stackoverflow.com/questions/25201131/writing-csv-files-from-c
@@ -44,6 +45,8 @@ namespace providentia {
 			CSVWriter &operator<<(const cv::Rect &val);
 
 			CSVWriter &operator<<(const cv::Point2d &val);
+
+			CSVWriter &operator<<(const Eigen::Vector3d &val);
 
 			CSVWriter &operator<<(const providentia::evaluation::TrackerWrapper &val);
 

@@ -11,7 +11,11 @@ namespace providentia {
 
 		template<typename T>
 		CSVWriter &CSVWriter::operator<<(const T &val) {
-			fs_ << val << separator_;
+			std::stringstream ss;
+			ss << std::fixed;
+			ss << std::setprecision(20);
+			ss << val;
+			fs_ << ss.str() << separator_;
 			return *this;
 		}
 
@@ -39,6 +43,7 @@ namespace providentia {
 
 		void CSVWriter::newline() {
 			fs_ << std::endl;
+			flush();
 		}
 
 		CSVWriter &CSVWriter::operator<<(CSVWriter &(*val)(CSVWriter &)) {
@@ -73,6 +78,11 @@ namespace providentia {
 
 		CSVWriter &CSVWriter::operator<<(const TrackerWrapper &val) {
 			*this << val.getBbox() << val.getMidpoint();
+			return *this;
+		}
+
+		CSVWriter &CSVWriter::operator<<(const Eigen::Vector3d &val) {
+			*this << val.x() << val.y() << val.z();
 			return *this;
 		}
 
