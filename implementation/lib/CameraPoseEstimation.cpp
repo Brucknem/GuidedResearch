@@ -28,18 +28,19 @@ namespace providentia {
 		}
 
 		void CameraPoseEstimator::calculateInitialGuess() {
-			if (hasInitialGuessSet) {
-				return;
+			if (!hasTranslationGuess) {
+				Eigen::Vector3d mean = calculateMean();
+				double wantedDistance = 500;
+
+				initialTranslation = mean;
+				initialTranslation.z() += wantedDistance;
+				translation = initialTranslation;
 			}
-			Eigen::Vector3d mean = calculateMean();
-			double wantedDistance = 500;
 
-			initialTranslation = mean;
-			initialTranslation.z() += wantedDistance;
-			initialRotation = {0, 0, 0};
-
-			translation = initialTranslation;
-			rotation = initialRotation;
+			if (!hasRotationGuess) {
+				initialRotation = {0, 0, 0};
+				rotation = initialRotation;
+			}
 		}
 
 		Eigen::Vector3d CameraPoseEstimator::calculateMean() {
@@ -87,6 +88,18 @@ namespace providentia {
 			}
 		}
 
+		ceres::ScaledLoss *CameraPoseEstimator::getScaledHuberLoss(double scale) {
+			return getScaledHuberLoss(1.0, scale);
+		}
+
+		ceres::ScaledLoss *CameraPoseEstimator::getScaledHuberLoss(double huber, double scale) {
+			return new ceres::ScaledLoss(
+				new ceres::HuberLoss(huber),
+				scale,
+				ceres::TAKE_OWNERSHIP
+			);
+		}
+
 		void CameraPoseEstimator::createProblem() {
 			problem = ceres::Problem();
 			weights.clear();
@@ -106,8 +119,12 @@ namespace providentia {
 							intrinsics
 						),
 						new ceres::HuberLoss(1.0),
-						translation.data(),
-						rotation.data(),
+						&translation.x(),
+						&translation.y(),
+						&translation.z(),
+						&rotation.x(),
+						&rotation.y(),
+						&rotation.z(),
 						point->getLambda(),
 						point->getMu(),
 						weights[weights.size() - 1]
@@ -115,17 +132,13 @@ namespace providentia {
 
 					problem.AddResidualBlock(
 						DistanceFromIntervalResidual::Create(worldObject.getHeight()),
-						new ceres::HuberLoss(1.0),
+						getScaledHuberLoss(100),
 						point->getLambda()
 					);
 
 					problem.AddResidualBlock(
 						DistanceResidual::Create(1),
-						new ceres::ScaledLoss(
-							new ceres::HuberLoss(1.0),
-							weightScale,
-							ceres::TAKE_OWNERSHIP
-						),
+						getScaledHuberLoss(weightScale),
 						weights[weights.size() - 1]
 					);
 				}
@@ -146,20 +159,58 @@ namespace providentia {
 //					weights[weights.size() - 1]
 //				);
 			}
+
+			addTranslationConstraints();
+			addRotationConstraints();
+
 			std::cout << "Residuals: " << problem.NumResidualBlocks() << std::endl;
+		}
+
+		void CameraPoseEstimator::addRotationConstraints() {
+			problem.AddResidualBlock(
+				DistanceFromIntervalResidual::Create(70, 100),
+				getScaledHuberLoss(1000),
+				&rotation.x()
+			);
+			problem.AddResidualBlock(
+				DistanceFromIntervalResidual::Create(-10, 10),
+				getScaledHuberLoss(1000),
+				&rotation.y()
+			);
+		}
+
+		void CameraPoseEstimator::addTranslationConstraints() {
+			problem.AddResidualBlock(
+				DistanceFromIntervalResidual::Create(translation.x() - 2000, translation.x() + 2000),
+				getScaledHuberLoss(1000),
+				&translation.x()
+			);
+			problem.AddResidualBlock(
+				DistanceFromIntervalResidual::Create(translation.y() - 2000, translation.y() + 2000),
+				getScaledHuberLoss(1000),
+				&translation.y()
+			);
+			problem.AddResidualBlock(
+				DistanceFromIntervalResidual::Create(translation.z() - 500 - 200, translation.z() - 500 + 200),
+				getScaledHuberLoss(1000),
+				&translation.z()
+			);
 		}
 
 		void CameraPoseEstimator::addIterationCallback(ceres::IterationCallback *callback) {
 			options.callbacks.push_back(callback);
 		}
 
-		void
-		CameraPoseEstimator::setInitialGuess(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation) {
-			hasInitialGuessSet = true;
-			initialTranslation = _translation;
+		void CameraPoseEstimator::guessRotation(const Eigen::Vector3d &_rotation) {
+			hasRotationGuess = true;
 			initialRotation = _rotation;
-			translation = _translation;
 			rotation = _rotation;
+		}
+
+		void CameraPoseEstimator::guessTranslation(const Eigen::Vector3d &_translation) {
+			hasTranslationGuess = true;
+			initialTranslation = _translation;
+			translation = _translation;
 		}
 
 		void CameraPoseEstimator::addWorldObject(const WorldObject &worldObject) {

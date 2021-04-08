@@ -77,7 +77,8 @@ namespace providentia {
 			 */
 			std::vector<providentia::calibration::WorldObject> worldObjects;
 
-			bool hasInitialGuessSet = false;
+			bool hasRotationGuess = false;
+			bool hasTranslationGuess = false;
 
 			bool optimizationFinished = true;
 
@@ -121,7 +122,9 @@ namespace providentia {
 			 */
 			void calculateInitialGuess();
 
-			void setInitialGuess(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation);
+			void guessRotation(const Eigen::Vector3d &rotation);
+
+			void guessTranslation(const Eigen::Vector3d &translation);
 
 			/**
 			 * @get
@@ -160,6 +163,14 @@ namespace providentia {
 			void clearWorldObjects();
 
 			std::vector<double> getWeights();
+
+			static ceres::ScaledLoss *getScaledHuberLoss(double scale);
+
+			static ceres::ScaledLoss *getScaledHuberLoss(double huber, double scale);
+
+			void addTranslationConstraints();
+
+			void addRotationConstraints();
 		};
 	}
 }

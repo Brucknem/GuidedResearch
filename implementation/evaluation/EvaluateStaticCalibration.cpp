@@ -42,7 +42,7 @@ public:
 	/**
 	 * Some [x, y, z] euler angle rotation of the camera around the world axis
 	 */
-	Eigen::Vector3d initialRotation{85, 0, -20};
+	Eigen::Vector3d initialRotation{85, 0, -160};
 	Eigen::Vector3d rotation = {initialRotation};
 
 	/**
@@ -53,7 +53,7 @@ public:
 	int trackbarShowIds = 0;
 
 	int evaluationRun = -1;
-	int weightScale = 5;
+	int weightScale = 50;
 	int maxWeightScale = 100;
 	int runsPerWeightScale = 1;
 
@@ -118,7 +118,8 @@ public:
 								   << "Rotation [y]"
 								   << "Rotation [z]"
 								   << "Weights [L1]"
-								   << "Weights [L2]"
+								   << "Weights [Min]"
+								   << "Weights [Max]"
 								   << newline
 								   << flush;
 	}
@@ -225,15 +226,22 @@ protected:
 	void writeToCSV() {
 		if (evaluationRun > -1) {
 			auto weights = estimator->getWeights();
-			Eigen::VectorXd weightsVector = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(weights.data(),
-																						  weights.size());
+			Eigen::VectorXd weightsVector =
+				Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(weights.data(), (long) weights.size());
+//			std::cout << weightsVector << std::endl;
+			auto l1 = weightsVector.lpNorm<1>() / (double) weights.size();
+			auto l2 = weightsVector.squaredNorm() / (double) weights.size();
+			double min = weightsVector.minCoeff();
+			double max = weightsVector.maxCoeff();
 			*extrinsicParametersWriter << evaluationRun
 									   << (int) weights.size()
 									   << (std::pow(2, weightScale))
 									   << translation
 									   << rotation
-									   << weightsVector.lpNorm<1>() / weights.size()
-									   << weightsVector.norm() / weights.size()
+									   << l1
+									   << l2
+									   << min
+									   << max
 									   << newline;
 		}
 	}
@@ -259,6 +267,7 @@ protected:
 			estimator->setWeightScale(std::pow(2, weightScale));
 			estimator->clearWorldObjects();
 			estimator->addWorldObjects(objects);
+//			estimator->guessRotation(initialRotation);
 
 			optimizationFinished = false;
 			estimator->estimateAsync(true);

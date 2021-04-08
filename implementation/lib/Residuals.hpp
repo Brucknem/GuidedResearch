@@ -22,9 +22,9 @@ namespace providentia {
 			explicit DistanceResidual(double expectedValue);
 
 			template<typename T>
-			bool operator()(const T *value, T *residual) const;;
+			bool operator()(const T *value, T *residual) const;
 
-			static ceres::CostFunction *Create(const double expectedValue);;
+			static ceres::CostFunction *Create(double expectedValue);
 
 		};
 
@@ -99,8 +99,17 @@ namespace providentia {
 			 * @return true
 			 */
 			template<typename T>
-			bool operator()(const T *_translation, const T *_rotation, const T *_lambda, const T *_mu, const T
-			*_weight, T *residual)
+			bool operator()(
+				const T *tx,
+				const T *ty,
+				const T *tz,
+				const T *rx,
+				const T *ry,
+				const T *rz,
+				const T *_lambda,
+				const T *_mu,
+				const T *_weight,
+				T *residual)
 			const;
 
 			/**
