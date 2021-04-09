@@ -30,6 +30,13 @@ namespace providentia {
 		 * Estimates the camera pose from some known correspondences between the world and image.
 		 */
 		class CameraPoseEstimator {
+		private:
+			cv::RNG rng;
+			std::vector<ceres::ResidualBlockId> correspondenceResiduals;
+			std::vector<ceres::ResidualBlockId> weightResiduals;
+			std::vector<ceres::ResidualBlockId> lambdaResiduals;
+			std::vector<ceres::ResidualBlockId> rotationResiduals;
+
 		protected:
 
 			/**
@@ -82,11 +89,13 @@ namespace providentia {
 
 			bool optimizationFinished = true;
 
-			double weightScale;
+			double weightScale = std::numeric_limits<double>::max();
+			double lambdaScale = 5;
+			double rotationScale = 10;
+
+			double initialDistanceFromMean = 500;
 
 			std::vector<double *> weights;
-
-			std::vector<ceres::ResidualBlockId> residualBlockIds;
 
 			std::vector<ceres::LossFunctionWrapper *> lossFunctions;
 
@@ -171,6 +180,30 @@ namespace providentia {
 			void addTranslationConstraints();
 
 			void addRotationConstraints();
+
+			double evaluate(ceres::Problem::EvaluateOptions evalOptions = ceres::Problem::EvaluateOptions());
+
+			void setupOptions(bool _logSummary);
+
+			double getLambdaScale() const;
+
+			void setLambdaScale(double lambdaScale);
+
+			double getRotationScale() const;
+
+			void setRotationScale(double rotationScale);
+
+			std::vector<double> getLambdas();
+
+			double evaluate(const std::vector<ceres::ResidualBlockId> &blockIds);
+
+			double evaluateCorrespondenceResiduals();
+
+			double evaluateWeightResiduals();
+
+			double evaluateLambdaResiduals();
+
+			double evaluateRotationResiduals();
 		};
 	}
 }

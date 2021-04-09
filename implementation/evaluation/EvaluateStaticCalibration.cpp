@@ -36,7 +36,9 @@ public:
 	/**
 	 * Some [x, y, z] translation of the camera in world space.
 	 */
-	Eigen::Vector3d initialTranslation{695825, 5.34608e+06, 546.63};
+	Eigen::Vector3d initialTranslation{
+		695962.92502753110602498055, 5346500.60284730326384305954 - 1000, 538.63933146729164036515
+	};
 	Eigen::Vector3d translation = {initialTranslation};
 
 	/**
@@ -53,9 +55,16 @@ public:
 	int trackbarShowIds = 0;
 
 	int evaluationRun = -1;
-	int weightScale = 50;
+	int weightScale = 100;
 	int maxWeightScale = 100;
-	int runsPerWeightScale = 1;
+
+	int lambdaIndex = -1;
+	std::vector<double> lambdaOptions{2., 4., 5., 6.};
+
+	int rotationIndex = 0;
+	std::vector<double> rotationOptions{0., 1., 5., 10., 50., 100., 500., 1000.};
+
+	int runsPerScale = 100;
 
 	/**
 	 * The objects from the HD map.
@@ -90,13 +99,18 @@ public:
 						intrinsicsCasted.emplace_back(boost::lexical_cast<double>(boost::trim_copy(value)));
 					};
 		intrinsics = providentia::camera::getIntrinsicsMatrixFromConfig(intrinsicsCasted.data());
+
+//		initialRotation.z() = vm["z_init"].as<int>();
 		return vm;
 	}
 
 	void addAdditionalOptions(po::options_description *desc) override {
 		desc->add_options()
 			("intrinsics,t", po::value<std::string>(),
-			 "The intrinsic parameters of the camera as comma separated list in format \"f_x,0,c_x,0,f_y,c_y,0,skew,1\".");
+			 "The intrinsic parameters of the camera as comma separated list in format \"f_x,0,c_x,0,f_y,c_y,0,skew,"
+			 "1\".");
+//			("z_init,z", po::value<int>()->default_value(0),
+//			 "The initial z rotation.");
 	}
 
 	void initCSVWriters() {
@@ -109,15 +123,22 @@ public:
 		extrinsicParametersWriter = new CSVWriter(evaluationPath / ("parameters" + suffix + ".csv"));
 
 		*extrinsicParametersWriter << "Run"
-								   << "# Residuals"
-								   << "Alpha"
+								   << "Correspondences"
+								   << "Penalize Scale [Lambdas]"
+								   << "Penalize Scale [Rotation]"
+								   << "Penalize Scale [Weights]"
+								   << "Loss"
+								   << "Loss [Correspondences]"
+								   << "Loss [Lambdas]"
+								   << "Loss [Rotations]"
+								   << "Loss [Weights]"
 								   << "Translation [x]"
 								   << "Translation [y]"
 								   << "Translation [z]"
 								   << "Rotation [x]"
 								   << "Rotation [y]"
 								   << "Rotation [z]"
-								   << "Weights [L1]"
+								   << "Weights [Avg]"
 								   << "Weights [Min]"
 								   << "Weights [Max]"
 								   << newline
@@ -132,7 +153,7 @@ public:
 
 		objects = providentia::calibration::LoadObjects(objectsFile, pixelsFile, imageSize);
 		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics, true,
-																					std::pow(2, weightScale));
+																					powBase2(weightScale));
 
 		if (!dontRenderFinalFrame) {
 			cv::createTrackbar("Background", windowName, &trackbarBackground, 10);
@@ -192,12 +213,22 @@ protected:
 	}
 
 	void renderText() {
-		cv::rectangle(finalFrame, {0, finalFrame.rows - 68 - 24}, {600, finalFrame.rows}, {0, 0, 0}, -1);
+		cv::rectangle(finalFrame, {0, finalFrame.rows - 125}, {600, finalFrame.rows}, {0, 0, 0}, -1);
 		cv::rectangle(finalFrame, {1345, finalFrame.rows - 190 - 24}, {finalFrame.cols, finalFrame.rows}, {0, 0, 0},
 					  -1);
 
-		addTextToFinalFrame("RED dots: Unmapped objects", 5, finalFrame.rows - 68);
-		addTextToFinalFrame("GREEN dots: Mapped objects", 5, finalFrame.rows - 44);
+		addTextToFinalFrame("RED dots: Unmapped objects", 5, finalFrame.rows - 120);
+		addTextToFinalFrame("GREEN dots: Mapped objects", 5, finalFrame.rows - 100);
+		addTextToFinalFrame("Weight Scale: " + std::to_string(powBase2(weightScale)), 5, finalFrame.rows - 80);
+		addTextToFinalFrame(
+			"Run: " + std::to_string(evaluationRun + (lambdaIndex * runsPerScale) + ((lambdaOptions.size() *
+																					  runsPerScale) * rotationIndex)) +
+			"/"
+			+ std::to_string(lambdaOptions.size() * rotationOptions.size() * runsPerScale), 5, finalFrame.rows - 60);
+		addTextToFinalFrame("Lambda: "
+							+ std::to_string(lambdaOptions[lambdaIndex]), 5, finalFrame.rows - 40);
+		addTextToFinalFrame("Rotation: "
+							+ std::to_string(rotationOptions[rotationIndex]), 5, finalFrame.rows - 20);
 
 		std::stringstream ss;
 		ss << *estimator;
@@ -223,26 +254,57 @@ protected:
 		}
 	}
 
+	double powBase2(double val) {
+		return std::pow(2, val);
+	}
+
 	void writeToCSV() {
 		if (evaluationRun > -1) {
 			auto weights = estimator->getWeights();
-			Eigen::VectorXd weightsVector =
-				Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(weights.data(), (long) weights.size());
-//			std::cout << weightsVector << std::endl;
-			auto l1 = weightsVector.lpNorm<1>() / (double) weights.size();
-			auto l2 = weightsVector.squaredNorm() / (double) weights.size();
-			double min = weightsVector.minCoeff();
-			double max = weightsVector.maxCoeff();
+
+			double min_w = 1e100;
+			double max_w = -1e100;
+			double sum_w = 0;
+			for (const auto &weight : weights) {
+				if (weight < min_w) {
+					min_w = weight;
+				}
+				if (weight > max_w) {
+					max_w = weight;
+				}
+				sum_w += weight;
+			}
+
 			*extrinsicParametersWriter << evaluationRun
 									   << (int) weights.size()
-									   << (std::pow(2, weightScale))
+									   << lambdaOptions[lambdaIndex]
+									   << rotationOptions[rotationIndex]
+									   << (powBase2(weightScale))
+									   << estimator->evaluate()
+									   << estimator->evaluateCorrespondenceResiduals()
+									   << estimator->evaluateLambdaResiduals()
+									   << estimator->evaluateRotationResiduals()
+									   << estimator->evaluateWeightResiduals()
 									   << translation
 									   << rotation
-									   << l1
-									   << l2
-									   << min
-									   << max
+									   << sum_w / weights.size()
+									   << min_w
+									   << max_w
 									   << newline;
+		}
+	}
+
+	void doEvaluationIncrementations() {
+		if (evaluationRun % runsPerScale == 0) {
+			evaluationRun = 0;
+			lambdaIndex++;
+			if (lambdaIndex >= lambdaOptions.size()) {
+				lambdaIndex = 0;
+				rotationIndex++;
+				if (rotationIndex >= rotationOptions.size()) {
+					exit(EXIT_SUCCESS);
+				}
+			}
 		}
 	}
 
@@ -256,18 +318,16 @@ protected:
 		if (optimizationFinished) {
 			writeToCSV();
 			evaluationRun++;
-			if (evaluationRun % runsPerWeightScale == 0) {
-				evaluationRun = 0;
-				weightScale++;
-				if (weightScale > maxWeightScale) {
-					exit(EXIT_SUCCESS);
-				}
-			}
+			doEvaluationIncrementations();
 
-			estimator->setWeightScale(std::pow(2, weightScale));
+			estimator->setWeightScale(powBase2(weightScale));
+			estimator->setLambdaScale(lambdaOptions[lambdaIndex]);
+			estimator->setRotationScale(rotationOptions[rotationIndex]);
+
 			estimator->clearWorldObjects();
 			estimator->addWorldObjects(objects);
 //			estimator->guessRotation(initialRotation);
+//			estimator->guessTranslation(initialTranslation);
 
 			optimizationFinished = false;
 			estimator->estimateAsync(true);

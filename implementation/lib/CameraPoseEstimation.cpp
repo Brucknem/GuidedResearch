@@ -30,15 +30,15 @@ namespace providentia {
 		void CameraPoseEstimator::calculateInitialGuess() {
 			if (!hasTranslationGuess) {
 				Eigen::Vector3d mean = calculateMean();
-				double wantedDistance = 500;
 
 				initialTranslation = mean;
-				initialTranslation.z() += wantedDistance;
+				initialTranslation.z() += initialDistanceFromMean;
 				translation = initialTranslation;
 			}
 
 			if (!hasRotationGuess) {
-				initialRotation = {0, 0, 0};
+				double x = 10.;
+				initialRotation = {rng.uniform(-x, x), rng.uniform(-x, x), rng.uniform(-x, x)};
 				rotation = initialRotation;
 			}
 		}
@@ -74,18 +74,34 @@ namespace providentia {
 
 		void CameraPoseEstimator::estimate(bool _logSummary) {
 			optimizationFinished = false;
-			options.linear_solver_type = ceres::DENSE_QR;
-			options.minimizer_progress_to_stdout = _logSummary;
-			options.update_state_every_iteration = true;
 			calculateInitialGuess();
 			createProblem();
+			setupOptions(_logSummary);
 			for (int i = 0; i < 5; ++i) {
 				Solve(options, &problem, &summary);
+				double finalLoss;
+				problem.Evaluate(ceres::Problem::EvaluateOptions(), &finalLoss, nullptr, nullptr, nullptr);
+				// TODO verify
+				if (finalLoss >= weights.size() * 0.5 && finalLoss < 10. * weights.size()) {
+					break;
+				}
 			}
 			optimizationFinished = true;
 			if (_logSummary) {
 				std::cout << *this << std::endl;
 			}
+		}
+
+		void CameraPoseEstimator::setupOptions(bool _logSummary) {
+			options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
+//			options.trust_region_strategy_type = ceres::DOGLEG;
+//			options.use_nonmonotonic_steps = true;
+//			options.max_num_consecutive_invalid_steps = 15;
+//			options.max_num_iterations = weights.size();
+			options.max_num_iterations = 1000;
+			options.num_threads = 12;
+			options.minimizer_progress_to_stdout = _logSummary;
+			options.update_state_every_iteration = true;
 		}
 
 		ceres::ScaledLoss *CameraPoseEstimator::getScaledHuberLoss(double scale) {
@@ -103,16 +119,16 @@ namespace providentia {
 		void CameraPoseEstimator::createProblem() {
 			problem = ceres::Problem();
 			weights.clear();
+			correspondenceResiduals.clear();
+			weightResiduals.clear();
+			lambdaResiduals.clear();
 			for (const auto &worldObject : worldObjects) {
-//				weights.emplace_back(new double(1));
-//				bool hasPoints = false;
 				for (const auto &point : worldObject.getPoints()) {
 					if (!point->hasExpectedPixel()) {
 						continue;
 					}
-//					hasPoints = true;
 					weights.emplace_back(new double(1));
-					problem.AddResidualBlock(
+					correspondenceResiduals.emplace_back(problem.AddResidualBlock(
 						CorrespondenceResidual::Create(
 							point->getExpectedPixel(),
 							point,
@@ -128,71 +144,61 @@ namespace providentia {
 						point->getLambda(),
 						point->getMu(),
 						weights[weights.size() - 1]
-					);
+					));
 
-					problem.AddResidualBlock(
+					lambdaResiduals.emplace_back(problem.AddResidualBlock(
 						DistanceFromIntervalResidual::Create(worldObject.getHeight()),
-						getScaledHuberLoss(100),
+						getScaledHuberLoss(lambdaScale),
 						point->getLambda()
-					);
+					));
 
-					problem.AddResidualBlock(
+					weightResiduals.emplace_back(problem.AddResidualBlock(
 						DistanceResidual::Create(1),
 						getScaledHuberLoss(weightScale),
 						weights[weights.size() - 1]
-					);
+					));
 				}
-
-//				if (!hasPoints) {
-//					weights.pop_back();
-//					continue;
-//				}
-//
-//				problem.AddResidualBlock(
-//					DistanceResidual::Create(1),
-//					new ceres::ScaledLoss(
-//						nullptr,
-////						std::numeric_limits<double>::max(),
-//						1e5,
-//						ceres::TAKE_OWNERSHIP
-//					),
-//					weights[weights.size() - 1]
-//				);
 			}
 
-			addTranslationConstraints();
+//			addTranslationConstraints();
 			addRotationConstraints();
 
 			std::cout << "Residuals: " << problem.NumResidualBlocks() << std::endl;
 		}
 
 		void CameraPoseEstimator::addRotationConstraints() {
-			problem.AddResidualBlock(
-				DistanceFromIntervalResidual::Create(70, 100),
-				getScaledHuberLoss(1000),
+			rotationResiduals.clear();
+			rotationResiduals.emplace_back(problem.AddResidualBlock(
+				DistanceFromIntervalResidual::Create(60, 110),
+				getScaledHuberLoss(rotationScale),
 				&rotation.x()
-			);
-			problem.AddResidualBlock(
+			));
+			rotationResiduals.emplace_back(problem.AddResidualBlock(
 				DistanceFromIntervalResidual::Create(-10, 10),
-				getScaledHuberLoss(1000),
+				getScaledHuberLoss(rotationScale),
 				&rotation.y()
-			);
+			));
 		}
 
 		void CameraPoseEstimator::addTranslationConstraints() {
+//			int x_interval = 5000;
+//			int y_interval = 5000;
+//			int z_interval = 300;
+			int scale = 10;
+//			problem.AddResidualBlock(
+//				DistanceFromIntervalResidual::Create(translation.x() - x_interval, translation.x() + x_interval),
+//				getScaledHuberLoss(scale),
+//				&translation.x()
+//			);
+//			problem.AddResidualBlock(
+//				DistanceFromIntervalResidual::Create(translation.y() - y_interval, translation.y() + y_interval),
+//				getScaledHuberLoss(scale),
+//				&translation.y()
+//			);
 			problem.AddResidualBlock(
-				DistanceFromIntervalResidual::Create(translation.x() - 2000, translation.x() + 2000),
-				getScaledHuberLoss(1000),
-				&translation.x()
-			);
-			problem.AddResidualBlock(
-				DistanceFromIntervalResidual::Create(translation.y() - 2000, translation.y() + 2000),
-				getScaledHuberLoss(1000),
-				&translation.y()
-			);
-			problem.AddResidualBlock(
-				DistanceFromIntervalResidual::Create(translation.z() - 500 - 200, translation.z() - 500 + 200),
-				getScaledHuberLoss(1000),
+				DistanceFromIntervalResidual::Create(0,
+													 translation.z() + 1000),
+				getScaledHuberLoss(scale),
 				&translation.z()
 			);
 		}
@@ -211,6 +217,7 @@ namespace providentia {
 			hasTranslationGuess = true;
 			initialTranslation = _translation;
 			translation = _translation;
+			initialDistanceFromMean = 0;
 		}
 
 		void CameraPoseEstimator::addWorldObject(const WorldObject &worldObject) {
@@ -269,6 +276,64 @@ namespace providentia {
 						   std::back_inserter(result), [](const double *weight) { return *weight; }
 			);
 			return result;
+		}
+
+		std::vector<double> CameraPoseEstimator::getLambdas() {
+			std::vector<double> result;
+			for (const auto &worldObject : worldObjects) {
+				for (const auto &point : worldObject.getPoints()) {
+					if (!point->hasExpectedPixel()) {
+						continue;
+					}
+					result.emplace_back(*point->getLambda());
+				}
+			}
+			return result;
+		}
+
+		double CameraPoseEstimator::evaluate(ceres::Problem::EvaluateOptions evaluateOptions) {
+			double loss;
+			std::vector<double> residuals;
+			problem.Evaluate(evaluateOptions, &loss, &residuals, nullptr, nullptr);
+			return loss;
+		}
+
+		double CameraPoseEstimator::evaluate(const std::vector<ceres::ResidualBlockId> &blockIds) {
+			auto evaluateOptions = ceres::Problem::EvaluateOptions();
+			evaluateOptions.residual_blocks = blockIds;
+			return evaluate(evaluateOptions);
+		}
+
+		double CameraPoseEstimator::evaluateCorrespondenceResiduals() {
+			return evaluate(correspondenceResiduals);
+		}
+
+		double CameraPoseEstimator::evaluateLambdaResiduals() {
+			return evaluate(lambdaResiduals);
+		}
+
+		double CameraPoseEstimator::evaluateWeightResiduals() {
+			return evaluate(weightResiduals);
+		}
+
+		double CameraPoseEstimator::evaluateRotationResiduals() {
+			return evaluate(rotationResiduals);
+		}
+
+		double CameraPoseEstimator::getLambdaScale() const {
+			return lambdaScale;
+		}
+
+		void CameraPoseEstimator::setLambdaScale(double lambdaScale) {
+			CameraPoseEstimator::lambdaScale = lambdaScale;
+		}
+
+		double CameraPoseEstimator::getRotationScale() const {
+			return rotationScale;
+		}
+
+		void CameraPoseEstimator::setRotationScale(double rotationScale) {
+			CameraPoseEstimator::rotationScale = rotationScale;
 		}
 
 		std::string printVectorRow(Eigen::Vector3d vector) {

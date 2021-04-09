@@ -137,6 +137,10 @@ namespace providentia {
 			height = _height;
 		}
 
+		int WorldObject::getNumPoints() const {
+			return points.size();
+		}
+
 #pragma endregion Objects
 	}
 }

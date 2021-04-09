@@ -250,6 +250,11 @@ namespace providentia {
 			 * @set
 			 */
 			void setHeading(double heading);
+
+			/**
+			 * @get
+			 */
+			int getNumPoints() const;
 		};
 	}
 }
