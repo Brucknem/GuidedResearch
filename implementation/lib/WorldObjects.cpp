@@ -14,10 +14,10 @@ namespace providentia {
 		&_axisA, const Eigen::Vector3d &_axisB, double _lambda, double _mu) :
 			expectedPixel({0, 0}), origin(std::move(_origin)), axisA(_axisA.normalized()),
 			axisB(_axisB.normalized()),
-			lambda(_lambda), mu(_mu) {}
+			lambda(new double(_lambda)), mu(new double(_mu)) {}
 
 		Eigen::Vector3d ParametricPoint::getPosition() const {
-			return origin + lambda * axisA + mu * axisB;
+			return origin + *lambda * axisA + *mu * axisB;
 		}
 
 		const Eigen::Vector3d &ParametricPoint::getOrigin() const {
@@ -32,12 +32,12 @@ namespace providentia {
 			return axisB;
 		}
 
-		double *ParametricPoint::getLambda() {
-			return &lambda;
+		double *ParametricPoint::getLambda() const {
+			return lambda;
 		}
 
-		double *ParametricPoint::getMu() {
-			return &mu;
+		double *ParametricPoint::getMu() const {
+			return mu;
 		}
 
 		const Eigen::Vector2d &ParametricPoint::getExpectedPixel() const {
@@ -95,7 +95,7 @@ namespace providentia {
 #pragma region Objects
 
 		void WorldObject::add(const ParametricPoint &point) {
-			points.emplace_back(std::make_shared<ParametricPoint>(point));
+			points.emplace_back(point);
 		}
 
 		double WorldObject::getWeight() const {
@@ -105,7 +105,7 @@ namespace providentia {
 			return 1. / points.size();
 		}
 
-		const std::vector<std::shared_ptr<ParametricPoint>> &WorldObject::getPoints() const {
+		const std::vector<ParametricPoint> &WorldObject::getPoints() const {
 			return points;
 		}
 
@@ -116,7 +116,7 @@ namespace providentia {
 		Eigen::Vector3d WorldObject::getMean() const {
 			Eigen::Vector3d mean{0, 0, 0};
 			for (const auto &point : points) {
-				mean += point->getPosition();
+				mean += point.getPosition();
 			}
 			return mean / points.size();
 		}

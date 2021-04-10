@@ -221,65 +221,79 @@ def create_scatter_plot(df: pd.DataFrame):
 
 
 def create_loss_compare_plot(df: pd.DataFrame):
-    loss_columns, non_loss_columns, foldername = setup_pairplots(df)
+    inliers = True
+    for t in ["inliers", "outliers"]:
+        loss_columns, non_loss_columns, foldername = setup_pairplots(df)
+        foldername = os.path.join(foldername, t)
 
-    result_data_rows = []
-    yaxis = ["Loss [Correspondences]", "Loss [Lambdas]"]
+        result_data_rows = []
+        yaxis = ["Loss [Correspondences]", "Loss [Lambdas]"]
 
-    plots = []
-    for j, xaxis in enumerate(non_loss_columns):
-        output_filename = str(xaxis).strip().replace(" ", "") + "_vs_" + str(yaxis[0]).strip().replace(" ", "") + \
-                          "_vs_" + str(yaxis[1]).strip().replace(" ", "")
-        output_file(get_output_filename(foldername, output_filename, 'html'))
+        plots = []
+        for j, xaxis in enumerate(non_loss_columns):
+            output_filename = str(xaxis).strip().replace(" ", "") + "_vs_" + str(yaxis[0]).strip().replace(" ", "") + \
+                              "_vs_" + str(yaxis[1]).strip().replace(" ", "")
+            output_file(get_output_filename(foldername, output_filename, 'html'))
 
-        total_loss = np.array(df["Loss"])
-        values = np.array([df[xaxis], df[yaxis[0]], df[yaxis[1]]])
-        values = np.transpose(values)
-        conf = 1
-        for _ in range(1):
-            mask, confidence = create_outlier_mask(total_loss)
-            values = values[mask]
-            conf *= confidence
+            total_loss = np.array(df["Loss"])
+            values = np.array([df[xaxis], df[yaxis[0]], df[yaxis[1]]])
+            values = np.transpose(values)
+            conf = 1
+            for _ in range(1):
+                mask, confidence = create_outlier_mask(total_loss)
+                if inliers:
+                    values = values[mask]
+                else:
+                    values = values[~mask]
+                conf *= confidence
 
-        remove_distance = 20
-        order = np.argsort(values[:, 0])
-        values = values[order[remove_distance: -remove_distance]]
-        values = np.transpose(values)
+            remove_distance = 20
+            if not inliers:
+                remove_distance = 2
+            order = np.argsort(values[:, 0])
+            values = values[order[remove_distance: -remove_distance]]
 
-        p = figure(tools="pan,wheel_zoom,box_zoom,reset,save", plot_width=plot_height, plot_height=plot_height,
-                   y_range=(min(values[1]), max(values[1])))
-        p.extra_y_ranges = {yaxis[1]: Range1d(start=0, end=1)}
-        p.add_layout(LinearAxis(y_range_name=yaxis[1]), 'right')
+            values = np.transpose(values)
 
-        p.dot(x=values[0], y=values[1], size=15, alpha=0.5, color='firebrick', legend_label=yaxis[1])
-        p.dot(x=values[0], y=values[2], size=15, alpha=0.5, color='darkblue', legend_label=yaxis[1],
-              y_range_name=yaxis[1])
+            mean = np.mean(values, axis=1)
+            std = np.std(values, axis=1)
+            mins = [min(values[0]), min(values[1]), min(values[2])]
+            maxs = [max(values[0]), max(values[1]), max(values[2])]
+            result_data_rows.append({
+                'X': xaxis,
+                'Y': yaxis,
+                'Size Total': len(df),
+                'Inlier Fraction': conf,
+                **create_result(None, len(values), len(values), mean, std, mins, maxs)
+            })
 
-        mean = np.mean(values, axis=1)
-        std = np.std(values, axis=1)
-        mins = [min(values[0]), min(values[1]), min(values[2])]
-        maxs = [max(values[0]), max(values[1]), max(values[2])]
+            p = figure(tools="pan,wheel_zoom,box_zoom,reset,save", plot_width=plot_height, plot_height=plot_height,
+                       y_range=(min(values[1]), max(values[1])))
+            p.extra_y_ranges = {yaxis[1]: Range1d(start=min(values[2]), end=max(values[2]))}
+            p.add_layout(LinearAxis(y_range_name=yaxis[1]), 'right')
 
-        result_data_rows.append({
-            'X': xaxis,
-            'Y': yaxis,
-            'Size Total': len(df),
-            'Inlier Fraction': conf,
-            **create_result(None, len(values), len(values), mean, std, mins, maxs)
-        })
-        add_spans(p, mean, std, mins, maxs)
+            dot_size = 15
+            if not inliers:
+                dot_size = 50
+            p.dot(x=values[0], y=values[1], size=dot_size, alpha=0.5, color='firebrick', legend_label=yaxis[1])
+            p.dot(x=values[0], y=values[2], size=dot_size, alpha=0.5, color='darkblue', legend_label=yaxis[1],
+                  y_range_name=yaxis[1])
 
-        set_plot_settings(p)
-        p.legend.items = []
-        p.xaxis.formatter.use_scientific = False
-        p.xaxis.axis_label = xaxis
-        p.yaxis[0].axis_label = yaxis[0]
-        p.yaxis[1].axis_label = yaxis[1]
-        p.xaxis.major_label_orientation = math.pi / 8
-        plots.append(p)
-        # show(p)
-        export_png(p, filename=get_output_filename(foldername, output_filename, 'png'))
-    finalize_pairplot(plots, foldername, result_data_rows)
+            if inliers:
+                add_spans(p, mean, std, mins, maxs)
+
+            set_plot_settings(p)
+            p.legend.items = []
+            p.xaxis.formatter.use_scientific = False
+            p.xaxis.axis_label = xaxis
+            p.yaxis[0].axis_label = yaxis[0]
+            p.yaxis[1].axis_label = yaxis[1]
+            p.xaxis.major_label_orientation = math.pi / 8
+            plots.append(p)
+            # show(p)
+            export_png(p, filename=get_output_filename(foldername, output_filename, 'png'))
+        finalize_pairplot(plots, foldername, result_data_rows)
+        inliers = not inliers
 
 
 def tsne_plot(df: pd.DataFrame):

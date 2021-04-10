@@ -40,12 +40,12 @@ namespace providentia {
 			/**
 			 * The distance from the origin in the first axis.
 			 */
-			double lambda;
+			double *lambda;
 
 			/**
 			 * The distance from the origin in the second axis.
 			 */
-			double mu;
+			double *mu;
 
 			/**
 			 * Flag if the expected pixel is set.
@@ -94,12 +94,12 @@ namespace providentia {
 			/**
 			 * @get The length of the first axis.
 			 */
-			double *getLambda();
+			double *getLambda() const;
 
 			/**
 			 * @get The length of the second axis.
 			 */
-			double *getMu();
+			double *getMu() const;
 
 			/**
 			 * @get
@@ -178,7 +178,7 @@ namespace providentia {
 			/**
 			 * The
 			 */
-			std::vector<std::shared_ptr<ParametricPoint>> points;
+			std::vector<ParametricPoint> points;
 
 			/**
 			 * An optional id.
@@ -214,7 +214,7 @@ namespace providentia {
 			/**
 			 * @get
 			 */
-			const std::vector<std::shared_ptr<ParametricPoint>> &getPoints() const;
+			const std::vector<ParametricPoint> &getPoints() const;
 
 			/**
 			 * @get The mean of the points.

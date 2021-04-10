@@ -92,6 +92,8 @@ namespace providentia {
 
 		template CSVWriter &CSVWriter::operator<<(const float &);
 
+		template CSVWriter &CSVWriter::operator<<(const bool &);
+
 		CSVWriter &newline(CSVWriter &file) {
 			file.newline();
 			return file;

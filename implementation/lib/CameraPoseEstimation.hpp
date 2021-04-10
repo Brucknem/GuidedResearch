@@ -37,18 +37,6 @@ namespace providentia {
 			std::vector<ceres::ResidualBlockId> lambdaResiduals;
 			std::vector<ceres::ResidualBlockId> rotationResiduals;
 
-		protected:
-
-			/**
-			 * The ceres internal minimization problem definition.
-			 */
-			ceres::Problem problem;
-
-			/**
-			 * Some options passed to the ceres solver.
-			 */
-			ceres::Solver::Options options;
-
 			/**
 			 * The final optimization summary.
 			 */
@@ -89,15 +77,61 @@ namespace providentia {
 
 			bool optimizationFinished = true;
 
-			double weightScale = std::numeric_limits<double>::max();
-			double lambdaScale = 4;
-			double rotationScale = 50;
+			double weightPenalizeScale = std::numeric_limits<double>::max();
+			double lambdaPenalizeScale = 2;
+			double rotationPenalizeScale = 50;
 
 			double initialDistanceFromMean = 500;
 
 			std::vector<double *> weights;
+			double weightsScale = 1;
+
+			bool foundValidSolution = false;
+			int maxTriesUntilAbort = 15;
 
 			std::vector<ceres::LossFunctionWrapper *> lossFunctions;
+
+			double lambdasLoss = 0;
+			double correspondencesLoss = 0;
+			double rotationsLoss = 0;
+			double weightsLoss = 0;
+			double totalLoss = 0;
+
+			/**
+			 * Calculates the mean of the known world correspondences.
+			 */
+			Eigen::Vector3d calculateMean();
+
+			ceres::Problem createProblem();
+
+			Eigen::Vector3d calculateFurthestPoint(const Eigen::Vector3d &mean);
+
+			static ceres::ScaledLoss *getScaledHuberLoss(double scale);
+
+			static ceres::ScaledLoss *getScaledHuberLoss(double huber, double scale);
+
+			void addTranslationConstraints(ceres::Problem &problem);
+
+			void addRotationConstraints(ceres::Problem &problem);
+
+			static double evaluate(ceres::Problem &problem,
+								   const ceres::Problem::EvaluateOptions &evalOptions = ceres::Problem::EvaluateOptions());
+
+			static ceres::Solver::Options setupOptions(bool _logSummary);
+
+			double evaluate(ceres::Problem &problem, const std::vector<ceres::ResidualBlockId> &blockIds);
+
+			void evaluateCorrespondenceResiduals(ceres::Problem &problem);
+
+			void evaluateWeightResiduals(ceres::Problem &problem);
+
+			void evaluateLambdaResiduals(ceres::Problem &problem);
+
+			void evaluateRotationResiduals(ceres::Problem &problem);
+
+			void solveProblem(bool _logSummary);
+
+			void evaluateAllResiduals(ceres::Problem &problem);
 
 		public:
 			/**
@@ -105,8 +139,8 @@ namespace providentia {
 			 *
 			 * @param _intrinsics The intrinsics of the pinhole camera model.
 			 */
-			CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics, bool initLogging = true,
-								double weightScale = std::numeric_limits<double>::max());
+			explicit CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics, bool initLogging = true,
+										 double weightPenalizeScale = std::numeric_limits<double>::max());
 
 			/**
 			 * @destructor
@@ -149,61 +183,37 @@ namespace providentia {
 
 			bool isOptimizationFinished() const;
 
-			/**
-			 * Calculates the mean of the known world correspondences.
-			 */
-			Eigen::Vector3d calculateMean();
-
-			/**
-			 * Adds a callback to the estimator that gets called after each optimization step.
-			 */
-			void addIterationCallback(ceres::IterationCallback *callback);
-
-			void createProblem();
-
-			Eigen::Vector3d calculateFurthestPoint(Eigen::Vector3d mean);
-
 			friend std::ostream &operator<<(std::ostream &os, const CameraPoseEstimator &estimator);
 
-			double getWeightScale() const;
+			double getWeightPenalizeScale() const;
 
-			void setWeightScale(double weightScale);
+			void setWeightPenalizeScale(double weightPenalizeScale);
 
 			void clearWorldObjects();
 
 			std::vector<double> getWeights();
 
-			static ceres::ScaledLoss *getScaledHuberLoss(double scale);
+			double getLambdaPenalizeScale() const;
 
-			static ceres::ScaledLoss *getScaledHuberLoss(double huber, double scale);
+			void setLambdaPenalizeScale(double lambdaPenalizeScale);
 
-			void addTranslationConstraints();
+			double getRotationPenalizeScale() const;
 
-			void addRotationConstraints();
-
-			double evaluate(ceres::Problem::EvaluateOptions evalOptions = ceres::Problem::EvaluateOptions());
-
-			void setupOptions(bool _logSummary);
-
-			double getLambdaScale() const;
-
-			void setLambdaScale(double lambdaScale);
-
-			double getRotationScale() const;
-
-			void setRotationScale(double rotationScale);
+			void setRotationPenalizeScale(double rotationPenalizeScale);
 
 			std::vector<double> getLambdas();
 
-			double evaluate(const std::vector<ceres::ResidualBlockId> &blockIds);
+			bool hasFoundValidSolution() const;
 
-			double evaluateCorrespondenceResiduals();
+			double getLambdasLoss() const;
 
-			double evaluateWeightResiduals();
+			double getCorrespondencesLoss() const;
 
-			double evaluateLambdaResiduals();
+			double getRotationsLoss() const;
 
-			double evaluateRotationResiduals();
+			double getWeightsLoss() const;
+
+			double getTotalLoss() const;
 		};
 	}
 }

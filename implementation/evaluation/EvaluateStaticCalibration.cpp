@@ -14,6 +14,7 @@
 
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include "glog/logging.h"
 
 using namespace providentia::evaluation;
 
@@ -64,7 +65,7 @@ public:
 	int rotationIndex = 0;
 	std::vector<double> rotationOptions{50.};
 
-	int runsPerScale = 10000;
+	int runsPerScale = 1500;
 
 	/**
 	 * The objects from the HD map.
@@ -80,7 +81,9 @@ public:
 	CSVWriter *extrinsicParametersWriter;
 	CSVWriter *optimizationRunWriter;
 
-	explicit Setup() : ImageSetup() {}
+	explicit Setup() : ImageSetup() {
+		google::InitGoogleLogging("Camera Pose Estimation");
+	}
 
 	boost::program_options::variables_map fromCLI(int argc, const char **argv) override {
 		auto vm = ImageSetup::fromCLI(argc, argv);
@@ -127,6 +130,7 @@ public:
 								   << "Penalize Scale [Lambdas]"
 								   << "Penalize Scale [Rotation]"
 								   << "Penalize Scale [Weights]"
+								   << "Valid Solution"
 								   << "Loss"
 								   << "Loss [Correspondences]"
 								   << "Loss [Lambdas]"
@@ -154,7 +158,7 @@ public:
 		objects = providentia::calibration::LoadObjects(objectsFile, pixelsFile, imageSize);
 		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics, true,
 																					powBase2(weightScale));
-
+		estimator->addWorldObjects(objects);
 		if (!dontRenderFinalFrame) {
 			cv::createTrackbar("Background", windowName, &trackbarBackground, 10);
 			cv::createTrackbar("Show Ids", windowName, &trackbarShowIds, 1);
@@ -243,9 +247,9 @@ protected:
 		for (const auto &worldObject: objects) {
 			bool idShown = false;
 			for (const auto &point : worldObject.getPoints()) {
-				Eigen::Vector3d p = point->getPosition();
+				Eigen::Vector3d p = point.getPosition();
 				cv::Vec3d color = {0, 0, 1};
-				if (point->hasExpectedPixel()) {
+				if (point.hasExpectedPixel()) {
 					color = {0, 1, 0};
 				}
 				render(worldObject.getId(), p, color, !idShown);
@@ -280,11 +284,12 @@ protected:
 									   << lambdaOptions[lambdaIndex]
 									   << rotationOptions[rotationIndex]
 									   << (powBase2(weightScale))
-									   << estimator->evaluate()
-									   << estimator->evaluateCorrespondenceResiduals()
-									   << estimator->evaluateLambdaResiduals()
-									   << estimator->evaluateRotationResiduals()
-									   << estimator->evaluateWeightResiduals()
+									   << estimator->hasFoundValidSolution()
+									   << estimator->getTotalLoss()
+									   << estimator->getCorrespondencesLoss()
+									   << estimator->getLambdasLoss()
+									   << estimator->getRotationsLoss()
+									   << estimator->getWeightsLoss()
 									   << translation
 									   << rotation
 									   << sum_w / weights.size()
@@ -320,7 +325,12 @@ protected:
 			evaluationRun++;
 			doEvaluationIncrementations();
 
-			estimator->setWeightScale(powBase2(weightScale));
+//			estimator.reset();
+//			auto count = estimator.unique();
+//			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics, true,
+//																						powBase2(weightScale));
+			estimator->setWeightPenalizeScale(powBase2(weightScale));
+			estimator->addWorldObjects(objects);
 //			estimator->setLambdaScale(lambdaOptions[lambdaIndex]);
 //			estimator->setRotationScale(rotationOptions[rotationIndex]);
 

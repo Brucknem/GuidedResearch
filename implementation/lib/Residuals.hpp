@@ -44,9 +44,9 @@ namespace providentia {
 			/**
 			 * Factory method to hide the residual creation.
 			 */
-			static ceres::CostFunction *Create(const double lowerBound, const double upperBound);
+			static ceres::CostFunction *Create(double lowerBound, double upperBound);
 
-			static ceres::CostFunction *Create(const double upperBound);
+			static ceres::CostFunction *Create(double upperBound);
 		};
 
 		/**
@@ -67,7 +67,7 @@ namespace providentia {
 			/**
 			 * The parametricPoint that contains the correspondence.
 			 */
-			std::shared_ptr<providentia::calibration::ParametricPoint> parametricPoint;
+			providentia::calibration::ParametricPoint parametricPoint;
 
 		public:
 			/**
@@ -78,9 +78,9 @@ namespace providentia {
 			 * @param _intrinsics The intrinsics of the pinhole camera model.
 			 * @param _imageSize The [width, height] of the image.
 			 */
-			CorrespondenceResidual(Eigen::Vector2d _expectedPixel,
-								   std::shared_ptr<providentia::calibration::ParametricPoint> _point,
-								   Eigen::Matrix<double, 3, 4> _intrinsics);
+			CorrespondenceResidual(const Eigen::Vector2d &_expectedPixel,
+								   const providentia::calibration::ParametricPoint &_point,
+								   const Eigen::Matrix<double, 3, 4> &_intrinsics);
 
 			/**
 			 * @destructor
@@ -116,7 +116,7 @@ namespace providentia {
 			 * Factory method to hide the residual creation.
 			 */
 			static ceres::CostFunction *Create(const Eigen::Vector2d &_expectedPixel,
-											   const std::shared_ptr<providentia::calibration::ParametricPoint> &point,
+											   const providentia::calibration::ParametricPoint &point,
 											   const Eigen::Matrix<double, 3, 4> &intrinsics);
 		};
 
