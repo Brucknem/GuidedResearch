@@ -15,7 +15,11 @@ font = "Times"
 font_size = '28pt'
 tick_font_size = '24pt'
 title_font_size = '32pt'
-title_suffix = sys.argv[2]
+
+
+def get_title_suffix():
+    return sys.argv[2]
+
 
 tools = "save,crosshair,pan,wheel_zoom,box_zoom,undo,redo,reset"
 plot_width = 1600
@@ -28,6 +32,7 @@ if not filename or not filename.endswith('.csv'):
     exit(-1)
 
 df = pd.read_csv(filename)
+df.dropna(axis=1, inplace=True)
 
 
 def get_colors(amount):

@@ -118,10 +118,14 @@ namespace providentia {
 
 		void CameraPoseEstimator::createProblem() {
 			problem = ceres::Problem();
+			for (auto p : weights) {
+				delete p;
+			}
 			weights.clear();
 			correspondenceResiduals.clear();
 			weightResiduals.clear();
 			lambdaResiduals.clear();
+
 			for (const auto &worldObject : worldObjects) {
 				for (const auto &point : worldObject.getPoints()) {
 					if (!point->hasExpectedPixel()) {

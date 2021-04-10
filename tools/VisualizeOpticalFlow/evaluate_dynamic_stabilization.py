@@ -47,7 +47,7 @@ def setup(window_size, title):
     output_file(get_output_filename(inspect.stack()[1].function, window_size))
 
     p = figure(plot_width=plot_width, plot_height=plot_height, tools=tools, y_range=y_range)
-    p.title.text = title + ' after dynamic stabilization [' + title_suffix + ']'
+    p.title.text = title + ' after dynamic stabilization [' + get_title_suffix() + ']'
     # p.add_layout(Legend(), 'right')
 
     columns, columns_names, means, stds = get_statistics(window_size)

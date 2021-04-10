@@ -18,7 +18,7 @@ def setup(foldername, filename, title):
     output_file(get_output_filename(foldername, filename + "_" + title))
 
     p = figure(plot_width=plot_width, plot_height=plot_height, tools=tools)
-    p.title.text = title + ' of ' + filename.replace('.csv', '') + ' [' + title_suffix + ']'
+    p.title.text = title + ' of ' + filename.replace('.csv', '') + ' [' + get_title_suffix() + ']'
 
     return p
 
@@ -99,7 +99,7 @@ def generate_curvature_plots(df, foldername, filename, column_names):
         plot_height=plot_height,
         tools=tools,
     )
-    p.title.text = title + ' of ' + filename.replace('.csv', '') + ' [' + title_suffix + ']'
+    p.title.text = title + ' of ' + filename.replace('.csv', '') + ' [' + get_title_suffix() + ']'
 
     colors = get_colors(len(column_names))
     # colors = colors[]

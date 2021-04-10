@@ -59,12 +59,12 @@ public:
 	int maxWeightScale = 100;
 
 	int lambdaIndex = -1;
-	std::vector<double> lambdaOptions{2., 4., 5., 6.};
+	std::vector<double> lambdaOptions{4.};
 
 	int rotationIndex = 0;
-	std::vector<double> rotationOptions{0., 1., 5., 10., 50., 100., 500., 1000.};
+	std::vector<double> rotationOptions{50.};
 
-	int runsPerScale = 100;
+	int runsPerScale = 10000;
 
 	/**
 	 * The objects from the HD map.
@@ -321,8 +321,8 @@ protected:
 			doEvaluationIncrementations();
 
 			estimator->setWeightScale(powBase2(weightScale));
-			estimator->setLambdaScale(lambdaOptions[lambdaIndex]);
-			estimator->setRotationScale(rotationOptions[rotationIndex]);
+//			estimator->setLambdaScale(lambdaOptions[lambdaIndex]);
+//			estimator->setRotationScale(rotationOptions[rotationIndex]);
 
 			estimator->clearWorldObjects();
 			estimator->addWorldObjects(objects);

@@ -90,8 +90,8 @@ namespace providentia {
 			bool optimizationFinished = true;
 
 			double weightScale = std::numeric_limits<double>::max();
-			double lambdaScale = 5;
-			double rotationScale = 10;
+			double lambdaScale = 4;
+			double rotationScale = 50;
 
 			double initialDistanceFromMean = 500;
 
