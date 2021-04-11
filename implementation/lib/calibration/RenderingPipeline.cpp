@@ -151,8 +151,6 @@ namespace providentia {
 		template<typename T>
 		Eigen::Matrix<T, 3, 4> getIntrinsicsMatrix(const T *intrinsics) {
 			T zero = (T) 0;
-			Eigen::Matrix<T, 3, 4> intrinsicsMatrix = Eigen::Matrix<T, 3, 4>::Zero();
-
 			T focalLength = intrinsics[0];
 
 			Eigen::Matrix<T, 2, 1> m = Eigen::Matrix<T, 2, 1>(

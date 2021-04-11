@@ -63,9 +63,6 @@ namespace providentia {
 					std::cout << "Error in fundamental matrix calculation: " << e.what() << std::endl;
 					return;
 				}
-				const cv::Mat &essentialMatrix = cv::findFundamentalMat(frameMatchedPoints, referenceMatchedPoints,
-																		cv::FM_RANSAC, 1.0, 0.975,
-																		fundamentalMatrixInlierMask);
 				fundamentalMatches.clear();
 				for (int i = 0; i < goodMatches.size(); i++) {
 					if (fundamentalMatrixInlierMask.at<bool>(i, 0)) {

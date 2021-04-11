@@ -133,6 +133,15 @@ namespace providentia {
 
 			void evaluateAllResiduals(ceres::Problem &problem);
 
+			ceres::ResidualBlockId
+			addCorrespondenceResidualBlock(ceres::Problem &problem, const ParametricPoint &point);
+
+			ceres::ResidualBlockId
+			addLambdaResidualBlock(ceres::Problem &problem, const WorldObject &worldObject,
+								   const ParametricPoint &point) const;
+
+			ceres::ResidualBlockId addWeightResidualBlock(ceres::Problem &problem);
+
 		public:
 			/**
 			 * @constructor
@@ -159,7 +168,7 @@ namespace providentia {
 			std::thread estimateAsync(bool logSummary = false);
 
 			/**
-			 * Based on the known world positions calculates and initial guess for the camera translation and rotation.
+			 * Based on the known world positions calculates an initial guess for the camera translation and rotation.
 			 * This is necessary as the optimization problem is rather ill posed and sensitive to the initialization.
 			 */
 			void calculateInitialGuess();
@@ -213,6 +222,7 @@ namespace providentia {
 			double getWeightsLoss() const;
 
 			double getTotalLoss() const;
+
 		};
 	}
 }

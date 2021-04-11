@@ -22,45 +22,48 @@ namespace providentia {
 			return YAML::LoadFile(filename);
 		}
 
+		WorldObject
+		createWorldObject(const YAML::detail::iterator_value &object, const YAML::Node &imageObjects, Eigen::Vector2i
+		imageSize) {
+			WorldObject worldObject;
+			std::string objectId = object["id"].as<std::string>();
+			worldObject.setId(objectId);
+			worldObject.setHeight(object["height"].as<double>());
+			const Eigen::Vector3d &worldPosition = object["position"].as<Eigen::Vector3d>();
+
+			auto imageHeight = imageSize[1];
+			bool hasPixels = false;
+			std::vector<WorldObject> objects;
+			for (const auto imageObject : imageObjects) {
+				std::string frameObjectId = imageObject["id"].as<std::string>();
+				if (frameObjectId == worldObject.getId()) {
+					for (const auto pixelNode : imageObject["pixels"]) {
+						Eigen::Vector2d pixel = pixelNode.as<Eigen::Vector2d>();
+						if (imageHeight > 1) {
+							pixel = {pixel.x(), imageHeight - 1 - pixel.y()};
+						}
+						worldObject.add(
+							ParametricPoint::onLine(pixel, worldPosition, Eigen::Vector3d::UnitZ()));
+						hasPixels = true;
+					}
+				}
+			}
+
+			if (!hasPixels) {
+				worldObject.add(ParametricPoint::onPoint(worldPosition));
+			}
+			return worldObject;
+		}
+
 		std::vector<WorldObject>
-		loadObjects(YAML::Node opendriveObjects, const YAML::Node &imageObjects, Eigen::Vector2i imageSize) {
+		loadObjects(YAML::Node opendriveObjects, const YAML::Node &imageObjects, const Eigen::Vector2i &imageSize) {
 			std::vector<WorldObject> objects;
 			assert(opendriveObjects["objects"].IsSequence());
 
-			auto imageHeight = imageSize[1];
-
 			for (const auto &object : opendriveObjects["objects"]) {
-				WorldObject worldObject;
-
-				std::string objectId = object["id"].as<std::string>();
-				worldObject.setId(objectId);
-				worldObject.setHeight(object["height"].as<double>());
-
-				if (std::strcmp(object["type"].as<std::string>().c_str(), "pole") == 0 &&
-					std::strcmp(object["name"].as<std::string>().c_str(), "permanentDelineator") == 0) {
-					const Eigen::Vector3d &worldPosition = object["position"].as<Eigen::Vector3d>();
-//					auto heading = object["hdg"].as<double>();
-
-					bool hasPixels = false;
-					for (const auto imageObject : imageObjects) {
-						std::string frameObjectId = imageObject["id"].as<std::string>();
-						if (std::strcmp(frameObjectId.c_str(), objectId.c_str()) == 0) {
-							for (const auto pixelNode : imageObject["pixels"]) {
-								Eigen::Vector2d pixel = pixelNode.as<Eigen::Vector2d>();
-								if (imageHeight > 1) {
-									pixel = {pixel.x(), imageHeight - 1 - pixel.y()};
-								}
-								worldObject.add(
-									ParametricPoint::onLine(pixel, worldPosition, Eigen::Vector3d::UnitZ()));
-								hasPixels = true;
-							}
-						}
-					}
-
-					if (!hasPixels) {
-						worldObject.add(ParametricPoint::onPoint(worldPosition));
-					}
-					objects.emplace_back(worldObject);
+				if (object["type"].as<std::string>() == "pole" &&
+					object["name"].as<std::string>() == "permanentDelineator") {
+					objects.emplace_back(createWorldObject(object, imageObjects, imageSize));
 				}
 			}
 			return objects;
@@ -68,10 +71,10 @@ namespace providentia {
 
 		std::vector<WorldObject>
 		loadObjects(const std::string &opendriveObjectsFile, const std::string &imageObjectsFile,
-					Eigen::Vector2i imageSize) {
+					const Eigen::Vector2i &imageSize) {
 			YAML::Node opendriveObjects = loadYAML(opendriveObjectsFile);
 			YAML::Node imageObjects = loadYAML(imageObjectsFile);
-			return loadObjects(opendriveObjects, imageObjects, std::move(imageSize));
+			return loadObjects(opendriveObjects, imageObjects, imageSize);
 		}
 	}
 }

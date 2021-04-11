@@ -29,7 +29,7 @@ namespace providentia {
 		 * @return
 		 */
 		std::vector<WorldObject>
-		loadObjects(YAML::Node opendriveObjects, const YAML::Node &imageObjects, Eigen::Vector2i
+		loadObjects(YAML::Node opendriveObjects, const YAML::Node &imageObjects, const Eigen::Vector2i &
 		imageSize = {-1, -1});
 
 		/**
@@ -39,7 +39,7 @@ namespace providentia {
 		 * @return
 		 */
 		std::vector<WorldObject> loadObjects(const std::string &opendriveObjectsFile, const std::string
-		&imageObjectsFile, Eigen::Vector2i imageSize = {-1, -1});
+		&imageObjectsFile, const Eigen::Vector2i &imageSize = {-1, -1});
 	}
 }
 

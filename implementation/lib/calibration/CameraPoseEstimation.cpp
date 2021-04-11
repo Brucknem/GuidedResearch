@@ -156,36 +156,9 @@ namespace providentia {
 					*point.getLambda() = 0;
 					*point.getMu() = 0;
 					weights.emplace_back(new double(1));
-					correspondenceResiduals.emplace_back(problem.AddResidualBlock(
-						providentia::calibration::residuals::CorrespondenceResidual::create(
-							point.getExpectedPixel(),
-							point,
-							intrinsics
-						),
-						new ceres::HuberLoss(1.0),
-						&translation.x(),
-						&translation.y(),
-						&translation.z(),
-						&rotation.x(),
-						&rotation.y(),
-						&rotation.z(),
-						point.getLambda(),
-						point.getMu(),
-						weights[weights.size() - 1]
-					));
-
-					lambdaResiduals.emplace_back(problem.AddResidualBlock(
-						providentia::calibration::residuals::DistanceFromIntervalResidual::create(
-							worldObject.getHeight()),
-						getScaledHuberLoss(lambdaPenalizeScale),
-						point.getLambda()
-					));
-
-					weightResiduals.emplace_back(problem.AddResidualBlock(
-						providentia::calibration::residuals::DistanceResidual::create(1),
-						getScaledHuberLoss(weightPenalizeScale),
-						weights[weights.size() - 1]
-					));
+					correspondenceResiduals.emplace_back(addCorrespondenceResidualBlock(problem, point));
+					lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, worldObject, point));
+					weightResiduals.emplace_back(addWeightResidualBlock(problem));
 				}
 			}
 			// +1.5 empirical knowledge. Might be further investigated.
@@ -198,6 +171,46 @@ namespace providentia {
 
 			std::cout << "Residuals: " << problem.NumResidualBlocks() << std::endl;
 			return problem;
+		}
+
+		ceres::ResidualBlockId CameraPoseEstimation::addWeightResidualBlock(ceres::Problem &problem) {
+			return problem.AddResidualBlock(
+				residuals::DistanceResidual::create(1),
+				getScaledHuberLoss(weightPenalizeScale),
+				weights[weights.size() - 1]
+			);
+		}
+
+		ceres::ResidualBlockId
+		CameraPoseEstimation::addLambdaResidualBlock(ceres::Problem &problem, const WorldObject &worldObject,
+													 const ParametricPoint &point) const {
+			return problem.AddResidualBlock(
+				residuals::DistanceFromIntervalResidual::create(
+					worldObject.getHeight()),
+				getScaledHuberLoss(lambdaPenalizeScale),
+				point.getLambda()
+			);
+		}
+
+		ceres::ResidualBlockId
+		CameraPoseEstimation::addCorrespondenceResidualBlock(ceres::Problem &problem, const ParametricPoint &point) {
+			return problem.AddResidualBlock(
+				residuals::CorrespondenceResidual::create(
+					point.getExpectedPixel(),
+					point,
+					intrinsics
+				),
+				new ceres::HuberLoss(1.0),
+				&translation.x(),
+				&translation.y(),
+				&translation.z(),
+				&rotation.x(),
+				&rotation.y(),
+				&rotation.z(),
+				point.getLambda(),
+				point.getMu(),
+				weights[weights.size() - 1]
+			);
 		}
 
 		void CameraPoseEstimation::addRotationConstraints(ceres::Problem &problem) {
