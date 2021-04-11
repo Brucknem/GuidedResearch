@@ -2,19 +2,19 @@
 // Created by brucknem on 11.04.21.
 //
 
-#include "BruteForceFeatureMatcher.hpp"
+#include "BruteForceFeatureMatching.hpp"
 
 namespace providentia {
 	namespace stabilization {
 		namespace features {
-			BruteForceFeatureMatcher::BruteForceFeatureMatcher(cv::NormTypes norm,
+			BruteForceFeatureMatching::BruteForceFeatureMatching(cv::NormTypes norm,
 															   float goodMatchRatioThreshold)
 				: FeatureMatchingBase(goodMatchRatioThreshold) {
 				matcher = cv::cuda::DescriptorMatcher::createBFMatcher(norm);
 				setName(typeid(*this).name());
 			}
 
-			void BruteForceFeatureMatcher::specificMatch() {
+			void BruteForceFeatureMatching::specificMatch() {
 				if (frameDetector->getDescriptorsGPU().empty() || frameDetector->getDescriptorsGPU().empty()) {
 					throw std::invalid_argument("Possibly match with wrong descriptor format called.");
 				}

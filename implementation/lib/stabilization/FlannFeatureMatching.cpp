@@ -2,12 +2,12 @@
 // Created by brucknem on 11.04.21.
 //
 
-#include "FlannFeatureMatcher.hpp"
+#include "FlannFeatureMatching.hpp"
 
 namespace providentia {
 	namespace stabilization {
 		namespace features {
-			FlannFeatureMatcher::FlannFeatureMatcher(cv::flann::IndexParams *params,
+			FlannFeatureMatching::FlannFeatureMatching(cv::flann::IndexParams *params,
 													 float goodMatchRatioThreshold)
 				: FeatureMatchingBase(
 				goodMatchRatioThreshold) {
@@ -15,7 +15,7 @@ namespace providentia {
 				setName(typeid(*this).name());
 			}
 
-			void FlannFeatureMatcher::specificMatch() {
+			void FlannFeatureMatching::specificMatch() {
 				if (frameDetector->getDescriptorsCPU().empty() || referenceFrameDetector->getDescriptorsCPU().empty()) {
 					throw std::invalid_argument("Possibly match with wrong descriptor format called.");
 				}
@@ -24,7 +24,7 @@ namespace providentia {
 								  2);
 			}
 
-			FlannFeatureMatcher::FlannFeatureMatcher(bool binaryDescriptors,
+			FlannFeatureMatching::FlannFeatureMatching(bool binaryDescriptors,
 													 float goodMatchRatioThreshold) : FeatureMatchingBase(
 				goodMatchRatioThreshold) {
 				if (binaryDescriptors) {

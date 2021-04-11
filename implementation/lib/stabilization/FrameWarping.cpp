@@ -8,7 +8,7 @@
 namespace providentia {
 	namespace stabilization {
 
-		cv::cuda::GpuMat FrameWarper::warp(const cv::cuda::GpuMat &frame,
+		cv::cuda::GpuMat FrameWarping::warp(const cv::cuda::GpuMat &frame,
 										   const cv::Mat &homography, int perspectiveWarpFlags) {
 			if (homography.empty()) {
 				return frame;
@@ -18,7 +18,7 @@ namespace providentia {
 			return result;
 		}
 
-		void FrameWarper::warp(const cv::cuda::GpuMat &frame,
+		void FrameWarping::warp(const cv::cuda::GpuMat &frame,
 							   const std::shared_ptr<providentia::stabilization::features::FeatureMatchingBase> &matcher) {
 			clear();
 			if (matcher->getFrameMatchedPoints().size() < 4) {
@@ -39,22 +39,22 @@ namespace providentia {
 			addTimestamp("Frame warping finished", 0);
 		}
 
-		providentia::stabilization::FrameWarper::FrameWarper() : providentia::utils::TimeMeasurable("Frame Warper",
+		providentia::stabilization::FrameWarping::FrameWarping() : providentia::utils::TimeMeasurable("Frame Warper",
 																									1) {}
 
-		const cv::cuda::GpuMat &providentia::stabilization::FrameWarper::getWarpedFrame() const {
+		const cv::cuda::GpuMat &providentia::stabilization::FrameWarping::getWarpedFrame() const {
 			return warpedFrame;
 		}
 
-		cv::Mat providentia::stabilization::FrameWarper::getHomography() const {
+		cv::Mat providentia::stabilization::FrameWarping::getHomography() const {
 			return homography;
 		}
 
-		double FrameWarper::getSkewThreshold() const {
+		double FrameWarping::getSkewThreshold() const {
 			return skewThreshold;
 		}
 
-		void FrameWarper::setSkewThreshold(double value) {
+		void FrameWarping::setSkewThreshold(double value) {
 			skewThreshold = value;
 		}
 	}

@@ -36,7 +36,8 @@ namespace providentia {
 			/**
 			 * Feature detectors for the current frame and reference frame.
 			 */
-			std::shared_ptr<providentia::stabilization::features::FeatureDetectionBase> frameFeatureDetector, referenceFeatureDetector;
+			std::shared_ptr<providentia::stabilization::detection::FeatureDetectionBase> frameFeatureDetector,
+				referenceFeatureDetector;
 
 			/**
 			 * Feature matcher to match the frame and reference frame stabilization::features.
@@ -46,7 +47,7 @@ namespace providentia {
 			/**
 			 * Warps the frame based on the given matches.
 			 */
-			std::shared_ptr<providentia::stabilization::FrameWarper> warper;
+			std::shared_ptr<providentia::stabilization::FrameWarping> warper;
 
 			/**
 			 * Generates the foreground background masks.
@@ -67,7 +68,7 @@ namespace providentia {
 			/**
 			 * @get The warper used to align the frame with the reference frame.
 			 */
-			const std::shared_ptr<providentia::stabilization::FrameWarper> &getWarper() const;
+			const std::shared_ptr<providentia::stabilization::FrameWarping> &getWarper() const;
 
 			/**
 			 * @get The background segmentor used to mask the writeFrames.
@@ -78,7 +79,7 @@ namespace providentia {
 			/**
 			 * @get The feature detector for the current frame.
 			 */
-			const std::shared_ptr<providentia::stabilization::features::FeatureDetectionBase> &
+			const std::shared_ptr<providentia::stabilization::detection::FeatureDetectionBase> &
 			getFrameFeatureDetector() const;
 
 			/**

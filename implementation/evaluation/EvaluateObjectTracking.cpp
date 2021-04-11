@@ -153,7 +153,7 @@ public:
 			resultFrames.emplace_back(
 				::addText(
 					(tracking * homographies[i]).draw(
-						cv::Mat(providentia::stabilization::FrameWarper::warp(frameGPU, homographies[i]))
+						cv::Mat(providentia::stabilization::FrameWarping::warp(frameGPU, homographies[i]))
 					), stabilizerNames[i] + " - Frame: " + std::to_string(frameId), 2, 5,
 					frameCPU.rows - 50)
 			);

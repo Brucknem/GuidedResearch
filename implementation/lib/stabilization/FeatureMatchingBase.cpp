@@ -3,8 +3,8 @@
 //
 
 #include "FeatureMatchingBase.hpp"
-#include "BruteForceFeatureMatcher.hpp"
-#include "FlannFeatureMatcher.hpp"
+#include "BruteForceFeatureMatching.hpp"
+#include "FlannFeatureMatching.hpp"
 
 namespace providentia {
 	namespace stabilization {
@@ -13,8 +13,8 @@ namespace providentia {
 #pragma region FeatureMatchingBase
 
 			void FeatureMatchingBase::match(
-				const std::shared_ptr<FeatureDetectionBase> &frameFeatureDetector,
-				const std::shared_ptr<FeatureDetectionBase> &referenceFeatureDetector
+				const std::shared_ptr<providentia::stabilization::detection::FeatureDetectionBase> &frameFeatureDetector,
+				const std::shared_ptr<providentia::stabilization::detection::FeatureDetectionBase> &referenceFeatureDetector
 			) {
 				clear();
 				frameDetector = frameFeatureDetector;

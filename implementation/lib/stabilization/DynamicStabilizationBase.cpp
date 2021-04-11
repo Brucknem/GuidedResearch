@@ -1,9 +1,9 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 #include "DynamicStabilizationBase.hpp"
-#include "SURFBFDynamicStabilizer.hpp"
-#include "ORBBFDynamicStabilizer.hpp"
-#include "FastFREAKBFDynamicStabilizer.hpp"
+#include "SURFBFDynamicStabilization.hpp"
+#include "ORBBFDynamicStabilization.hpp"
+#include "FastFREAKBFDynamicStabilization.hpp"
 #include <opencv2/cudaarithm.hpp>
 
 namespace providentia {
@@ -57,7 +57,7 @@ namespace providentia {
 
 		DynamicStabilizationBase::DynamicStabilizationBase() : providentia::utils::TimeMeasurable(
 			"DynamicStabilizationBase", 1) {
-			warper = std::make_shared<FrameWarper>();
+			warper = std::make_shared<FrameWarping>();
 			segmentor = std::make_shared<providentia::stabilization::segmentation::MOG2BackgroundSegmentation>(
 				cv::Size(1920, 1200) /
 				10);
@@ -79,7 +79,7 @@ namespace providentia {
 			return referenceFeatureDetector->getCurrentMask();
 		}
 
-		const std::shared_ptr<providentia::stabilization::features::FeatureDetectionBase> &
+		const std::shared_ptr<providentia::stabilization::detection::FeatureDetectionBase> &
 		DynamicStabilizationBase::getFrameFeatureDetector() const {
 			return frameFeatureDetector;
 		}
@@ -98,7 +98,7 @@ namespace providentia {
 			return segmentor->getBackgroundMask(size);
 		}
 
-		const std::shared_ptr<FrameWarper> &
+		const std::shared_ptr<FrameWarping> &
 		DynamicStabilizationBase::getWarper() const {
 			return warper;
 		}

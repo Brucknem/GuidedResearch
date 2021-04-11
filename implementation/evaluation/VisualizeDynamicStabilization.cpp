@@ -26,8 +26,8 @@ public:
 		opticalFlows.emplace_back(new providentia::opticalflow::FarnebackDenseOpticalFlow());
 		opticalFlows.emplace_back(new providentia::opticalflow::FarnebackDenseOpticalFlow());
 		opticalFlows.emplace_back(new providentia::opticalflow::FarnebackDenseOpticalFlow());
-//        stabilizer = std::make_shared<providentia::stabilization::ORBBFDynamicStabilizer>();
-//		stabilizer = std::make_shared<providentia::stabilization::FastFREAKBFDynamicStabilizer>();
+//        stabilizer = std::make_shared<providentia::stabilization::ORBBFDynamicStabilization>();
+//		stabilizer = std::make_shared<providentia::stabilization::FastFREAKBFDynamicStabilization>();
 //        stabilizer->setShouldUpdateKeyframe(true);
 	}
 

@@ -14,7 +14,7 @@ namespace providentia {
 		/**
 		 * Base class for the frame warpers.
 		 */
-		class FrameWarper : public providentia::utils::TimeMeasurable {
+		class FrameWarping : public providentia::utils::TimeMeasurable {
 		protected:
 
 			/**
@@ -45,12 +45,12 @@ namespace providentia {
 			/**
 			 * @constructor
 			 */
-			explicit FrameWarper();
+			explicit FrameWarping();
 
 			/**
 			 * @destructor
 			 */
-			~FrameWarper() override = default;
+			~FrameWarping() override = default;
 
 			/**
 			 * @get The final frame warped by the found homography.

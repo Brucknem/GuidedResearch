@@ -2,8 +2,8 @@
 // Created by brucknem on 11.04.21.
 //
 
-#ifndef CAMERASTABILIZATION_BRUTEFORCEFEATUREMATCHER_HPP
-#define CAMERASTABILIZATION_BRUTEFORCEFEATUREMATCHER_HPP
+#ifndef CAMERASTABILIZATION_BRUTEFORCEFEATUREMATCHING_HPP
+#define CAMERASTABILIZATION_BRUTEFORCEFEATUREMATCHING_HPP
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/core/base.hpp"
@@ -18,7 +18,7 @@ namespace providentia {
 /**
  * Brute force feature matching on GPU.
  */
-			class BruteForceFeatureMatcher : public providentia::stabilization::features::FeatureMatchingBase {
+			class BruteForceFeatureMatching : public providentia::stabilization::features::FeatureMatchingBase {
 			private:
 				/**
 				 * The CUDA GPU stream used during matching.
@@ -40,7 +40,7 @@ namespace providentia {
 				/**
 				 * @destructor
 				 */
-				~BruteForceFeatureMatcher() override = default;
+				~BruteForceFeatureMatching() override = default;
 
 				/**
 				 * @constructor
@@ -48,11 +48,11 @@ namespace providentia {
 				 * @param norm The norm used to compare the features.
 				 * @param goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
 				 */
-				explicit BruteForceFeatureMatcher(cv::NormTypes norm, float goodMatchRatioThreshold = 0.75f);
+				explicit BruteForceFeatureMatching(cv::NormTypes norm, float goodMatchRatioThreshold = 0.75f);
 
 			};
 		}
 	}
 }
 
-#endif //CAMERASTABILIZATION_BRUTEFORCEFEATUREMATCHER_HPP
+#endif //CAMERASTABILIZATION_BRUTEFORCEFEATUREMATCHING_HPP

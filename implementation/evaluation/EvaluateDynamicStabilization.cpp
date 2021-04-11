@@ -4,9 +4,9 @@
 #include <opencv2/cudawarping.hpp>
 
 #include "DynamicStabilizationBase.hpp"
-#include "SURFBFDynamicStabilizer.hpp"
-#include "ORBBFDynamicStabilizer.hpp"
-#include "FastFREAKBFDynamicStabilizer.hpp"
+#include "SURFBFDynamicStabilization.hpp"
+#include "ORBBFDynamicStabilization.hpp"
+#include "FastFREAKBFDynamicStabilization.hpp"
 
 #include "OpticalFlow.hpp"
 #include "Commons.hpp"
@@ -39,9 +39,9 @@ private:
 
 public:
 	explicit Setup() : VideoSetup() {
-		stabilizers.emplace_back(providentia::stabilization::SURFBFDynamicStabilizer{});
-		stabilizers.emplace_back(providentia::stabilization::ORBBFDynamicStabilizer{});
-		stabilizers.emplace_back(providentia::stabilization::FastFREAKBFDynamicStabilizer{});
+		stabilizers.emplace_back(providentia::stabilization::SURFBFDynamicStabilization{});
+		stabilizers.emplace_back(providentia::stabilization::ORBBFDynamicStabilization{});
+		stabilizers.emplace_back(providentia::stabilization::FastFREAKBFDynamicStabilization{});
 
 		for (int i = 0; i <= stabilizers.size(); i++) {
 			opticalFlows.emplace_back();

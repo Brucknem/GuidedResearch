@@ -22,27 +22,27 @@ private:
 
 public:
 	explicit Setup() : VideoSetup() {
-//        providentia::features::SIFTFeatureDetector detector(100);
-//        frameDetector = std::make_shared<providentia::features::SIFTFeatureDetector>(detector);
-//        referenceFrameDetector = std::make_shared<providentia::features::SIFTFeatureDetector>(detector);
+//        providentia::features::SIFTFeatureDetection detector(100);
+//        frameDetector = std::make_shared<providentia::features::SIFTFeatureDetection>(detector);
+//        referenceFrameDetector = std::make_shared<providentia::features::SIFTFeatureDetection>(detector);
 
 		providentia::features::SURFFeatureDetector detector;
 		frameDetector = std::make_shared<providentia::features::SURFFeatureDetector>(detector);
 		referenceFrameDetector = std::make_shared<providentia::features::SURFFeatureDetector>(detector);
 
-//        providentia::features::ORBFeatureDetector detector(1000);
-//        frameDetector = std::make_shared<providentia::features::ORBFeatureDetector>(detector);
-//        referenceFrameDetector = std::make_shared<providentia::features::ORBFeatureDetector>(detector);
+//        providentia::features::ORBFeatureDetection detector(1000);
+//        frameDetector = std::make_shared<providentia::features::ORBFeatureDetection>(detector);
+//        referenceFrameDetector = std::make_shared<providentia::features::ORBFeatureDetection>(detector);
 
-//        providentia::features::FastFREAKFeatureDetector detector;
-//        frameDetector = std::make_shared<providentia::features::FastFREAKFeatureDetector>(detector);
-//        referenceFrameDetector = std::make_shared<providentia::features::FastFREAKFeatureDetector>(detector);
+//        providentia::features::FastFREAKFeatureDetection detector;
+//        frameDetector = std::make_shared<providentia::features::FastFREAKFeatureDetection>(detector);
+//        referenceFrameDetector = std::make_shared<providentia::features::FastFREAKFeatureDetection>(detector);
 
 		matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_L2);
 		matcher->setShouldUseFundamentalMatrix(false);
 		matcherWithoutFundamental = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_L2);
-//        matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_HAMMING);
-//        matcher = std::make_shared<providentia::features::FlannFeatureMatcher>(true);
+//        matcher = std::make_shared<providentia::features::BruteForceFeatureMatching>(cv::NORM_HAMMING);
+//        matcher = std::make_shared<providentia::features::FlannFeatureMatching>(true);
 	}
 
 	void specificMainLoop() override {

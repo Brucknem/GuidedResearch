@@ -2,8 +2,8 @@
 // Created by brucknem on 11.04.21.
 //
 
-#ifndef CAMERASTABILIZATION_FLANNFEATUREMATCHER_HPP
-#define CAMERASTABILIZATION_FLANNFEATUREMATCHER_HPP
+#ifndef CAMERASTABILIZATION_FLANNFEATUREMATCHING_HPP
+#define CAMERASTABILIZATION_FLANNFEATUREMATCHING_HPP
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/core/base.hpp"
@@ -18,7 +18,7 @@ namespace providentia {
 /**
  * CPU implementation of the FLANN feature matcher.
  */
-			class FlannFeatureMatcher : public providentia::stabilization::features::FeatureMatchingBase {
+			class FlannFeatureMatching : public providentia::stabilization::features::FeatureMatchingBase {
 			private:
 
 				/**
@@ -37,7 +37,7 @@ namespace providentia {
 				/**
 				 * @destructor
 				 */
-				~FlannFeatureMatcher() override = default;
+				~FlannFeatureMatching() override = default;
 
 				/**
 				 * @constructor
@@ -45,8 +45,8 @@ namespace providentia {
 				 * @param binaryDescriptors Flag if binary desccriptors are used.
 				 * @param goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
 				 */
-				explicit FlannFeatureMatcher(bool binaryDescriptors = false,
-											 float goodMatchRatioThreshold = 0.75f);
+				explicit FlannFeatureMatching(bool binaryDescriptors = false,
+											  float goodMatchRatioThreshold = 0.75f);
 
 				/**
 				 * @constructor
@@ -54,11 +54,11 @@ namespace providentia {
 				 * @params The FLANN parameters.
 				 * @param goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
 				 */
-				explicit FlannFeatureMatcher(cv::flann::IndexParams *params, float goodMatchRatioThreshold = 0.75f);
+				explicit FlannFeatureMatching(cv::flann::IndexParams *params, float goodMatchRatioThreshold = 0.75f);
 
 			};
 		}
 	}
 }
 
-#endif //CAMERASTABILIZATION_FLANNFEATUREMATCHER_HPP
+#endif //CAMERASTABILIZATION_FLANNFEATUREMATCHING_HPP

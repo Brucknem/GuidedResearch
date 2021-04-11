@@ -31,7 +31,7 @@ namespace providentia {
 				/**
 				 * The current frame feature detector applied in the main loop.
 				 */
-				std::shared_ptr<providentia::stabilization::features::FeatureDetectionBase> frameDetector, referenceFrameDetector;
+				std::shared_ptr<providentia::stabilization::detection::FeatureDetectionBase> frameDetector, referenceFrameDetector;
 
 				/**
 				 * Flag if the fundamental matrix should be used.
@@ -124,8 +124,8 @@ namespace providentia {
 				 * @param referenceFeatureDetector  The feature detector of the reference frame.
 				 */
 				void match(
-					const std::shared_ptr<providentia::stabilization::features::FeatureDetectionBase> &frameFeatureDetector,
-					const std::shared_ptr<providentia::stabilization::features::FeatureDetectionBase> &referenceFeatureDetector);
+					const std::shared_ptr<providentia::stabilization::detection::FeatureDetectionBase> &frameFeatureDetector,
+					const std::shared_ptr<providentia::stabilization::detection::FeatureDetectionBase> &referenceFeatureDetector);
 
 				/**
 				 * Horizontally stacks the writeFrames and draws the matched features.
