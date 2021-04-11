@@ -3,6 +3,7 @@
 //
 
 #include "SURFBFDynamicStabilizer.hpp"
+#include "BruteForceFeatureMatcher.hpp"
 
 namespace providentia {
 	namespace stabilization {
@@ -12,14 +13,14 @@ namespace providentia {
 														 bool extended,
 														 float keypointsRatio,
 														 bool upright) {
-			auto detector = providentia::features::SURFFeatureDetector(hessianThreshold, nOctaves,
-																	   nOctaveLayers, extended,
-																	   keypointsRatio, upright);
-			providentia::stabilization::DynamicStabilizationBase::frameFeatureDetector = std::make_shared<providentia::features::SURFFeatureDetector>(
+			auto detector = providentia::stabilization::features::SURFFeatureDetector(hessianThreshold, nOctaves,
+																					  nOctaveLayers, extended,
+																					  keypointsRatio, upright);
+			providentia::stabilization::DynamicStabilizationBase::frameFeatureDetector = std::make_shared<providentia::stabilization::features::SURFFeatureDetector>(
 				detector);
-			providentia::stabilization::DynamicStabilizationBase::referenceFeatureDetector = std::make_shared<providentia::features::SURFFeatureDetector>(
+			providentia::stabilization::DynamicStabilizationBase::referenceFeatureDetector = std::make_shared<providentia::stabilization::features::SURFFeatureDetector>(
 				detector);
-			providentia::stabilization::DynamicStabilizationBase::matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(
+			providentia::stabilization::DynamicStabilizationBase::matcher = std::make_shared<providentia::stabilization::features::BruteForceFeatureMatcher>(
 				cv::NORM_L2);
 			providentia::utils::TimeMeasurable::setName(typeid(*this).name());
 		}

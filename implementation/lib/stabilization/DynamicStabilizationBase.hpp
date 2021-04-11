@@ -3,8 +3,8 @@
 
 #include "BackgroundSegmentionBase.hpp"
 #include "MOG2BackgroundSegmentation.hpp"
-#include "FeatureDetection.hpp"
-#include "FeatureMatching.hpp"
+#include "FeatureDetectionBase.hpp"
+#include "FeatureMatchingBase.hpp"
 #include "FrameWarping.hpp"
 #include "TimeMeasurable.hpp"
 #include "opencv2/opencv.hpp"
@@ -36,12 +36,12 @@ namespace providentia {
 			/**
 			 * Feature detectors for the current frame and reference frame.
 			 */
-			std::shared_ptr<providentia::features::FeatureDetectorBase> frameFeatureDetector, referenceFeatureDetector;
+			std::shared_ptr<providentia::stabilization::features::FeatureDetectionBase> frameFeatureDetector, referenceFeatureDetector;
 
 			/**
-			 * Feature matcher to match the frame and reference frame features.
+			 * Feature matcher to match the frame and reference frame stabilization::features.
 			 */
-			std::shared_ptr<providentia::features::FeatureMatcherBase> matcher;
+			std::shared_ptr<providentia::stabilization::features::FeatureMatchingBase> matcher;
 
 			/**
 			 * Warps the frame based on the given matches.
@@ -78,12 +78,13 @@ namespace providentia {
 			/**
 			 * @get The feature detector for the current frame.
 			 */
-			const std::shared_ptr<providentia::features::FeatureDetectorBase> &getFrameFeatureDetector() const;
+			const std::shared_ptr<providentia::stabilization::features::FeatureDetectionBase> &
+			getFrameFeatureDetector() const;
 
 			/**
 			 * @get The matcher used for matching the frame and reference frame.
 			 */
-			const std::shared_ptr<providentia::features::FeatureMatcherBase> &getMatcher() const;
+			const std::shared_ptr<providentia::stabilization::features::FeatureMatchingBase> &getMatcher() const;
 
 			/**
 			 * @get The current frame.
@@ -127,8 +128,8 @@ namespace providentia {
 
 			/**
 			 * Main algorithm. <br>
-			 * 1. Detects features in the current frame and reference frame. <br>
-			 * 2. Matches features of the writeFrames. <br>
+			 * 1. Detects stabilization::features in the current frame and reference frame. <br>
+			 * 2. Matches stabilization::features of the writeFrames. <br>
 			 * 3. Finds homography by minimizing the reprojection error. <br>
 			 * 4. Warps the frame using the found homography. <br>
 			 *

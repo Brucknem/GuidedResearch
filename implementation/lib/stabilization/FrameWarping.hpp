@@ -6,7 +6,7 @@
 #define CAMERASTABILIZATION_FRAMEWARPING_HPP
 
 #include "opencv2/opencv.hpp"
-#include "FeatureMatching.hpp"
+#include "FeatureMatchingBase.hpp"
 #include "TimeMeasurable.hpp"
 
 namespace providentia {
@@ -79,7 +79,7 @@ namespace providentia {
 			 */
 			void
 			warp(const cv::cuda::GpuMat &frame,
-				 const std::shared_ptr<providentia::features::FeatureMatcherBase> &matcher);
+				 const std::shared_ptr<providentia::stabilization::features::FeatureMatchingBase> &matcher);
 
 			static cv::cuda::GpuMat warp(const cv::cuda::GpuMat &frame, const cv::Mat &homography, int
 			perspectiveWarpFlags = cv::INTER_LINEAR);

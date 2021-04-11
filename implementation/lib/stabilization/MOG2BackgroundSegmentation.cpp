@@ -8,20 +8,24 @@
 namespace providentia {
 	namespace stabilization {
 		namespace segmentation {
-			MOG2BackgroundSegmention::MOG2BackgroundSegmention(cv::Size calculationSize,
-															   int history,
-															   double varThreshold,
-															   bool detectShadows)
-				: BackgroundSegmentionBase(std::move(calculationSize)) {
+			MOG2BackgroundSegmentation::MOG2BackgroundSegmentation(cv::Size
+																   calculationSize,
+																   int history,
+																   double varThreshold,
+																   bool detectShadows
+			)
+				:
+
+				BackgroundSegmentionBase(std::move(calculationSize)) {
 				algorithm = cv::cuda::createBackgroundSubtractorMOG2(history, varThreshold, detectShadows);
 				addFilters();
 			}
 
-			void MOG2BackgroundSegmention::specificApply() {
+			void MOG2BackgroundSegmentation::specificApply() {
 				algorithm->apply(calculationFrame, foregroundMask, -1, stream);
 			}
 
-			void MOG2BackgroundSegmention::addFilters() {
+			void MOG2BackgroundSegmentation::addFilters() {
 				BackgroundSegmentionBase::addFilters();
 
 //    filters.emplace_back(cv::cuda::createMorphologyFilter(cv::MORPH_OPEN, CV_8UC1,

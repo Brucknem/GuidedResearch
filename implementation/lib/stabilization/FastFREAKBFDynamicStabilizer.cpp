@@ -3,6 +3,7 @@
 //
 
 #include "FastFREAKBFDynamicStabilizer.hpp"
+#include "BruteForceFeatureMatcher.hpp"
 
 namespace providentia {
 	namespace stabilization {
@@ -15,16 +16,20 @@ namespace providentia {
 																   float patternScale,
 																   int nOctaves,
 																   const std::vector<int> &selectedPairs) {
-			auto detector = providentia::features::FastFREAKFeatureDetector(threshold,
-																			nonmaxSuppression, type,
-																			maxNPoints,
-																			orientationNormalized,
-																			scaleNormalized,
-																			patternScale, nOctaves,
-																			selectedPairs);
-			frameFeatureDetector = std::make_shared<providentia::features::FastFREAKFeatureDetector>(detector);
-			referenceFeatureDetector = std::make_shared<providentia::features::FastFREAKFeatureDetector>(detector);
-			matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_HAMMING);
+			auto detector = providentia::stabilization::features::FastFREAKFeatureDetector(threshold,
+																						   nonmaxSuppression, type,
+																						   maxNPoints,
+																						   orientationNormalized,
+																						   scaleNormalized,
+																						   patternScale, nOctaves,
+																						   selectedPairs);
+			frameFeatureDetector = std::make_shared<providentia::stabilization::features::FastFREAKFeatureDetector>(
+				detector);
+			referenceFeatureDetector = std::make_shared<providentia::stabilization::features::FastFREAKFeatureDetector>(
+				detector);
+			matcher = std::make_shared<providentia::stabilization::features::BruteForceFeatureMatcher>(
+				cv::NORM_HAMMING);
 			setName(typeid(*this).name());
 		}
-	}}
+	}
+}

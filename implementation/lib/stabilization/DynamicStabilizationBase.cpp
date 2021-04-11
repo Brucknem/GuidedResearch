@@ -58,7 +58,7 @@ namespace providentia {
 		DynamicStabilizationBase::DynamicStabilizationBase() : providentia::utils::TimeMeasurable(
 			"DynamicStabilizationBase", 1) {
 			warper = std::make_shared<FrameWarper>();
-			segmentor = std::make_shared<providentia::stabilization::segmentation::MOG2BackgroundSegmention>(
+			segmentor = std::make_shared<providentia::stabilization::segmentation::MOG2BackgroundSegmentation>(
 				cv::Size(1920, 1200) /
 				10);
 		}
@@ -79,12 +79,12 @@ namespace providentia {
 			return referenceFeatureDetector->getCurrentMask();
 		}
 
-		const std::shared_ptr<providentia::features::FeatureDetectorBase> &
+		const std::shared_ptr<providentia::stabilization::features::FeatureDetectionBase> &
 		DynamicStabilizationBase::getFrameFeatureDetector() const {
 			return frameFeatureDetector;
 		}
 
-		const std::shared_ptr<providentia::features::FeatureMatcherBase> &
+		const std::shared_ptr<providentia::stabilization::features::FeatureMatchingBase> &
 		DynamicStabilizationBase::getMatcher() const {
 			return matcher;
 		}

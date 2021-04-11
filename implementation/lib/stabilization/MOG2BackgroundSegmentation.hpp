@@ -18,7 +18,7 @@ namespace providentia {
 			/**
 			 * Wrapper for the MOG2 background segmentation algorithm.
 			 */
-			class MOG2BackgroundSegmention : public BackgroundSegmentionBase {
+			class MOG2BackgroundSegmentation : public BackgroundSegmentionBase {
 			private:
 
 				/**
@@ -51,14 +51,14 @@ namespace providentia {
 				 * @param detectShadows If true, the algorithm will detect shadows and mark them. It decreases the
 				 * speed a bit, so if you do not need this feature, set the parameter to false.
 				 */
-				explicit MOG2BackgroundSegmention(cv::Size calculationSize = cv::Size(), int history = 500,
-												  double varThreshold = 16,
-												  bool detectShadows = false);
+				explicit MOG2BackgroundSegmentation(cv::Size calculationSize = cv::Size(), int history = 500,
+													double varThreshold = 16,
+													bool detectShadows = false);
 
 				/**
 				 * @desctructor
 				 */
-				~MOG2BackgroundSegmention() override = default;
+				~MOG2BackgroundSegmentation() override = default;
 			};
 		}
 	}
