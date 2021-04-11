@@ -22,6 +22,21 @@ namespace providentia {
 			return YAML::LoadFile(filename);
 		}
 
+		bool addPixels(WorldObject &worldObject, const Eigen::Vector3d &worldPosition, int imageHeight,
+					   const YAML::detail::iterator_value &imageObject) {
+			bool hasPixels = false;
+			for (const auto pixelNode : imageObject["pixels"]) {
+				Eigen::Vector2d pixel = pixelNode.as<Eigen::Vector2d>();
+				if (imageHeight > 1) {
+					pixel = {pixel.x(), imageHeight - 1 - pixel.y()};
+				}
+				worldObject.add(
+					ParametricPoint::onLine(pixel, worldPosition, Eigen::Vector3d::UnitZ()));
+				hasPixels = true;
+			}
+			return hasPixels;
+		}
+
 		WorldObject
 		createWorldObject(const YAML::detail::iterator_value &object, const YAML::Node &imageObjects, Eigen::Vector2i
 		imageSize) {
@@ -31,21 +46,11 @@ namespace providentia {
 			worldObject.setHeight(object["height"].as<double>());
 			const Eigen::Vector3d &worldPosition = object["position"].as<Eigen::Vector3d>();
 
-			auto imageHeight = imageSize[1];
 			bool hasPixels = false;
-			std::vector<WorldObject> objects;
 			for (const auto imageObject : imageObjects) {
 				std::string frameObjectId = imageObject["id"].as<std::string>();
 				if (frameObjectId == worldObject.getId()) {
-					for (const auto pixelNode : imageObject["pixels"]) {
-						Eigen::Vector2d pixel = pixelNode.as<Eigen::Vector2d>();
-						if (imageHeight > 1) {
-							pixel = {pixel.x(), imageHeight - 1 - pixel.y()};
-						}
-						worldObject.add(
-							ParametricPoint::onLine(pixel, worldPosition, Eigen::Vector3d::UnitZ()));
-						hasPixels = true;
-					}
+					hasPixels = addPixels(worldObject, worldPosition, imageSize.y(), imageObject);
 				}
 			}
 
