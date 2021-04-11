@@ -89,8 +89,6 @@ namespace providentia {
 			bool foundValidSolution = false;
 			int maxTriesUntilAbort = 15;
 
-			std::vector<ceres::LossFunctionWrapper *> lossFunctions;
-
 			double lambdasLoss = 0;
 			double correspondencesLoss = 0;
 			double rotationsLoss = 0;

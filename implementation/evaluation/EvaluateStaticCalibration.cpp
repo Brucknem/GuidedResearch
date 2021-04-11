@@ -102,7 +102,7 @@ public:
 						intrinsicsCasted.emplace_back(boost::lexical_cast<double>(boost::trim_copy(value)));
 					};
 		intrinsics = providentia::camera::getIntrinsicsMatrixFromConfig(intrinsicsCasted.data());
-
+		pixelsFile = vm["pixels"].as<std::string>();
 //		initialRotation.z() = vm["z_init"].as<int>();
 		return vm;
 	}
@@ -111,19 +111,22 @@ public:
 		desc->add_options()
 			("intrinsics,t", po::value<std::string>(),
 			 "The intrinsic parameters of the camera as comma separated list in format \"f_x,0,c_x,0,f_y,c_y,0,skew,"
-			 "1\".");
+			 "1\".")
+			("pixels,p", po::value<std::string>(), "The pixels mapping file.");
 //			("z_init,z", po::value<int>()->default_value(0),
 //			 "The initial z rotation.");
 	}
 
 	void initCSVWriters() {
+		auto pixelsFilePath = boost::filesystem::path(pixelsFile);
 		evaluationPath =
-			outputFolder / "StaticCalibration" / boost::filesystem::path(pixelsFile).parent_path().filename();
+			outputFolder / "StaticCalibration" / pixelsFilePath.parent_path().filename();
 		if (!boost::filesystem::is_directory(evaluationPath)) {
 			boost::filesystem::create_directories(evaluationPath);
 		}
 		auto suffix = getNowSuffix();
-		extrinsicParametersWriter = new CSVWriter(evaluationPath / ("parameters" + suffix + ".csv"));
+		extrinsicParametersWriter = new CSVWriter(
+			evaluationPath / (pixelsFilePath.filename().string() + suffix + ".csv"));
 
 		*extrinsicParametersWriter << "Run"
 								   << "Correspondences"
@@ -152,7 +155,6 @@ public:
 	void init() override {
 		ImageSetup::init();
 
-		pixelsFile = inputResource + ".yaml";
 		objectsFile = (boost::filesystem::path(inputResource).parent_path() / "objects.yaml").string();
 
 		objects = providentia::calibration::LoadObjects(objectsFile, pixelsFile, imageSize);

@@ -111,7 +111,8 @@ namespace providentia {
 									   const providentia::calibration::ParametricPoint &_point,
 									   const Eigen::Matrix<double, 3, 4> &_intrinsics) {
 			return new ceres::AutoDiffCostFunction<CorrespondenceResidual, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1>(
-				new CorrespondenceResidual(_expectedPixel, _point, _intrinsics)
+				new CorrespondenceResidual(_expectedPixel, _point, _intrinsics),
+				ceres::TAKE_OWNERSHIP
 			);
 		}
 

@@ -154,6 +154,8 @@ namespace providentia {
 					if (!point.hasExpectedPixel()) {
 						continue;
 					}
+					*point.getLambda() = 0;
+					*point.getMu() = 0;
 					weights.emplace_back(new double(1));
 					correspondenceResiduals.emplace_back(problem.AddResidualBlock(
 						CorrespondenceResidual::Create(
