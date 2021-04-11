@@ -15,7 +15,9 @@
 #include "glog/logging.h"
 
 #include "opencv2/opencv.hpp"
-#include "Residuals.hpp"
+#include "CorrespondenceResidual.hpp"
+#include "DistanceFromIntervalResidual.hpp"
+#include "DistanceResidual.hpp"
 #include "WorldObjects.hpp"
 
 namespace providentia {

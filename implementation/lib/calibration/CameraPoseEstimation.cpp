@@ -157,7 +157,7 @@ namespace providentia {
 					*point.getMu() = 0;
 					weights.emplace_back(new double(1));
 					correspondenceResiduals.emplace_back(problem.AddResidualBlock(
-						CorrespondenceResidual::create(
+						providentia::calibration::residuals::CorrespondenceResidual::create(
 							point.getExpectedPixel(),
 							point,
 							intrinsics
@@ -175,13 +175,14 @@ namespace providentia {
 					));
 
 					lambdaResiduals.emplace_back(problem.AddResidualBlock(
-						DistanceFromIntervalResidual::create(worldObject.getHeight()),
+						providentia::calibration::residuals::DistanceFromIntervalResidual::create(
+							worldObject.getHeight()),
 						getScaledHuberLoss(lambdaPenalizeScale),
 						point.getLambda()
 					));
 
 					weightResiduals.emplace_back(problem.AddResidualBlock(
-						DistanceResidual::create(1),
+						providentia::calibration::residuals::DistanceResidual::create(1),
 						getScaledHuberLoss(weightPenalizeScale),
 						weights[weights.size() - 1]
 					));
@@ -202,12 +203,12 @@ namespace providentia {
 		void CameraPoseEstimation::addRotationConstraints(ceres::Problem &problem) {
 			rotationResiduals.clear();
 			rotationResiduals.emplace_back(problem.AddResidualBlock(
-				DistanceFromIntervalResidual::create(60, 110),
+				providentia::calibration::residuals::DistanceFromIntervalResidual::create(60, 110),
 				getScaledHuberLoss(rotationPenalizeScale),
 				&rotation.x()
 			));
 			rotationResiduals.emplace_back(problem.AddResidualBlock(
-				DistanceFromIntervalResidual::create(-10, 10),
+				providentia::calibration::residuals::DistanceFromIntervalResidual::create(-10, 10),
 				getScaledHuberLoss(rotationPenalizeScale),
 				&rotation.y()
 			));
@@ -229,8 +230,8 @@ namespace providentia {
 //				&translation.y()
 //			);
 			problem.AddResidualBlock(
-				DistanceFromIntervalResidual::create(0,
-													 translation.z() + 1000),
+				providentia::calibration::residuals::DistanceFromIntervalResidual::create(0,
+																						  translation.z() + 1000),
 				getScaledHuberLoss(scale),
 				&translation.z()
 			);
@@ -321,7 +322,8 @@ namespace providentia {
 		}
 
 		double
-		CameraPoseEstimation::evaluate(ceres::Problem &problem, const ceres::Problem::EvaluateOptions &evaluateOptions) {
+		CameraPoseEstimation::evaluate(ceres::Problem &problem,
+									   const ceres::Problem::EvaluateOptions &evaluateOptions) {
 			double loss;
 			std::vector<double> residuals;
 			problem.Evaluate(evaluateOptions, &loss, &residuals, nullptr, nullptr);

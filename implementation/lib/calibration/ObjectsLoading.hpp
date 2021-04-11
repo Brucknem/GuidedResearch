@@ -11,19 +11,6 @@
 
 #include "WorldObjects.hpp"
 
-namespace YAML {
-	template<>
-	struct convert<Eigen::Vector3d> {
-		static bool decode(const Node &node, Eigen::Vector3d &rhs);
-	};
-
-	template<>
-	struct convert<Eigen::Vector2d> {
-		static bool decode(const Node &node, Eigen::Vector2d &rhs);
-	};
-
-}
-
 namespace providentia {
 	namespace calibration {
 

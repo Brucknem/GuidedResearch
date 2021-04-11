@@ -145,8 +145,8 @@ namespace providentia {
 			 * speed a bit, so if you do not need this feature, set the parameter to false.
 			 */
 			explicit MOG2BackgroundSegmention(cv::Size calculationSize = cv::Size(), int history = 500,
-											 double varThreshold = 16,
-											 bool detectShadows = false);
+											  double varThreshold = 16,
+											  bool detectShadows = false);
 
 			/**
 			 * @desctructor
