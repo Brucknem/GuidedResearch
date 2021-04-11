@@ -55,7 +55,9 @@ namespace providentia {
 		DynamicStabilizerBase::DynamicStabilizerBase() : providentia::utils::TimeMeasurable(
 			"DynamicStabilizerBase", 1) {
 			warper = std::make_shared<FrameWarper>();
-			segmentor = std::make_shared<providentia::segmentation::MOG2BackgroundSegmention>(cv::Size(1920, 1200) / 10);
+			segmentor = std::make_shared<providentia::stabilization::segmentation::MOG2BackgroundSegmention>(
+				cv::Size(1920, 1200) /
+				10);
 		}
 
 		cv::Mat DynamicStabilizerBase::draw() {
@@ -84,7 +86,7 @@ namespace providentia {
 			return matcher;
 		}
 
-		const std::shared_ptr<providentia::segmentation::BackgroundSegmentionBase> &
+		const std::shared_ptr<providentia::stabilization::segmentation::BackgroundSegmentionBase> &
 		DynamicStabilizerBase::getSegmentor() const {
 			return segmentor;
 		}

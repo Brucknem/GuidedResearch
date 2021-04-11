@@ -18,7 +18,7 @@
 #include "CorrespondenceResidual.hpp"
 #include "DistanceFromIntervalResidual.hpp"
 #include "DistanceResidual.hpp"
-#include "WorldObjects.hpp"
+#include "WorldObject.hpp"
 
 namespace providentia {
 	namespace calibration {

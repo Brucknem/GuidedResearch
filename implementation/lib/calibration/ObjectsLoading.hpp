@@ -9,7 +9,7 @@
 #include <utility>
 #include "yaml-cpp/yaml.h"
 
-#include "WorldObjects.hpp"
+#include "WorldObject.hpp"
 
 namespace providentia {
 	namespace calibration {

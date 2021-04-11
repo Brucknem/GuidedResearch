@@ -6,7 +6,7 @@
 #define CAMERASTABILIZATION_CORRESPONDENCERESIDUAL_HPP
 
 #include <eigen3/Eigen/src/Core/Matrix.h>
-#include "WorldObjects.hpp"
+#include "WorldObject.hpp"
 
 namespace providentia {
 	namespace calibration {
@@ -89,7 +89,7 @@ namespace providentia {
 #include "Eigen/Dense"
 #include "ceres/ceres.h"
 #include "RenderingPipeline.hpp"
-#include "WorldObjects.hpp"
+#include "WorldObject.hpp"
 #include "ParametricPoint.hpp"
 
 #endif //CAMERASTABILIZATION_CORRESPONDENCERESIDUAL_HPP

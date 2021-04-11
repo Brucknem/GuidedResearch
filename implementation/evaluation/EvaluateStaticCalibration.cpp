@@ -7,7 +7,7 @@
 #include "Commons.hpp"
 #include "Eigen/Dense"
 #include "RenderingPipeline.hpp"
-#include "WorldObjects.hpp"
+#include "WorldObject.hpp"
 #include "ObjectsLoading.hpp"
 #include "CameraPoseEstimation.hpp"
 #include "CSVWriter.hpp"

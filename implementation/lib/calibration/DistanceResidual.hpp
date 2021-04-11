@@ -9,7 +9,7 @@
 #include "ceres/ceres.h"
 
 #include "RenderingPipeline.hpp"
-#include "WorldObjects.hpp"
+#include "WorldObject.hpp"
 
 namespace providentia {
 	namespace calibration {

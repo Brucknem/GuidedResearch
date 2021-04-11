@@ -18,7 +18,8 @@ add_library(DynamicStabilization
         FeatureDetection.cpp
         DynamicStabilization.cpp
         FeatureMatching.cpp
-        BackgroundSegmentation.cpp
+        MOG2BackgroundSegmentation.cpp
+        BackgroundSegmentionBase.cpp
         FrameWarping.cpp
         TimeMeasurable.cpp
         )

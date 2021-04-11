@@ -2,7 +2,7 @@
 // Created by brucknem on 08.02.21.
 //
 
-#include "WorldObjects.hpp"
+#include "WorldObject.hpp"
 
 #include <utility>
 

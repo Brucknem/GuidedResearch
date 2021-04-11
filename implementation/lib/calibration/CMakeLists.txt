@@ -47,7 +47,7 @@ add_library(StaticCalibration
         DistanceResidual.cpp
         CorrespondenceResidual.cpp
         ParametricPoint.cpp
-        WorldObjects.cpp
+        WorldObject.cpp
         ObjectsLoading.cpp
         YAMLExtension.cpp
         )

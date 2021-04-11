@@ -4,11 +4,12 @@
 
 #include "gtest/gtest.h"
 #include "CameraTestBase.hpp"
-#include "Residuals.hpp"
-
+#include "DistanceResidual.hpp"
+#include "DistanceFromIntervalResidual.hpp"
+#include "CorrespondenceResidual.hpp"
 #include <utility>
 
-using namespace providentia::calibration;
+using namespace providentia::calibration::residuals;
 
 namespace providentia {
 	namespace tests {
@@ -16,18 +17,18 @@ namespace providentia {
 		/**
 		 * Tests for the residual blocks.
 		 */
-		class ResidualsTest : public CameraTestBase {
+		class ResidualsTests : public CameraTestBase {
 		protected:
 
 			/**
 			 * @destructor
 			 */
-			~ResidualsTest() override = default;
+			~ResidualsTests() override = default;
 
 			void assertParametricPoint(ParametricPoint point, Eigen::Vector2d expectedResidual) {
 				Eigen::Vector2d residual;
 				CorrespondenceResidual correspondenceResidual = {
-					point.getExpectedPixel(), std::make_shared<ParametricPoint>(point),
+					point.getExpectedPixel(), point,
 					intrinsics,
 				};
 				correspondenceResidual(translation.data(), rotation.data(), point.getLambda(), point.getMu(), new
@@ -72,7 +73,7 @@ namespace providentia {
 		/**
 		 * Tests the point correspondence residual calculation.
 		 */
-		TEST_F(ResidualsTest, testPointCorrespondence) {
+		TEST_F(ResidualsTests, testPointCorrespondence) {
 			Eigen::Vector3d worldPosition{0, 0, 0};
 			Eigen::Vector2d pixel{960, 0};
 
@@ -97,7 +98,7 @@ namespace providentia {
 		/**
 		 * Tests the line correspondence residual calculation.
 		 */
-		TEST_F(ResidualsTest, testLineCorrespondence) {
+		TEST_F(ResidualsTests, testLineCorrespondence) {
 			Eigen::Vector3d lineOrigin{0, 0, 0};
 			Eigen::Vector3d lineHeading{0, 0, 1};
 			Eigen::Vector2d pixel{960, 0};
@@ -121,7 +122,7 @@ namespace providentia {
 		/**
 		 * Tests the parametricPoint correspondence residual calculation.
 		 */
-		TEST_F(ResidualsTest, testPlaneCorrespondence) {
+		TEST_F(ResidualsTests, testPlaneCorrespondence) {
 			Eigen::Vector3d planeOrigin{0, 0, 0};
 
 			Eigen::Vector3d planeSideA{1, 0, 0};

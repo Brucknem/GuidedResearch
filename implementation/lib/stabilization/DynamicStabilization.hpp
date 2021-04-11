@@ -1,7 +1,8 @@
 #ifndef CAMERASTABILIZATION_DYNAMICSTABILIZATION_HPP
 #define CAMERASTABILIZATION_DYNAMICSTABILIZATION_HPP
 
-#include "BackgroundSegmentation.hpp"
+#include "BackgroundSegmentionBase.hpp"
+#include "MOG2BackgroundSegmentation.hpp"
 #include "FeatureDetection.hpp"
 #include "FeatureMatching.hpp"
 #include "FrameWarping.hpp"
@@ -50,7 +51,7 @@ namespace providentia {
 			/**
 			 * Generates the foreground background masks.
 			 */
-			std::shared_ptr<providentia::segmentation::BackgroundSegmentionBase> segmentor;
+			std::shared_ptr<providentia::stabilization::segmentation::BackgroundSegmentionBase> segmentor;
 
 			/**
 			 * @constructor
@@ -71,7 +72,8 @@ namespace providentia {
 			/**
 			 * @get The background segmentor used to mask the writeFrames.
 			 */
-			const std::shared_ptr<providentia::segmentation::BackgroundSegmentionBase> &getSegmentor() const;
+			const std::shared_ptr<providentia::stabilization::segmentation::BackgroundSegmentionBase> &
+			getSegmentor() const;
 
 			/**
 			 * @get The feature detector for the current frame.
