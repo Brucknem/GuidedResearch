@@ -187,40 +187,82 @@ namespace providentia {
 			 */
 			const Eigen::Vector3d &getRotation() const;
 
+			/**
+			 * @get
+			 */
 			const std::vector<providentia::calibration::WorldObject> &getWorldObjects() const;
 
 			bool isOptimizationFinished() const;
 
 			friend std::ostream &operator<<(std::ostream &os, const CameraPoseEstimation &estimator);
 
+			/**
+			 * @get
+			 */
 			double getWeightPenalizeScale() const;
 
+			/**
+			 * @set
+			 */
 			void setWeightPenalizeScale(double weightPenalizeScale);
 
 			void clearWorldObjects();
 
+			/**
+			 * @get
+			 */
 			std::vector<double> getWeights();
 
+			/**
+			 * @get
+			 */
 			double getLambdaPenalizeScale() const;
 
+			/**
+			 * @set
+			 */
 			void setLambdaPenalizeScale(double lambdaPenalizeScale);
 
+			/**
+			 * @get
+			 */
 			double getRotationPenalizeScale() const;
 
+			/**
+			 * @set
+			 */
 			void setRotationPenalizeScale(double rotationPenalizeScale);
 
+			/**
+			 * @get
+			 */
 			std::vector<double> getLambdas();
 
 			bool hasFoundValidSolution() const;
 
+			/**
+			 * @get
+			 */
 			double getLambdasLoss() const;
 
+			/**
+			 * @get
+			 */
 			double getCorrespondencesLoss() const;
 
+			/**
+			 * @get
+			 */
 			double getRotationsLoss() const;
 
+			/**
+			 * @get
+			 */
 			double getWeightsLoss() const;
 
+			/**
+			 * @get
+			 */
 			double getTotalLoss() const;
 
 		};
