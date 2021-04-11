@@ -33,7 +33,7 @@ namespace providentia {
 		 * @param filename
 		 * @return
 		 */
-		static YAML::Node LoadYAML(const std::string &filename);
+		YAML::Node loadYAML(const std::string &filename);
 
 		/**
 		 * Loads the world positions of the objects from a YAML object.
@@ -41,8 +41,8 @@ namespace providentia {
 		 * @param opendriveObjects
 		 * @return
 		 */
-		static std::vector<WorldObject>
-		LoadObjects(YAML::Node opendriveObjects, const YAML::Node &imageObjects, Eigen::Vector2i
+		std::vector<WorldObject>
+		loadObjects(YAML::Node opendriveObjects, const YAML::Node &imageObjects, Eigen::Vector2i
 		imageSize = {-1, -1});
 
 		/**
@@ -51,7 +51,7 @@ namespace providentia {
 		 * @param opendriveObjectsFile
 		 * @return
 		 */
-		static std::vector<WorldObject> LoadObjects(const std::string &opendriveObjectsFile, const std::string
+		std::vector<WorldObject> loadObjects(const std::string &opendriveObjectsFile, const std::string
 		&imageObjectsFile, Eigen::Vector2i imageSize = {-1, -1});
 	}
 }

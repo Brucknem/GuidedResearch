@@ -158,7 +158,7 @@ namespace providentia {
 					*point.getMu() = 0;
 					weights.emplace_back(new double(1));
 					correspondenceResiduals.emplace_back(problem.AddResidualBlock(
-						CorrespondenceResidual::Create(
+						CorrespondenceResidual::create(
 							point.getExpectedPixel(),
 							point,
 							intrinsics
@@ -176,13 +176,13 @@ namespace providentia {
 					));
 
 					lambdaResiduals.emplace_back(problem.AddResidualBlock(
-						DistanceFromIntervalResidual::Create(worldObject.getHeight()),
+						DistanceFromIntervalResidual::create(worldObject.getHeight()),
 						getScaledHuberLoss(lambdaPenalizeScale),
 						point.getLambda()
 					));
 
 					weightResiduals.emplace_back(problem.AddResidualBlock(
-						DistanceResidual::Create(1),
+						DistanceResidual::create(1),
 						getScaledHuberLoss(weightPenalizeScale),
 						weights[weights.size() - 1]
 					));
@@ -203,12 +203,12 @@ namespace providentia {
 		void CameraPoseEstimator::addRotationConstraints(ceres::Problem &problem) {
 			rotationResiduals.clear();
 			rotationResiduals.emplace_back(problem.AddResidualBlock(
-				DistanceFromIntervalResidual::Create(60, 110),
+				DistanceFromIntervalResidual::create(60, 110),
 				getScaledHuberLoss(rotationPenalizeScale),
 				&rotation.x()
 			));
 			rotationResiduals.emplace_back(problem.AddResidualBlock(
-				DistanceFromIntervalResidual::Create(-10, 10),
+				DistanceFromIntervalResidual::create(-10, 10),
 				getScaledHuberLoss(rotationPenalizeScale),
 				&rotation.y()
 			));
@@ -220,17 +220,17 @@ namespace providentia {
 //			int z_interval = 300;
 			int scale = 10;
 //			problem.AddResidualBlock(
-//				DistanceFromIntervalResidual::Create(translation.x() - x_interval, translation.x() + x_interval),
+//				DistanceFromIntervalResidual::create(translation.x() - x_interval, translation.x() + x_interval),
 //				getScaledHuberLoss(scale),
 //				&translation.x()
 //			);
 //			problem.AddResidualBlock(
-//				DistanceFromIntervalResidual::Create(translation.y() - y_interval, translation.y() + y_interval),
+//				DistanceFromIntervalResidual::create(translation.y() - y_interval, translation.y() + y_interval),
 //				getScaledHuberLoss(scale),
 //				&translation.y()
 //			);
 			problem.AddResidualBlock(
-				DistanceFromIntervalResidual::Create(0,
+				DistanceFromIntervalResidual::create(0,
 													 translation.z() + 1000),
 				getScaledHuberLoss(scale),
 				&translation.z()

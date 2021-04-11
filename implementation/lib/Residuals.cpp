@@ -20,7 +20,7 @@ namespace providentia {
 			return true;
 		}
 
-		ceres::CostFunction *DistanceResidual::Create(const double expectedValue) {
+		ceres::CostFunction *DistanceResidual::create(const double expectedValue) {
 			return new ceres::AutoDiffCostFunction<DistanceResidual, 1, 1>(
 				new DistanceResidual(expectedValue)
 			);
@@ -48,13 +48,13 @@ namespace providentia {
 			return true;
 		}
 
-		ceres::CostFunction *DistanceFromIntervalResidual::Create(double lowerBound, double upperBound) {
+		ceres::CostFunction *DistanceFromIntervalResidual::create(double lowerBound, double upperBound) {
 			return new ceres::AutoDiffCostFunction<DistanceFromIntervalResidual, 1, 1>(
 				new DistanceFromIntervalResidual(lowerBound, upperBound)
 			);
 		}
 
-		ceres::CostFunction *DistanceFromIntervalResidual::Create(const double upperBound) {
+		ceres::CostFunction *DistanceFromIntervalResidual::create(const double upperBound) {
 			return new ceres::AutoDiffCostFunction<DistanceFromIntervalResidual, 1, 1>(
 				new DistanceFromIntervalResidual(0, upperBound)
 			);
@@ -107,7 +107,7 @@ namespace providentia {
 		}
 
 		ceres::CostFunction *
-		CorrespondenceResidual::Create(const Eigen::Vector2d &expectedPixel,
+		CorrespondenceResidual::create(const Eigen::Vector2d &expectedPixel,
 									   const providentia::calibration::ParametricPoint &point,
 									   const Eigen::Matrix<double, 3, 4> &intrinsics) {
 			return new ceres::AutoDiffCostFunction<CorrespondenceResidual, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1>(

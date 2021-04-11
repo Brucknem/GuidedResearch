@@ -24,7 +24,7 @@ namespace providentia {
 			template<typename T>
 			bool operator()(const T *value, T *residual) const;
 
-			static ceres::CostFunction *Create(double expectedValue);
+			static ceres::CostFunction *create(double expectedValue);
 
 		};
 
@@ -44,9 +44,9 @@ namespace providentia {
 			/**
 			 * Factory method to hide the residual creation.
 			 */
-			static ceres::CostFunction *Create(double lowerBound, double upperBound);
+			static ceres::CostFunction *create(double lowerBound, double upperBound);
 
-			static ceres::CostFunction *Create(double upperBound);
+			static ceres::CostFunction *create(double upperBound);
 		};
 
 		/**
@@ -115,7 +115,7 @@ namespace providentia {
 			/**
 			 * Factory method to hide the residual creation.
 			 */
-			static ceres::CostFunction *Create(const Eigen::Vector2d &expectedPixel,
+			static ceres::CostFunction *create(const Eigen::Vector2d &expectedPixel,
 											   const providentia::calibration::ParametricPoint &point,
 											   const Eigen::Matrix<double, 3, 4> &intrinsics);
 		};

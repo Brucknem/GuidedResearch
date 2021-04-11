@@ -123,12 +123,12 @@ namespace providentia {
  			 * @param worldPosition The world position of the point.
 			 */
 			static ParametricPoint
-			OnPoint(const Eigen::Vector2d &expectedPixel, const Eigen::Vector3d &worldPosition);
+			onPoint(const Eigen::Vector2d &expectedPixel, const Eigen::Vector3d &worldPosition);
 
 			/**
 			 * @copydoc
 			 */
-			static ParametricPoint OnPoint(const Eigen::Vector3d &worldPosition);
+			static ParametricPoint onPoint(const Eigen::Vector3d &worldPosition);
 
 			/**
  			 * Factory for a [x, y, z] world point on a parametric line.
@@ -139,13 +139,13 @@ namespace providentia {
 			 * @param lambda Optional distance from the origin in heading direction.
 			 */
 			static ParametricPoint
-			OnLine(const Eigen::Vector2d &expectedPixel, Eigen::Vector3d origin, const Eigen::Vector3d &heading,
+			onLine(const Eigen::Vector2d &expectedPixel, Eigen::Vector3d origin, const Eigen::Vector3d &heading,
 				   double lambda = 0);
 
 			/**
 			 * @copydoc
 			 */
-			static ParametricPoint OnLine(Eigen::Vector3d origin, const Eigen::Vector3d &heading, double lambda = 0);
+			static ParametricPoint onLine(Eigen::Vector3d origin, const Eigen::Vector3d &heading, double lambda = 0);
 
 			/**
  			 * Factory for a [x, y, z] world point on a parametric parametricPoint.
@@ -158,7 +158,7 @@ namespace providentia {
 			 * @param mu Optional distance from the origin in the second axis.
 			 */
 			static ParametricPoint
-			OnPlane(const Eigen::Vector2d &expectedPixel, Eigen::Vector3d origin, const Eigen::Vector3d &axisA,
+			onPlane(const Eigen::Vector2d &expectedPixel, Eigen::Vector3d origin, const Eigen::Vector3d &axisA,
 					const Eigen::Vector3d &axisB,
 					double lambda = 0, double mu = 0);
 
@@ -166,7 +166,7 @@ namespace providentia {
 			 * @copydoc
 			 */
 			static ParametricPoint
-			OnPlane(Eigen::Vector3d origin, const Eigen::Vector3d &axisA, const Eigen::Vector3d &axisB,
+			onPlane(Eigen::Vector3d origin, const Eigen::Vector3d &axisA, const Eigen::Vector3d &axisB,
 					double lambda = 0, double mu = 0);
 		};
 

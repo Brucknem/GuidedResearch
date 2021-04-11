@@ -30,7 +30,7 @@ namespace YAML {
 
 namespace providentia {
 	namespace calibration {
-		YAML::Node LoadYAML(const std::string &filename) {
+		YAML::Node loadYAML(const std::string &filename) {
 			size_t l = filename.length();
 			if (
 				filename.at(l - 5) != '.' ||
@@ -45,7 +45,7 @@ namespace providentia {
 		}
 
 		std::vector<WorldObject>
-		LoadObjects(YAML::Node opendriveObjects, const YAML::Node &imageObjects, Eigen::Vector2i imageSize) {
+		loadObjects(YAML::Node opendriveObjects, const YAML::Node &imageObjects, Eigen::Vector2i imageSize) {
 			std::vector<WorldObject> objects;
 			assert(opendriveObjects["objects"].IsSequence());
 
@@ -73,14 +73,14 @@ namespace providentia {
 									pixel = {pixel.x(), imageHeight - 1 - pixel.y()};
 								}
 								worldObject.add(
-									ParametricPoint::OnLine(pixel, worldPosition, Eigen::Vector3d::UnitZ()));
+									ParametricPoint::onLine(pixel, worldPosition, Eigen::Vector3d::UnitZ()));
 								hasPixels = true;
 							}
 						}
 					}
 
 					if (!hasPixels) {
-						worldObject.add(ParametricPoint::OnPoint(worldPosition));
+						worldObject.add(ParametricPoint::onPoint(worldPosition));
 					}
 					objects.emplace_back(worldObject);
 				}
@@ -89,11 +89,11 @@ namespace providentia {
 		}
 
 		std::vector<WorldObject>
-		LoadObjects(const std::string &opendriveObjectsFile, const std::string &imageObjectsFile,
+		loadObjects(const std::string &opendriveObjectsFile, const std::string &imageObjectsFile,
 					Eigen::Vector2i imageSize) {
-			YAML::Node opendriveObjects = LoadYAML(opendriveObjectsFile);
-			YAML::Node imageObjects = LoadYAML(imageObjectsFile);
-			return LoadObjects(opendriveObjects, imageObjects, std::move(imageSize));
+			YAML::Node opendriveObjects = loadYAML(opendriveObjectsFile);
+			YAML::Node imageObjects = loadYAML(imageObjectsFile);
+			return loadObjects(opendriveObjects, imageObjects, std::move(imageSize));
 		}
 	}
 }

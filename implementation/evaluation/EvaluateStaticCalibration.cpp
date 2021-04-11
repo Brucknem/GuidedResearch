@@ -157,7 +157,7 @@ public:
 
 		objectsFile = (boost::filesystem::path(inputResource).parent_path() / "objects.yaml").string();
 
-		objects = providentia::calibration::LoadObjects(objectsFile, pixelsFile, imageSize);
+		objects = providentia::calibration::loadObjects(objectsFile, pixelsFile, imageSize);
 		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics, true,
 																					powBase2(weightScale));
 		estimator->addWorldObjects(objects);

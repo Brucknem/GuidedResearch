@@ -115,7 +115,7 @@ namespace providentia {
 			static double evaluate(ceres::Problem &problem,
 								   const ceres::Problem::EvaluateOptions &evalOptions = ceres::Problem::EvaluateOptions());
 
-			static ceres::Solver::Options setupOptions(bool _logSummary);
+			static ceres::Solver::Options setupOptions(bool logSummary);
 
 			double evaluate(ceres::Problem &problem, const std::vector<ceres::ResidualBlockId> &blockIds);
 
@@ -127,7 +127,7 @@ namespace providentia {
 
 			void evaluateRotationResiduals(ceres::Problem &problem);
 
-			void solveProblem(bool _logSummary);
+			void solveProblem(bool logSummary);
 
 			void evaluateAllResiduals(ceres::Problem &problem);
 
@@ -135,9 +135,9 @@ namespace providentia {
 			/**
 			 * @constructor
 			 *
-			 * @param _intrinsics The intrinsics of the pinhole camera model.
+			 * @param intrinsics The intrinsics of the pinhole camera model.
 			 */
-			explicit CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics, bool initLogging = true,
+			explicit CameraPoseEstimator(Eigen::Matrix<double, 3, 4> intrinsics, bool initLogging = true,
 										 double weightPenalizeScale = std::numeric_limits<double>::max());
 
 			/**
@@ -153,9 +153,9 @@ namespace providentia {
 			 * Estimates the camera translation and rotation based on the known correspondences between the world and
 			 * image.
 			 */
-			void estimate(bool _logSummary = false);
+			void estimate(bool logSummary = false);
 
-			std::thread estimateAsync(bool _logSummary = false);
+			std::thread estimateAsync(bool logSummary = false);
 
 			/**
 			 * Based on the known world positions calculates and initial guess for the camera translation and rotation.

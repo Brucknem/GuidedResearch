@@ -49,41 +49,41 @@ namespace providentia {
 			isExpectedPixelSet = true;
 		}
 
-		ParametricPoint ParametricPoint::OnPlane(const Eigen::Vector2d &expectedPixel, Eigen::Vector3d origin,
+		ParametricPoint ParametricPoint::onPlane(const Eigen::Vector2d &expectedPixel, Eigen::Vector3d origin,
 												 const Eigen::Vector3d &axisA, const Eigen::Vector3d &axisB,
 												 double lambda, double mu) {
-			ParametricPoint point = OnPlane(std::move(origin), axisA, axisB, lambda, mu);
+			ParametricPoint point = onPlane(std::move(origin), axisA, axisB, lambda, mu);
 			point.setExpectedPixel(expectedPixel);
 			return point;
 		}
 
-		ParametricPoint ParametricPoint::OnPlane(Eigen::Vector3d origin, const Eigen::Vector3d &axisA,
+		ParametricPoint ParametricPoint::onPlane(Eigen::Vector3d origin, const Eigen::Vector3d &axisA,
 												 const Eigen::Vector3d &axisB, double lambda, double mu) {
 			return ParametricPoint(std::move(origin), axisA.stableNormalized(), axisB.stableNormalized(), lambda,
 								   mu);
 		}
 
-		ParametricPoint ParametricPoint::OnLine(const Eigen::Vector2d &expectedPixel, Eigen::Vector3d origin, const
+		ParametricPoint ParametricPoint::onLine(const Eigen::Vector2d &expectedPixel, Eigen::Vector3d origin, const
 		Eigen::Vector3d &heading, double lambda) {
-			ParametricPoint point = OnLine(std::move(origin), heading, lambda);
+			ParametricPoint point = onLine(std::move(origin), heading, lambda);
 			point.setExpectedPixel(expectedPixel);
 			return point;
 		}
 
-		ParametricPoint ParametricPoint::OnLine(Eigen::Vector3d origin, const Eigen::Vector3d &heading,
+		ParametricPoint ParametricPoint::onLine(Eigen::Vector3d origin, const Eigen::Vector3d &heading,
 												double lambda) {
-			return ParametricPoint::OnPlane(std::move(origin), heading, {0, 0, 0}, lambda, 0);
+			return ParametricPoint::onPlane(std::move(origin), heading, {0, 0, 0}, lambda, 0);
 		}
 
 		ParametricPoint
-		ParametricPoint::OnPoint(const Eigen::Vector2d &expectedPixel, const Eigen::Vector3d &worldPosition) {
-			ParametricPoint point = OnPoint(worldPosition);
+		ParametricPoint::onPoint(const Eigen::Vector2d &expectedPixel, const Eigen::Vector3d &worldPosition) {
+			ParametricPoint point = onPoint(worldPosition);
 			point.setExpectedPixel(expectedPixel);
 			return point;
 		}
 
-		ParametricPoint ParametricPoint::OnPoint(const Eigen::Vector3d &worldPosition) {
-			return ParametricPoint::OnLine(worldPosition, {0, 0, 0}, 0);
+		ParametricPoint ParametricPoint::onPoint(const Eigen::Vector3d &worldPosition) {
+			return ParametricPoint::onLine(worldPosition, {0, 0, 0}, 0);
 		}
 
 		bool ParametricPoint::hasExpectedPixel() const {
