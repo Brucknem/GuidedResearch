@@ -25,6 +25,8 @@ namespace providentia {
 
 				DistanceFromIntervalResidual(double lowerBound, double upperBound);
 
+				virtual ~DistanceFromIntervalResidual() = default;
+
 				template<typename T>
 				bool operator()(const T *value, T *residual) const;
 

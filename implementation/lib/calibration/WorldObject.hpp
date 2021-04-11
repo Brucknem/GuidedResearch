@@ -44,6 +44,8 @@ namespace providentia {
 			 */
 			explicit WorldObject(const ParametricPoint &point);
 
+			virtual ~WorldObject() = default;
+
 			/**
 			 * Adds the given point to the object.
 			 */

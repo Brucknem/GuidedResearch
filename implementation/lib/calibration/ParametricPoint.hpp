@@ -170,8 +170,4 @@ public:
 			double lambda = 0, double mu = 0);
 };
 
-#include <vector>
-#include <memory>
-#include "Eigen/Dense"
-
 #endif //CAMERASTABILIZATION_PARAMETRICPOINT_HPP

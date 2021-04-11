@@ -22,6 +22,8 @@ namespace providentia {
 			public:
 				explicit DistanceResidual(double expectedValue);
 
+				virtual ~DistanceResidual() = default;
+
 				template<typename T>
 				bool operator()(const T *value, T *residual) const;
 

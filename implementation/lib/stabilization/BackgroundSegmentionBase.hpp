@@ -114,9 +114,4 @@ namespace providentia {
 	}
 }
 
-#include <opencv2/cudabgsegm.hpp>
-#include "opencv2/opencv.hpp"
-#include "opencv2/cudafilters.hpp"
-#include "TimeMeasurable.hpp"
-
 #endif //CAMERASTABILIZATION_BACKGROUNDSEGMENTIONBASE_HPP
