@@ -1,5 +1,5 @@
-#ifndef CAMERASTABILIZATION_DYNAMICSTABILIZATION_HPP
-#define CAMERASTABILIZATION_DYNAMICSTABILIZATION_HPP
+#ifndef CAMERASTABILIZATION_DYNAMICSTABILIZATIONBASE_HPP
+#define CAMERASTABILIZATION_DYNAMICSTABILIZATIONBASE_HPP
 
 #include "BackgroundSegmentionBase.hpp"
 #include "MOG2BackgroundSegmentation.hpp"
@@ -15,7 +15,7 @@ namespace providentia {
 		/**
 		 * Base class for the dynamic calibration algorithms.
 		 */
-		class DynamicStabilizerBase : public providentia::utils::TimeMeasurable {
+		class DynamicStabilizationBase : public providentia::utils::TimeMeasurable {
 		private:
 			/**
 			 * The warmup iterations before the keyframe may be updated.
@@ -56,13 +56,13 @@ namespace providentia {
 			/**
 			 * @constructor
 			 */
-			DynamicStabilizerBase();
+			DynamicStabilizationBase();
 
 		public:
 			/**
 			 * @destructor
 			 */
-			~DynamicStabilizerBase() override = default;
+			~DynamicStabilizationBase() override = default;
 
 			/**
 			 * @get The warper used to align the frame with the reference frame.
@@ -151,73 +151,6 @@ namespace providentia {
 			void setSkewThreshold(double value);
 		};
 
-		/**
-		 * SURF feature detection and Brute Force feature matching stabilization algorithm.
-		 */
-		class SURFBFDynamicStabilizer : public DynamicStabilizerBase {
-		public:
-			/**
-			 * @constructor
-			 */
-			explicit SURFBFDynamicStabilizer(double hessianThreshold = 1000, int nOctaves = 4,
-											 int nOctaveLayers = 2, bool extended = false,
-											 float keypointsRatio = 0.01f,
-											 bool upright = false);
-
-			/**
-			 * @destructor
-			 */
-			~SURFBFDynamicStabilizer() override = default;
-		};
-
-		/**
-		 * ORB feature detection and Brute Force feature matching stabilization algorithm.
-		 */
-		class ORBBFDynamicStabilizer : public DynamicStabilizerBase {
-		public:
-			/**
-			 * @constructor
-			 */
-			explicit ORBBFDynamicStabilizer(int nfeatures = 1e4,
-											float scaleFactor = 1.2f,
-											int nlevels = 8,
-											int edgeThreshold = 31,
-											int firstLevel = 0,
-											int wtaK = 2,
-											int scoreType = cv::ORB::FAST_SCORE,
-											int patchSize = 31,
-											int fastThreshold = 20,
-											bool blurForDescriptor = false);
-
-			/**
-			 * @destructor
-			 */
-			~ORBBFDynamicStabilizer() override = default;
-		};
-
-		/**
-		 * Dynamic stabilization with Fast feature detectors, FREAK feature descriptors and Brute Force matching.
-		 */
-		class FastFREAKBFDynamicStabilizer : public DynamicStabilizerBase {
-		public:
-			/**
-			 * @constructor
-			 */
-			explicit FastFREAKBFDynamicStabilizer(int threshold = 50,
-												  bool nonmaxSuppression = true,
-												  cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16,
-												  int maxNPoints = 5000,
-												  bool orientationNormalized = true,
-												  bool scaleNormalized = true,
-												  float patternScale = 22.0f,
-												  int nOctaves = 4,
-												  const std::vector<int> &selectedPairs = std::vector<int>());
-
-			/**
-			 * @destructor
-			 */
-			~FastFREAKBFDynamicStabilizer() override = default;
-		};
 	}// namespace stabilization
 }// namespace providentia
-#endif//CAMERASTABILIZATION_DYNAMICSTABILIZATION_HPP
+#endif//CAMERASTABILIZATION_DYNAMICSTABILIZATIONBASE_HPP

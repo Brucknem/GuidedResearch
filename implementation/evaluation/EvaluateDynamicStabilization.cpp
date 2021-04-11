@@ -2,7 +2,12 @@
 // Created by brucknem on 13.01.21.
 //
 #include <opencv2/cudawarping.hpp>
-#include "DynamicStabilization.hpp"
+
+#include "DynamicStabilizationBase.hpp"
+#include "SURFBFDynamicStabilizer.hpp"
+#include "ORBBFDynamicStabilizer.hpp"
+#include "FastFREAKBFDynamicStabilizer.hpp"
+
 #include "OpticalFlow.hpp"
 #include "Commons.hpp"
 #include "CSVWriter.hpp"
@@ -18,7 +23,7 @@ private:
 	/**
 	 * The matcher used to match the features.
 	 */
-	std::vector<providentia::stabilization::DynamicStabilizerBase> stabilizers;
+	std::vector<providentia::stabilization::DynamicStabilizationBase> stabilizers;
 	std::vector<std::string> stabilizerNames = {
 		"SURF", "ORB", "FAST"
 	};

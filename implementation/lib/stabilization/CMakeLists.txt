@@ -16,7 +16,10 @@ include_directories(${Boost_INCLUDE_DIRS})
 ########################################################################################################################
 add_library(DynamicStabilization
         FeatureDetection.cpp
-        DynamicStabilization.cpp
+        DynamicStabilizationBase.cpp
+        SURFBFDynamicStabilizer.cpp
+        ORBBFDynamicStabilizer.cpp
+        FastFREAKBFDynamicStabilizer.cpp
         FeatureMatching.cpp
         MOG2BackgroundSegmentation.cpp
         BackgroundSegmentionBase.cpp
