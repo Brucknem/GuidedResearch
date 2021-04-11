@@ -6,7 +6,7 @@
 #define CAMERASTABILIZATION_ORBBFDYNAMICSTABILIZATION_HPP
 
 #include "DynamicStabilizationBase.hpp"
-#include "ORBFeatureDetection.hpp"
+#include "detection/ORBFeatureDetection.hpp"
 
 namespace providentia {
 	namespace stabilization {

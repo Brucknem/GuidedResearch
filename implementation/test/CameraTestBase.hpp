@@ -5,7 +5,7 @@
 #ifndef CAMERASTABILIZATION_CAMERATESTBASE_HPP
 #define CAMERASTABILIZATION_CAMERATESTBASE_HPP
 
-#include <RenderingPipeline.hpp>
+#include <camera/RenderingPipeline.hpp>
 #include "Eigen/Dense"
 #include "gtest/gtest.h"
 

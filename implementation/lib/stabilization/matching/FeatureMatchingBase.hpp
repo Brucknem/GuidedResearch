@@ -8,8 +8,8 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/core/base.hpp"
 #include "opencv2/cudafeatures2d.hpp"
-#include "FeatureDetectionBase.hpp"
-#include "TimeMeasurable.hpp"
+#include "../detection/FeatureDetectionBase.hpp"
+#include "../TimeMeasurable.hpp"
 
 namespace providentia {
 	namespace stabilization {

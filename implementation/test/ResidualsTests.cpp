@@ -4,9 +4,9 @@
 
 #include "gtest/gtest.h"
 #include "CameraTestBase.hpp"
-#include "DistanceResidual.hpp"
-#include "DistanceFromIntervalResidual.hpp"
-#include "CorrespondenceResidual.hpp"
+#include "residuals/DistanceResidual.hpp"
+#include "residuals/DistanceFromIntervalResidual.hpp"
+#include "residuals/CorrespondenceResidual.hpp"
 #include <utility>
 
 using namespace providentia::calibration::residuals;

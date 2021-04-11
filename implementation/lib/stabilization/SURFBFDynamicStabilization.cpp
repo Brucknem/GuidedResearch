@@ -3,8 +3,8 @@
 //
 
 #include "SURFBFDynamicStabilization.hpp"
-#include "BruteForceFeatureMatching.hpp"
-#include "SURFFeatureDetection.hpp"
+#include "matching/BruteForceFeatureMatching.hpp"
+#include "detection/SURFFeatureDetection.hpp"
 
 namespace providentia {
 	namespace stabilization {

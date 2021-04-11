@@ -3,8 +3,8 @@
 //
 
 #include "ORBBFDynamicStabilization.hpp"
-#include "BruteForceFeatureMatching.hpp"
-#include "ORBFeatureDetection.hpp"
+#include "matching/BruteForceFeatureMatching.hpp"
+#include "detection/ORBFeatureDetection.hpp"
 
 namespace providentia {
 	namespace stabilization {

@@ -15,22 +15,22 @@ include_directories(${Boost_INCLUDE_DIRS})
 ### Dynamic Stabilization ###
 ########################################################################################################################
 add_library(DynamicStabilization
-        FeatureDetectionBase.cpp
-        SURFFeatureDetection.cpp
-        ORBFeatureDetection.cpp
-        FastFREAKFeatureDetection.cpp
-        StarBRIEFFeatureDetection.cpp
-        SIFTFeatureDetection.cpp
+        detection/FeatureDetectionBase.cpp
+        detection/SURFFeatureDetection.cpp
+        detection/ORBFeatureDetection.cpp
+        detection/FastFREAKFeatureDetection.cpp
+        detection/StarBRIEFFeatureDetection.cpp
+        detection/SIFTFeatureDetection.cpp
         DynamicStabilizationBase.cpp
         SURFBFDynamicStabilization.cpp
         ORBBFDynamicStabilization.cpp
         FastFREAKBFDynamicStabilization.cpp
-        FeatureMatchingBase.cpp
-        BruteForceFeatureMatching.cpp
-        FlannFeatureMatching.cpp
-        MOG2BackgroundSegmentation.cpp
-        BackgroundSegmentionBase.cpp
-        FrameWarping.cpp
+        matching/FeatureMatchingBase.cpp
+        matching/BruteForceFeatureMatching.cpp
+        matching/FlannFeatureMatching.cpp
+        segmentation/MOG2BackgroundSegmentation.cpp
+        segmentation/BackgroundSegmentionBase.cpp
+        warping/FrameWarping.cpp
         TimeMeasurable.cpp
         )
 

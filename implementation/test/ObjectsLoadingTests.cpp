@@ -3,7 +3,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "ObjectsLoading.hpp"
+#include "objects/ObjectsLoading.hpp"
 #include "yaml-cpp/yaml.h"
 
 using namespace providentia::calibration;

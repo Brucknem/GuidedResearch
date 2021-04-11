@@ -6,9 +6,9 @@
 #include <boost/algorithm/string/split.hpp>
 #include "Commons.hpp"
 #include "Eigen/Dense"
-#include "RenderingPipeline.hpp"
-#include "WorldObject.hpp"
-#include "ObjectsLoading.hpp"
+#include "camera/RenderingPipeline.hpp"
+#include "objects/WorldObject.hpp"
+#include "objects/ObjectsLoading.hpp"
 #include "CameraPoseEstimation.hpp"
 #include "CSVWriter.hpp"
 

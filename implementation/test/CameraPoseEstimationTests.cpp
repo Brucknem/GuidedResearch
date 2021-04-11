@@ -4,7 +4,7 @@
 
 #include "CameraTestBase.hpp"
 #include "CameraPoseEstimation.hpp"
-#include "RenderingPipeline.hpp"
+#include "camera/RenderingPipeline.hpp"
 
 using namespace providentia::calibration;
 

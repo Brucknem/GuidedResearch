@@ -10,7 +10,7 @@
 #include "opencv2/xfeatures2d/cuda.hpp"
 #include <opencv2/cudafeatures2d.hpp>
 
-#include "TimeMeasurable.hpp"
+#include "../TimeMeasurable.hpp"
 
 namespace providentia {
 	namespace stabilization {

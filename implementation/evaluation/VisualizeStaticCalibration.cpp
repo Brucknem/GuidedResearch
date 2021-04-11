@@ -5,9 +5,9 @@
 #include <thread>
 #include "Commons.hpp"
 #include "Eigen/Dense"
-#include "RenderingPipeline.hpp"
+#include "camera/RenderingPipeline.hpp"
 #include "WorldObjects.hpp"
-#include "ObjectsLoading.hpp"
+#include "objects/ObjectsLoading.hpp"
 #include "CameraPoseEstimation.hpp"
 
 using namespace providentia::evaluation;

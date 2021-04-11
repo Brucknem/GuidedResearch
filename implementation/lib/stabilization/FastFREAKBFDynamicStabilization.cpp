@@ -3,8 +3,8 @@
 //
 
 #include "FastFREAKBFDynamicStabilization.hpp"
-#include "BruteForceFeatureMatching.hpp"
-#include "FastFREAKFeatureDetection.hpp"
+#include "matching/BruteForceFeatureMatching.hpp"
+#include "detection/FastFREAKFeatureDetection.hpp"
 
 namespace providentia {
 	namespace stabilization {

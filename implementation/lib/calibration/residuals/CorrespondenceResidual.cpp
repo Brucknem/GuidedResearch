@@ -6,7 +6,7 @@
 #include <utility>
 #include "DistanceFromIntervalResidual.hpp"
 #include "CorrespondenceResidual.hpp"
-#include "ParametricPoint.hpp"
+#include "../objects/ParametricPoint.hpp"
 
 namespace providentia {
 	namespace calibration {

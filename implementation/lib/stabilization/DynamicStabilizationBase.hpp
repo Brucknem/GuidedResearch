@@ -1,11 +1,11 @@
 #ifndef CAMERASTABILIZATION_DYNAMICSTABILIZATIONBASE_HPP
 #define CAMERASTABILIZATION_DYNAMICSTABILIZATIONBASE_HPP
 
-#include "BackgroundSegmentionBase.hpp"
-#include "MOG2BackgroundSegmentation.hpp"
-#include "FeatureDetectionBase.hpp"
-#include "FeatureMatchingBase.hpp"
-#include "FrameWarping.hpp"
+#include "segmentation/BackgroundSegmentionBase.hpp"
+#include "segmentation/MOG2BackgroundSegmentation.hpp"
+#include "detection/FeatureDetectionBase.hpp"
+#include "matching/FeatureMatchingBase.hpp"
+#include "warping/FrameWarping.hpp"
 #include "TimeMeasurable.hpp"
 #include "opencv2/opencv.hpp"
 

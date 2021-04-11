@@ -42,14 +42,14 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 add_library(StaticCalibration
         CameraPoseEstimation.cpp
-        RenderingPipeline.cpp
-        DistanceFromIntervalResidual.cpp
-        DistanceResidual.cpp
-        CorrespondenceResidual.cpp
-        ParametricPoint.cpp
-        WorldObject.cpp
-        ObjectsLoading.cpp
-        YAMLExtension.cpp
+        camera/RenderingPipeline.cpp
+        residuals/DistanceFromIntervalResidual.cpp
+        residuals/DistanceResidual.cpp
+        residuals/CorrespondenceResidual.cpp
+        objects/ParametricPoint.cpp
+        objects/WorldObject.cpp
+        objects/ObjectsLoading.cpp
+        objects/YAMLExtension.cpp
         )
 
 target_include_directories(StaticCalibration

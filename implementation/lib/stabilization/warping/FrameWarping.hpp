@@ -6,8 +6,8 @@
 #define CAMERASTABILIZATION_FRAMEWARPING_HPP
 
 #include "opencv2/opencv.hpp"
-#include "FeatureMatchingBase.hpp"
-#include "TimeMeasurable.hpp"
+#include "../matching/FeatureMatchingBase.hpp"
+#include "../TimeMeasurable.hpp"
 
 namespace providentia {
 	namespace stabilization {

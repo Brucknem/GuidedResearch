@@ -9,7 +9,7 @@
 #include "ObjectTracking.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
-#include "FrameWarping.hpp"
+#include "warping/FrameWarping.hpp"
 #include "Color.hpp"
 
 using namespace providentia::evaluation;

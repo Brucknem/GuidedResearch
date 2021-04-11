@@ -6,7 +6,7 @@
 #define CAMERASTABILIZATION_COMMONS_HPP
 
 #include <stdexcept>
-#include <RenderingPipeline.hpp>
+#include <camera/RenderingPipeline.hpp>
 #include "opencv2/opencv.hpp"
 #include "TimeMeasurable.hpp"
 #include "Eigen/Dense"

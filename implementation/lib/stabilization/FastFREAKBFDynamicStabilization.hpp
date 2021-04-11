@@ -6,7 +6,7 @@
 #define CAMERASTABILIZATION_FASTFREAKBFDYNAMICSTABILIZATION_HPP
 
 #include "DynamicStabilizationBase.hpp"
-#include "FastFREAKFeatureDetection.hpp"
+#include "detection/FastFREAKFeatureDetection.hpp"
 
 namespace providentia {
 	namespace stabilization {

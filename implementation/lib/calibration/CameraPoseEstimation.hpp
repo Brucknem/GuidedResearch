@@ -15,10 +15,10 @@
 #include "glog/logging.h"
 
 #include "opencv2/opencv.hpp"
-#include "CorrespondenceResidual.hpp"
-#include "DistanceFromIntervalResidual.hpp"
-#include "DistanceResidual.hpp"
-#include "WorldObject.hpp"
+#include "residuals/CorrespondenceResidual.hpp"
+#include "residuals/DistanceFromIntervalResidual.hpp"
+#include "residuals/DistanceResidual.hpp"
+#include "objects/WorldObject.hpp"
 
 namespace providentia {
 	namespace calibration {

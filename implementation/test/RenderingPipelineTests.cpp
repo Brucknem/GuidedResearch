@@ -5,7 +5,7 @@
 
 #include "CameraTestBase.hpp"
 
-#include "RenderingPipeline.hpp"
+#include "camera/RenderingPipeline.hpp"
 
 namespace providentia {
 	namespace tests {

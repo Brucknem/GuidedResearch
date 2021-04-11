@@ -6,7 +6,7 @@
 #define CAMERASTABILIZATION_SURFBFDYNAMICSTABILIZATION_HPP
 
 #include "DynamicStabilizationBase.hpp"
-#include "SURFFeatureDetection.hpp"
+#include "detection/SURFFeatureDetection.hpp"
 
 namespace providentia {
 	namespace stabilization {

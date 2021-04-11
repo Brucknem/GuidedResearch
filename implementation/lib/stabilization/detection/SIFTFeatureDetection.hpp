@@ -10,7 +10,7 @@
 #include "opencv2/xfeatures2d/cuda.hpp"
 #include <opencv2/cudafeatures2d.hpp>
 
-#include "TimeMeasurable.hpp"
+#include "../TimeMeasurable.hpp"
 #include "FeatureDetectionBase.hpp"
 
 namespace providentia {
@@ -42,7 +42,9 @@ namespace providentia {
 					double edgeThreshold = 10;
 					double sigma = 1.6;
 
-					Options() {}
+					Options() {
+						// Necessary for default initialization
+					}
 				};
 
 				/**

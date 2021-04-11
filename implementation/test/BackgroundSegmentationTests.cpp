@@ -3,7 +3,7 @@
 //
 #include "gtest/gtest.h"
 #include "ImageTestBase.hpp"
-#include "MOG2BackgroundSegmentation.hpp"
+#include "segmentation/MOG2BackgroundSegmentation.hpp"
 #include <iostream>
 
 namespace providentia {
