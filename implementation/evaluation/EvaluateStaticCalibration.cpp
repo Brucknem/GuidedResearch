@@ -27,7 +27,7 @@ public:
 	 * The itnrinsics of the pinhole camera model.
 	 */
 	Eigen::Matrix<double, 3, 4> intrinsics;
-	std::shared_ptr<providentia::calibration::CameraPoseEstimator> estimator;
+	std::shared_ptr<providentia::calibration::CameraPoseEstimation> estimator;
 
 	/**
 	 * The [width, height] of the image.
@@ -158,8 +158,7 @@ public:
 		objectsFile = (boost::filesystem::path(inputResource).parent_path() / "objects.yaml").string();
 
 		objects = providentia::calibration::loadObjects(objectsFile, pixelsFile, imageSize);
-		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics, true,
-																					powBase2(weightScale));
+		estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(intrinsics);
 		estimator->addWorldObjects(objects);
 		if (!dontRenderFinalFrame) {
 			cv::createTrackbar("Background", windowName, &trackbarBackground, 10);
@@ -329,7 +328,7 @@ protected:
 
 //			estimator.reset();
 //			auto count = estimator.unique();
-//			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics, true,
+//			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(intrinsics, true,
 //																						powBase2(weightScale));
 			estimator->setWeightPenalizeScale(powBase2(weightScale));
 			estimator->addWorldObjects(objects);

@@ -15,7 +15,7 @@ namespace providentia {
 		/**
 		 * Base class for the background segmentation wrappers.
 		 */
-		class BackgroundSegmentorBase : public providentia::utils::TimeMeasurable {
+		class BackgroundSegmentionBase : public providentia::utils::TimeMeasurable {
 		private:
 
 			/**
@@ -62,7 +62,7 @@ namespace providentia {
 			/**
 			 * @constructor
 			 */
-			explicit BackgroundSegmentorBase(cv::Size calculationSize = cv::Size());
+			explicit BackgroundSegmentionBase(cv::Size calculationSize = cv::Size());
 
 			/**
 			 * Add optional filters to the postprocessing step.
@@ -74,7 +74,7 @@ namespace providentia {
 			/**
 			 * @destructor
 			 */
-			~BackgroundSegmentorBase() override = default;
+			~BackgroundSegmentionBase() override = default;
 
 			/**
 			 * Appends the given frame to the internal history of writeFrames and calculates the background segmentation.
@@ -111,7 +111,7 @@ namespace providentia {
 		/**
 		 * Wrapper for the MOG2 background segmentation algorithm.
 		 */
-		class MOG2BackgroundSegmentor : public BackgroundSegmentorBase {
+		class MOG2BackgroundSegmention : public BackgroundSegmentionBase {
 		private:
 
 			/**
@@ -144,14 +144,14 @@ namespace providentia {
 			 * @param detectShadows If true, the algorithm will detect shadows and mark them. It decreases the
 			 * speed a bit, so if you do not need this feature, set the parameter to false.
 			 */
-			explicit MOG2BackgroundSegmentor(cv::Size calculationSize = cv::Size(), int history = 500,
+			explicit MOG2BackgroundSegmention(cv::Size calculationSize = cv::Size(), int history = 500,
 											 double varThreshold = 16,
 											 bool detectShadows = false);
 
 			/**
 			 * @desctructor
 			 */
-			~MOG2BackgroundSegmentor() override = default;
+			~MOG2BackgroundSegmention() override = default;
 		};
 	}
 }

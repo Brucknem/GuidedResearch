@@ -29,7 +29,7 @@ namespace providentia {
 		/**
 		 * Estimates the camera pose from some known correspondences between the world and image.
 		 */
-		class CameraPoseEstimator {
+		class CameraPoseEstimation {
 		private:
 			cv::RNG rng;
 			std::vector<ceres::ResidualBlockId> correspondenceResiduals;
@@ -137,13 +137,12 @@ namespace providentia {
 			 *
 			 * @param intrinsics The intrinsics of the pinhole camera model.
 			 */
-			explicit CameraPoseEstimator(Eigen::Matrix<double, 3, 4> intrinsics, bool initLogging = true,
-										 double weightPenalizeScale = std::numeric_limits<double>::max());
+			explicit CameraPoseEstimation(Eigen::Matrix<double, 3, 4> intrinsics);
 
 			/**
 			 * @destructor
 			 */
-			virtual ~CameraPoseEstimator() = default;
+			virtual ~CameraPoseEstimation() = default;
 
 			void addWorldObject(const WorldObject &worldObject);
 
@@ -181,7 +180,7 @@ namespace providentia {
 
 			bool isOptimizationFinished() const;
 
-			friend std::ostream &operator<<(std::ostream &os, const CameraPoseEstimator &estimator);
+			friend std::ostream &operator<<(std::ostream &os, const CameraPoseEstimation &estimator);
 
 			double getWeightPenalizeScale() const;
 

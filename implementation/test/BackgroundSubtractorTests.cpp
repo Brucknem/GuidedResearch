@@ -24,7 +24,7 @@ namespace providentia {
 		 * Tests that the MOG2 background segmentor gives a only black mask for all the same image.
 		 */
 		TEST_F(BackgroundSegmentationTests, testMOG2BackgroundSubtractorRuns) {
-			providentia::segmentation::MOG2BackgroundSegmentor segmentor;
+			providentia::segmentation::MOG2BackgroundSegmention segmentor;
 			for (int i = 0; i < 20; i++) {
 				segmentor.segment(testImgGPU);
 			}

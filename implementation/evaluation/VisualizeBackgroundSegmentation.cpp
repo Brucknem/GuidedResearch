@@ -12,11 +12,11 @@ private:
 	/**
 	 * The matcher used to match the features.
 	 */
-	std::shared_ptr<providentia::segmentation::BackgroundSegmentorBase> segmentor;
+	std::shared_ptr<providentia::segmentation::BackgroundSegmentionBase> segmentor;
 
 public:
 	explicit Setup() : VideoSetup() {
-		segmentor = std::make_shared<providentia::segmentation::MOG2BackgroundSegmentor>();
+		segmentor = std::make_shared<providentia::segmentation::MOG2BackgroundSegmention>();
 	}
 
 	void specificMainLoop() override {

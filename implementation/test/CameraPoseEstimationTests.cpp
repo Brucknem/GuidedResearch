@@ -17,7 +17,7 @@ namespace providentia {
 		class CameraPoseEstimationTests : public CameraTestBase {
 		protected:
 
-			std::shared_ptr<providentia::calibration::CameraPoseEstimator> estimator;
+			std::shared_ptr<providentia::calibration::CameraPoseEstimation> estimator;
 
 			/**
 			 * @destructor
@@ -90,7 +90,7 @@ namespace providentia {
 		 * Tests that the initial guess is 500m above the mean.
 		 */
 		TEST_F(CameraPoseEstimationTests, testCalculateInitialGuess) {
-			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
+			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(
 				intrinsics, false, false
 			);
 
@@ -111,7 +111,7 @@ namespace providentia {
 		 * Tests that the optimization converges to the expected extrinsic parameters.
 		 */
 		TEST_F(CameraPoseEstimationTests, testEstimationOnlyWorldPositions) {
-			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
+			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(
 				intrinsics, false, false
 			);
 			addSomePointCorrespondences();
@@ -123,7 +123,7 @@ namespace providentia {
 		 * Tests that the optimization converges to the expected extrinsic parameters.
 		 */
 		TEST_F(CameraPoseEstimationTests, testEstimationOnlyLines) {
-			estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(
+			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(
 				intrinsics, false, false
 			);
 

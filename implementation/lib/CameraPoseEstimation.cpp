@@ -11,20 +11,19 @@
 namespace providentia {
 	namespace calibration {
 
-		CameraPoseEstimator::CameraPoseEstimator(Eigen::Matrix<double, 3, 4> intrinsics, bool initLogging,
-												 double weightPenalizeScale) :
-			intrinsics(std::move(intrinsics)), weightPenalizeScale(weightPenalizeScale) {
+		CameraPoseEstimation::CameraPoseEstimation(Eigen::Matrix<double, 3, 4> intrinsics) :
+			intrinsics(std::move(intrinsics)) {
 		}
 
-		const Eigen::Vector3d &CameraPoseEstimator::getTranslation() const {
+		const Eigen::Vector3d &CameraPoseEstimation::getTranslation() const {
 			return translation;
 		}
 
-		const Eigen::Vector3d &CameraPoseEstimator::getRotation() const {
+		const Eigen::Vector3d &CameraPoseEstimation::getRotation() const {
 			return rotation;
 		}
 
-		void CameraPoseEstimator::calculateInitialGuess() {
+		void CameraPoseEstimation::calculateInitialGuess() {
 			if (!hasTranslationGuess) {
 				Eigen::Vector3d mean = calculateMean();
 
@@ -40,7 +39,7 @@ namespace providentia {
 			}
 		}
 
-		Eigen::Vector3d CameraPoseEstimator::calculateMean() {
+		Eigen::Vector3d CameraPoseEstimation::calculateMean() {
 			Eigen::Vector3d meanVector(0, 0, 0);
 			for (const auto &worldObject : worldObjects) {
 				meanVector += worldObject.getMean();
@@ -48,7 +47,7 @@ namespace providentia {
 			return meanVector / worldObjects.size();
 		}
 
-		Eigen::Vector3d CameraPoseEstimator::calculateFurthestPoint(const Eigen::Vector3d &mean) {
+		Eigen::Vector3d CameraPoseEstimation::calculateFurthestPoint(const Eigen::Vector3d &mean) {
 			Eigen::Vector3d furthestPoint{0, 0, 0};
 			double maxDistance = 0;
 			for (const auto &worldObject : worldObjects) {
@@ -63,13 +62,13 @@ namespace providentia {
 			return furthestPoint;
 		}
 
-		std::thread CameraPoseEstimator::estimateAsync(bool logSummary) {
-			auto thread = std::thread(&CameraPoseEstimator::estimate, this, logSummary);
+		std::thread CameraPoseEstimation::estimateAsync(bool logSummary) {
+			auto thread = std::thread(&CameraPoseEstimation::estimate, this, logSummary);
 			thread.detach();
 			return thread;
 		}
 
-		void CameraPoseEstimator::solveProblem(bool logSummary) {
+		void CameraPoseEstimation::solveProblem(bool logSummary) {
 			auto problem = createProblem();
 			auto options = setupOptions(logSummary);
 			Solve(options, &problem, &summary);
@@ -80,7 +79,7 @@ namespace providentia {
 			evaluateWeightResiduals(problem);
 		}
 
-		void CameraPoseEstimator::estimate(bool logSummary) {
+		void CameraPoseEstimation::estimate(bool logSummary) {
 			optimizationFinished = false;
 			foundValidSolution = false;
 			int i = 0;
@@ -113,7 +112,7 @@ namespace providentia {
 
 		}
 
-		ceres::Solver::Options CameraPoseEstimator::setupOptions(bool logSummary) {
+		ceres::Solver::Options CameraPoseEstimation::setupOptions(bool logSummary) {
 			ceres::Solver::Options options;
 			options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
 //			options.trust_region_strategy_type = ceres::DOGLEG;
@@ -127,11 +126,11 @@ namespace providentia {
 			return options;
 		}
 
-		ceres::ScaledLoss *CameraPoseEstimator::getScaledHuberLoss(double scale) {
+		ceres::ScaledLoss *CameraPoseEstimation::getScaledHuberLoss(double scale) {
 			return getScaledHuberLoss(1.0, scale);
 		}
 
-		ceres::ScaledLoss *CameraPoseEstimator::getScaledHuberLoss(double huber, double scale) {
+		ceres::ScaledLoss *CameraPoseEstimation::getScaledHuberLoss(double huber, double scale) {
 			return new ceres::ScaledLoss(
 				new ceres::HuberLoss(huber),
 				scale,
@@ -139,7 +138,7 @@ namespace providentia {
 			);
 		}
 
-		ceres::Problem CameraPoseEstimator::createProblem() {
+		ceres::Problem CameraPoseEstimation::createProblem() {
 			auto problem = ceres::Problem();
 			for (auto p : weights) {
 				delete p;
@@ -200,7 +199,7 @@ namespace providentia {
 			return problem;
 		}
 
-		void CameraPoseEstimator::addRotationConstraints(ceres::Problem &problem) {
+		void CameraPoseEstimation::addRotationConstraints(ceres::Problem &problem) {
 			rotationResiduals.clear();
 			rotationResiduals.emplace_back(problem.AddResidualBlock(
 				DistanceFromIntervalResidual::create(60, 110),
@@ -214,7 +213,7 @@ namespace providentia {
 			));
 		}
 
-		void CameraPoseEstimator::addTranslationConstraints(ceres::Problem &problem) {
+		void CameraPoseEstimation::addTranslationConstraints(ceres::Problem &problem) {
 //			int x_interval = 5000;
 //			int y_interval = 5000;
 //			int z_interval = 300;
@@ -237,38 +236,38 @@ namespace providentia {
 			);
 		}
 
-		void CameraPoseEstimator::guessRotation(const Eigen::Vector3d &value) {
+		void CameraPoseEstimation::guessRotation(const Eigen::Vector3d &value) {
 			hasRotationGuess = true;
 			initialRotation = value;
 			rotation = value;
 		}
 
-		void CameraPoseEstimator::guessTranslation(const Eigen::Vector3d &value) {
+		void CameraPoseEstimation::guessTranslation(const Eigen::Vector3d &value) {
 			hasTranslationGuess = true;
 			initialTranslation = value;
 			translation = value;
 			initialDistanceFromMean = 0;
 		}
 
-		void CameraPoseEstimator::addWorldObject(const WorldObject &worldObject) {
+		void CameraPoseEstimation::addWorldObject(const WorldObject &worldObject) {
 			worldObjects.emplace_back(worldObject);
 		}
 
-		void CameraPoseEstimator::addWorldObjects(const std::vector<WorldObject> &vector) {
+		void CameraPoseEstimation::addWorldObjects(const std::vector<WorldObject> &vector) {
 			for (const auto &worldObject : vector) {
 				addWorldObject(worldObject);
 			}
 		}
 
-		const std::vector<providentia::calibration::WorldObject> &CameraPoseEstimator::getWorldObjects() const {
+		const std::vector<providentia::calibration::WorldObject> &CameraPoseEstimation::getWorldObjects() const {
 			return worldObjects;
 		}
 
-		bool CameraPoseEstimator::isOptimizationFinished() const {
+		bool CameraPoseEstimation::isOptimizationFinished() const {
 			return optimizationFinished;
 		}
 
-		std::ostream &operator<<(std::ostream &os, const CameraPoseEstimator &estimator) {
+		std::ostream &operator<<(std::ostream &os, const CameraPoseEstimation &estimator) {
 			os << "Translation:" << std::endl;
 			os << "From:       " << printVectorRow(estimator.initialTranslation) << std::endl;
 			os << "To:         " << printVectorRow(estimator.translation) << std::endl;
@@ -287,19 +286,19 @@ namespace providentia {
 			return os;
 		}
 
-		double CameraPoseEstimator::getWeightPenalizeScale() const {
+		double CameraPoseEstimation::getWeightPenalizeScale() const {
 			return weightPenalizeScale;
 		}
 
-		void CameraPoseEstimator::setWeightPenalizeScale(double value) {
+		void CameraPoseEstimation::setWeightPenalizeScale(double value) {
 			weightPenalizeScale = value;
 		}
 
-		void CameraPoseEstimator::clearWorldObjects() {
+		void CameraPoseEstimation::clearWorldObjects() {
 			worldObjects.clear();
 		}
 
-		std::vector<double> CameraPoseEstimator::getWeights() {
+		std::vector<double> CameraPoseEstimation::getWeights() {
 			std::vector<double> result;
 			result.reserve(weights.size());
 			std::transform(std::begin(weights), std::end(weights),
@@ -308,7 +307,7 @@ namespace providentia {
 			return result;
 		}
 
-		std::vector<double> CameraPoseEstimator::getLambdas() {
+		std::vector<double> CameraPoseEstimation::getLambdas() {
 			std::vector<double> result;
 			for (auto &worldObject : worldObjects) {
 				for (auto &point : worldObject.getPoints()) {
@@ -322,77 +321,77 @@ namespace providentia {
 		}
 
 		double
-		CameraPoseEstimator::evaluate(ceres::Problem &problem, const ceres::Problem::EvaluateOptions &evaluateOptions) {
+		CameraPoseEstimation::evaluate(ceres::Problem &problem, const ceres::Problem::EvaluateOptions &evaluateOptions) {
 			double loss;
 			std::vector<double> residuals;
 			problem.Evaluate(evaluateOptions, &loss, &residuals, nullptr, nullptr);
 			return loss;
 		}
 
-		double CameraPoseEstimator::evaluate(ceres::Problem &problem, const std::vector<ceres::ResidualBlockId>
+		double CameraPoseEstimation::evaluate(ceres::Problem &problem, const std::vector<ceres::ResidualBlockId>
 		&blockIds) {
 			auto evaluateOptions = ceres::Problem::EvaluateOptions();
 			evaluateOptions.residual_blocks = blockIds;
 			return evaluate(problem, evaluateOptions);
 		}
 
-		void CameraPoseEstimator::evaluateAllResiduals(ceres::Problem &problem) {
+		void CameraPoseEstimation::evaluateAllResiduals(ceres::Problem &problem) {
 			totalLoss = evaluate(problem);
 		}
 
-		void CameraPoseEstimator::evaluateCorrespondenceResiduals(ceres::Problem &problem) {
+		void CameraPoseEstimation::evaluateCorrespondenceResiduals(ceres::Problem &problem) {
 			correspondencesLoss = evaluate(problem, correspondenceResiduals);
 		}
 
-		void CameraPoseEstimator::evaluateLambdaResiduals(ceres::Problem &problem) {
+		void CameraPoseEstimation::evaluateLambdaResiduals(ceres::Problem &problem) {
 			lambdasLoss = evaluate(problem, lambdaResiduals);
 		}
 
-		void CameraPoseEstimator::evaluateWeightResiduals(ceres::Problem &problem) {
+		void CameraPoseEstimation::evaluateWeightResiduals(ceres::Problem &problem) {
 			weightsLoss = evaluate(problem, weightResiduals);
 		}
 
-		void CameraPoseEstimator::evaluateRotationResiduals(ceres::Problem &problem) {
+		void CameraPoseEstimation::evaluateRotationResiduals(ceres::Problem &problem) {
 			rotationsLoss = evaluate(problem, rotationResiduals);
 		}
 
-		double CameraPoseEstimator::getLambdaPenalizeScale() const {
+		double CameraPoseEstimation::getLambdaPenalizeScale() const {
 			return lambdaPenalizeScale;
 		}
 
-		void CameraPoseEstimator::setLambdaPenalizeScale(double value) {
-			CameraPoseEstimator::lambdaPenalizeScale = value;
+		void CameraPoseEstimation::setLambdaPenalizeScale(double value) {
+			CameraPoseEstimation::lambdaPenalizeScale = value;
 		}
 
-		double CameraPoseEstimator::getRotationPenalizeScale() const {
+		double CameraPoseEstimation::getRotationPenalizeScale() const {
 			return rotationPenalizeScale;
 		}
 
-		void CameraPoseEstimator::setRotationPenalizeScale(double value) {
+		void CameraPoseEstimation::setRotationPenalizeScale(double value) {
 			rotationPenalizeScale = value;
 		}
 
-		bool CameraPoseEstimator::hasFoundValidSolution() const {
+		bool CameraPoseEstimation::hasFoundValidSolution() const {
 			return foundValidSolution;
 		}
 
-		double CameraPoseEstimator::getLambdasLoss() const {
+		double CameraPoseEstimation::getLambdasLoss() const {
 			return lambdasLoss;
 		}
 
-		double CameraPoseEstimator::getCorrespondencesLoss() const {
+		double CameraPoseEstimation::getCorrespondencesLoss() const {
 			return correspondencesLoss;
 		}
 
-		double CameraPoseEstimator::getRotationsLoss() const {
+		double CameraPoseEstimation::getRotationsLoss() const {
 			return rotationsLoss;
 		}
 
-		double CameraPoseEstimator::getWeightsLoss() const {
+		double CameraPoseEstimation::getWeightsLoss() const {
 			return weightsLoss;
 		}
 
-		double CameraPoseEstimator::getTotalLoss() const {
+		double CameraPoseEstimation::getTotalLoss() const {
 			return totalLoss;
 		}
 

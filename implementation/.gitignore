@@ -81,4 +81,5 @@ latex/*
 # CMake
 cmake-**/**
 
-
+.history
+.vscode

@@ -21,7 +21,7 @@ public:
 	 * The itnrinsics of the pinhole camera model.
 	 */
 	Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getS40NCamFarIntrinsics();
-	std::shared_ptr<providentia::calibration::CameraPoseEstimator> estimator;
+	std::shared_ptr<providentia::calibration::CameraPoseEstimation> estimator;
 
 	/**
 	 * The [width, height] of the image.
@@ -87,7 +87,7 @@ public:
 		objects = providentia::calibration::LoadObjects("../misc/objects.yaml", pixelsFile,
 														imageSize);
 
-		estimator = std::make_shared<providentia::calibration::CameraPoseEstimator>(intrinsics, true,
+		estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(intrinsics, true,
 																					std::pow(2, trackbarWeightScale));
 //		estimator->setInitialGuess(initialTranslation, initialRotation);
 

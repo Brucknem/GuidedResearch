@@ -9,7 +9,7 @@ namespace providentia {
 
 #pragma region BackgroundSegmentorBase
 
-		void BackgroundSegmentorBase::segment(const cv::cuda::GpuMat &frame) {
+		void BackgroundSegmentionBase::segment(const cv::cuda::GpuMat &frame) {
 			clear();
 
 			if (calculationSize.empty()) {
@@ -33,14 +33,14 @@ namespace providentia {
 			addTimestamp("Background segmentation finished", 0);
 		}
 
-		void BackgroundSegmentorBase::postProcess() {
+		void BackgroundSegmentionBase::postProcess() {
 			for (const auto &filter : filters) {
 				filter->apply(foregroundMask, foregroundMask, stream);
 			}
 		}
 
 		const cv::cuda::GpuMat &
-		BackgroundSegmentorBase::getForegroundMask(const cv::Size &size) {
+		BackgroundSegmentionBase::getForegroundMask(const cv::Size &size) {
 			if (foregroundMask.empty() ||
 				cv::cuda::countNonZero(foregroundMask) == foregroundMask.size().width * foregroundMask.size().height) {
 				clearMasks(size);
@@ -49,7 +49,7 @@ namespace providentia {
 		}
 
 		const cv::cuda::GpuMat &
-		BackgroundSegmentorBase::getBackgroundMask(const cv::Size &size) {
+		BackgroundSegmentionBase::getBackgroundMask(const cv::Size &size) {
 			if (backgroundMask.empty() ||
 				cv::cuda::countNonZero(backgroundMask) == 0) {
 				clearMasks(size);
@@ -60,24 +60,24 @@ namespace providentia {
 			return backgroundMask;
 		}
 
-		cv::Mat BackgroundSegmentorBase::draw() const {
+		cv::Mat BackgroundSegmentionBase::draw() const {
 			cv::Mat result;
 			cv::hconcat(std::vector<cv::Mat>{cv::Mat(backgroundMask), cv::Mat(foregroundMask)}, result);
 			cv::cvtColor(result, result, cv::COLOR_GRAY2BGR);
 			return result;
 		}
 
-		void BackgroundSegmentorBase::clearMasks(const cv::Size &size) {
+		void BackgroundSegmentionBase::clearMasks(const cv::Size &size) {
 			foregroundMask.upload(cv::Mat::ones(size, CV_8UC1) * 0);
 			backgroundMask.upload(cv::Mat::ones(size, CV_8UC1) * 255);
 		}
 
-		BackgroundSegmentorBase::BackgroundSegmentorBase(cv::Size size)
+		BackgroundSegmentionBase::BackgroundSegmentionBase(cv::Size size)
 			: providentia::utils::TimeMeasurable(
-			"BackgroundSegmentorBase", 1), calculationSize(std::move(size)) {
+			"BackgroundSegmentionBase", 1), calculationSize(std::move(size)) {
 		}
 
-		void BackgroundSegmentorBase::addFilters() {
+		void BackgroundSegmentionBase::addFilters() {
 			// Optional filters can be added by overriding this function.
 		}
 
@@ -85,21 +85,21 @@ namespace providentia {
 
 #pragma region MOG2BackgroundSegmentor
 
-		MOG2BackgroundSegmentor::MOG2BackgroundSegmentor(cv::Size calculationSize,
+		MOG2BackgroundSegmention::MOG2BackgroundSegmention(cv::Size calculationSize,
 														 int history,
 														 double varThreshold,
 														 bool detectShadows)
-			: BackgroundSegmentorBase(std::move(calculationSize)) {
+			: BackgroundSegmentionBase(std::move(calculationSize)) {
 			algorithm = cv::cuda::createBackgroundSubtractorMOG2(history, varThreshold, detectShadows);
 			addFilters();
 		}
 
-		void MOG2BackgroundSegmentor::specificApply() {
+		void MOG2BackgroundSegmention::specificApply() {
 			algorithm->apply(calculationFrame, foregroundMask, -1, stream);
 		}
 
-		void MOG2BackgroundSegmentor::addFilters() {
-			BackgroundSegmentorBase::addFilters();
+		void MOG2BackgroundSegmention::addFilters() {
+			BackgroundSegmentionBase::addFilters();
 
 //    filters.emplace_back(cv::cuda::createMorphologyFilter(cv::MORPH_OPEN, CV_8UC1,
 //                                                          cv::getStructuringElement(cv::MORPH_RECT,

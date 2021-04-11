@@ -50,7 +50,7 @@ namespace providentia {
 			/**
 			 * Generates the foreground background masks.
 			 */
-			std::shared_ptr<providentia::segmentation::BackgroundSegmentorBase> segmentor;
+			std::shared_ptr<providentia::segmentation::BackgroundSegmentionBase> segmentor;
 
 			/**
 			 * @constructor
@@ -71,7 +71,7 @@ namespace providentia {
 			/**
 			 * @get The background segmentor used to mask the writeFrames.
 			 */
-			const std::shared_ptr<providentia::segmentation::BackgroundSegmentorBase> &getSegmentor() const;
+			const std::shared_ptr<providentia::segmentation::BackgroundSegmentionBase> &getSegmentor() const;
 
 			/**
 			 * @get The feature detector for the current frame.
