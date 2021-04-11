@@ -8,17 +8,9 @@
 
 namespace providentia {
 	namespace stabilization {
-		ORBBFDynamicStabilization::ORBBFDynamicStabilization(int nfeatures, float scaleFactor,
-													   int nlevels, int edgeThreshold,
-													   int firstLevel, int wtaK,
-													   int scoreType,
-													   int patchSize, int fastThreshold,
-													   bool blurForDescriptor) {
-			auto detector = providentia::stabilization::detection::ORBFeatureDetection(nfeatures, scaleFactor,
-																					  nlevels, edgeThreshold,
-																					  firstLevel, wtaK, scoreType,
-																					  patchSize, fastThreshold,
-																					  blurForDescriptor);
+		ORBBFDynamicStabilization::ORBBFDynamicStabilization(
+			providentia::stabilization::detection::ORBFeatureDetection::Options options) {
+			auto detector = providentia::stabilization::detection::ORBFeatureDetection(options);
 			frameFeatureDetector = std::make_shared<providentia::stabilization::detection::ORBFeatureDetection>(
 				detector);
 			referenceFeatureDetector = std::make_shared<providentia::stabilization::detection::ORBFeatureDetection>(

@@ -35,17 +35,24 @@ namespace providentia {
 				void specificDetect() override;
 
 			public:
+				struct Options {
+					int maxSize = 45;
+					int responseThreshold = 30;
+					int lineThresholdProjected = 10;
+					int lineThresholdBinarized = 8;
+					int suppressNonmaxSize = 5;
+					int bytes = 64;
+					bool useOrientation = false;
+
+					Options() {}
+				};
 
 				/**
 				 * @constructor
 				 *
 				 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
 				 */
-				explicit StarBRIEFFeatureDetection(int maxSize = 45, int responseThreshold = 30,
-												   int lineThresholdProjected = 10,
-												   int lineThresholdBinarized = 8,
-												   int suppressNonmaxSize = 5,
-												   int bytes = 64, bool useOrientation = false);
+				explicit StarBRIEFFeatureDetection(Options options = {});
 
 				/**
 				 * @destructor

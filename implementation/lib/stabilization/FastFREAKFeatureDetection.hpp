@@ -36,20 +36,26 @@ namespace providentia {
 
 			public:
 
+				struct Options {
+					int threshold = 40;
+					bool nonmaxSuppression = true;
+					cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16;
+					int maxNPoints = 500000;
+					bool orientationNormalized = true;
+					bool scaleNormalized = true;
+					float patternScale = 22.0f;
+					int nOctaves = 4;
+					std::vector<int> selectedPairs = std::vector<int>();
+
+					Options() {}
+				};
+
 				/**
 				 * @constructor
 				 *
 				 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
 				 */
-				explicit FastFREAKFeatureDetection(int threshold = 40,
-												   bool nonmaxSuppression = true,
-												   cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16,
-												   int maxNPoints = 500000,
-												   bool orientationNormalized = true,
-												   bool scaleNormalized = true,
-												   float patternScale = 22.0f,
-												   int nOctaves = 4,
-												   const std::vector<int> &selectedPairs = std::vector<int>());
+				explicit FastFREAKFeatureDetection(Options options = Options());
 
 				/**
 				 * @destructor

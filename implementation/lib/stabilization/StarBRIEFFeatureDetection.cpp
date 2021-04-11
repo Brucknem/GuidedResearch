@@ -8,14 +8,12 @@ namespace providentia {
 	namespace stabilization {
 		namespace detection {
 
-			StarBRIEFFeatureDetection::StarBRIEFFeatureDetection(int maxSize, int responseThreshold,
-															   int lineThresholdProjected,
-															   int lineThresholdBinarized,
-															   int suppressNonmaxSize, int bytes,
-															   bool useOrientation) {
-				detector = cv::xfeatures2d::StarDetector::create(maxSize, responseThreshold, lineThresholdProjected,
-																 lineThresholdBinarized, suppressNonmaxSize);
-				descriptor = cv::xfeatures2d::BriefDescriptorExtractor::create(bytes, useOrientation);
+			StarBRIEFFeatureDetection::StarBRIEFFeatureDetection(Options options) {
+				detector = cv::xfeatures2d::StarDetector::create(options.maxSize, options.responseThreshold,
+																 options.lineThresholdProjected,
+																 options.lineThresholdBinarized,
+																 options.suppressNonmaxSize);
+				descriptor = cv::xfeatures2d::BriefDescriptorExtractor::create(options.bytes, options.useOrientation);
 				providentia::utils::TimeMeasurable::setName(typeid(*this).name());
 			}
 

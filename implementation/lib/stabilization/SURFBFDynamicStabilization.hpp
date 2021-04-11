@@ -6,6 +6,7 @@
 #define CAMERASTABILIZATION_SURFBFDYNAMICSTABILIZATION_HPP
 
 #include "DynamicStabilizationBase.hpp"
+#include "SURFFeatureDetection.hpp"
 
 namespace providentia {
 	namespace stabilization {
@@ -17,10 +18,8 @@ namespace providentia {
 			/**
 			 * @constructor
 			 */
-			explicit SURFBFDynamicStabilization(double hessianThreshold = 1000, int nOctaves = 4,
-												int nOctaveLayers = 2, bool extended = false,
-												float keypointsRatio = 0.01f,
-												bool upright = false);
+			explicit SURFBFDynamicStabilization(
+				providentia::stabilization::detection::SURFFeatureDetection::Options = {});
 
 			/**
 			 * @destructor

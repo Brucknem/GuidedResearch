@@ -8,12 +8,11 @@ namespace providentia {
 	namespace stabilization {
 		namespace detection {
 
-			ORBFeatureDetection::ORBFeatureDetection(int nfeatures, float scaleFactor, int nlevels,
-												   int edgeThreshold, int firstLevel, int wtaK,
-												   int scoreType, int patchSize, int fastThreshold,
-												   bool blurForDescriptor) {
-				detector = cv::cuda::ORB::create(nfeatures, scaleFactor, nlevels, edgeThreshold, firstLevel, wtaK,
-												 scoreType, patchSize, fastThreshold, blurForDescriptor);
+			ORBFeatureDetection::ORBFeatureDetection(Options options) {
+				detector = cv::cuda::ORB::create(options.nfeatures, options.scaleFactor, options.nlevels,
+												 options.edgeThreshold, options.firstLevel, options.wtaK,
+												 options.scoreType, options.patchSize, options.fastThreshold,
+												 options.blurForDescriptor);
 				providentia::utils::TimeMeasurable::setName(typeid(*this).name());
 			}
 

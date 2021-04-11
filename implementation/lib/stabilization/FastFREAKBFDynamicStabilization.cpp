@@ -8,22 +8,9 @@
 
 namespace providentia {
 	namespace stabilization {
-		FastFREAKBFDynamicStabilization::FastFREAKBFDynamicStabilization(int threshold,
-																   bool nonmaxSuppression,
-																   cv::FastFeatureDetector::DetectorType type,
-																   int maxNPoints,
-																   bool orientationNormalized,
-																   bool scaleNormalized,
-																   float patternScale,
-																   int nOctaves,
-																   const std::vector<int> &selectedPairs) {
-			auto detector = providentia::stabilization::detection::FastFREAKFeatureDetection(threshold,
-																							nonmaxSuppression, type,
-																							maxNPoints,
-																							orientationNormalized,
-																							scaleNormalized,
-																							patternScale, nOctaves,
-																							selectedPairs);
+		FastFREAKBFDynamicStabilization::FastFREAKBFDynamicStabilization
+			(providentia::stabilization::detection::FastFREAKFeatureDetection::Options options) {
+			auto detector = providentia::stabilization::detection::FastFREAKFeatureDetection(options);
 			frameFeatureDetector = std::make_shared<providentia::stabilization::detection::FastFREAKFeatureDetection>(
 				detector);
 			referenceFeatureDetector = std::make_shared<providentia::stabilization::detection::FastFREAKFeatureDetection>(

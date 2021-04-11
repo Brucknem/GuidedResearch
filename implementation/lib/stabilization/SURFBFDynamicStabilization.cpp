@@ -8,15 +8,9 @@
 
 namespace providentia {
 	namespace stabilization {
-		SURFBFDynamicStabilization::SURFBFDynamicStabilization(double hessianThreshold,
-															   int nOctaves,
-															   int nOctaveLayers,
-															   bool extended,
-															   float keypointsRatio,
-															   bool upright) {
-			auto detector = providentia::stabilization::detection::SURFFeatureDetection(hessianThreshold, nOctaves,
-																					   nOctaveLayers, extended,
-																					   keypointsRatio, upright);
+		SURFBFDynamicStabilization::SURFBFDynamicStabilization(
+			providentia::stabilization::detection::SURFFeatureDetection::Options options) {
+			auto detector = providentia::stabilization::detection::SURFFeatureDetection(options);
 			providentia::stabilization::DynamicStabilizationBase::frameFeatureDetector = std::make_shared<providentia::stabilization::detection::SURFFeatureDetection>(
 				detector);
 			providentia::stabilization::DynamicStabilizationBase::referenceFeatureDetector = std::make_shared<providentia::stabilization::detection::SURFFeatureDetection>(

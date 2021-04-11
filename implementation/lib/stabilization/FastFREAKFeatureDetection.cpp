@@ -7,18 +7,12 @@
 namespace providentia {
 	namespace stabilization {
 		namespace detection {
-			FastFREAKFeatureDetection::FastFREAKFeatureDetection(int threshold, bool nonmaxSuppression,
-															   cv::FastFeatureDetector::DetectorType type,
-															   int maxNPoints,
-															   bool orientationNormalized,
-															   bool scaleNormalized,
-															   float patternScale,
-															   int nOctaves,
-															   const std::vector<int> &selectedPairs) {
-				detector = cv::cuda::FastFeatureDetector::create(threshold, nonmaxSuppression, type, maxNPoints);
-				descriptor = cv::xfeatures2d::FREAK::create(orientationNormalized, scaleNormalized, patternScale,
-															nOctaves,
-															selectedPairs);
+			FastFREAKFeatureDetection::FastFREAKFeatureDetection(Options options) {
+				detector = cv::cuda::FastFeatureDetector::create(options.threshold, options.nonmaxSuppression,
+																 options.type, options.maxNPoints);
+				descriptor = cv::xfeatures2d::FREAK::create(options.orientationNormalized, options.scaleNormalized,
+															options.patternScale, options.nOctaves,
+															options.selectedPairs);
 				providentia::utils::TimeMeasurable::setName(typeid(*this).name());
 			}
 

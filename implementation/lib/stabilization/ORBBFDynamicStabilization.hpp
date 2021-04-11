@@ -6,6 +6,7 @@
 #define CAMERASTABILIZATION_ORBBFDYNAMICSTABILIZATION_HPP
 
 #include "DynamicStabilizationBase.hpp"
+#include "ORBFeatureDetection.hpp"
 
 namespace providentia {
 	namespace stabilization {
@@ -17,16 +18,8 @@ namespace providentia {
 			/**
 			 * @constructor
 			 */
-			explicit ORBBFDynamicStabilization(int nfeatures = 1e4,
-											   float scaleFactor = 1.2f,
-											   int nlevels = 8,
-											   int edgeThreshold = 31,
-											   int firstLevel = 0,
-											   int wtaK = 2,
-											   int scoreType = cv::ORB::FAST_SCORE,
-											   int patchSize = 31,
-											   int fastThreshold = 20,
-											   bool blurForDescriptor = false);
+			explicit ORBBFDynamicStabilization(
+				providentia::stabilization::detection::ORBFeatureDetection::Options options = {});
 
 			/**
 			 * @destructor

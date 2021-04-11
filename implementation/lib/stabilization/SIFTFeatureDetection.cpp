@@ -8,10 +8,9 @@ namespace providentia {
 	namespace stabilization {
 		namespace detection {
 
-			SIFTFeatureDetection::SIFTFeatureDetection(int nfeatures, int nOctaveLayers,
-													 double contrastThreshold, double edgeThreshold,
-													 double sigma) {
-				detector = cv::SIFT::create(nfeatures, nOctaveLayers, contrastThreshold, edgeThreshold, sigma);
+			SIFTFeatureDetection::SIFTFeatureDetection(Options options) {
+				detector = cv::SIFT::create(options.nfeatures, options.nOctaveLayers, options.contrastThreshold,
+											options.edgeThreshold, options.sigma);
 				setName(typeid(*this).name());
 			}
 

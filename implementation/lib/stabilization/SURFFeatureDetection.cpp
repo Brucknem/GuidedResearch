@@ -8,11 +8,10 @@ namespace providentia {
 	namespace stabilization {
 		namespace detection {
 
-			SURFFeatureDetection::SURFFeatureDetection(double hessianThreshold, int nOctaves,
-													 int nOctaveLayers, bool extended,
-													 float keypointsRatio, bool upright) {
-				detector = cv::cuda::SURF_CUDA::create(hessianThreshold, nOctaves, nOctaveLayers, extended,
-													   keypointsRatio, upright);
+			SURFFeatureDetection::SURFFeatureDetection(Options options) {
+				detector = cv::cuda::SURF_CUDA::create(options.hessianThreshold, options.nOctaves,
+													   options.nOctaveLayers, options.extended,
+													   options.keypointsRatio, options.upright);
 				providentia::utils::TimeMeasurable::setName(typeid(*this).name());
 			}
 

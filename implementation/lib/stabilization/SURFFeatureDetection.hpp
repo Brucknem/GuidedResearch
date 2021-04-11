@@ -35,15 +35,23 @@ namespace providentia {
 
 			public:
 
+				struct Options {
+					double hessianThreshold = 500;
+					int nOctaves = 4;
+					int nOctaveLayers = 2;
+					bool extended = false;
+					float keypointsRatio = 0.01f;
+					bool upright = false;
+
+					Options() {};
+				};
+
 				/**
 				 * @constructor
 				 *
 				 * @ref opencv2/xfeatures2d/cuda.hpp -> cv::cuda::SURF_CUDA::create
 				 */
-				explicit SURFFeatureDetection(double hessianThreshold = 500, int nOctaves = 4,
-											  int nOctaveLayers = 2, bool extended = false,
-											  float keypointsRatio = 0.01f,
-											  bool upright = false);
+				explicit SURFFeatureDetection(Options options = Options());
 
 				/**
 				 * @destructor

@@ -6,6 +6,7 @@
 #define CAMERASTABILIZATION_FASTFREAKBFDYNAMICSTABILIZATION_HPP
 
 #include "DynamicStabilizationBase.hpp"
+#include "FastFREAKFeatureDetection.hpp"
 
 namespace providentia {
 	namespace stabilization {
@@ -17,15 +18,8 @@ namespace providentia {
 			/**
 			 * @constructor
 			 */
-			explicit FastFREAKBFDynamicStabilization(int threshold = 50,
-													 bool nonmaxSuppression = true,
-													 cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16,
-													 int maxNPoints = 5000,
-													 bool orientationNormalized = true,
-													 bool scaleNormalized = true,
-													 float patternScale = 22.0f,
-													 int nOctaves = 4,
-													 const std::vector<int> &selectedPairs = std::vector<int>());
+			explicit FastFREAKBFDynamicStabilization(
+				providentia::stabilization::detection::FastFREAKFeatureDetection::Options options = {});
 
 			/**
 			 * @destructor

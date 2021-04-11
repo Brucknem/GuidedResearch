@@ -34,22 +34,27 @@ namespace providentia {
 				void specificDetect() override;
 
 			public:
+				struct Options {
+					int nfeatures = 1e4;
+					float scaleFactor = 1.2f;
+					int nlevels = 8;
+					int edgeThreshold = 31;
+					int firstLevel = 0;
+					int wtaK = 2;
+					int scoreType = cv::ORB::FAST_SCORE;
+					int patchSize = 31;
+					int fastThreshold = 20;
+					bool blurForDescriptor = false;
+
+					Options() {}
+				};
 
 				/**
 				 * @constructor
 				 *
 				 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::ORB::create
 				 */
-				explicit ORBFeatureDetection(int nfeatures = 1e4,
-											 float scaleFactor = 1.2f,
-											 int nlevels = 8,
-											 int edgeThreshold = 31,
-											 int firstLevel = 0,
-											 int wtaK = 2,
-											 int scoreType = cv::ORB::FAST_SCORE,
-											 int patchSize = 31,
-											 int fastThreshold = 20,
-											 bool blurForDescriptor = false);
+				explicit ORBFeatureDetection(Options options = Options());
 
 				/**
 				 * @destructor
