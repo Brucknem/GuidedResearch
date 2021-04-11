@@ -147,7 +147,7 @@ namespace providentia {
 
 			void addWorldObject(const WorldObject &worldObject);
 
-			void addWorldObjects(const std::vector<WorldObject> &worldObjects);
+			void addWorldObjects(const std::vector<WorldObject> &vector);
 
 			/**
 			 * Estimates the camera translation and rotation based on the known correspondences between the world and

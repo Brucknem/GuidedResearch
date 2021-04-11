@@ -11,19 +11,19 @@ namespace providentia {
 
 #pragma region Getters_Setters{
 
-		void FeatureDetectorBase::setCurrentMask(cv::Size _size) {
-			cv::Size size = std::move(_size);
-			if (size.empty()) {
-				size = frame.size();
+		void FeatureDetectorBase::setCurrentMask(cv::Size size) {
+			cv::Size sizeIntern = std::move(size);
+			if (sizeIntern.empty()) {
+				sizeIntern = processedFrame.size();
 			}
-			if (useLatestMask) {
+			if (useLatestMaskFlag) {
 				if (latestMask.empty()) {
-					latestMask.upload(cv::Mat::ones(size, CV_8UC1) * 255);
+					latestMask.upload(cv::Mat::ones(sizeIntern, CV_8UC1) * 255);
 				}
 				currentMask = latestMask;
 			} else {
-				if (noMask.empty() || noMask.size() != size) {
-					noMask.upload(cv::Mat::ones(size, CV_8UC1) * 255);
+				if (noMask.empty() || noMask.size() != sizeIntern) {
+					noMask.upload(cv::Mat::ones(sizeIntern, CV_8UC1) * 255);
 				}
 				currentMask = noMask;
 			}
@@ -33,25 +33,25 @@ namespace providentia {
 
 #pragma region FeatureDetectorBase
 
-		void FeatureDetectorBase::detect(const cv::cuda::GpuMat &_frame) {
+		void FeatureDetectorBase::detect(const cv::cuda::GpuMat &frame) {
 			clear();
-			originalFrame = _frame.clone();
-			cv::cuda::cvtColor(_frame, frame, cv::COLOR_BGR2GRAY);
-			frame.download(frameCPU);
+			originalFrame = frame.clone();
+			cv::cuda::cvtColor(frame, processedFrame, cv::COLOR_BGR2GRAY);
+			processedFrame.download(frameCPU);
 			setCurrentMask();
 			specificDetect();
 			addTimestamp("Detection finished", 0);
 		}
 
-		void FeatureDetectorBase::detect(const cv::cuda::GpuMat &_frame, bool _useLatestMask) {
-			useLatestMask = _useLatestMask;
-			detect(_frame);
+		void FeatureDetectorBase::detect(const cv::cuda::GpuMat &frame, bool useLatestMask) {
+			useLatestMaskFlag = useLatestMask;
+			detect(frame);
 		}
 
-		void FeatureDetectorBase::detect(const cv::cuda::GpuMat &_frame,
-										 const cv::cuda::GpuMat &_mask) {
-			latestMask = _mask;
-			detect(_frame, true);
+		void FeatureDetectorBase::detect(const cv::cuda::GpuMat &frame,
+										 const cv::cuda::GpuMat &mask) {
+			latestMask = mask;
+			detect(frame, true);
 		}
 
 		const cv::cuda::GpuMat &FeatureDetectorBase::getOriginalFrame() const {
@@ -61,8 +61,8 @@ namespace providentia {
 		FeatureDetectorBase::FeatureDetectorBase() : providentia::utils::TimeMeasurable(
 			"FeatureDetectorBase", 1) {}
 
-		const cv::cuda::GpuMat &FeatureDetectorBase::getCurrentMask(cv::Size _size) {
-			setCurrentMask(std::move(_size));
+		const cv::cuda::GpuMat &FeatureDetectorBase::getCurrentMask(cv::Size size) {
+			setCurrentMask(std::move(size));
 			return currentMask;
 		}
 
@@ -91,16 +91,17 @@ namespace providentia {
 
 #pragma region SURFFeatureDetector
 
-		SURFFeatureDetector::SURFFeatureDetector(double _hessianThreshold, int _nOctaves,
-												 int _nOctaveLayers, bool _extended,
-												 float _keypointsRatio, bool _upright) {
-			detector = cv::cuda::SURF_CUDA::create(_hessianThreshold, _nOctaves, _nOctaveLayers, _extended,
-												   _keypointsRatio, _upright);
+		SURFFeatureDetector::SURFFeatureDetector(double hessianThreshold, int nOctaves,
+												 int nOctaveLayers, bool extended,
+												 float keypointsRatio, bool upright) {
+			detector = cv::cuda::SURF_CUDA::create(hessianThreshold, nOctaves, nOctaveLayers, extended,
+												   keypointsRatio, upright);
 			setName(typeid(*this).name());
 		}
 
 		void SURFFeatureDetector::specificDetect() {
-			detector->detectWithDescriptors(frame, getCurrentMask(frame.size()), keypointsGPU, descriptorsGPU, false);
+			detector->detectWithDescriptors(processedFrame, getCurrentMask(processedFrame.size()), keypointsGPU,
+											descriptorsGPU, false);
 			detector->downloadKeypoints(keypointsGPU, keypointsCPU);
 			descriptorsGPU.download(descriptorsCPU);
 		}
@@ -110,17 +111,17 @@ namespace providentia {
 #pragma region ORBFeatureDetector
 
 		ORBFeatureDetector::ORBFeatureDetector(int nfeatures, float scaleFactor, int nlevels,
-											   int edgeThreshold, int firstLevel, int WTA_K,
+											   int edgeThreshold, int firstLevel, int wtaK,
 											   int scoreType, int patchSize, int fastThreshold,
 											   bool blurForDescriptor) {
-			detector = cv::cuda::ORB::create(nfeatures, scaleFactor, nlevels, edgeThreshold, firstLevel, WTA_K,
-											 scoreType,
-											 patchSize, fastThreshold, blurForDescriptor);
+			detector = cv::cuda::ORB::create(nfeatures, scaleFactor, nlevels, edgeThreshold, firstLevel, wtaK,
+											 scoreType, patchSize, fastThreshold, blurForDescriptor);
 			setName(typeid(*this).name());
 		}
 
 		void ORBFeatureDetector::specificDetect() {
-			detector->detectAndComputeAsync(frame, getCurrentMask(frame.size()), keypointsGPU, descriptorsGPU, false);
+			detector->detectAndComputeAsync(processedFrame, getCurrentMask(processedFrame.size()), keypointsGPU,
+											descriptorsGPU, false);
 			detector->convert(keypointsGPU, keypointsCPU);
 			descriptorsGPU.download(descriptorsCPU);
 		}
@@ -131,20 +132,20 @@ namespace providentia {
 
 		FastFREAKFeatureDetector::FastFREAKFeatureDetector(int threshold, bool nonmaxSuppression,
 														   cv::FastFeatureDetector::DetectorType type,
-														   int max_npoints,
+														   int maxNPoints,
 														   bool orientationNormalized,
 														   bool scaleNormalized,
 														   float patternScale,
 														   int nOctaves,
 														   const std::vector<int> &selectedPairs) {
-			detector = cv::cuda::FastFeatureDetector::create(threshold, nonmaxSuppression, type, max_npoints);
+			detector = cv::cuda::FastFeatureDetector::create(threshold, nonmaxSuppression, type, maxNPoints);
 			descriptor = cv::xfeatures2d::FREAK::create(orientationNormalized, scaleNormalized, patternScale, nOctaves,
 														selectedPairs);
 			setName(typeid(*this).name());
 		}
 
 		void FastFREAKFeatureDetector::specificDetect() {
-			detector->detect(frame, keypointsCPU, getCurrentMask(frame.size()));
+			detector->detect(processedFrame, keypointsCPU, getCurrentMask(processedFrame.size()));
 			descriptor->compute(frameCPU, keypointsCPU, descriptorsCPU);
 			descriptorsGPU.upload(descriptorsCPU);
 		}
@@ -173,15 +174,15 @@ namespace providentia {
 														   int lineThresholdProjected,
 														   int lineThresholdBinarized,
 														   int suppressNonmaxSize, int bytes,
-														   bool use_orientation) {
+														   bool useOrientation) {
 			detector = cv::xfeatures2d::StarDetector::create(maxSize, responseThreshold, lineThresholdProjected,
 															 lineThresholdBinarized, suppressNonmaxSize);
-			descriptor = cv::xfeatures2d::BriefDescriptorExtractor::create(bytes, use_orientation);
+			descriptor = cv::xfeatures2d::BriefDescriptorExtractor::create(bytes, useOrientation);
 			setName(typeid(*this).name());
 		}
 
 		void StarBRIEFFeatureDetector::specificDetect() {
-			detector->detect(frameCPU, keypointsCPU, cv::Mat(getCurrentMask(frame.size())));
+			detector->detect(frameCPU, keypointsCPU, cv::Mat(getCurrentMask(processedFrame.size())));
 			descriptor->compute(frameCPU, keypointsCPU, descriptorsCPU);
 			descriptorsGPU.upload(descriptorsCPU);
 		}

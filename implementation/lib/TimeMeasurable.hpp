@@ -64,17 +64,17 @@ namespace providentia {
 			/**
 			 * @set The print name of the instance.
 			 */
-			void setName(std::string _name);
+			void setName(std::string name);
 
 			/**
 			 * @set The minimal verbosity needed to add a measurement.
 			 */
-			void setVerbosity(int _verbosity);
+			void setVerbosity(int verbosity);
 
 			/**
 			 * @set The name and verbosity.
 			 */
-			void setNameAndVerbosity(std::string _name, int _verbosity);
+			void setNameAndVerbosity(std::string name, int verbosity);
 
 			/**
 			 * Gets the current unix timestamp in milliseconds since 01.01.1970.

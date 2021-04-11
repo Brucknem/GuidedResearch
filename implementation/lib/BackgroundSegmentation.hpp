@@ -37,7 +37,7 @@ namespace providentia {
 			/**
 			 * The frame used during calculations.
 			 */
-			cv::cuda::GpuMat frame;
+			cv::cuda::GpuMat calculationFrame;
 
 			/**
 			 * The fore- and background masks.
@@ -51,8 +51,6 @@ namespace providentia {
 
 			/**
 			 * Subclass specifc algorithm implementation.
-			 *
-			 * @param _frame The new frame to apply the algorithm to.
 			 */
 			virtual void specificApply() = 0;
 
@@ -81,28 +79,28 @@ namespace providentia {
 			/**
 			 * Appends the given frame to the internal history of writeFrames and calculates the background segmentation.
 			 *
-			 * @param _frame The new frame to apply.
+			 * @param frame The new frame to apply.
 			 */
-			virtual void segment(const cv::cuda::GpuMat &_frame);
+			virtual void segment(const cv::cuda::GpuMat &frame);
 
 			/**
 			 * Clears the masks to all background.
 			 */
-			void clearMasks(const cv::Size &_size = cv::Size());
+			void clearMasks(const cv::Size &size = cv::Size());
 
 			/**
 			 * @get
 			 *
 			 * @return The background mask.
 			 */
-			const cv::cuda::GpuMat &getBackgroundMask(const cv::Size &_size = cv::Size());
+			const cv::cuda::GpuMat &getBackgroundMask(const cv::Size &size = cv::Size());
 
 			/**
 			 * @get
 			 *
 			 * @return The foreground mask.
 			 */
-			const cv::cuda::GpuMat &getForegroundMask(const cv::Size &_size = cv::Size());
+			const cv::cuda::GpuMat &getForegroundMask(const cv::Size &size = cv::Size());
 
 			/**
 			 * Draws the foreground and background masks aside.
@@ -138,7 +136,7 @@ namespace providentia {
 			/**
 			 * @constructor
 			 *
-			 * @param _calculationSize The scaling size of the frame during calculation.
+			 * @param calculationSize The scaling size of the frame during calculation.
 			 * @param history Length of the history.
 			 * @param varThreshold Threshold on the squared Mahalanobis distance between the expectedPixel and the model
 			 * to decide whether a expectedPixel is well described by the background model. This parameter does not

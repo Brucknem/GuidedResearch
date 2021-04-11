@@ -106,7 +106,7 @@ namespace providentia {
 			/**
 			 * @get The found homography minimizing the reprojection error between the frame and reference frame.
 			 */
-			cv::Mat getHomography(double _skewThreshold = 1e-4) const;
+			cv::Mat getHomography() const;
 
 			/**
 			 * @get
@@ -121,7 +121,7 @@ namespace providentia {
 			/**
 			 * @set
 			 */
-			void setShouldUpdateKeyframe(bool _shouldUpdateKeyframe);
+			void setShouldUpdateKeyframe(bool shouldUpdateKeyframe);
 
 			/**
 			 * Main algorithm. <br>
@@ -130,9 +130,9 @@ namespace providentia {
 			 * 3. Finds homography by minimizing the reprojection error. <br>
 			 * 4. Warps the frame using the found homography. <br>
 			 *
-			 * @param _frame The frame to stabilize.
+			 * @param frame The frame to stabilize.
 			 */
-			void stabilize(const cv::cuda::GpuMat &_frame);
+			void stabilize(const cv::cuda::GpuMat &frame);
 
 			/**
 			 * Draws the original and the stabilized frame aside.
@@ -144,9 +144,9 @@ namespace providentia {
 			 */
 			void updateKeyframe();
 
-			cv::cuda::GpuMat getBackgroundMask(const cv::Size &_size) const;
+			cv::cuda::GpuMat getBackgroundMask(const cv::Size &size) const;
 
-			void setSkewThreshold(double skewThreshold);
+			void setSkewThreshold(double value);
 		};
 
 		/**
@@ -157,10 +157,10 @@ namespace providentia {
 			/**
 			 * @constructor
 			 */
-			explicit SURFBFDynamicStabilizer(double _hessianThreshold = 1000, int _nOctaves = 4,
-											 int _nOctaveLayers = 2, bool _extended = false,
-											 float _keypointsRatio = 0.01f,
-											 bool _upright = false);
+			explicit SURFBFDynamicStabilizer(double hessianThreshold = 1000, int nOctaves = 4,
+											 int nOctaveLayers = 2, bool extended = false,
+											 float keypointsRatio = 0.01f,
+											 bool upright = false);
 
 			/**
 			 * @destructor
@@ -181,7 +181,7 @@ namespace providentia {
 											int nlevels = 8,
 											int edgeThreshold = 31,
 											int firstLevel = 0,
-											int WTA_K = 2,
+											int wtaK = 2,
 											int scoreType = cv::ORB::FAST_SCORE,
 											int patchSize = 31,
 											int fastThreshold = 20,
@@ -204,7 +204,7 @@ namespace providentia {
 			explicit FastFREAKBFDynamicStabilizer(int threshold = 50,
 												  bool nonmaxSuppression = true,
 												  cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16,
-												  int max_npoints = 5000,
+												  int maxNPoints = 5000,
 												  bool orientationNormalized = true,
 												  bool scaleNormalized = true,
 												  float patternScale = 22.0f,

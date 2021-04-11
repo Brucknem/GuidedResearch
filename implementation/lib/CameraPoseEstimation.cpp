@@ -11,9 +11,9 @@
 namespace providentia {
 	namespace calibration {
 
-		CameraPoseEstimator::CameraPoseEstimator(Eigen::Matrix<double, 3, 4> _intrinsics, bool initLogging,
+		CameraPoseEstimator::CameraPoseEstimator(Eigen::Matrix<double, 3, 4> intrinsics, bool initLogging,
 												 double weightPenalizeScale) :
-			intrinsics(std::move(_intrinsics)), weightPenalizeScale(weightPenalizeScale) {
+			intrinsics(std::move(intrinsics)), weightPenalizeScale(weightPenalizeScale) {
 		}
 
 		const Eigen::Vector3d &CameraPoseEstimator::getTranslation() const {
@@ -63,15 +63,15 @@ namespace providentia {
 			return furthestPoint;
 		}
 
-		std::thread CameraPoseEstimator::estimateAsync(bool _logSummary) {
-			auto thread = std::thread(&CameraPoseEstimator::estimate, this, _logSummary);
+		std::thread CameraPoseEstimator::estimateAsync(bool logSummary) {
+			auto thread = std::thread(&CameraPoseEstimator::estimate, this, logSummary);
 			thread.detach();
 			return thread;
 		}
 
-		void CameraPoseEstimator::solveProblem(bool _logSummary) {
+		void CameraPoseEstimator::solveProblem(bool logSummary) {
 			auto problem = createProblem();
-			auto options = setupOptions(_logSummary);
+			auto options = setupOptions(logSummary);
 			Solve(options, &problem, &summary);
 			evaluateAllResiduals(problem);
 			evaluateCorrespondenceResiduals(problem);
@@ -80,16 +80,16 @@ namespace providentia {
 			evaluateWeightResiduals(problem);
 		}
 
-		void CameraPoseEstimator::estimate(bool _logSummary) {
+		void CameraPoseEstimator::estimate(bool logSummary) {
 			optimizationFinished = false;
 			foundValidSolution = false;
 			int i = 0;
 			for (; i < maxTriesUntilAbort; i++) {
 				calculateInitialGuess();
-				solveProblem(_logSummary);
+				solveProblem(logSummary);
 				double originalPenalize = lambdaPenalizeScale;
 				lambdaPenalizeScale = originalPenalize * 10;
-				solveProblem(_logSummary);
+				solveProblem(logSummary);
 				if (lambdasLoss > 10) {
 					// > 10 is an empirical number. Might be further investigated.
 					lambdaPenalizeScale = originalPenalize;
@@ -101,19 +101,19 @@ namespace providentia {
 					continue;
 				}
 				lambdaPenalizeScale = originalPenalize * 100000;
-				solveProblem(_logSummary);
+				solveProblem(logSummary);
 				lambdaPenalizeScale = originalPenalize;
 				break;
 			}
 			foundValidSolution = i < maxTriesUntilAbort;
 			optimizationFinished = true;
-			if (_logSummary) {
+			if (logSummary) {
 				std::cout << *this << std::endl;
 			}
 
 		}
 
-		ceres::Solver::Options CameraPoseEstimator::setupOptions(bool _logSummary) {
+		ceres::Solver::Options CameraPoseEstimator::setupOptions(bool logSummary) {
 			ceres::Solver::Options options;
 			options.linear_solver_type = ceres::SPARSE_NORMAL_CHOLESKY;
 //			options.trust_region_strategy_type = ceres::DOGLEG;
@@ -122,7 +122,7 @@ namespace providentia {
 //			options.max_num_iterations = weights.size();
 			options.max_num_iterations = 1000;
 			options.num_threads = 12;
-			options.minimizer_progress_to_stdout = _logSummary;
+			options.minimizer_progress_to_stdout = logSummary;
 			options.update_state_every_iteration = true;
 			return options;
 		}
@@ -237,16 +237,16 @@ namespace providentia {
 			);
 		}
 
-		void CameraPoseEstimator::guessRotation(const Eigen::Vector3d &_rotation) {
+		void CameraPoseEstimator::guessRotation(const Eigen::Vector3d &value) {
 			hasRotationGuess = true;
-			initialRotation = _rotation;
-			rotation = _rotation;
+			initialRotation = value;
+			rotation = value;
 		}
 
-		void CameraPoseEstimator::guessTranslation(const Eigen::Vector3d &_translation) {
+		void CameraPoseEstimator::guessTranslation(const Eigen::Vector3d &value) {
 			hasTranslationGuess = true;
-			initialTranslation = _translation;
-			translation = _translation;
+			initialTranslation = value;
+			translation = value;
 			initialDistanceFromMean = 0;
 		}
 
@@ -254,8 +254,8 @@ namespace providentia {
 			worldObjects.emplace_back(worldObject);
 		}
 
-		void CameraPoseEstimator::addWorldObjects(const std::vector<WorldObject> &_worldObjects) {
-			for (const auto &worldObject : _worldObjects) {
+		void CameraPoseEstimator::addWorldObjects(const std::vector<WorldObject> &vector) {
+			for (const auto &worldObject : vector) {
 				addWorldObject(worldObject);
 			}
 		}
@@ -291,8 +291,8 @@ namespace providentia {
 			return weightPenalizeScale;
 		}
 
-		void CameraPoseEstimator::setWeightPenalizeScale(double _weightPenalizeScale) {
-			weightPenalizeScale = _weightPenalizeScale;
+		void CameraPoseEstimator::setWeightPenalizeScale(double value) {
+			weightPenalizeScale = value;
 		}
 
 		void CameraPoseEstimator::clearWorldObjects() {
@@ -360,16 +360,16 @@ namespace providentia {
 			return lambdaPenalizeScale;
 		}
 
-		void CameraPoseEstimator::setLambdaPenalizeScale(double lambdaScale) {
-			CameraPoseEstimator::lambdaPenalizeScale = lambdaPenalizeScale;
+		void CameraPoseEstimator::setLambdaPenalizeScale(double value) {
+			CameraPoseEstimator::lambdaPenalizeScale = value;
 		}
 
 		double CameraPoseEstimator::getRotationPenalizeScale() const {
 			return rotationPenalizeScale;
 		}
 
-		void CameraPoseEstimator::setRotationPenalizeScale(double _rotationPenalizeScale) {
-			rotationPenalizeScale = _rotationPenalizeScale;
+		void CameraPoseEstimator::setRotationPenalizeScale(double value) {
+			rotationPenalizeScale = value;
 		}
 
 		bool CameraPoseEstimator::hasFoundValidSolution() const {

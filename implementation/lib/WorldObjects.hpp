@@ -56,14 +56,14 @@ namespace providentia {
 			/**
 			 * @constructor
 			 *
-			 * @param _origin The origin of the parametricPoint.
-			 * @param _axisA One side of the parametricPoint.
-			 * @param _axisB Another side of the parametricPoint.
-			 * @param _lambda Optional distance from the origin in the first axis.
-			 * @param _mu Optional distance from the origin in the second axis.
+			 * @param origin The origin of the parametricPoint.
+			 * @param axisA One side of the parametricPoint.
+			 * @param axisB Another side of the parametricPoint.
+			 * @param lambda Optional distance from the origin in the first axis.
+			 * @param mu Optional distance from the origin in the second axis.
 			 */
-			ParametricPoint(Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA, const Eigen::Vector3d &_axisB,
-							double _lambda = 0, double _mu = 0);
+			ParametricPoint(Eigen::Vector3d origin, const Eigen::Vector3d &axisA, const Eigen::Vector3d &axisB,
+							double lambda = 0, double mu = 0);
 
 		public:
 			/**
@@ -109,7 +109,7 @@ namespace providentia {
 			/**
 			 * @set
 			 */
-			void setExpectedPixel(const Eigen::Vector2d &_expectedPixel);
+			void setExpectedPixel(const Eigen::Vector2d &expectedPixel);
 
 			/**
 			 * @get
@@ -119,55 +119,55 @@ namespace providentia {
 			/**
 			 * Factory for a [x, y, z] world point.
 			 *
-			 * @param _expectedPixel The expected pixel.
- 			 * @param _worldPosition The world position of the point.
+			 * @param expectedPixel The expected pixel.
+ 			 * @param worldPosition The world position of the point.
 			 */
 			static ParametricPoint
-			OnPoint(const Eigen::Vector2d &_expectedPixel, const Eigen::Vector3d &_worldPosition);
+			OnPoint(const Eigen::Vector2d &expectedPixel, const Eigen::Vector3d &worldPosition);
 
 			/**
 			 * @copydoc
 			 */
-			static ParametricPoint OnPoint(const Eigen::Vector3d &_worldPosition);
+			static ParametricPoint OnPoint(const Eigen::Vector3d &worldPosition);
 
 			/**
  			 * Factory for a [x, y, z] world point on a parametric line.
  			 *
-			 * @param _expectedPixel The expected pixel.
-			 * @param _origin The origin of the parametricPoint.
-			 * @param _heading The heading of the line.
-			 * @param _lambda Optional distance from the origin in heading direction.
+			 * @param expectedPixel The expected pixel.
+			 * @param origin The origin of the parametricPoint.
+			 * @param heading The heading of the line.
+			 * @param lambda Optional distance from the origin in heading direction.
 			 */
 			static ParametricPoint
-			OnLine(const Eigen::Vector2d &_expectedPixel, Eigen::Vector3d _origin, const Eigen::Vector3d &_heading,
-				   double _lambda = 0);
+			OnLine(const Eigen::Vector2d &expectedPixel, Eigen::Vector3d origin, const Eigen::Vector3d &heading,
+				   double lambda = 0);
 
 			/**
 			 * @copydoc
 			 */
-			static ParametricPoint OnLine(Eigen::Vector3d _origin, const Eigen::Vector3d &_heading, double _lambda = 0);
+			static ParametricPoint OnLine(Eigen::Vector3d origin, const Eigen::Vector3d &heading, double lambda = 0);
 
 			/**
  			 * Factory for a [x, y, z] world point on a parametric parametricPoint.
 			 *
-			 * @param _expectedPixel The expected pixel.
-			 * @param _origin The origin of the parametricPoint.
-			 * @param _axisA One side of the parametricPoint.
-			 * @param _axisB Another side of the parametricPoint.
-			 * @param _lambda Optional distance from the origin in the first axis.
-			 * @param _mu Optional distance from the origin in the second axis.
+			 * @param expectedPixel The expected pixel.
+			 * @param origin The origin of the parametricPoint.
+			 * @param axisA One side of the parametricPoint.
+			 * @param axisB Another side of the parametricPoint.
+			 * @param lambda Optional distance from the origin in the first axis.
+			 * @param mu Optional distance from the origin in the second axis.
 			 */
 			static ParametricPoint
-			OnPlane(const Eigen::Vector2d &_expectedPixel, Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA,
-					const Eigen::Vector3d &_axisB,
-					double _lambda = 0, double _mu = 0);
+			OnPlane(const Eigen::Vector2d &expectedPixel, Eigen::Vector3d origin, const Eigen::Vector3d &axisA,
+					const Eigen::Vector3d &axisB,
+					double lambda = 0, double mu = 0);
 
 			/**
 			 * @copydoc
 			 */
 			static ParametricPoint
-			OnPlane(Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA, const Eigen::Vector3d &_axisB,
-					double _lambda = 0, double _mu = 0);
+			OnPlane(Eigen::Vector3d origin, const Eigen::Vector3d &axisA, const Eigen::Vector3d &axisB,
+					double lambda = 0, double mu = 0);
 		};
 
 		/**
@@ -240,16 +240,6 @@ namespace providentia {
 			 * @set
 			 */
 			void setHeight(double height);
-
-			/**
-			 * @get
-			 */
-			double getHeading() const;
-
-			/**
-			 * @set
-			 */
-			void setHeading(double heading);
 
 			/**
 			 * @get

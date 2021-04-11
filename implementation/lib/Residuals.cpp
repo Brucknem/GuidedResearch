@@ -64,12 +64,12 @@ namespace providentia {
 
 #pragma region CorrespondenceResidualBase
 
-		CorrespondenceResidual::CorrespondenceResidual(const Eigen::Vector2d &_expectedPixel,
-													   const providentia::calibration::ParametricPoint &_point,
-													   const Eigen::Matrix<double, 3, 4> &_intrinsics) :
-			expectedPixel(_expectedPixel),
-			parametricPoint(_point),
-			intrinsics(_intrinsics) {}
+		CorrespondenceResidual::CorrespondenceResidual(Eigen::Vector2d expectedPixel,
+													   const providentia::calibration::ParametricPoint &point,
+													   Eigen::Matrix<double, 3, 4> intrinsics) :
+			expectedPixel(std::move(expectedPixel)),
+			parametricPoint(point),
+			intrinsics(std::move(intrinsics)) {}
 
 		template<typename T>
 		bool CorrespondenceResidual::operator()(
@@ -79,13 +79,13 @@ namespace providentia {
 			const T *rx,
 			const T *ry,
 			const T *rz,
-			const T *_lambda,
-			const T *_mu,
-			const T *_weight,
+			const T *lambda,
+			const T *mu,
+			const T *weight,
 			T *residual) const {
 			Eigen::Matrix<T, 3, 1> point = parametricPoint.getOrigin().cast<T>();
-			point += parametricPoint.getAxisA().cast<T>() * _lambda[0];
-			point += parametricPoint.getAxisB().cast<T>() * _mu[0];
+			point += parametricPoint.getAxisA().cast<T>() * lambda[0];
+			point += parametricPoint.getAxisB().cast<T>() * mu[0];
 
 			Eigen::Matrix<T, 2, 1> actualPixel;
 			bool flipped;
@@ -100,18 +100,18 @@ namespace providentia {
 			residual[0] = expectedPixel.x() - actualPixel.x();
 			residual[1] = expectedPixel.y() - actualPixel.y();
 
-			residual[0] = residual[0] * _weight[0];
-			residual[1] = residual[1] * _weight[0];
+			residual[0] = residual[0] * weight[0];
+			residual[1] = residual[1] * weight[0];
 
 			return !flipped;
 		}
 
 		ceres::CostFunction *
-		CorrespondenceResidual::Create(const Eigen::Vector2d &_expectedPixel,
-									   const providentia::calibration::ParametricPoint &_point,
-									   const Eigen::Matrix<double, 3, 4> &_intrinsics) {
+		CorrespondenceResidual::Create(const Eigen::Vector2d &expectedPixel,
+									   const providentia::calibration::ParametricPoint &point,
+									   const Eigen::Matrix<double, 3, 4> &intrinsics) {
 			return new ceres::AutoDiffCostFunction<CorrespondenceResidual, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1>(
-				new CorrespondenceResidual(_expectedPixel, _point, _intrinsics),
+				new CorrespondenceResidual(expectedPixel, point, intrinsics),
 				ceres::TAKE_OWNERSHIP
 			);
 		}

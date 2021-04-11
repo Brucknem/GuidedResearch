@@ -8,22 +8,19 @@
 namespace providentia {
 	namespace stabilization {
 
-		cv::cuda::GpuMat FrameWarper::warp(const cv::cuda::GpuMat &_frame,
+		cv::cuda::GpuMat FrameWarper::warp(const cv::cuda::GpuMat &frame,
 										   const cv::Mat &homography, int perspectiveWarpFlags) {
 			if (homography.empty()) {
-				return _frame;
+				return frame;
 			}
 			cv::cuda::GpuMat result;
-			cv::cuda::warpPerspective(_frame, result, homography, _frame.size(), perspectiveWarpFlags);
+			cv::cuda::warpPerspective(frame, result, homography, frame.size(), perspectiveWarpFlags);
 			return result;
 		}
 
-		void FrameWarper::warp(const cv::cuda::GpuMat &_frame,
+		void FrameWarper::warp(const cv::cuda::GpuMat &frame,
 							   const std::shared_ptr<providentia::features::FeatureMatcherBase> &matcher) {
 			clear();
-//			std::cout << matcher->getFrameMatchedPoints().size() << ", "
-//					  << matcher->getReferenceMatchedPoints().size()
-//					  << std::endl;
 			if (matcher->getFrameMatchedPoints().size() < 4) {
 				homography = cv::Mat::eye(3, 3, CV_64F);
 			} else {
@@ -31,55 +28,34 @@ namespace providentia {
 												homographyCalculationAlgorithm);
 			}
 
-			homography = getHomography(skewThreshold);
+			homography = getHomography();
 
-			cv::cuda::warpPerspective(_frame, warpedFrame, homography, _frame.size(), perspectiveWarpFlags);
+			cv::Vec2d skew = {homography.at<double>(2, 0), homography.at<double>(2, 1)};
+			if (cv::norm(skew) > skewThreshold) {
+				homography = cv::Mat::eye(3, 3, CV_64F);
+			}
+
+			cv::cuda::warpPerspective(frame, warpedFrame, homography, frame.size(), perspectiveWarpFlags);
 			addTimestamp("Frame warping finished", 0);
 		}
 
-		providentia::stabilization::FrameWarper::FrameWarper() : providentia::utils::TimeMeasurable("Frame Warper", 1) {
-
-		}
+		providentia::stabilization::FrameWarper::FrameWarper() : providentia::utils::TimeMeasurable("Frame Warper",
+																									1) {}
 
 		const cv::cuda::GpuMat &providentia::stabilization::FrameWarper::getWarpedFrame() const {
 			return warpedFrame;
 		}
 
-		cv::Mat providentia::stabilization::FrameWarper::getHomography(double _skewThreshold) const {
-//			cv::Vec2d translation = {homography.at<double>(0, 2), homography.at<double>(1, 2)};
-//			cv::Vec4d rotation = {
-//				homography.at<double>(0, 0), homography.at<double>(0, 1),
-//				homography.at<double>(1, 0), homography.at<double>(1, 1)
-//			};
-			cv::Vec2d skew = {homography.at<double>(2, 0), homography.at<double>(2, 1)};
-
-//			if (cv::norm(translation) > 10 ||
-//				abs(sqrt(2) - cv::norm(rotation)) > 0.10 ||
-			// TODO Evaluate skew threshold
-			if (cv::norm(skew) > _skewThreshold) {
-//				std::cout << "translation" << std::endl;
-//				std::cout << translation << std::endl;
-//				std::cout << cv::norm(translation) << std::endl;
-//				std::cout << "rotation" << std::endl;
-//				std::cout << rotation << std::endl;
-//				std::cout << abs(sqrt(2) - cv::norm(rotation)) << std::endl;
-//				std::cout << "skew" << std::endl;
-//				std::cout << skew << std::endl;
-//				std::cout << cv::norm(skew) << std::endl;
-//				std::cout << homography << std::endl;
-
-				return cv::Mat::eye(3, 3, CV_64F);
-			}
+		cv::Mat providentia::stabilization::FrameWarper::getHomography() const {
 			return homography;
 		}
 
-		double FrameWarper::getMaxSkew() const {
+		double FrameWarper::getSkewThreshold() const {
 			return skewThreshold;
 		}
 
-		void FrameWarper::setSkewThreshold(double _skewThreshold) {
-			skewThreshold = _skewThreshold;
+		void FrameWarper::setSkewThreshold(double value) {
+			skewThreshold = value;
 		}
-
 	}
 }

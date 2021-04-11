@@ -10,32 +10,36 @@ namespace providentia {
 
 		template<typename T>
 		Eigen::Matrix<T, 2, 1>
-		render(const T *_translation, const T *_rotation, const Eigen::Matrix<double, 3, 4> &_intrinsics, const T
+		render(const T *translation, const T *rotation, const Eigen::Matrix<double, 3, 4> &intrinsics, const T
 		*vector) {
 			bool flipped;
-			return render(_translation, _rotation, _intrinsics, vector, flipped);
+			return render(translation, rotation, intrinsics, vector, flipped);
 		}
+
+		template Eigen::Matrix<double, 2, 1>
+		render<double>(const double *, const double *, const Eigen::Matrix<double, 3, 4> &, const double *);
 
 		template<typename T>
 		Eigen::Matrix<T, 2, 1>
-		render(const T *_translation, const T *_rotation, const Eigen::Matrix<double, 3, 4> &_intrinsics, const T
+		render(const T *translation, const T *rotation, const Eigen::Matrix<double, 3, 4> &intrinsics, const T
 		*vector, bool &flipped) {
-			Eigen::Matrix<T, 3, 1> translation{_translation[0], _translation[1], _translation[2]};
-			Eigen::Matrix<T, 3, 1> rotation{_rotation[0], _rotation[1], _rotation[2]};
-			Eigen::Matrix<T, 3, 1> _vector{vector[0], vector[1], vector[2]};
-
-			Eigen::Matrix<T, 4, 1> pointInCameraSpace = toCameraSpace(_translation, _rotation, vector);
-
-			Eigen::Matrix<T, 3, 1> homogeneousPixel = _intrinsics.template cast<T>() * pointInCameraSpace;
-
+			Eigen::Matrix<T, 4, 1> pointInCameraSpace = toCameraSpace(translation, rotation, vector);
+			Eigen::Matrix<T, 3, 1> homogeneousPixel = intrinsics.template cast<T>() * pointInCameraSpace;
 			Eigen::Matrix<T, 2, 1> pixel = perspectiveDivision(homogeneousPixel, flipped);
-
 			return pixel;
 		}
 
+		template Eigen::Matrix<double, 2, 1>
+		render<double>(const double *, const double *, const Eigen::Matrix<double, 3, 4> &, const double *, bool &);
+
+		template Eigen::Matrix<ceres::Jet<double, 9>, 2, 1>
+		render<ceres::Jet<double, 9>>(const ceres::Jet<double, 9> *, const ceres::Jet<double, 9> *,
+									  const Eigen::Matrix<double, 3, 4> &,
+									  const ceres::Jet<double, 9> *, bool &);
+
 		template<typename T>
-		Eigen::Matrix<T, 4, 4> getCameraRotationMatrix(const T *_rotation) {
-			Eigen::Matrix<T, 3, 1> rotationInRadians{-_rotation[0], -_rotation[1], _rotation[2]};
+		Eigen::Matrix<T, 4, 4> getCameraRotationMatrix(const T *rotation) {
+			Eigen::Matrix<T, 3, 1> rotationInRadians{-rotation[0], -rotation[1], rotation[2]};
 			rotationInRadians *= (T) (M_PI / 180);
 
 			T zero = (T) 0;
@@ -62,13 +66,13 @@ namespace providentia {
 				zero, sin(theta), cos(theta), zero,
 				zero, zero, zero, one;
 
-			Eigen::Matrix<T, 4, 4> rotation;
-			rotation << one, zero, zero, zero,
+			Eigen::Matrix<T, 4, 4> identityZFlipped;
+			identityZFlipped << one, zero, zero, zero,
 				zero, one, zero, zero,
 				zero, zero, -one, zero,
 				zero, zero, zero, one;
 
-			const Eigen::Matrix<T, 4, 4> &rotationMatrix = rotation * zAxis * yAxis * xAxis;
+			const Eigen::Matrix<T, 4, 4> &rotationMatrix = identityZFlipped * zAxis * yAxis * xAxis;
 			return rotationMatrix;
 		}
 
@@ -80,32 +84,32 @@ namespace providentia {
 		}
 
 		template<typename T>
-		Eigen::Matrix<T, 4, 1> toCameraSpace(const T *_translation, const T *_rotation, const T *vector) {
+		Eigen::Matrix<T, 4, 1> toCameraSpace(const T *translation, const T *rotation, const T *vector) {
 			// TODO Remove inverse
-			return getCameraRotationMatrix<T>(_rotation).inverse() *
+			return getCameraRotationMatrix<T>(rotation).inverse() *
 				   (Eigen::Matrix<T, 4, 1>(
-					   vector[0] - _translation[0],
-					   vector[1] - _translation[1],
-					   vector[2] - _translation[2],
+					   vector[0] - translation[0],
+					   vector[1] - translation[1],
+					   vector[2] - translation[2],
 					   (T) 1));
 		}
 
-		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation,
-										   const Eigen::Matrix<double, 3, 4> &_intrinsics,
+		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+										   const Eigen::Matrix<double, 3, 4> &intrinsics,
 										   const Eigen::Vector4d &vector,
 										   const cv::Vec3d &color, cv::Mat &image) {
 			bool flipped;
-			return render(_translation, _rotation, _intrinsics, vector, color, image, flipped);
+			return render(translation, rotation, intrinsics, vector, color, image, flipped);
 		}
 
-		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation,
-										   const Eigen::Matrix<double, 3, 4> &_intrinsics,
+		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+										   const Eigen::Matrix<double, 3, 4> &intrinsics,
 										   const Eigen::Vector4d &vector,
 										   const cv::Vec3d &color, cv::Mat &image, bool &flipped) {
 			Eigen::Vector2i imageSize(image.cols, image.rows);
 
 			Eigen::Vector2d pointInImageSpace = render(
-				_translation.data(), _rotation.data(), _intrinsics,
+				translation.data(), rotation.data(), intrinsics,
 				vector.data(), flipped);
 
 			if (flipped) {
@@ -128,10 +132,10 @@ namespace providentia {
 					}
 //					std::cout << std::endl;
 
-					cv::Vec4d _color = {color[0], color[1], color[2], (distance / (double) sqrt(2))};
+					cv::Vec4d colorCV = {color[0], color[1], color[2], (distance / (double) sqrt(2))};
 
 					// 1200, 1920
-					image.at<cv::Vec4d>(nearestPixel.y(), nearestPixel.x()) = _color;
+					image.at<cv::Vec4d>(nearestPixel.y(), nearestPixel.x()) = colorCV;
 				}
 			}
 
@@ -190,10 +194,10 @@ namespace providentia {
 			double pixelWidth = 32. / 1920.;
 			double principalX = 1920. / 2;
 			double principalY = 1200. / 2;
-			std::vector<double> _intrinsics{
+			std::vector<double> intrinsics{
 				20, pixelWidth, pixelWidth, principalX, principalY, 0
 			};
-			return getIntrinsicsMatrix(_intrinsics.data());
+			return getIntrinsicsMatrix(intrinsics.data());
 		}
 
 		Eigen::Matrix<double, 3, 4> getS40NCamFarIntrinsics() {
@@ -201,33 +205,6 @@ namespace providentia {
 				9023.482825, 0.000000, 1222.314303, 0.000000, 9014.504360, 557.541182, 0.000000, 0.000000, 1.000000
 			});
 		}
-
-#pragma region TemplateInstances
-
-		//////////////////////////////////////////////////////////////////////////////////////////////////
-		/// These template instances are needed to tell the compiler for which types we want specialized
-		/// implementations of the functions.
-		//////////////////////////////////////////////////////////////////////////////////////////////////
-
-		template Eigen::Matrix<double, 2, 1>
-		render<double>(const double *_translation, const double *_rotation,
-					   const Eigen::Matrix<double, 3, 4> &_intrinsics,
-					   const double *vector, bool &);
-
-		template Eigen::Matrix<double, 2, 1>
-		render<double>(const double *_translation, const double *_rotation,
-					   const Eigen::Matrix<double, 3, 4> &_intrinsics,
-					   const double *vector);
-
-		/**
-		 * ParametricPoint correspondences.
-		 */
-		template Eigen::Matrix<ceres::Jet<double, 9>, 2, 1>
-		render<ceres::Jet<double, 9>>(const ceres::Jet<double, 9> *, const ceres::Jet<double, 9> *,
-									  const Eigen::Matrix<double, 3, 4> &,
-									  const ceres::Jet<double, 9> *, bool &);
-
-#pragma endregion TemplateInstances
 
 	}
 }

@@ -8,18 +8,18 @@ namespace providentia {
 
 #pragma region DynamicStabilizerBase
 
-		void DynamicStabilizerBase::stabilize(const cv::cuda::GpuMat &_frame) {
+		void DynamicStabilizerBase::stabilize(const cv::cuda::GpuMat &frame) {
 			clear();
 			updateKeyframe();
 
-			frameFeatureDetector->detect(_frame, segmentor->getBackgroundMask(_frame.size()));
+			frameFeatureDetector->detect(frame, segmentor->getBackgroundMask(frame.size()));
 			if (referenceFeatureDetector->isEmpty()) {
 				// TODO copy/clone frameFeatureDetector
-				referenceFeatureDetector->detect(_frame, segmentor->getBackgroundMask(_frame.size()));
+				referenceFeatureDetector->detect(frame, segmentor->getBackgroundMask(frame.size()));
 			}
 
 			matcher->match(frameFeatureDetector, referenceFeatureDetector);
-			warper->warp(_frame, matcher);
+			warper->warp(frame, matcher);
 			segmentor->segment(getStabilizedFrame());
 			addTimestamp("Stabilization finished", 0);
 		}
@@ -40,8 +40,8 @@ namespace providentia {
 			}
 		}
 
-		cv::Mat DynamicStabilizerBase::getHomography(double _skewThreshold) const {
-			return warper->getHomography(_skewThreshold);
+		cv::Mat DynamicStabilizerBase::getHomography() const {
+			return warper->getHomography();
 		}
 
 		const cv::cuda::GpuMat &DynamicStabilizerBase::getStabilizedFrame() const {
@@ -89,8 +89,8 @@ namespace providentia {
 			return segmentor;
 		}
 
-		cv::cuda::GpuMat DynamicStabilizerBase::getBackgroundMask(const cv::Size &_size) const {
-			return segmentor->getBackgroundMask(_size);
+		cv::cuda::GpuMat DynamicStabilizerBase::getBackgroundMask(const cv::Size &size) const {
+			return segmentor->getBackgroundMask(size);
 		}
 
 		const std::shared_ptr<FrameWarper> &
@@ -102,8 +102,8 @@ namespace providentia {
 			return shouldUpdateKeyframe;
 		}
 
-		void DynamicStabilizerBase::setShouldUpdateKeyframe(bool _shouldUpdateKeyframe) {
-			DynamicStabilizerBase::shouldUpdateKeyframe = _shouldUpdateKeyframe;
+		void DynamicStabilizerBase::setShouldUpdateKeyframe(bool value) {
+			shouldUpdateKeyframe = value;
 		}
 
 		void DynamicStabilizerBase::setShouldUseFundamentalMatrix(bool shouldUseFundamentalMatrix) {
@@ -118,15 +118,15 @@ namespace providentia {
 
 #pragma region SURFBFDynamicStabilizer
 
-		SURFBFDynamicStabilizer::SURFBFDynamicStabilizer(double _hessianThreshold,
-														 int _nOctaves,
-														 int _nOctaveLayers,
-														 bool _extended,
-														 float _keypointsRatio,
-														 bool _upright) {
-			auto detector = providentia::features::SURFFeatureDetector(_hessianThreshold, _nOctaves,
-																	   _nOctaveLayers, _extended,
-																	   _keypointsRatio, _upright);
+		SURFBFDynamicStabilizer::SURFBFDynamicStabilizer(double hessianThreshold,
+														 int nOctaves,
+														 int nOctaveLayers,
+														 bool extended,
+														 float keypointsRatio,
+														 bool upright) {
+			auto detector = providentia::features::SURFFeatureDetector(hessianThreshold, nOctaves,
+																	   nOctaveLayers, extended,
+																	   keypointsRatio, upright);
 			frameFeatureDetector = std::make_shared<providentia::features::SURFFeatureDetector>(detector);
 			referenceFeatureDetector = std::make_shared<providentia::features::SURFFeatureDetector>(detector);
 			matcher = std::make_shared<providentia::features::BruteForceFeatureMatcher>(cv::NORM_L2);
@@ -139,13 +139,13 @@ namespace providentia {
 
 		ORBBFDynamicStabilizer::ORBBFDynamicStabilizer(int nfeatures, float scaleFactor,
 													   int nlevels, int edgeThreshold,
-													   int firstLevel, int WTA_K,
+													   int firstLevel, int wtaK,
 													   int scoreType,
 													   int patchSize, int fastThreshold,
 													   bool blurForDescriptor) {
 			auto detector = providentia::features::ORBFeatureDetector(nfeatures, scaleFactor,
 																	  nlevels, edgeThreshold,
-																	  firstLevel, WTA_K, scoreType,
+																	  firstLevel, wtaK, scoreType,
 																	  patchSize, fastThreshold,
 																	  blurForDescriptor);
 			frameFeatureDetector = std::make_shared<providentia::features::ORBFeatureDetector>(detector);
@@ -159,7 +159,7 @@ namespace providentia {
 		FastFREAKBFDynamicStabilizer::FastFREAKBFDynamicStabilizer(int threshold,
 																   bool nonmaxSuppression,
 																   cv::FastFeatureDetector::DetectorType type,
-																   int max_npoints,
+																   int maxNPoints,
 																   bool orientationNormalized,
 																   bool scaleNormalized,
 																   float patternScale,
@@ -167,7 +167,7 @@ namespace providentia {
 																   const std::vector<int> &selectedPairs) {
 			auto detector = providentia::features::FastFREAKFeatureDetector(threshold,
 																			nonmaxSuppression, type,
-																			max_npoints,
+																			maxNPoints,
 																			orientationNormalized,
 																			scaleNormalized,
 																			patternScale, nOctaves,

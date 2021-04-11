@@ -68,67 +68,67 @@ namespace providentia {
 		 * @link https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
 		 *
 		 * @tparam T double or ceres::Jet
-		 * @param _rotation The [x, y, z] euler angle rotation.
+		 * @param rotation The [x, y, z] euler angle rotation.
 		 *
 		 * @return The complete rotation around the three axis.
 		 */
 		template<typename T>
-		Eigen::Matrix<T, 4, 4> getCameraRotationMatrix(const T *_rotation);
+		Eigen::Matrix<T, 4, 4> getCameraRotationMatrix(const T *rotation);
 
 		/**
 		 * Transforms the given vector from world to camera space.
 		 *
 		 * @tparam T double or ceres::Jet
-		 * @param _translation The [x, y, z] translation of the camera in world space.
-		 * @param _rotation The [x, y, z] euler angle rotation of the camera around the world axis.
+		 * @param translation The [x, y, z] translation of the camera in world space.
+		 * @param rotation The [x, y, z] euler angle rotation of the camera around the world axis.
 		 * @param vector The [x, y, z, w] vector in world space.
 		 *
 		 * @return The [x, y, z, w] vector in camera space.
 		 */
 		template<typename T>
-		Eigen::Matrix<T, 4, 1> toCameraSpace(const T *_translation, const T *_rotation, const T *vector);
+		Eigen::Matrix<T, 4, 1> toCameraSpace(const T *translation, const T *rotation, const T *vector);
 
 		/**
 		 * Wrapper for the whole rendering pipeline.
 		 *
 		 * @tparam T double or ceres::Jet
-		 * @param _translation The [x, y, z] translation of the camera in world space.
-		 * @param _rotation The [x, y, z] euler angle rotation of the camera around the world axis.
-		 * @param _intrinsics [focalLength, sensorWidth, sensorHeight, principalX, principalY, skew]
+		 * @param translation The [x, y, z] translation of the camera in world space.
+		 * @param rotation The [x, y, z] euler angle rotation of the camera around the world axis.
+		 * @param intrinsics [focalLength, sensorWidth, sensorHeight, principalX, principalY, skew]
 		 * @param vector The [x, y, z, w] vector in world space.
 		 *
 		 * @return The [u, v] expectedPixel location in image space.
 		 */
 		template<typename T>
 		Eigen::Matrix<T, 2, 1>
-		render(const T *_translation, const T *_rotation, const Eigen::Matrix<double, 3, 4> &_intrinsics,
+		render(const T *translation, const T *rotation, const Eigen::Matrix<double, 3, 4> &intrinsics,
 			   const T *vector);
 
 		template<typename T>
 		Eigen::Matrix<T, 2, 1>
-		render(const T *_translation, const T *_rotation, const Eigen::Matrix<double, 3, 4> &_intrinsics,
+		render(const T *translation, const T *rotation, const Eigen::Matrix<double, 3, 4> &intrinsics,
 			   const T *vector, bool &flipped);
 
 		/**
 		 * Renders the given vector with the given color to the given image.
 		 *
 		 * @tparam T double or ceres::Jet
-		 * @param _translation The [x, y, z] translation of the camera in world space.
-		 * @param _rotation The [x, y, z] euler angle rotation of the camera around the world axis.
-		 * @param _intrinsics [focalLength, sensorWidth, sensorHeight, principalX, principalY, skew]
+		 * @param translation The [x, y, z] translation of the camera in world space.
+		 * @param rotation The [x, y, z] euler angle rotation of the camera around the world axis.
+		 * @param intrinsics [focalLength, sensorWidth, sensorHeight, principalX, principalY, skew]
 		 * @param vector The [x, y, z, w] vector in world space.
 		 * @param color The color that is assigned to the expectedPixel.
 		 * @param image The image to which the expectedPixel will rendered.
 		 */
 
-		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation,
-										   const Eigen::Matrix<double, 3, 4> &_intrinsics,
+		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+										   const Eigen::Matrix<double, 3, 4> &intrinsics,
 										   const Eigen::Vector4d &vector, const cv::Vec3d
 										   &color,
 										   cv::Mat &image, bool &flipped);
 
-		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &_translation, const Eigen::Vector3d &_rotation,
-										   const Eigen::Matrix<double, 3, 4> &_intrinsics,
+		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+										   const Eigen::Matrix<double, 3, 4> &intrinsics,
 										   const Eigen::Vector4d &vector, const cv::Vec3d
 										   &color,
 										   cv::Mat &image);

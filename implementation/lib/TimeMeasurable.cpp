@@ -10,17 +10,17 @@ namespace providentia {
 		TimeMeasurable::TimeMeasurable(std::string name, int verbosity) : name(std::move(name)),
 																		  verbosity(verbosity) {}
 
-		void TimeMeasurable::setName(std::string _name) {
-			name = std::move(_name);
+		void TimeMeasurable::setName(std::string value) {
+			name = std::move(value);
 		}
 
-		void TimeMeasurable::setVerbosity(int _verbosity) {
-			verbosity = _verbosity;
+		void TimeMeasurable::setVerbosity(int value) {
+			verbosity = value;
 		}
 
-		void TimeMeasurable::setNameAndVerbosity(std::string _name, int _verbosity) {
-			setName(std::move(_name));
-			setVerbosity(_verbosity);
+		void TimeMeasurable::setNameAndVerbosity(std::string nameValue, int verbosityValue) {
+			setName(std::move(nameValue));
+			setVerbosity(verbosityValue);
 		}
 
 		std::chrono::milliseconds TimeMeasurable::now() {

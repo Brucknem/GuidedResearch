@@ -24,12 +24,12 @@ namespace providentia {
 			/**
 			 * Flag if the latest mask should be used.
 			 */
-			bool useLatestMask = false;
+			bool useLatestMaskFlag = false;
 
 			/**
 			 * The current processed GPU frame.
 			 */
-			cv::cuda::GpuMat frame;
+			cv::cuda::GpuMat processedFrame;
 
 			/**
 			 * The current processed CPU frame.
@@ -80,7 +80,7 @@ namespace providentia {
 			 * Sets the current mask from the latest or an empty mask based on the useLatestMask flag.
 			 * @see FeatureDetectorBase#useLatestMask
 			 */
-			void setCurrentMask(cv::Size _size = cv::Size());
+			void setCurrentMask(cv::Size size = cv::Size());
 
 			/**
 			 * @constructor
@@ -111,7 +111,7 @@ namespace providentia {
 			/**
 			 * @get Gets the current mask from the latest or an empty mask based on the useLatestMask flag.
 			 */
-			const cv::cuda::GpuMat &getCurrentMask(cv::Size _size = cv::Size());
+			const cv::cuda::GpuMat &getCurrentMask(cv::Size size = cv::Size());
 
 			/**
 			 * @get
@@ -129,30 +129,30 @@ namespace providentia {
 			 * Grayscales the given frame.
 			 * Detects keypoints and features using the subclass specific implementations.
 			 *
-			 * @param _frame The frame used for detection.
+			 * @param frame The frame used for detection.
 			 */
-			void detect(const cv::cuda::GpuMat &_frame);
+			void detect(const cv::cuda::GpuMat &frame);
 
 			/**
 			 * Detects keypoints and features using the latest mask or without a mask.
 			 *
-			 * @param _frame The frame used for detection.
-			 * @param _useLatestMask Flag whether or not to use the latest mask.
+			 * @param frame The frame used for detection.
+			 * @param useLatestMask Flag whether or not to use the latest mask.
 			 *
 			 * @see FeatureDetectorBase#useLatestMask
 			 * @see FeatureDetectorBase#detect(cv::cuda::GpuMat)
 			 */
-			void detect(const cv::cuda::GpuMat &_frame, bool _useLatestMask);
+			void detect(const cv::cuda::GpuMat &frame, bool useLatestMask);
 
 			/**
 			 * Detects keypoints and features using the given mask.
 			 *
-			 * @param _frame The frame used for detection.
-			 * @param _mask The mask used for detection.
+			 * @param frame The frame used for detection.
+			 * @param mask The mask used for detection.
 			 *
 			 * @see FeatureDetectorBase#detect(cv::cuda::GpuMat)
 			 */
-			void detect(const cv::cuda::GpuMat &_frame, const cv::cuda::GpuMat &_mask);
+			void detect(const cv::cuda::GpuMat &frame, const cv::cuda::GpuMat &mask);
 
 			/**
 			 * Draws the detected features.
@@ -218,9 +218,9 @@ namespace providentia {
 			 *
 			 * @ref opencv2/xfeatures2d/cuda.hpp -> cv::cuda::SURF_CUDA::create
 			 */
-			explicit SURFFeatureDetector(double _hessianThreshold = 500, int _nOctaves = 4,
-										 int _nOctaveLayers = 2, bool _extended = false, float _keypointsRatio = 0.01f,
-										 bool _upright = false);
+			explicit SURFFeatureDetector(double hessianThreshold = 500, int nOctaves = 4,
+										 int nOctaveLayers = 2, bool extended = false, float keypointsRatio = 0.01f,
+										 bool upright = false);
 
 			/**
 			 * @destructor
@@ -257,7 +257,7 @@ namespace providentia {
 										int nlevels = 8,
 										int edgeThreshold = 31,
 										int firstLevel = 0,
-										int WTA_K = 2,
+										int wtaK = 2,
 										int scoreType = cv::ORB::FAST_SCORE,
 										int patchSize = 31,
 										int fastThreshold = 20,
@@ -296,7 +296,7 @@ namespace providentia {
 			explicit FastFREAKFeatureDetector(int threshold = 40,
 											  bool nonmaxSuppression = true,
 											  cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16,
-											  int max_npoints = 500000,
+											  int maxNPoints = 500000,
 											  bool orientationNormalized = true,
 											  bool scaleNormalized = true,
 											  float patternScale = 22.0f,
@@ -337,7 +337,7 @@ namespace providentia {
 											  int lineThresholdProjected = 10,
 											  int lineThresholdBinarized = 8,
 											  int suppressNonmaxSize = 5,
-											  int bytes = 64, bool use_orientation = false);
+											  int bytes = 64, bool useOrientation = false);
 
 			/**
 			 * @destructor

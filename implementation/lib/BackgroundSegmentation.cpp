@@ -9,17 +9,17 @@ namespace providentia {
 
 #pragma region BackgroundSegmentorBase
 
-		void BackgroundSegmentorBase::segment(const cv::cuda::GpuMat &_frame) {
+		void BackgroundSegmentorBase::segment(const cv::cuda::GpuMat &frame) {
 			clear();
 
 			if (calculationSize.empty()) {
-				calculationSize = _frame.size();
+				calculationSize = frame.size();
 			}
 
-			if (calculationSize != _frame.size()) {
-				cv::cuda::resize(_frame, frame, calculationSize);
+			if (calculationSize != frame.size()) {
+				cv::cuda::resize(frame, calculationFrame, calculationSize);
 			} else {
-				frame = _frame.clone();
+				calculationFrame = frame.clone();
 			}
 
 			specificApply();
@@ -40,22 +40,22 @@ namespace providentia {
 		}
 
 		const cv::cuda::GpuMat &
-		BackgroundSegmentorBase::getForegroundMask(const cv::Size &_size) {
+		BackgroundSegmentorBase::getForegroundMask(const cv::Size &size) {
 			if (foregroundMask.empty() ||
 				cv::cuda::countNonZero(foregroundMask) == foregroundMask.size().width * foregroundMask.size().height) {
-				clearMasks(_size);
+				clearMasks(size);
 			}
 			return foregroundMask;
 		}
 
 		const cv::cuda::GpuMat &
-		BackgroundSegmentorBase::getBackgroundMask(const cv::Size &_size) {
+		BackgroundSegmentorBase::getBackgroundMask(const cv::Size &size) {
 			if (backgroundMask.empty() ||
 				cv::cuda::countNonZero(backgroundMask) == 0) {
-				clearMasks(_size);
+				clearMasks(size);
 			}
-			if (!_size.empty() && backgroundMask.size() != _size) {
-				cv::cuda::resize(backgroundMask, backgroundMask, _size);
+			if (!size.empty() && backgroundMask.size() != size) {
+				cv::cuda::resize(backgroundMask, backgroundMask, size);
 			}
 			return backgroundMask;
 		}
@@ -67,14 +67,14 @@ namespace providentia {
 			return result;
 		}
 
-		void BackgroundSegmentorBase::clearMasks(const cv::Size &_size) {
-			foregroundMask.upload(cv::Mat::ones(_size, CV_8UC1) * 0);
-			backgroundMask.upload(cv::Mat::ones(_size, CV_8UC1) * 255);
+		void BackgroundSegmentorBase::clearMasks(const cv::Size &size) {
+			foregroundMask.upload(cv::Mat::ones(size, CV_8UC1) * 0);
+			backgroundMask.upload(cv::Mat::ones(size, CV_8UC1) * 255);
 		}
 
-		BackgroundSegmentorBase::BackgroundSegmentorBase(cv::Size _size)
+		BackgroundSegmentorBase::BackgroundSegmentorBase(cv::Size size)
 			: providentia::utils::TimeMeasurable(
-			"BackgroundSegmentorBase", 1), calculationSize(std::move(_size)) {
+			"BackgroundSegmentorBase", 1), calculationSize(std::move(size)) {
 		}
 
 		void BackgroundSegmentorBase::addFilters() {
@@ -95,7 +95,7 @@ namespace providentia {
 		}
 
 		void MOG2BackgroundSegmentor::specificApply() {
-			algorithm->apply(frame, foregroundMask, -1, stream);
+			algorithm->apply(calculationFrame, foregroundMask, -1, stream);
 		}
 
 		void MOG2BackgroundSegmentor::addFilters() {

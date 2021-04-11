@@ -10,11 +10,11 @@ namespace providentia {
 	namespace calibration {
 #pragma region Points
 
-		ParametricPoint::ParametricPoint(Eigen::Vector3d _origin, const Eigen::Vector3d
-		&_axisA, const Eigen::Vector3d &_axisB, double _lambda, double _mu) :
-			expectedPixel({0, 0}), origin(std::move(_origin)), axisA(_axisA.normalized()),
-			axisB(_axisB.normalized()),
-			lambda(new double(_lambda)), mu(new double(_mu)) {}
+		ParametricPoint::ParametricPoint(Eigen::Vector3d origin, const Eigen::Vector3d
+		&axisA, const Eigen::Vector3d &axisB, double lambda, double mu) :
+			expectedPixel({0, 0}), origin(std::move(origin)), axisA(axisA.normalized()),
+			axisB(axisB.normalized()),
+			lambda(new double(lambda)), mu(new double(mu)) {}
 
 		Eigen::Vector3d ParametricPoint::getPosition() const {
 			return origin + *lambda * axisA + *mu * axisB;
@@ -44,46 +44,46 @@ namespace providentia {
 			return expectedPixel;
 		}
 
-		void ParametricPoint::setExpectedPixel(const Eigen::Vector2d &_expectedPixel) {
-			expectedPixel = _expectedPixel;
+		void ParametricPoint::setExpectedPixel(const Eigen::Vector2d &value) {
+			expectedPixel = value;
 			isExpectedPixelSet = true;
 		}
 
-		ParametricPoint ParametricPoint::OnPlane(const Eigen::Vector2d &_expectedPixel, Eigen::Vector3d _origin,
-												 const Eigen::Vector3d &_axisA, const Eigen::Vector3d &_axisB,
-												 double _lambda, double _mu) {
-			ParametricPoint point = OnPlane(std::move(_origin), _axisA, _axisB, _lambda, _mu);
-			point.setExpectedPixel(_expectedPixel);
+		ParametricPoint ParametricPoint::OnPlane(const Eigen::Vector2d &expectedPixel, Eigen::Vector3d origin,
+												 const Eigen::Vector3d &axisA, const Eigen::Vector3d &axisB,
+												 double lambda, double mu) {
+			ParametricPoint point = OnPlane(std::move(origin), axisA, axisB, lambda, mu);
+			point.setExpectedPixel(expectedPixel);
 			return point;
 		}
 
-		ParametricPoint ParametricPoint::OnPlane(Eigen::Vector3d _origin, const Eigen::Vector3d &_axisA,
-												 const Eigen::Vector3d &_axisB, double _lambda, double _mu) {
-			return ParametricPoint(std::move(_origin), _axisA.stableNormalized(), _axisB.stableNormalized(), _lambda,
-								   _mu);
+		ParametricPoint ParametricPoint::OnPlane(Eigen::Vector3d origin, const Eigen::Vector3d &axisA,
+												 const Eigen::Vector3d &axisB, double lambda, double mu) {
+			return ParametricPoint(std::move(origin), axisA.stableNormalized(), axisB.stableNormalized(), lambda,
+								   mu);
 		}
 
-		ParametricPoint ParametricPoint::OnLine(const Eigen::Vector2d &_expectedPixel, Eigen::Vector3d _origin, const
-		Eigen::Vector3d &_heading, double _lambda) {
-			ParametricPoint point = OnLine(std::move(_origin), _heading, _lambda);
-			point.setExpectedPixel(_expectedPixel);
+		ParametricPoint ParametricPoint::OnLine(const Eigen::Vector2d &expectedPixel, Eigen::Vector3d origin, const
+		Eigen::Vector3d &heading, double lambda) {
+			ParametricPoint point = OnLine(std::move(origin), heading, lambda);
+			point.setExpectedPixel(expectedPixel);
 			return point;
 		}
 
-		ParametricPoint ParametricPoint::OnLine(Eigen::Vector3d _origin, const Eigen::Vector3d &_heading,
-												double _lambda) {
-			return ParametricPoint::OnPlane(std::move(_origin), _heading, {0, 0, 0}, _lambda, 0);
+		ParametricPoint ParametricPoint::OnLine(Eigen::Vector3d origin, const Eigen::Vector3d &heading,
+												double lambda) {
+			return ParametricPoint::OnPlane(std::move(origin), heading, {0, 0, 0}, lambda, 0);
 		}
 
 		ParametricPoint
-		ParametricPoint::OnPoint(const Eigen::Vector2d &_expectedPixel, const Eigen::Vector3d &_worldPosition) {
-			ParametricPoint point = OnPoint(_worldPosition);
-			point.setExpectedPixel(_expectedPixel);
+		ParametricPoint::OnPoint(const Eigen::Vector2d &expectedPixel, const Eigen::Vector3d &worldPosition) {
+			ParametricPoint point = OnPoint(worldPosition);
+			point.setExpectedPixel(expectedPixel);
 			return point;
 		}
 
-		ParametricPoint ParametricPoint::OnPoint(const Eigen::Vector3d &_worldPosition) {
-			return ParametricPoint::OnLine(_worldPosition, {0, 0, 0}, 0);
+		ParametricPoint ParametricPoint::OnPoint(const Eigen::Vector3d &worldPosition) {
+			return ParametricPoint::OnLine(worldPosition, {0, 0, 0}, 0);
 		}
 
 		bool ParametricPoint::hasExpectedPixel() const {
@@ -102,7 +102,7 @@ namespace providentia {
 			if (points.empty()) {
 				return 0;
 			}
-			return 1. / points.size();
+			return 1. / (double) points.size();
 		}
 
 		const std::vector<ParametricPoint> &WorldObject::getPoints() const {
@@ -125,20 +125,20 @@ namespace providentia {
 			return id;
 		}
 
-		void WorldObject::setId(const std::string &_id) {
-			id = _id;
+		void WorldObject::setId(const std::string &value) {
+			id = value;
 		}
 
 		double WorldObject::getHeight() const {
 			return height;
 		}
 
-		void WorldObject::setHeight(double _height) {
-			height = _height;
+		void WorldObject::setHeight(double value) {
+			height = value;
 		}
 
 		int WorldObject::getNumPoints() const {
-			return points.size();
+			return (int) points.size();
 		}
 
 #pragma endregion Objects

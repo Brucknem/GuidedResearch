@@ -73,14 +73,14 @@ namespace providentia {
 			/**
 			 * @constructor
 			 *
-			 * @param _expectedPixel The expected [u, v] pixel location.
-			 * @param _point The [x, y, z] point that corresponds to the pixel.
-			 * @param _intrinsics The intrinsics of the pinhole camera model.
-			 * @param _imageSize The [width, height] of the image.
+			 * @param expectedPixel The expected [u, v] pixel location.
+			 * @param point The [x, y, z] point that corresponds to the pixel.
+			 * @param intrinsics The intrinsics of the pinhole camera model.
+			 * @param imageSize The [width, height] of the image.
 			 */
-			CorrespondenceResidual(const Eigen::Vector2d &_expectedPixel,
-								   const providentia::calibration::ParametricPoint &_point,
-								   const Eigen::Matrix<double, 3, 4> &_intrinsics);
+			CorrespondenceResidual(Eigen::Vector2d expectedPixel,
+								   const providentia::calibration::ParametricPoint &point,
+								   Eigen::Matrix<double, 3, 4> intrinsics);
 
 			/**
 			 * @destructor
@@ -91,10 +91,10 @@ namespace providentia {
 			 * Calculates the residual error after transforming the world position to a pixel.
 			 *
 			 * @tparam T Template parameter expected from the ceres-solver.
-			 * @param _translation The [x, y, z] translation of the camera in world space for which we optimize.
-			 * @param _rotation The [x, y, z] euler angle rotation of the camera around the world axis for which we optimize.
-			 * @param _lambda The [l] distance of the point in the direction of one side of the parametricPoint from the origin.
-			 * @param _mu The [m] distance of the point in the direction of another side of the parametricPoint from the origin.
+			 * @param translation The [x, y, z] translation of the camera in world space for which we optimize.
+			 * @param rotation The [x, y, z] euler angle rotation of the camera around the world axis for which we optimize.
+			 * @param lambda The [l] distance of the point in the direction of one side of the parametricPoint from the origin.
+			 * @param mu The [m] distance of the point in the direction of another side of the parametricPoint from the origin.
 			 * @param residual The [u, v] pixel error between the expected and calculated pixel.
 			 * @return true
 			 */
@@ -106,16 +106,16 @@ namespace providentia {
 				const T *rx,
 				const T *ry,
 				const T *rz,
-				const T *_lambda,
-				const T *_mu,
-				const T *_weight,
+				const T *lambda,
+				const T *mu,
+				const T *weight,
 				T *residual)
 			const;
 
 			/**
 			 * Factory method to hide the residual creation.
 			 */
-			static ceres::CostFunction *Create(const Eigen::Vector2d &_expectedPixel,
+			static ceres::CostFunction *Create(const Eigen::Vector2d &expectedPixel,
 											   const providentia::calibration::ParametricPoint &point,
 											   const Eigen::Matrix<double, 3, 4> &intrinsics);
 		};

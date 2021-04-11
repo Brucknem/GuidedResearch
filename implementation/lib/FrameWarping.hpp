@@ -43,6 +43,11 @@ namespace providentia {
 		public:
 
 			/**
+			 * @constructor
+			 */
+			explicit FrameWarper();
+
+			/**
 			 * @destructor
 			 */
 			~FrameWarper() override = default;
@@ -53,29 +58,30 @@ namespace providentia {
 			const cv::cuda::GpuMat &getWarpedFrame() const;
 
 			/**
-			 * @get The homography that minimizes the reprojection error.
+			 * @get
 			 */
-			cv::Mat getHomography(double _skewThreshold = 1e-4) const;
-
-			double getMaxSkew() const;
-
-			void setSkewThreshold(double _skewThreshold);
+			double getSkewThreshold() const;
 
 			/**
-			 * @constructor
+			 * @get
 			 */
-			explicit FrameWarper();
+			void setSkewThreshold(double skewThreshold);
+
+			/**
+			 * @get The homography that minimizes the reprojection error.
+			 */
+			cv::Mat getHomography() const;
 
 			/**
 			 * Finds the homography that minimizes the reprojection error between the feature matches and warpes the frame.
-			 * @param _frame The frame to warp.
+			 * @param frame The frame to warp.
 			 * @param matcher The matched features.
 			 */
 			void
-			warp(const cv::cuda::GpuMat &_frame,
+			warp(const cv::cuda::GpuMat &frame,
 				 const std::shared_ptr<providentia::features::FeatureMatcherBase> &matcher);
 
-			static cv::cuda::GpuMat warp(const cv::cuda::GpuMat &_frame, const cv::Mat &homography, int
+			static cv::cuda::GpuMat warp(const cv::cuda::GpuMat &frame, const cv::Mat &homography, int
 			perspectiveWarpFlags = cv::INTER_LINEAR);
 		};
 	}

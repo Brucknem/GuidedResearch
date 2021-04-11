@@ -92,9 +92,9 @@ namespace providentia {
 			/**
 			 * @constructor
 			 *
-			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
+			 * @param goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
 			 */
-			explicit FeatureMatcherBase(float _goodMatchRatioThreshold = 0.75f);
+			explicit FeatureMatcherBase(float goodMatchRatioThreshold = 0.75f);
 
 			/**
 			 * @get
@@ -122,8 +122,8 @@ namespace providentia {
 			 * @param frameFeatureDetector The feature detector of the frame.
 			 * @param referenceFeatureDetector  The feature detector of the reference frame.
 			 */
-			void match(const std::shared_ptr<providentia::features::FeatureDetectorBase> &_frameFeatureDetector,
-					   const std::shared_ptr<providentia::features::FeatureDetectorBase> &_referenceFeatureDetector);
+			void match(const std::shared_ptr<providentia::features::FeatureDetectorBase> &frameFeatureDetector,
+					   const std::shared_ptr<providentia::features::FeatureDetectorBase> &referenceFeatureDetector);
 
 			/**
 			 * Horizontally stacks the writeFrames and draws the matched features.
@@ -163,9 +163,9 @@ namespace providentia {
 			 * @constructor
 			 *
 			 * @param norm The norm used to compare the features.
-			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
+			 * @param goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
 			 */
-			explicit BruteForceFeatureMatcher(cv::NormTypes norm, float _goodMatchRatioThreshold = 0.75f);
+			explicit BruteForceFeatureMatcher(cv::NormTypes norm, float goodMatchRatioThreshold = 0.75f);
 
 		};
 
@@ -197,18 +197,18 @@ namespace providentia {
 			 * @constructor
 			 *
 			 * @param binaryDescriptors Flag if binary desccriptors are used.
-			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
+			 * @param goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
 			 */
 			explicit FlannFeatureMatcher(bool binaryDescriptors = false,
-										 float _goodMatchRatioThreshold = 0.75f);
+										 float goodMatchRatioThreshold = 0.75f);
 
 			/**
 			 * @constructor
 			 *
 			 * @params The FLANN parameters.
-			 * @param _goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
+			 * @param goodMatchRatioThreshold The ratio threshold of good matches for the Lowe's ratio toCameraSpace.
 			 */
-			explicit FlannFeatureMatcher(cv::flann::IndexParams *params, float _goodMatchRatioThreshold = 0.75f);
+			explicit FlannFeatureMatcher(cv::flann::IndexParams *params, float goodMatchRatioThreshold = 0.75f);
 
 		};
 	}
