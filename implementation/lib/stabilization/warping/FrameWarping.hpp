@@ -38,6 +38,9 @@ namespace providentia {
 			 */
 			cv::cuda::GpuMat warpedFrame;
 
+			/**
+			 * The maximal value for the skew of the homographic transformation in the frame warping.
+			 */
 			double skewThreshold = 2e-4;
 
 		public:
@@ -69,6 +72,7 @@ namespace providentia {
 
 			/**
 			 * @get The homography that minimizes the reprojection error.
+			 * 		If the skew of the homography exceeds the skew threshold the identity is returned.
 			 */
 			cv::Mat getHomography() const;
 
@@ -81,6 +85,15 @@ namespace providentia {
 			warp(const cv::cuda::GpuMat &frame,
 				 const std::shared_ptr<providentia::stabilization::features::FeatureMatchingBase> &matcher);
 
+			/**
+			 * Warps the given frame with the given homography.
+			 *
+			 * @param frame The frame to warp
+			 * @param homography The homography to use.
+			 * @param perspectiveWarpFlags The flags for the warp algorithm.
+			 *
+			 * @return The warped frame.
+			 */
 			static cv::cuda::GpuMat warp(const cv::cuda::GpuMat &frame, const cv::Mat &homography, int
 			perspectiveWarpFlags = cv::INTER_LINEAR);
 		};

@@ -148,8 +148,19 @@ namespace providentia {
 			 */
 			void updateKeyframe();
 
+			/**
+			 * Gets the current calculated background mask in the given size.
+			 *
+			 * @param size The size of the requested background mask.
+			 * 		Necessary if the background estimation was not run previously and the mask is empty.
+			 *
+			 * @return The binary mask.
+			 */
 			cv::cuda::GpuMat getBackgroundMask(const cv::Size &size) const;
 
+			/**
+			 * @set the maximal value for the skew of the homographic transformation in the frame warping.
+			 */
 			void setSkewThreshold(double value);
 		};
 

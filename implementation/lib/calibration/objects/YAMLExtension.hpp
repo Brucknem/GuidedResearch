@@ -9,14 +9,29 @@
 #include "yaml-cpp/yaml.h"
 
 namespace YAML {
+
+	/**
+	 * Extension to the YAML parser for Eigen vectors.
+	 */
 	template<>
 	struct convert<Eigen::Vector3d> {
-		static bool decode(const Node &node, Eigen::Vector3d &rhs);
+
+		/**
+		 * Decoder function from the YAML node to the Eigen vector.
+		 */
+		static bool decode(const Node &node, Eigen::Vector3d &vector);
 	};
 
+	/**
+	 * Extension to the YAML parser for Eigen vectors.
+	 */
 	template<>
 	struct convert<Eigen::Vector2d> {
-		static bool decode(const Node &node, Eigen::Vector2d &rhs);
+
+		/**
+		 * Decoder function from the YAML node to the Eigen vector.
+		 */
+		static bool decode(const Node &node, Eigen::Vector2d &vector);
 	};
 
 }

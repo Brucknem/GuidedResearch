@@ -28,6 +28,9 @@ namespace providentia {
 			 */
 			std::string id;
 
+			/**
+			 * The height of the object in meters.
+			 */
 			double height = 0;
 
 		public:
@@ -44,6 +47,9 @@ namespace providentia {
 			 */
 			explicit WorldObject(const ParametricPoint &point);
 
+			/**
+			 * @destructor
+			 */
 			virtual ~WorldObject() = default;
 
 			/**
