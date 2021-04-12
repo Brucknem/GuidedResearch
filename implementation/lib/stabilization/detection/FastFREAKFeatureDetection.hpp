@@ -36,24 +36,67 @@ namespace providentia {
 
 			public:
 
+				/**
+				 * The feature detector options.
+				 */
 				struct Options {
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
+					 */
 					int threshold = 40;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
+					 */
 					bool nonmaxSuppression = true;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
+					 */
 					cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
+					 */
 					int maxNPoints = 500000;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
+					 */
 					bool orientationNormalized = true;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
+					 */
 					bool scaleNormalized = true;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
+					 */
 					float patternScale = 22.0f;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
+					 */
 					int nOctaves = 4;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
+					 */
 					std::vector<int> selectedPairs = std::vector<int>();
 
-					Options() {}
+					/**
+					 * @constructor
+					 */
+					Options() {
+						// Necessary for default initialization
+					};
 				};
 
 				/**
 				 * @constructor
 				 *
-				 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
+				 * @param options The feature detector options
 				 */
 				explicit FastFREAKFeatureDetection(Options options = Options());
 

@@ -34,25 +34,72 @@ namespace providentia {
 				void specificDetect() override;
 
 			public:
+
+				/**
+				 * The feature detector options.
+				 */
 				struct Options {
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::ORB::create
+					 */
 					int nfeatures = 1e4;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::ORB::create
+					 */
 					float scaleFactor = 1.2f;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::ORB::create
+					 */
 					int nlevels = 8;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::ORB::create
+					 */
 					int edgeThreshold = 31;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::ORB::create
+					 */
 					int firstLevel = 0;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::ORB::create
+					 */
 					int wtaK = 2;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::ORB::create
+					 */
 					int scoreType = cv::ORB::FAST_SCORE;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::ORB::create
+					 */
 					int patchSize = 31;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::ORB::create
+					 */
 					int fastThreshold = 20;
+
+					/**
+					 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::ORB::create
+					 */
 					bool blurForDescriptor = false;
 
-					Options() {}
+					/**
+					 * @constructor
+					 */
+					Options() {
+						// Necessary for default initialization
+					};
 				};
 
 				/**
 				 * @constructor
-				 *
-				 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::ORB::create
 				 */
 				explicit ORBFeatureDetection(Options options = Options());
 

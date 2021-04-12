@@ -35,14 +35,43 @@ namespace providentia {
 
 			public:
 
+				/**
+				 * The feature detector options.
+				 */
 				struct Options {
+					/**
+					 * @ref opencv2/xfeatures2d/cuda.hpp -> cv::cuda::SURF_CUDA::create
+					 */
 					double hessianThreshold = 500;
+
+					/**
+					 * @ref opencv2/xfeatures2d/cuda.hpp -> cv::cuda::SURF_CUDA::create
+					 */
 					int nOctaves = 4;
+
+					/**
+					 * @ref opencv2/xfeatures2d/cuda.hpp -> cv::cuda::SURF_CUDA::create
+					 */
 					int nOctaveLayers = 2;
+
+					/**
+					 * @ref opencv2/xfeatures2d/cuda.hpp -> cv::cuda::SURF_CUDA::create
+					 */
 					bool extended = false;
+
+					/**
+					 * @ref opencv2/xfeatures2d/cuda.hpp -> cv::cuda::SURF_CUDA::create
+					 */
 					float keypointsRatio = 0.01f;
+
+					/**
+					 * @ref opencv2/xfeatures2d/cuda.hpp -> cv::cuda::SURF_CUDA::create
+					 */
 					bool upright = false;
 
+					/**
+					 * @constructor
+					 */
 					Options() {
 						// Necessary for default initialization
 					};
@@ -50,8 +79,6 @@ namespace providentia {
 
 				/**
 				 * @constructor
-				 *
-				 * @ref opencv2/xfeatures2d/cuda.hpp -> cv::cuda::SURF_CUDA::create
 				 */
 				explicit SURFFeatureDetection(Options options = Options());
 

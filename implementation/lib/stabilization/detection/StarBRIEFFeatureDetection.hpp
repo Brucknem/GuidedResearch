@@ -35,15 +35,49 @@ namespace providentia {
 				void specificDetect() override;
 
 			public:
+				/**
+				 * The feature detector options.
+				 */
 				struct Options {
+
+					/**
+					 * @ref opencv2/xfeatures2d.hpp -> cv::xfeatures2d::StarDetector::create
+					 */
 					int maxSize = 45;
+
+					/**
+					 * @ref opencv2/xfeatures2d.hpp -> cv::xfeatures2d::StarDetector::create
+					 */
 					int responseThreshold = 30;
+
+					/**
+					 * @ref opencv2/xfeatures2d.hpp -> cv::xfeatures2d::StarDetector::create
+					 */
 					int lineThresholdProjected = 10;
+
+					/**
+					 * @ref opencv2/xfeatures2d.hpp -> cv::xfeatures2d::StarDetector::create
+					 */
 					int lineThresholdBinarized = 8;
+
+					/**
+					 * @ref opencv2/xfeatures2d.hpp -> cv::xfeatures2d::StarDetector::create
+					 */
 					int suppressNonmaxSize = 5;
+
+					/**
+					 * @ref cv::xfeatures2d::BriefDescriptorExtractor::create
+					 */
 					int bytes = 64;
+
+					/**
+					 * @ref cv::xfeatures2d::BriefDescriptorExtractor::create
+					 */
 					bool useOrientation = false;
 
+					/**
+					 * @constructor
+					 */
 					Options() {
 						// Necessary for default initialization
 					}
@@ -52,7 +86,8 @@ namespace providentia {
 				/**
 				 * @constructor
 				 *
-				 * @ref opencv2/cudafeatures2d.hpp -> cv::cuda::FastFeatures::create
+				 * @ref opencv2/xfeatures2d.hpp -> cv::cuda::FastFeatures::create
+				 * @ref cv::xfeatures2d::BriefDescriptorExtractor::create
 				 */
 				explicit StarBRIEFFeatureDetection(Options options = {});
 

@@ -35,13 +35,39 @@ namespace providentia {
 				void specificDetect() override;
 
 			public:
+				/**
+				 * The feature detector options.
+				 */
 				struct Options {
+
+					/**
+					 * @ref opencv2/xfeatures2d.hpp -> cv::SIFT::create
+					 */
 					int nfeatures = 0;
+
+					/**
+					 * @ref opencv2/xfeatures2d.hpp -> cv::SIFT::create
+					 */
 					int nOctaveLayers = 3;
+
+					/**
+					 * @ref opencv2/xfeatures2d.hpp -> cv::SIFT::create
+					 */
 					double contrastThreshold = 0.04;
+
+					/**
+					 * @ref opencv2/xfeatures2d.hpp -> cv::SIFT::create
+					 */
 					double edgeThreshold = 10;
+
+					/**
+					 * @ref opencv2/xfeatures2d.hpp -> cv::SIFT::create
+					 */
 					double sigma = 1.6;
 
+					/**
+					 * @constructor
+					 */
 					Options() {
 						// Necessary for default initialization
 					}
@@ -49,8 +75,6 @@ namespace providentia {
 
 				/**
 				 * @constructor
-				 *
-				 * @ref opencv2/xfeatures2d/cuda.hpp -> cv::cuda::SURF_CUDA::create
 				 */
 				explicit SIFTFeatureDetection(Options options = {});
 
