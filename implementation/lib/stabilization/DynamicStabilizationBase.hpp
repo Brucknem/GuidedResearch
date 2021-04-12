@@ -42,7 +42,7 @@ namespace providentia {
 			/**
 			 * Feature matcher to match the frame and reference frame stabilization::features.
 			 */
-			std::shared_ptr<providentia::stabilization::features::FeatureMatchingBase> matcher;
+			std::shared_ptr<providentia::stabilization::matching::FeatureMatchingBase> matcher;
 
 			/**
 			 * Warps the frame based on the given matches.
@@ -85,7 +85,7 @@ namespace providentia {
 			/**
 			 * @get The matcher used for matching the frame and reference frame.
 			 */
-			const std::shared_ptr<providentia::stabilization::features::FeatureMatchingBase> &getMatcher() const;
+			const std::shared_ptr<providentia::stabilization::matching::FeatureMatchingBase> &getMatcher() const;
 
 			/**
 			 * @get The current frame.

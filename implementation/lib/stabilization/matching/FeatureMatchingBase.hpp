@@ -13,7 +13,7 @@
 
 namespace providentia {
 	namespace stabilization {
-		namespace features {
+		namespace matching {
 
 			/**
 			 * Base class for all feature matchers.

@@ -6,10 +6,7 @@
 #define CAMERASTABILIZATION_IMAGETESTBASE_HPP
 
 #include "gtest/gtest.h"
-#include "FeatureDetection.hpp"
-#include "FeatureMatching.hpp"
-#include "DynamicStabilization.hpp"
-#include "BackgroundSegmentation.hpp"
+#include "opencv2/opencv.hpp"
 #include <iostream>
 
 namespace providentia {

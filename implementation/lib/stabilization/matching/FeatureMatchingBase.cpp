@@ -8,7 +8,7 @@
 
 namespace providentia {
 	namespace stabilization {
-		namespace features {
+		namespace matching {
 
 			void FeatureMatchingBase::match(
 				const std::shared_ptr<providentia::stabilization::detection::FeatureDetectionBase> &frameFeatureDetector,

@@ -2,6 +2,8 @@
 // Created by brucknem on 13.01.21.
 //
 #include "Commons.hpp"
+#include "segmentation/BackgroundSegmentionBase.hpp"
+#include "segmentation/MOG2BackgroundSegmentation.hpp"
 
 /**
  * Setup to visualize the background segmentation.
@@ -11,11 +13,11 @@ private:
 	/**
 	 * The matcher used to match the features.
 	 */
-	std::shared_ptr<providentia::segmentation::BackgroundSegmentionBase> segmentor;
+	std::shared_ptr<providentia::stabilization::segmentation::BackgroundSegmentionBase> segmentor;
 
 public:
 	explicit Setup() : VideoSetup() {
-		segmentor = std::make_shared<providentia::segmentation::MOG2BackgroundSegmention>();
+		segmentor = std::make_shared<providentia::stabilization::segmentation::MOG2BackgroundSegmentation>();
 	}
 
 	void specificMainLoop() override {

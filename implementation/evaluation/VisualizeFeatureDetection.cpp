@@ -2,7 +2,13 @@
 // Created by brucknem on 13.01.21.
 //
 #include <opencv2/cudawarping.hpp>
-#include "FeatureDetection.hpp"
+#include "detection/FeatureDetectionBase.hpp"
+#include "detection/SURFFeatureDetection.hpp"
+#include "detection/ORBFeatureDetection.hpp"
+#include "detection/FastFREAKFeatureDetection.hpp"
+#include "detection/StarBRIEFFeatureDetection.hpp"
+#include "detection/SIFTFeatureDetection.hpp"
+
 #include "Commons.hpp"
 
 /**
@@ -13,15 +19,17 @@ private:
 	/**
 	 * The detectors and scaling factors that are applied in the main loop.
 	 */
-	std::vector<std::pair<providentia::features::FeatureDetectorBase *, float>> detectors;
+	std::vector<std::pair<providentia::stabilization::detection::FeatureDetectionBase *, float>> detectors;
 
 public:
 	explicit Setup() : VideoSetup() {
-		detectors.emplace_back(std::make_pair(new providentia::features::SURFFeatureDetector(), 1.0));
-		detectors.emplace_back(std::make_pair(new providentia::features::ORBFeatureDetector(), 1.0));
-		detectors.emplace_back(std::make_pair(new providentia::features::SIFTFeatureDetector(), 1.0));
-		detectors.emplace_back(std::make_pair(new providentia::features::FastFREAKFeatureDetector(), 1.0));
-		detectors.emplace_back(std::make_pair(new providentia::features::StarBRIEFFeatureDetector(), 1.0));
+		detectors.emplace_back(std::make_pair(new providentia::stabilization::detection::SURFFeatureDetection(), 1.0));
+		detectors.emplace_back(std::make_pair(new providentia::stabilization::detection::ORBFeatureDetection(), 1.0));
+		detectors.emplace_back(std::make_pair(new providentia::stabilization::detection::SIFTFeatureDetection(), 1.0));
+		detectors.emplace_back(
+			std::make_pair(new providentia::stabilization::detection::FastFREAKFeatureDetection(), 1.0));
+		detectors.emplace_back(
+			std::make_pair(new providentia::stabilization::detection::StarBRIEFFeatureDetection(), 1.0));
 	}
 
 	void specificMainLoop() override {
@@ -35,7 +43,7 @@ public:
 													   std::string(typeid(*entry.first).name()) + " [" +
 													   std::to_string(entry.second) + "]",
 													   entry.first->getTotalMilliseconds(),
-													   5, 20);
+													   2, 5, 20);
 
 			if (finalFrame.empty()) {
 				finalFrame = bufferCPU.clone();

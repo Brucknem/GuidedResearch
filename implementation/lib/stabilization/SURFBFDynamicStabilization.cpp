@@ -15,7 +15,7 @@ namespace providentia {
 				detector);
 			providentia::stabilization::DynamicStabilizationBase::referenceFeatureDetector = std::make_shared<providentia::stabilization::detection::SURFFeatureDetection>(
 				detector);
-			providentia::stabilization::DynamicStabilizationBase::matcher = std::make_shared<providentia::stabilization::features::BruteForceFeatureMatching>(
+			providentia::stabilization::DynamicStabilizationBase::matcher = std::make_shared<providentia::stabilization::matching::BruteForceFeatureMatching>(
 				cv::NORM_L2);
 			providentia::utils::TimeMeasurable::setName(typeid(*this).name());
 		}

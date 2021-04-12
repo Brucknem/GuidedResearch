@@ -5,7 +5,7 @@
 #include "Commons.hpp"
 #include "Eigen/Dense"
 #include "camera/RenderingPipeline.hpp"
-#include "WorldObjects.hpp"
+#include "objects/WorldObject.hpp"
 
 using namespace providentia::evaluation;
 
@@ -39,7 +39,7 @@ public:
 	void renderScene() {
 		for (int i = -7; i <= 7; i += 2) {
 			for (int j = 0; j < 200; j += 5) {
-				render(providentia::calibration::ParametricPoint::OnPlane(
+				render(providentia::calibration::ParametricPoint::onPlane(
 					Eigen::Vector3d{0, 0, 0}, Eigen::Vector3d{1, 0, 0},
 					Eigen::Vector3d{0, 1, 0}, i, j)
 						   .getPosition(),
@@ -49,12 +49,12 @@ public:
 
 		for (int i = 0; i < 40; ++i) {
 			for (int j = 0; j < 5; ++j) {
-				render(providentia::calibration::ParametricPoint::OnLine(
+				render(providentia::calibration::ParametricPoint::onLine(
 					Eigen::Vector3d{-7.5, (double) i * 5., 0},
 					Eigen::Vector3d{0, 0, 1}, j)
 						   .getPosition(),
 					   {1, 1, 0});
-				render(providentia::calibration::ParametricPoint::OnLine(
+				render(providentia::calibration::ParametricPoint::onLine(
 					Eigen::Vector3d{7.5, (double) i * 5., 0},
 					Eigen::Vector3d{0, 0, 1}, j)
 						   .getPosition(),

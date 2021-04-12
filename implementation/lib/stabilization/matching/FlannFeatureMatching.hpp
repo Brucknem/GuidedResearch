@@ -14,11 +14,11 @@
 
 namespace providentia {
 	namespace stabilization {
-		namespace features {
+		namespace matching {
 /**
  * CPU implementation of the FLANN feature matcher.
  */
-			class FlannFeatureMatching : public providentia::stabilization::features::FeatureMatchingBase {
+			class FlannFeatureMatching : public providentia::stabilization::matching::FeatureMatchingBase {
 			private:
 
 				/**

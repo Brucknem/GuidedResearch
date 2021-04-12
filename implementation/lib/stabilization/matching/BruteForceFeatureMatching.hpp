@@ -14,11 +14,11 @@
 
 namespace providentia {
 	namespace stabilization {
-		namespace features {
+		namespace matching {
 /**
  * Brute force feature matching on GPU.
  */
-			class BruteForceFeatureMatching : public providentia::stabilization::features::FeatureMatchingBase {
+			class BruteForceFeatureMatching : public providentia::stabilization::matching::FeatureMatchingBase {
 			private:
 				/**
 				 * The CUDA GPU stream used during matching.

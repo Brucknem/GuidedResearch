@@ -82,7 +82,7 @@ namespace providentia {
 			return frameFeatureDetector;
 		}
 
-		const std::shared_ptr<providentia::stabilization::features::FeatureMatchingBase> &
+		const std::shared_ptr<providentia::stabilization::matching::FeatureMatchingBase> &
 		DynamicStabilizationBase::getMatcher() const {
 			return matcher;
 		}

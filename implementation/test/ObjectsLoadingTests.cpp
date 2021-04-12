@@ -27,7 +27,7 @@ namespace providentia {
 		 * Tests loading the objects from a YAML file.
 		 */
 		TEST_F(ObjectsLoadingTests, testLoadingObjects) {
-			auto objects = LoadObjects("../misc/objects.yaml", "../misc/pixels.yaml");
+			auto objects = loadObjects("../misc/objects.yaml", "../misc/pixels.yaml");
 
 			ASSERT_EQ(objects.size(), 554);
 		}

@@ -6,9 +6,9 @@
 
 namespace providentia {
 	namespace stabilization {
-		namespace features {
+		namespace matching {
 			FlannFeatureMatching::FlannFeatureMatching(cv::flann::IndexParams *params,
-													 float goodMatchRatioThreshold)
+													   float goodMatchRatioThreshold)
 				: FeatureMatchingBase(
 				goodMatchRatioThreshold) {
 				matcher = std::make_shared<cv::FlannBasedMatcher>(params);
@@ -25,7 +25,7 @@ namespace providentia {
 			}
 
 			FlannFeatureMatching::FlannFeatureMatching(bool binaryDescriptors,
-													 float goodMatchRatioThreshold) : FeatureMatchingBase(
+													   float goodMatchRatioThreshold) : FeatureMatchingBase(
 				goodMatchRatioThreshold) {
 				if (binaryDescriptors) {
 					matcher = std::make_shared<cv::FlannBasedMatcher>(new cv::flann::LshIndexParams(12, 20, 2));

@@ -40,28 +40,15 @@ add_executable(VisualizeBackgroundSegmentation VisualizeBackgroundSegmentation.c
 target_link_libraries(VisualizeBackgroundSegmentation DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeBackgroundSegmentation PUBLIC "${PROJECT_BINARY_DIR}")
 
-add_executable(VisualizeDynamicStabilization VisualizeDynamicStabilization.cpp)
-target_link_libraries(VisualizeDynamicStabilization DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
-target_include_directories(VisualizeDynamicStabilization PUBLIC "${PROJECT_BINARY_DIR}")
-
-add_executable(VisualizeOpticalFlow VisualizeOpticalFlow.cpp)
-target_link_libraries(VisualizeOpticalFlow DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
-target_include_directories(VisualizeOpticalFlow PUBLIC "${PROJECT_BINARY_DIR}")
-
 add_executable(VisualizeRenderingPipeline VisualizeRenderingPipeline.cpp)
 target_link_libraries(VisualizeRenderingPipeline DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeRenderingPipeline PUBLIC "${PROJECT_BINARY_DIR}")
-
-add_executable(VisualizeStaticCalibration VisualizeStaticCalibration.cpp)
-target_link_libraries(VisualizeStaticCalibration DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
-target_include_directories(VisualizeStaticCalibration PUBLIC "${PROJECT_BINARY_DIR}")
-
 
 ########################################################################################################################
 ### Evaluation ###
 ########################################################################################################################
 
-add_executable(EvaluateDynamicStabilization EvaluateDynamicStabilization.cpp)
+add_executable(EvaluateDynamicStabilization EvaluateOpticalFlow.cpp)
 target_link_libraries(EvaluateDynamicStabilization DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(EvaluateDynamicStabilization PUBLIC "${PROJECT_BINARY_DIR}")
 

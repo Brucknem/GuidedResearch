@@ -36,7 +36,9 @@ namespace providentia {
 			}
 
 			void addPointCorrespondence(const Eigen::Vector3d &pointInWorldSpace) {
-				WorldObject worldObject(ParametricPoint::OnPoint(getPixel(pointInWorldSpace), pointInWorldSpace));
+				WorldObject worldObject(providentia::calibration::ParametricPoint::onPoint(getPixel
+																							   (pointInWorldSpace),
+																						   pointInWorldSpace));
 				estimator->addWorldObject(worldObject);
 			}
 
@@ -66,7 +68,7 @@ namespace providentia {
 					for (const auto &worldObject : estimator->getWorldObjects()) {
 						std::cout << "Next world object" << std::endl;
 						for (const auto &point : worldObject.getPoints()) {
-							std::cout << point->getPosition() << std::endl << std::endl;
+							std::cout << point.getPosition() << std::endl << std::endl;
 						}
 					}
 				}
@@ -78,7 +80,8 @@ namespace providentia {
 				WorldObject post;
 				post.setHeight(height);
 				for (int i = 0; i < number; ++i) {
-					ParametricPoint point = ParametricPoint::OnLine(origin, {0, 0, 1}, (height / number) * i);
+					ParametricPoint point = providentia::calibration::ParametricPoint::onLine(origin, {0, 0, 1},
+																							  (height / number) * i);
 					point.setExpectedPixel(getPixel(point));
 					post.add(point);
 				}
@@ -90,9 +93,7 @@ namespace providentia {
 		 * Tests that the initial guess is 500m above the mean.
 		 */
 		TEST_F(CameraPoseEstimationTests, testCalculateInitialGuess) {
-			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(
-				intrinsics, false, false
-			);
+			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(intrinsics);
 
 			addPointCorrespondence({0, 0, 9});
 			addPointCorrespondence({0, 0, -9});
@@ -111,9 +112,7 @@ namespace providentia {
 		 * Tests that the optimization converges to the expected extrinsic parameters.
 		 */
 		TEST_F(CameraPoseEstimationTests, testEstimationOnlyWorldPositions) {
-			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(
-				intrinsics, false, false
-			);
+			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(intrinsics);
 			addSomePointCorrespondences();
 			assertEstimation();
 		}
@@ -123,9 +122,7 @@ namespace providentia {
 		 * Tests that the optimization converges to the expected extrinsic parameters.
 		 */
 		TEST_F(CameraPoseEstimationTests, testEstimationOnlyLines) {
-			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(
-				intrinsics, false, false
-			);
+			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(intrinsics);
 
 			Eigen::Vector3d origin, axisA, axisB;
 			origin << 0, 0, 0;
@@ -142,7 +139,8 @@ namespace providentia {
 						});
 			}
 
-			estimator->setInitialGuess({0, -50, 0}, {80, 10, -10});
+			estimator->guessTranslation({0, -50, 0});
+			estimator->guessTranslation({80, 10, -10});
 			// TODO refine
 			assertEstimation(false, 1e-5);
 

@@ -83,7 +83,7 @@ namespace providentia {
 			 */
 			void
 			warp(const cv::cuda::GpuMat &frame,
-				 const std::shared_ptr<providentia::stabilization::features::FeatureMatchingBase> &matcher);
+				 const std::shared_ptr<providentia::stabilization::matching::FeatureMatchingBase> &matcher);
 
 			/**
 			 * Warps the given frame with the given homography.

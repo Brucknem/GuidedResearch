@@ -6,9 +6,9 @@
 
 namespace providentia {
 	namespace stabilization {
-		namespace features {
+		namespace matching {
 			BruteForceFeatureMatching::BruteForceFeatureMatching(cv::NormTypes norm,
-															   float goodMatchRatioThreshold)
+																 float goodMatchRatioThreshold)
 				: FeatureMatchingBase(goodMatchRatioThreshold) {
 				matcher = cv::cuda::DescriptorMatcher::createBFMatcher(norm);
 				setName(typeid(*this).name());

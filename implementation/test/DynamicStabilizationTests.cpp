@@ -3,7 +3,10 @@
 //
 #include "gtest/gtest.h"
 #include "ImageTestBase.hpp"
-#include "FeatureDetection.hpp"
+#include "DynamicStabilizationBase.hpp"
+#include "SURFBFDynamicStabilization.hpp"
+#include "ORBBFDynamicStabilization.hpp"
+#include "FastFREAKBFDynamicStabilization.hpp"
 #include <iostream>
 
 namespace providentia {

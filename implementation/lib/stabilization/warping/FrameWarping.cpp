@@ -9,7 +9,7 @@ namespace providentia {
 	namespace stabilization {
 
 		cv::cuda::GpuMat FrameWarping::warp(const cv::cuda::GpuMat &frame,
-										   const cv::Mat &homography, int perspectiveWarpFlags) {
+											const cv::Mat &homography, int perspectiveWarpFlags) {
 			if (homography.empty()) {
 				return frame;
 			}
@@ -19,7 +19,7 @@ namespace providentia {
 		}
 
 		void FrameWarping::warp(const cv::cuda::GpuMat &frame,
-							   const std::shared_ptr<providentia::stabilization::features::FeatureMatchingBase> &matcher) {
+								const std::shared_ptr<providentia::stabilization::matching::FeatureMatchingBase> &matcher) {
 			clear();
 			if (matcher->getFrameMatchedPoints().size() < 4) {
 				homography = cv::Mat::eye(3, 3, CV_64F);
@@ -40,7 +40,7 @@ namespace providentia {
 		}
 
 		providentia::stabilization::FrameWarping::FrameWarping() : providentia::utils::TimeMeasurable("Frame Warper",
-																									1) {}
+																									  1) {}
 
 		const cv::cuda::GpuMat &providentia::stabilization::FrameWarping::getWarpedFrame() const {
 			return warpedFrame;

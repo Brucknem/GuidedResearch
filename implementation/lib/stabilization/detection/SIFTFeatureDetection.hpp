@@ -43,7 +43,7 @@ namespace providentia {
 					/**
 					 * @ref opencv2/xfeatures2d.hpp -> cv::SIFT::create
 					 */
-					int nfeatures = 0;
+					int nfeatures = 1000;
 
 					/**
 					 * @ref opencv2/xfeatures2d.hpp -> cv::SIFT::create

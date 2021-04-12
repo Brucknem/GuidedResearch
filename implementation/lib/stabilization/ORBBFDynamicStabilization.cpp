@@ -15,7 +15,7 @@ namespace providentia {
 				detector);
 			referenceFeatureDetector = std::make_shared<providentia::stabilization::detection::ORBFeatureDetection>(
 				detector);
-			matcher = std::make_shared<providentia::stabilization::features::BruteForceFeatureMatching>(
+			matcher = std::make_shared<providentia::stabilization::matching::BruteForceFeatureMatching>(
 				cv::NORM_HAMMING);
 			setName(typeid(*this).name());
 		}

@@ -25,14 +25,17 @@ namespace providentia {
 			 */
 			~ResidualsTests() override = default;
 
-			void assertParametricPoint(ParametricPoint point, Eigen::Vector2d expectedResidual) {
+			void assertParametricPoint(providentia::calibration::ParametricPoint point, Eigen::Vector2d
+			expectedResidual) {
 				Eigen::Vector2d residual;
 				CorrespondenceResidual correspondenceResidual = {
 					point.getExpectedPixel(), point,
 					intrinsics,
 				};
-				correspondenceResidual(translation.data(), rotation.data(), point.getLambda(), point.getMu(), new
-					double(1), residual.data());
+				correspondenceResidual(
+					&translation.x(), &translation.y(), &translation.z(),
+					&rotation.x(), &rotation.y(), &rotation.z(),
+					point.getLambda(), point.getMu(), new double(1), residual.data());
 
 				EXPECT_NEAR(residual.x(), expectedResidual.x(), 1e-6);
 				EXPECT_NEAR(residual.y(), expectedResidual.y(), 1e-6);
@@ -44,7 +47,8 @@ namespace providentia {
 			 */
 			void assertPointCorrespondenceResidual(const Eigen::Vector3d &worldPosition, const Eigen::Vector2d &pixel,
 												   Eigen::Vector2d expectedResidual) {
-				assertParametricPoint(ParametricPoint::OnPoint(pixel, worldPosition), std::move(expectedResidual));
+				assertParametricPoint(providentia::calibration::ParametricPoint::onPoint(pixel, worldPosition),
+									  std::move(expectedResidual));
 			}
 
 			/**
@@ -54,7 +58,8 @@ namespace providentia {
 			void assertLineCorrespondenceResidual(Eigen::Vector3d lineOrigin, const Eigen::Vector3d &lineHeading, double
 			lambda, const Eigen::Vector2d &pixel, const Eigen::Vector2d &expectedResidual) {
 				assertParametricPoint(
-					ParametricPoint::OnLine(pixel, std::move(lineOrigin), lineHeading, lambda),
+					providentia::calibration::ParametricPoint::onLine(pixel, std::move(lineOrigin), lineHeading,
+																	  lambda),
 					expectedResidual);
 			}
 
@@ -65,8 +70,10 @@ namespace providentia {
 			void assertPlaneCorrespondenceResidual(Eigen::Vector3d planeOrigin, const Eigen::Vector3d &planeSideA,
 												   double lambda, const Eigen::Vector3d &planeSideB, double mu,
 												   const Eigen::Vector2d &pixel, Eigen::Vector2d expectedResidual) {
-				assertParametricPoint(ParametricPoint::OnPlane(pixel, std::move(planeOrigin), planeSideA, planeSideB,
-															   lambda, mu), std::move(expectedResidual));
+				assertParametricPoint(providentia::calibration::ParametricPoint::onPlane(pixel, std::move
+																							 (planeOrigin), planeSideA, planeSideB,
+																						 lambda, mu),
+									  std::move(expectedResidual));
 			}
 		};
 
