@@ -153,7 +153,7 @@ namespace providentia {
 
 			addRotationConstraints(problem);
 
-			std::cout << "Residuals: " << problem.NumResidualBlocks() << std::endl;
+//			std::cout << "Residuals: " << problem.NumResidualBlocks() << std::endl;
 			return problem;
 		}
 

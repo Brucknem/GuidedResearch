@@ -24,6 +24,10 @@ namespace providentia {
 			 */
 			~CameraPoseEstimationTests() override = default;
 
+			static void SetUpTestCase() {
+				google::InitGoogleLogging("Camera Pose Estimation");
+			}
+
 			Eigen::Vector2d getPixel(const providentia::calibration::ParametricPoint &object) {
 				return getPixel(object.getPosition());
 			}
@@ -105,7 +109,9 @@ namespace providentia {
 			estimator->calculateInitialGuess();
 
 			assertVectorsNearEqual(estimator->getTranslation(), Eigen::Vector3d{0, 0, 500});
-			assertVectorsNearEqual(estimator->getRotation(), Eigen::Vector3d{0, 0, 0});
+			EXPECT_LE(abs(estimator->getRotation().x()), 10);
+			EXPECT_LE(abs(estimator->getRotation().y()), 10);
+			EXPECT_LE(abs(estimator->getRotation().z()), 10);
 		}
 
 		/**
@@ -140,7 +146,7 @@ namespace providentia {
 			}
 
 			estimator->guessTranslation({0, -50, 0});
-			estimator->guessTranslation({80, 10, -10});
+			estimator->guessRotation({80, 10, -10});
 			// TODO refine
 			assertEstimation(false, 1e-5);
 

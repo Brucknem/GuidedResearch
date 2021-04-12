@@ -184,7 +184,7 @@ namespace providentia {
 				   intrinsics[0], intrinsics[1], intrinsics[2], zero,
 				intrinsics[3], intrinsics[4], intrinsics[5], zero,
 				intrinsics[6], intrinsics[7], intrinsics[8], zero;
-			std::cout << matrix << std::endl;
+//			std::cout << matrix << std::endl;
 			return matrix;
 		}
 
