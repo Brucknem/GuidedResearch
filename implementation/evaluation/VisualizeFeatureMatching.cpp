@@ -1,8 +1,7 @@
 //
 // Created by brucknem on 13.01.21.
 //
-#include "FeatureDetection.hpp"
-#include "FeatureMatching.hpp"
+#include "FastFREAKBFDynamicStabilization.hpp"
 #include "Commons.hpp"
 
 /**

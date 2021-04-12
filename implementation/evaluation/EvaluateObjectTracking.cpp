@@ -2,7 +2,12 @@
 // Created by brucknem on 13.01.21.
 //
 #include <opencv2/cudawarping.hpp>
-#include "DynamicStabilization.hpp"
+
+#include "DynamicStabilizationBase.hpp"
+#include "SURFBFDynamicStabilization.hpp"
+#include "ORBBFDynamicStabilization.hpp"
+#include "FastFREAKBFDynamicStabilization.hpp"
+
 #include "Commons.hpp"
 #include "CSVWriter.hpp"
 #include <boost/filesystem/convenience.hpp>
@@ -22,18 +27,8 @@ private:
 	/**
 	 * The matcher used to match the features.
 	 */
-	std::vector<providentia::stabilization::DynamicStabilizerBase> stabilizers;
+	std::vector<providentia::stabilization::DynamicStabilizationBase> stabilizers;
 	std::vector<std::string> stabilizerNames = {"Original"};
-	std::vector<double> skewValuesToTest = {
-//		1e-5,
-//		0.75e-4,
-		1e-4,
-//		1.25e-4,
-//		5e-4,
-//		1e1,
-//		1e2,
-//		1e3,
-	};
 
 	ObjectTracking tracking;
 	std::vector<cv::Rect2d> originalBoundingBoxes;
@@ -91,21 +86,12 @@ public:
 	void init() override {
 		VideoSetup::init();
 		for (int i = 0; i < numParallelRuns; i++) {
-			stabilizers.emplace_back(providentia::stabilization::SURFBFDynamicStabilizer());
-			stabilizers.emplace_back(providentia::stabilization::ORBBFDynamicStabilizer());
-			stabilizers.emplace_back(providentia::stabilization::FastFREAKBFDynamicStabilizer());
-			for (const auto &skewValues : skewValuesToTest) {
-				std::stringstream ss;
-				if (skewValuesToTest.size() > 1) {
-					ss << " (Skew: ";
-					ss << std::scientific << std::setprecision(2);
-					ss << skewValues;
-					ss << ")";
-				}
-				stabilizerNames.emplace_back("SURF" + ss.str());
-				stabilizerNames.emplace_back("ORB" + ss.str());
-				stabilizerNames.emplace_back("Fast" + ss.str());
-			}
+			stabilizers.emplace_back(providentia::stabilization::SURFBFDynamicStabilization());
+			stabilizers.emplace_back(providentia::stabilization::ORBBFDynamicStabilization());
+			stabilizers.emplace_back(providentia::stabilization::FastFREAKBFDynamicStabilization());
+			stabilizerNames.emplace_back("SURF");
+			stabilizerNames.emplace_back("ORB");
+			stabilizerNames.emplace_back("Fast");
 		}
 
 		outputFolder = outputFolder / "ObjectTracking";
@@ -141,11 +127,9 @@ public:
 
 		std::vector<cv::Mat> homographies;
 		homographies.emplace_back(cv::Mat::eye(3, 3, CV_64F));
-		for (const auto &skewThreshold : skewValuesToTest) {
-			for (auto &stabilizer : stabilizers) {
-				stabilizer.stabilize(frameGPU);
-				homographies.emplace_back(stabilizer.getHomography(skewThreshold));
-			}
+		for (auto &stabilizer : stabilizers) {
+			stabilizer.stabilize(frameGPU);
+			homographies.emplace_back(stabilizer.getHomography());
 		}
 
 		std::vector<cv::Mat> resultFrames;

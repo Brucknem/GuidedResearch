@@ -15,8 +15,6 @@ namespace providentia {
 	namespace stabilization {
 		namespace detection {
 
-#pragma region Getters_Setters{
-
 			void FeatureDetectionBase::setCurrentMask(cv::Size size) {
 				cv::Size sizeIntern = std::move(size);
 				if (sizeIntern.empty()) {
@@ -34,10 +32,6 @@ namespace providentia {
 					currentMask = noMask;
 				}
 			}
-
-#pragma endregion Getters_Setters
-
-#pragma region FeatureDetectionBase
 
 			void FeatureDetectionBase::detect(const cv::cuda::GpuMat &frame) {
 				clear();
@@ -93,27 +87,6 @@ namespace providentia {
 				return descriptorsCPU;
 			}
 
-#pragma endregion FeatureDetectionBase
-
-#pragma region SURFFeatureDetector
-
-#pragma endregion SURFFeatureDetector
-
-#pragma region ORBFeatureDetector
-
-#pragma endregion ORBFeatureDetector
-
-#pragma region FastFREAKFeatureDetector
-
-#pragma endregion FastFREAKFeatureDetector
-
-#pragma region SIFTFeatureDetector
-
-#pragma endregion SIFTFeatureDetector
-
-#pragma region StarBRIEFFeatureDetector
-
-#pragma endregion StarBRIEFFeatureDetector
 		}
 	}
 }

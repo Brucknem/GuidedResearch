@@ -23,7 +23,7 @@ namespace providentia {
 			/**
 			 * Asserts that the given stabilizer runs and gives nearly the identity.
 			 */
-			void assertStabilizer(providentia::stabilization::DynamicStabilizerBase *stabilizer) {
+			void assertStabilization(providentia::stabilization::DynamicStabilizationBase *stabilizer) {
 				stabilizer->stabilize(testImgGPU);
 
 				cv::Mat homography = stabilizer->getHomography();
@@ -64,22 +64,22 @@ namespace providentia {
 		/**
 		 * Test for the stabilizer based on the SURF feature detector and Brute force matcher.
 		 */
-		TEST_F(DynamicStabilizationTests, testSURFBruteForceStabilizerRuns) {
-			assertStabilizer(new providentia::stabilization::SURFBFDynamicStabilizer());
+		TEST_F(DynamicStabilizationTests, testSURFBruteForceStabilizationRuns) {
+			assertStabilization(new providentia::stabilization::SURFBFDynamicStabilization());
 		}
 
 		/**
 		 * Test for the stabilizer based on the ORB feature detector and Brute force matcher.
 		 */
-		TEST_F(DynamicStabilizationTests, testORBBruteForceStabilizerRuns) {
-			assertStabilizer(new providentia::stabilization::ORBBFDynamicStabilizer());
+		TEST_F(DynamicStabilizationTests, testORBBruteForceStabilizationRuns) {
+			assertStabilization(new providentia::stabilization::ORBBFDynamicStabilization());
 		}
 
 		/**
 		 * Test for the stabilizer based on the Fast feature detector, FREAK feature descriptors and Brute force matcher.
 		 */
-		TEST_F(DynamicStabilizationTests, testFastFREAKBruteForceStabilizerRuns) {
-			assertStabilizer(new providentia::stabilization::FastFREAKBFDynamicStabilizer());
+		TEST_F(DynamicStabilizationTests, testFastFREAKBruteForceStabilizationRuns) {
+			assertStabilization(new providentia::stabilization::FastFREAKBFDynamicStabilization());
 		}
 	}
 }

@@ -9,8 +9,6 @@
 namespace providentia {
 	namespace stabilization {
 
-#pragma region DynamicStabilizationBase
-
 		void DynamicStabilizationBase::stabilize(const cv::cuda::GpuMat &frame) {
 			clear();
 			updateKeyframe();
@@ -118,16 +116,6 @@ namespace providentia {
 		void DynamicStabilizationBase::setSkewThreshold(double skewThreshold) {
 			warper->setSkewThreshold(skewThreshold);
 		}
-
-#pragma endregion DynamicStabilizationBase
-
-#pragma region SURFBFDynamicStabilizer
-
-#pragma endregion SURFBFDynamicStabilizer
-
-#pragma region ORBBFDynamicStabilizer
-
-#pragma endregion ORBBFDynamicStabilizer
 
 	}// namespace stabilization
 }// namespace providentia

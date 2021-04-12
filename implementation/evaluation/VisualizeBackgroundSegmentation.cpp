@@ -1,7 +1,6 @@
 //
 // Created by brucknem on 13.01.21.
 //
-#include "BackgroundSegmentation.hpp"
 #include "Commons.hpp"
 
 /**

@@ -10,8 +10,6 @@ namespace providentia {
 	namespace stabilization {
 		namespace features {
 
-#pragma region FeatureMatchingBase
-
 			void FeatureMatchingBase::match(
 				const std::shared_ptr<providentia::stabilization::detection::FeatureDetectionBase> &frameFeatureDetector,
 				const std::shared_ptr<providentia::stabilization::detection::FeatureDetectionBase> &referenceFeatureDetector
@@ -111,15 +109,6 @@ namespace providentia {
 				shouldUseFundamentalMatrix = value;
 			}
 
-#pragma endregion FeatureMatchingBase
-
-#pragma region BruteForceFeatureMatching
-
-#pragma endregion BruteForceFeatureMatching
-
-#pragma region FlannFeatureMatching
-
-#pragma endregion FlannFeatureMatching
 		}
 	}
 }

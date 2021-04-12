@@ -14,7 +14,7 @@ private:
 	/**
 	 * The stabilizer used to stabilize the video.
 	 */
-	std::shared_ptr<providentia::stabilization::DynamicStabilizerBase> stabilizer;
+	std::shared_ptr<providentia::stabilization::DynamicStabilizationBase> stabilizer;
 
 	/**
 	 * The optical flow algorithms for the original and stabilized writeFrames.
@@ -23,7 +23,7 @@ private:
 
 public:
 	explicit Setup() : VideoSetup() {
-		stabilizer = std::make_shared<providentia::stabilization::SURFBFDynamicStabilizer>();
+		stabilizer = std::make_shared<providentia::stabilization::SURFBFDynamicStabilization>();
 		stabilizer->setShouldUpdateKeyframe(true);
 
 		originalOpticalFlow = std::make_shared<providentia::opticalflow::FarnebackDenseOpticalFlow>();

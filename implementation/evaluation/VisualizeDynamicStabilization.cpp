@@ -2,7 +2,12 @@
 // Created by brucknem on 13.01.21.
 //
 #include <opencv2/cudawarping.hpp>
-#include "DynamicStabilization.hpp"
+
+#include "DynamicStabilizationBase.hpp"
+#include "SURFBFDynamicStabilization.hpp"
+#include "ORBBFDynamicStabilization.hpp"
+#include "FastFREAKBFDynamicStabilization.hpp"
+
 #include "OpticalFlow.hpp"
 #include "Commons.hpp"
 
@@ -16,13 +21,13 @@ private:
 	/**
 	 * The matcher used to match the features.
 	 */
-	std::shared_ptr<providentia::stabilization::DynamicStabilizerBase> stabilizer;
+	std::shared_ptr<providentia::stabilization::DynamicStabilizationBase> stabilizer;
 	std::vector<providentia::opticalflow::DenseOpticalFlow *> opticalFlows;
 	cv::Mat referenceMask, currentMask;
 
 public:
 	explicit Setup() : VideoSetup() {
-		stabilizer = std::make_shared<providentia::stabilization::SURFBFDynamicStabilizer>();
+		stabilizer = std::make_shared<providentia::stabilization::SURFBFDynamicStabilization>();
 		opticalFlows.emplace_back(new providentia::opticalflow::FarnebackDenseOpticalFlow());
 		opticalFlows.emplace_back(new providentia::opticalflow::FarnebackDenseOpticalFlow());
 		opticalFlows.emplace_back(new providentia::opticalflow::FarnebackDenseOpticalFlow());
