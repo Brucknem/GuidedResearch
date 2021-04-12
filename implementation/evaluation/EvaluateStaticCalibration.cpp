@@ -317,7 +317,7 @@ protected:
 	void specificMainLoop() override {
 		initFinalFrame();
 
-		optimizationFinished = estimator->isOptimizationFinished();
+		optimizationFinished = estimator->isEstimationFinished();
 		translation = estimator->getTranslation();
 		rotation = estimator->getRotation();
 

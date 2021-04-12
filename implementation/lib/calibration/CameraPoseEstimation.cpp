@@ -47,21 +47,6 @@ namespace providentia {
 			return meanVector / worldObjects.size();
 		}
 
-		Eigen::Vector3d CameraPoseEstimation::calculateFurthestPoint(const Eigen::Vector3d &mean) {
-			Eigen::Vector3d furthestPoint{0, 0, 0};
-			double maxDistance = 0;
-			for (const auto &worldObject : worldObjects) {
-				for (const auto &point : worldObject.getPoints()) {
-					double distance = (point.getPosition() - mean).norm();
-					if (distance > maxDistance) {
-						maxDistance = distance;
-						furthestPoint = point.getPosition();
-					}
-				}
-			}
-			return furthestPoint;
-		}
-
 		std::thread CameraPoseEstimation::estimateAsync(bool logSummary) {
 			auto thread = std::thread(&CameraPoseEstimation::estimate, this, logSummary);
 			thread.detach();
@@ -86,22 +71,22 @@ namespace providentia {
 			for (; i < maxTriesUntilAbort; i++) {
 				calculateInitialGuess();
 				solveProblem(logSummary);
-				double originalPenalize = lambdaPenalizeScale;
-				lambdaPenalizeScale = originalPenalize * 10;
+				double originalPenalize = lambdaResidualScalingFactor;
+				lambdaResidualScalingFactor = originalPenalize * 10;
 				solveProblem(logSummary);
 				if (lambdasLoss > 10) {
 					// > 10 is an empirical number. Might be further investigated.
-					lambdaPenalizeScale = originalPenalize;
+					lambdaResidualScalingFactor = originalPenalize;
 					continue;
 				}
 				correspondencesLoss = log10(correspondencesLoss);
-				if (correspondencesLoss <= 1 || correspondencesLoss > weightsScale) {
-					lambdaPenalizeScale = originalPenalize;
+				if (correspondencesLoss <= 1 || correspondencesLoss > correspondenceLossUpperBound) {
+					lambdaResidualScalingFactor = originalPenalize;
 					continue;
 				}
-				lambdaPenalizeScale = originalPenalize * 100000;
+				lambdaResidualScalingFactor = originalPenalize * 100000;
 				solveProblem(logSummary);
-				lambdaPenalizeScale = originalPenalize;
+				lambdaResidualScalingFactor = originalPenalize;
 				break;
 			}
 			foundValidSolution = i < maxTriesUntilAbort;
@@ -157,37 +142,36 @@ namespace providentia {
 					*point.getMu() = 0;
 					weights.emplace_back(new double(1));
 					correspondenceResiduals.emplace_back(addCorrespondenceResidualBlock(problem, point));
-					lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, worldObject, point));
-					weightResiduals.emplace_back(addWeightResidualBlock(problem));
+					lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, point, worldObject.getHeight()));
+					weightResiduals.emplace_back(addWeightResidualBlock(problem, weights[weights.size() - 1]));
 				}
 			}
 			// +1.5 empirical knowledge. Might be further investigated.
 			// Better might be max(width) of all objects, i.e. max # of pixels per row over all objects.
 			// weightScale = max(width) * weight.size()
-			weightsScale = log10(weights.size() * 2) + 1.5;
+			correspondenceLossUpperBound = log10(weights.size() * 2) + 1.5;
 
-//			addTranslationConstraints();
 			addRotationConstraints(problem);
 
 			std::cout << "Residuals: " << problem.NumResidualBlocks() << std::endl;
 			return problem;
 		}
 
-		ceres::ResidualBlockId CameraPoseEstimation::addWeightResidualBlock(ceres::Problem &problem) {
+		ceres::ResidualBlockId
+		CameraPoseEstimation::addWeightResidualBlock(ceres::Problem &problem, double *weight) const {
 			return problem.AddResidualBlock(
 				residuals::DistanceResidual::create(1),
-				getScaledHuberLoss(weightPenalizeScale),
-				weights[weights.size() - 1]
+				getScaledHuberLoss(weightResidualScalingFactor),
+				weight
 			);
 		}
 
 		ceres::ResidualBlockId
-		CameraPoseEstimation::addLambdaResidualBlock(ceres::Problem &problem, const WorldObject &worldObject,
-													 const ParametricPoint &point) const {
+		CameraPoseEstimation::addLambdaResidualBlock(ceres::Problem &problem, const ParametricPoint &point,
+													 double height) const {
 			return problem.AddResidualBlock(
-				residuals::DistanceFromIntervalResidual::create(
-					worldObject.getHeight()),
-				getScaledHuberLoss(lambdaPenalizeScale),
+				residuals::DistanceFromIntervalResidual::create(height),
+				getScaledHuberLoss(lambdaResidualScalingFactor),
 				point.getLambda()
 			);
 		}
@@ -217,37 +201,14 @@ namespace providentia {
 			rotationResiduals.clear();
 			rotationResiduals.emplace_back(problem.AddResidualBlock(
 				providentia::calibration::residuals::DistanceFromIntervalResidual::create(60, 110),
-				getScaledHuberLoss(rotationPenalizeScale),
+				getScaledHuberLoss(rotationResidualScalingFactor),
 				&rotation.x()
 			));
 			rotationResiduals.emplace_back(problem.AddResidualBlock(
 				providentia::calibration::residuals::DistanceFromIntervalResidual::create(-10, 10),
-				getScaledHuberLoss(rotationPenalizeScale),
+				getScaledHuberLoss(rotationResidualScalingFactor),
 				&rotation.y()
 			));
-		}
-
-		void CameraPoseEstimation::addTranslationConstraints(ceres::Problem &problem) {
-//			int x_interval = 5000;
-//			int y_interval = 5000;
-//			int z_interval = 300;
-			int scale = 10;
-//			problem.AddResidualBlock(
-//				DistanceFromIntervalResidual::create(translation.x() - x_interval, translation.x() + x_interval),
-//				getScaledHuberLoss(scale),
-//				&translation.x()
-//			);
-//			problem.AddResidualBlock(
-//				DistanceFromIntervalResidual::create(translation.y() - y_interval, translation.y() + y_interval),
-//				getScaledHuberLoss(scale),
-//				&translation.y()
-//			);
-			problem.AddResidualBlock(
-				providentia::calibration::residuals::DistanceFromIntervalResidual::create(0,
-																						  translation.z() + 1000),
-				getScaledHuberLoss(scale),
-				&translation.z()
-			);
 		}
 
 		void CameraPoseEstimation::guessRotation(const Eigen::Vector3d &value) {
@@ -277,7 +238,7 @@ namespace providentia {
 			return worldObjects;
 		}
 
-		bool CameraPoseEstimation::isOptimizationFinished() const {
+		bool CameraPoseEstimation::isEstimationFinished() const {
 			return optimizationFinished;
 		}
 
@@ -300,12 +261,8 @@ namespace providentia {
 			return os;
 		}
 
-		double CameraPoseEstimation::getWeightPenalizeScale() const {
-			return weightPenalizeScale;
-		}
-
 		void CameraPoseEstimation::setWeightPenalizeScale(double value) {
-			weightPenalizeScale = value;
+			weightResidualScalingFactor = value;
 		}
 
 		void CameraPoseEstimation::clearWorldObjects() {
@@ -318,19 +275,6 @@ namespace providentia {
 			std::transform(std::begin(weights), std::end(weights),
 						   std::back_inserter(result), [](const double *weight) { return *weight; }
 			);
-			return result;
-		}
-
-		std::vector<double> CameraPoseEstimation::getLambdas() {
-			std::vector<double> result;
-			for (auto &worldObject : worldObjects) {
-				for (auto &point : worldObject.getPoints()) {
-					if (!point.hasExpectedPixel()) {
-						continue;
-					}
-					result.emplace_back(*(point.getLambda()));
-				}
-			}
 			return result;
 		}
 
@@ -368,22 +312,6 @@ namespace providentia {
 
 		void CameraPoseEstimation::evaluateRotationResiduals(ceres::Problem &problem) {
 			rotationsLoss = evaluate(problem, rotationResiduals);
-		}
-
-		double CameraPoseEstimation::getLambdaPenalizeScale() const {
-			return lambdaPenalizeScale;
-		}
-
-		void CameraPoseEstimation::setLambdaPenalizeScale(double value) {
-			CameraPoseEstimation::lambdaPenalizeScale = value;
-		}
-
-		double CameraPoseEstimation::getRotationPenalizeScale() const {
-			return rotationPenalizeScale;
-		}
-
-		void CameraPoseEstimation::setRotationPenalizeScale(double value) {
-			rotationPenalizeScale = value;
 		}
 
 		bool CameraPoseEstimation::hasFoundValidSolution() const {

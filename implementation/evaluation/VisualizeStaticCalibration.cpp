@@ -88,7 +88,7 @@ public:
 														imageSize);
 
 		estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(intrinsics, true,
-																					std::pow(2, trackbarWeightScale));
+																					 std::pow(2, trackbarWeightScale));
 //		estimator->setInitialGuess(initialTranslation, initialRotation);
 
 	}
@@ -160,7 +160,7 @@ protected:
 		finalFrame = finalFrame * (trackbarBackground / 10.);
 
 		if (!optimizationFinished) {
-			optimizationFinished = estimator->isOptimizationFinished();
+			optimizationFinished = estimator->isEstimationFinished();
 			if (optimizationFinished) {
 				trackbarBackground = 4;
 				cv::setTrackbarPos("Background", windowName, trackbarBackground);
