@@ -114,7 +114,7 @@ where $R$ is the cameras world rotation in Euler angles, $T$ is the cameras worl
 
 The optimal value for $T,R$ is found, if it holds for all correspondences:
 \begin{equation}
-  0 = p_c - \pi \left( R * T * (o_c + \lambda_c * h_c)\right)
+  0 = p_c - \pi \left( R * T * (o_c + \lambda_c * h_c)\right) = p_c - \hat{p}_c
 \end{equation}
 
 This places constraints on the values $R, T$ can take and enables us to recover the camera pose only from the correspondences.
@@ -127,11 +127,10 @@ We estimate the camera pose by minimizing a modified version of the least-square
 formulated as
 \begin{equation}
   \begin{split}
-    s_c =& o_c + \lambda_c * h_c \\
   E(P, S, T, R, \Lambda, W ) =& 
   \sum_{c \in C} 
   \left\lVert 
-    w_c * [ p_c - \pi(T * R * s_c) ]
+    w_c * [ p_c - \hat{p}_c ]
   \right\rVert_2^2 \\ 
   +& 
   \sum_{c \in C} 

@@ -53,10 +53,10 @@ def add_label(p, mean):
     p.add_layout(labels)
 
 
-def add_spans(p, mean, std, mins, maxs, color='black'):
+def add_spans(p, mean, std, color='black'):
     for val in zip(
-            [mins, maxs, mean, np.array(mean) - std, np.array(mean) + std],
-            [1, 1, 3, 2, 2]):
+            [mean, np.array(mean) - std, np.array(mean) + std],
+            [3, 2, 2]):
         p.add_layout(
             Span(location=val[0][0], dimension='height', line_color=color, line_dash='dashed', line_width=val[1]))
 
@@ -253,37 +253,47 @@ def add_cluster(p, cluster_label, values, yaxis):
     mins = [min(values[0]), min(values[1]), min(values[2])]
 
     dot_size = 15
-    p.dot(x=values[0], y=values[1], size=dot_size, alpha=0.5, color='firebrick',
+    p.dot(x=values[0], y=values[1], size=dot_size, alpha=0.5, color='darkblue',
           legend_label=str(cluster_label))
-    p.dot(x=values[0], y=values[2], size=dot_size, alpha=0.5, color='darkblue',
+    p.dot(x=values[0], y=values[2], size=dot_size, alpha=0.5, color='firebrick',
           legend_label=str(cluster_label),
           y_range_name=yaxis[1])
 
-    add_spans(p, mean, std, mins, maxs)
+    add_spans(p, mean, std)
     return mean, std, mins, maxs
 
 
-def create_loss_compare_plot(i, foldername, cluster_values, xaxis, yaxis, total_num_values):
+def create_loss_compare_plot(i, foldername, cluster_values, xaxis, yaxis, title):
     output_filename = str(xaxis).strip().replace(" ", "") + "_vs_" + str(yaxis[0]).strip().replace(" ", "")
     output_filename += "_vs_" + str(yaxis[1]).strip().replace(" ", "")
     output_filename += "_cluster_" + str(i)
 
+    # plot_height = 600
     output_file(get_output_filename(foldername, output_filename, 'html'))
-    p = figure(tools="pan,wheel_zoom,box_zoom,reset,save", plot_width=int(plot_height * 1.2),
+    p = figure(tools="", plot_width=int(plot_height * 1.2),
                plot_height=plot_height, y_range=(min(cluster_values[1]), max(cluster_values[1])))
     p.extra_y_ranges = {yaxis[1]: Range1d(start=min(cluster_values[2]), end=max(cluster_values[2]))}
     p.add_layout(LinearAxis(y_range_name=yaxis[1]), 'right')
 
     mean, std, mins, maxs = add_cluster(p, i, cluster_values, yaxis)
 
-    p.title.text = "Cluster: " + str(i) + " - [" + str(len(cluster_values[0])) + "/" + str(total_num_values) + "]"
+    x_range = (min(mins[0], mean[0] - std[0]), max(maxs[0], mean[0] + std[0]))
+    x_distance = x_range[1] - x_range[0]
+    p.x_range = Range1d(x_range[0] - 0.05 * x_distance, x_range[1] + 0.05 * x_distance)
+
+    p.title.text = title
     p.legend.items = []
     p.xaxis.formatter.use_scientific = False
     # p.xaxis.formatter.precision = 10
-    p.xaxis.axis_label = xaxis
+    p.xaxis.axis_label = xaxis + " (" + ("meters" if "Translation" in xaxis else "degree") + ")"
     p.yaxis[0].axis_label = yaxis[0]
     p.yaxis[1].axis_label = yaxis[1]
+    # p.xaxis.major_label_orientation = math.pi / 4
     p.xaxis.major_label_orientation = math.pi / 6
+
+    p.yaxis[0].axis_label_text_color = 'darkblue'
+    p.yaxis[1].axis_label_text_color = 'firebrick'
+
     set_plot_settings(p)
 
     # show(p)
@@ -292,74 +302,71 @@ def create_loss_compare_plot(i, foldername, cluster_values, xaxis, yaxis, total_
 
 
 def create_loss_compare_plots(df: pd.DataFrame):
-    inliers = True
-    # for t in ["inliers", "outliers"]:
-    for t in ["inliers", ]:
-        loss_columns, non_loss_columns, foldername = setup_pairplots(df)
-        foldername = os.path.join(foldername, t)
+    loss_columns, non_loss_columns, foldername = setup_pairplots(df)
 
-        result_data_rows = []
-        yaxis = ["Loss [Correspondences]", "Loss [Lambdas]"]
+    result_data_rows = []
+    yaxis = ["Loss [Correspondences]", "Loss [Lambdas]"]
 
-        plots = []
-        for j, xaxis in enumerate(non_loss_columns):
-            x_values = df[xaxis]
-            if "Rotation" in xaxis:
-                new_x_values = []
-                for value in x_values:
-                    while value < 0:
-                        value += 360
-                    while value > 360:
-                        value -= 360
-                    new_x_values.append(value)
-                x_values = np.array(new_x_values)
+    plots = []
+    for j, xaxis in enumerate(non_loss_columns):
+        x_values = df[xaxis]
+        if "Rotation" in xaxis:
+            new_x_values = []
+            for value in x_values:
+                while value < 0:
+                    value += 360
+                while value > 360:
+                    value -= 360
+                new_x_values.append(value)
+            x_values = np.array(new_x_values)
 
-            total_loss = np.array(df["Loss"])
-            values = np.array([x_values, df[yaxis[0]], df[yaxis[1]], total_loss])
+        total_loss = np.array(df["Loss"])
+        values = np.array([x_values, df[yaxis[0]], df[yaxis[1]], total_loss])
 
-            conf = 1
-            values, conf = clean_values(values, total_loss, not inliers)
-            # clustering_input = values[0].reshape(-1, 1)
-            clustering_input = values[3].reshape(-1, 1)
-            # clustering_input = values.transpose()
-            clustering = BayesianGaussianMixture(n_components=25, random_state=42).fit_predict(clustering_input)
-            # clustering = [0] * len(values[0])
-            labels, count = get_cluster_labels(clustering, 10)
+        conf = 1
+        values, conf = clean_values(values, total_loss, False)
+        # clustering_input = values[0].reshape(-1, 1)
+        clustering_input = values[3].reshape(-1, 1)
+        # clustering_input = values.transpose()
+        clustering = BayesianGaussianMixture(n_components=25, random_state=42).fit_predict(clustering_input)
+        # clustering = [0] * len(values[0])
+        labels, count = get_cluster_labels(clustering, 10)
 
-            # p.yaxis[0].formatter.precision = 1
-            # p.yaxis[1].formatter.precision = 1
-            i = 0
-            size = len(df)
-            total_inliers = len(values[0])
-            inlier_fraction = total_inliers / len(df)
-            p, mean, std, mins, maxs = create_loss_compare_plot('All', foldername, values, xaxis, yaxis, size)
+        # p.yaxis[0].formatter.precision = 1
+        # p.yaxis[1].formatter.precision = 1
+        i = 0
+        size = len(df)
+        total_inliers = len(values[0])
+        inlier_fraction = total_inliers / len(df)
+        title = xaxis
+        p, mean, std, mins, maxs = create_loss_compare_plot('All', foldername, values, xaxis, yaxis, title)
+        result_data_rows.append({
+            'X': xaxis,
+            'Y': yaxis,
+            'Size Total': size,
+            'Inlier Fraction': inlier_fraction,
+            **create_result(-1, total_inliers, 1, mean, std, mins, maxs)
+        })
+        cluster_plots = [p]
+
+        for cluster_label, count in zip(labels, count):
+            if count == 0:
+                continue
+            indices = np.where(clustering == cluster_label)
+            cluster_values = values.transpose()[indices].transpose()
+            title = "Cluster: " + str(i) + " - [" + str(len(cluster_values[0])) + "/" + str(size) + "]"
+            p, mean, std, mins, maxs = create_loss_compare_plot(i, foldername, cluster_values, xaxis, yaxis, title)
             result_data_rows.append({
                 'X': xaxis,
                 'Y': yaxis,
                 'Size Total': size,
                 'Inlier Fraction': inlier_fraction,
-                **create_result(-1, total_inliers, 1, mean, std, mins, maxs)
+                **create_result(cluster_label, count, count / total_inliers, mean, std, mins, maxs)
             })
-            cluster_plots = [p]
-
-            for cluster_label, count in zip(labels, count):
-                if count == 0:
-                    continue
-                indices = np.where(clustering == cluster_label)
-                cluster_values = values.transpose()[indices].transpose()
-                p, mean, std, mins, maxs = create_loss_compare_plot(i, foldername, cluster_values, xaxis, yaxis, size)
-                result_data_rows.append({
-                    'X': xaxis,
-                    'Y': yaxis,
-                    'Size Total': size,
-                    'Inlier Fraction': inlier_fraction,
-                    **create_result(cluster_label, count, count / total_inliers, mean, std, mins, maxs)
-                })
-                i += 1
-                cluster_plots.append(p)
-            plots.append(cluster_plots)
-        finalize_pairplot(plots, foldername, result_data_rows)
-        inliers = not inliers
+            i += 1
+            cluster_plots.append(p)
+        plots.append(cluster_plots)
+    finalize_pairplot(plots, foldername, result_data_rows)
 
 
 def tsne_plot(df: pd.DataFrame):
