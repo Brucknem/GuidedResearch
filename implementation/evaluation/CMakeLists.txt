@@ -40,7 +40,7 @@ add_executable(VisualizeBackgroundSegmentation VisualizeBackgroundSegmentation.c
 target_link_libraries(VisualizeBackgroundSegmentation DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeBackgroundSegmentation PUBLIC "${PROJECT_BINARY_DIR}")
 
-add_executable(VisualizeRenderingPipeline VisualizeRenderingPipeline.cpp)
+add_executable(VisualizeRenderingPipeline EvaluateExpectableError.cpp)
 target_link_libraries(VisualizeRenderingPipeline DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeRenderingPipeline PUBLIC "${PROJECT_BINARY_DIR}")
 
