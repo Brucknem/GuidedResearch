@@ -24,7 +24,7 @@ Additionally we retrieve a directional heading axis $d~=~(x, y, z)^T$ and the he
 
 These values enable us to approximate the real-world objects by sampling points $s \in S$ in world position along the center line of the object, where 
 \begin{equation}
-S = \{s | s = o + \lambda * d: \quad \lambda \in [0, h]\}
+S = \{o + \lambda * d: \quad \lambda \in [0, h]\}
 \end{equation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -53,6 +53,7 @@ To minimize the work an aiding system to mark pixels was implemented that output
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \paragraph{Relaxation of problem by line approximation}
+\label{sec:static_calibration_line_approximation}
 \begin{figure*}[!ht]
   \centering
   \begin{tabular}{cc}
@@ -82,13 +83,45 @@ This models that the objects collapse into their center line in 2D and 3D and th
 \paragraph{Calibration procedure}
   
 Our camera is modelled using the pinhole camera model. 
-This uses the known intrinsic camera parameters and their corresponding projection $\pi$ from camera to image space.
-
-The extrinsic camera parameters that map from world space to camera space are defined by the camera translation $T$ and the camera rotation $R$.
-The translation and rotation are unknown, for them we optimize. 
-
-We estimate the camera pose by minimizing a modified version of the reprojection error 
+The pinhole projection from samples of the world objects to pixels is formulated as
 \begin{equation}
+  \label{eq:static_calibration_reprojection}
+  p_c = \pi \left(  
+    \begin{bmatrix}
+      R, T \\
+      0, 1
+    \end{bmatrix} *
+    (o_c + \lambda_c * h_c)
+  \right)
+\end{equation}
+\begin{equation}
+    \begin{bmatrix}
+      R, T \\
+      0, 1
+    \end{bmatrix} = 
+    \begin{bmatrix}
+      R, 0 \\
+      0, 1
+    \end{bmatrix} *
+    \begin{bmatrix}
+      0, T \\
+      0, 1
+    \end{bmatrix} =
+    R * T
+\end{equation}
+
+where $R$ is the cameras world rotation in Euler angles, $T$ is the cameras world translation and $\pi$ is the camera projection to image space based on the camera intrinsic parameters.
+
+The optimal value for $T,R$ is found, if it holds for all correspondences:
+\begin{equation}
+  0 = p_c - \pi \left( R * T * (o_c + \lambda_c * h_c)\right)
+\end{equation}
+
+This places constraints on the values $R, T$ can take and enables us to recover the camera pose only from the correspondences.
+
+We estimate the camera pose by minimizing a modified version of the least-squares reprojection error 
+\begin{equation}
+  \label{eq:static_calibration_error}
   \min_{T, R, \Lambda, W} E(P, S, T, R, \Lambda, W) 
 \end{equation}
 formulated as

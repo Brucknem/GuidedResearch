@@ -225,7 +225,7 @@ def clean_values(input_values, metric_values, invert):
             values = values[~mask]
         conf *= confidence
 
-    remove_distance = 20
+    remove_distance = 40
     if invert:
         remove_distance = 2
     order = np.argsort(values[:, 0])

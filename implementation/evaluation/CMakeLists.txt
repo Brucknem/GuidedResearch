@@ -44,6 +44,10 @@ add_executable(VisualizeRenderingPipeline VisualizeRenderingPipeline.cpp)
 target_link_libraries(VisualizeRenderingPipeline DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
 target_include_directories(VisualizeRenderingPipeline PUBLIC "${PROJECT_BINARY_DIR}")
 
+add_executable(DrawUnitCircle DrawUnitCircle.cpp)
+target_link_libraries(DrawUnitCircle DynamicStabilization StaticCalibration Utils ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_include_directories(DrawUnitCircle PUBLIC "${PROJECT_BINARY_DIR}")
+
 ########################################################################################################################
 ### Evaluation ###
 ########################################################################################################################
