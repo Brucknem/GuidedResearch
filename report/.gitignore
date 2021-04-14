@@ -287,3 +287,5 @@ cvpr2021AuthorKit*
 cvpr.pdf
 .history/
 
+!images/**
+!diagrams/**

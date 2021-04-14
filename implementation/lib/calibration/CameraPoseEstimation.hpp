@@ -144,7 +144,7 @@ namespace providentia {
 			/**
 			 * An additional scaling factor for the rotation residuals.
 			 */
-			double rotationResidualScalingFactor = 50;
+			double rotationResidualScalingFactor = 10;
 
 			/**
 			 * The distance from the mean of the world objects in z-direction used to estimate an initial guess for

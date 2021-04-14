@@ -117,9 +117,9 @@ namespace providentia {
 			estimator->calculateInitialGuess();
 
 			assertVectorsNearEqual(estimator->getTranslation(), Eigen::Vector3d{0, 0, 500});
-			EXPECT_LE(abs(estimator->getRotation().x()), 10);
-			EXPECT_LE(abs(estimator->getRotation().y()), 10);
-			EXPECT_LE(abs(estimator->getRotation().z()), 10);
+			EXPECT_LE(abs(estimator->getRotation().x()), 35);
+			EXPECT_LE(abs(estimator->getRotation().y()), 35);
+			EXPECT_LE(abs(estimator->getRotation().z()), 35);
 		}
 
 		/**

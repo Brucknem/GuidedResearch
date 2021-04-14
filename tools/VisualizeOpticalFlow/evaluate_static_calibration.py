@@ -285,7 +285,15 @@ def create_loss_compare_plot(i, foldername, cluster_values, xaxis, yaxis, title)
     p.legend.items = []
     p.xaxis.formatter.use_scientific = False
     # p.xaxis.formatter.precision = 10
-    p.xaxis.axis_label = xaxis + " (" + ("meters" if "Translation" in xaxis else "degree") + ")"
+    p.xaxis.axis_label = xaxis + " ("
+    if "Translation" in xaxis:
+        p.xaxis.axis_label += "meter"
+    elif "Rotation" in xaxis:
+        p.xaxis.axis_label += "degree"
+    else:
+        p.xaxis.axis_label += "pixel"
+    p.xaxis.axis_label += ")"
+
     p.yaxis[0].axis_label = yaxis[0]
     p.yaxis[1].axis_label = yaxis[1]
     # p.xaxis.major_label_orientation = math.pi / 4
@@ -309,19 +317,16 @@ def create_loss_compare_plots(df: pd.DataFrame):
 
     plots = []
     for j, xaxis in enumerate(non_loss_columns):
-        x_values = df[xaxis]
-        if "Rotation" in xaxis:
-            new_x_values = []
-            for value in x_values:
-                while value < 0:
-                    value += 360
-                while value > 360:
-                    value -= 360
-                new_x_values.append(value)
-            x_values = np.array(new_x_values)
+        x_values = df[xaxis].to_numpy()
 
         total_loss = np.array(df["Loss"])
-        values = np.array([x_values, df[yaxis[0]], df[yaxis[1]], total_loss])
+        non_zero_rotation_loss = np.where(df["Loss [Rotations]"].to_numpy() < 1)
+
+        values = np.array([x_values[non_zero_rotation_loss],
+                           df[yaxis[0]].to_numpy()[non_zero_rotation_loss],
+                           df[yaxis[1]].to_numpy()[non_zero_rotation_loss],
+                           total_loss[non_zero_rotation_loss]
+                           ])
 
         conf = 1
         # values, conf = clean_values(values, total_loss, False)

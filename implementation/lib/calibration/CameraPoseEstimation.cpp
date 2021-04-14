@@ -47,7 +47,7 @@ namespace providentia {
 			}
 
 			if (!hasRotationGuess) {
-				double x = 10.;
+				double x = 35.;
 				initialRotation = {rng.uniform(-x, x), rng.uniform(-x, x), rng.uniform(-x, x)};
 				rotation = initialRotation;
 			}
@@ -103,14 +103,14 @@ namespace providentia {
 				double originalPenalize = lambdaResidualScalingFactor;
 				lambdaResidualScalingFactor = originalPenalize * 10;
 				solveProblem(logSummary);
-				if (lambdasLoss > 5) {
+				if (lambdasLoss > 5 || rotationsLoss > 0.5) {
 					// > 10 is an empirical number. Might be further investigated.
 					lambdaResidualScalingFactor = originalPenalize;
 					continue;
 				}
 //				log10(correspondencesLoss);
 //				std::cout << correspondencesLossScale << std::endl;
-				if (correspondencesLoss > correspondenceLossUpperBound) {
+				if (correspondencesLoss > correspondenceLossUpperBound || rotationsLoss > 1e-6) {
 					lambdaResidualScalingFactor = originalPenalize;
 					continue;
 				}
