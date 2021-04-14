@@ -23,11 +23,6 @@ namespace providentia {
 				Eigen::Matrix<double, 2, 1> expectedPixel;
 
 				/**
-				 * The intrinsics matrix of the pinhole camera model.
-				 */
-				Eigen::Matrix<double, 3, 4> intrinsics;
-
-				/**
 				 * The parametricPoint that contains the correspondence.
 				 */
 				ParametricPoint parametricPoint;
@@ -42,8 +37,7 @@ namespace providentia {
 				 * @param imageSize The [width, height] of the image.
 				 */
 				CorrespondenceResidual(Eigen::Matrix<double, 2, 1> expectedPixel,
-									   const ParametricPoint &point,
-									   Eigen::Matrix<double, 3, 4> intrinsics);
+									   const ParametricPoint &point);
 
 				/**
 				 * @destructor
@@ -63,6 +57,11 @@ namespace providentia {
 				 */
 				template<typename T>
 				bool operator()(
+					const T *fx,
+					const T *cx,
+					const T *fy,
+					const T *cy,
+					const T *skew,
 					const T *tx,
 					const T *ty,
 					const T *tz,
@@ -79,8 +78,7 @@ namespace providentia {
 				 * Factory method to hide the residual creation.
 				 */
 				static ceres::CostFunction *create(const Eigen::Matrix<double, 2, 1> &expectedPixel,
-												   const ParametricPoint &point,
-												   const Eigen::Matrix<double, 3, 4> &intrinsics);
+												   const ParametricPoint &point);
 			};
 		}
 	}

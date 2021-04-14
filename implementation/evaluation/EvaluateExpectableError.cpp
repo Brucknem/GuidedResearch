@@ -17,7 +17,7 @@ public:
 	/**
 	 * The itnrinsics of the pinhole camera model.
 	 */
-	Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getS40NCamFarIntrinsics();
+	std::vector<double> intrinsics = providentia::camera::getS40NCamFarIntrinsics();
 
 	/**
 	 * The [width, height] of the image.

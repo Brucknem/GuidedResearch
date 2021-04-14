@@ -26,7 +26,7 @@ namespace providentia {
 		class RenderingPipelineTests : public ::testing::Test {
 		protected:
 
-			Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getBlenderCameraIntrinsics();
+			std::vector<double> intrinsics = providentia::camera::getBlenderCameraIntrinsics();
 
 			Eigen::Vector3d rotation{90, 0, 0};
 			Eigen::Vector3d translation{0, -10, 5};
@@ -43,7 +43,7 @@ namespace providentia {
 
 			Eigen::Vector2d render(const Eigen::Vector4d &pointInWorldSpace) {
 				return providentia::camera::render(
-					translation.data(), rotation.data(), intrinsics,
+					translation.data(), rotation.data(), intrinsics.data(),
 					pointInWorldSpace.data());
 			}
 		};
@@ -192,13 +192,13 @@ namespace providentia {
 		TEST_F(RenderingPipelineTests, testGetBlenderIntrinsics) {
 			auto intrinsics = providentia::camera::getBlenderCameraIntrinsics();
 
-			ASSERT_EQ(intrinsics(0, 0), 1200);
-			ASSERT_EQ(intrinsics(1, 1), 1200);
+			ASSERT_EQ(intrinsics[0], 1200);
+			ASSERT_EQ(intrinsics[2], 1200);
 
-			ASSERT_EQ(intrinsics(0, 2), 960);
-			ASSERT_EQ(intrinsics(1, 2), 600);
+			ASSERT_EQ(intrinsics[1], 960);
+			ASSERT_EQ(intrinsics[3], 600);
 
-			ASSERT_EQ(intrinsics(0, 1), 0);
+			ASSERT_EQ(intrinsics[4], 0);
 		}
 	}// namespace toCameraSpace
 }// namespace providentia

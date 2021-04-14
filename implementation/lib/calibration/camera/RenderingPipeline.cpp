@@ -10,18 +10,21 @@ namespace providentia {
 
 		template<typename T>
 		Eigen::Matrix<T, 2, 1>
-		render(const T *translation, const T *rotation, const Eigen::Matrix<double, 3, 4> &intrinsics, const T
-		*vector) {
+		render(const T *translation, const T *rotation, const T *intrinsics, const T *vector) {
 			bool flipped;
 			return render(translation, rotation, intrinsics, vector, flipped);
 		}
 
 		template Eigen::Matrix<double, 2, 1>
-		render<double>(const double *, const double *, const Eigen::Matrix<double, 3, 4> &, const double *);
+		render(const double *translation, const double *rotation, const double *intrinsics, const double *vector);
+
+		template Eigen::Matrix<ceres::Jet<double, 14>, 2, 1>
+		render(const ceres::Jet<double, 14> *translation, const ceres::Jet<double, 14> *rotation,
+			   const ceres::Jet<double, 14> *intrinsics, const ceres::Jet<double, 14> *vector);
 
 		template<typename T>
 		Eigen::Matrix<T, 2, 1>
-		render(const T *translation, const T *rotation, const Eigen::Matrix<double, 3, 4> &intrinsics, const T
+		render(const T *translation, const T *rotation, const T *intrinsics, const T
 		*vector, bool &flipped) {
 //			Eigen::Matrix<T, 3, 1> translationVector{translation[0], translation[1], translation[2]};
 //			Eigen::Matrix<T, 3, 1> rotationVector{rotation[0], rotation[1], rotation[2]};
@@ -34,21 +37,26 @@ namespace providentia {
 			Eigen::Matrix<T, 4, 1> pointInCameraSpace = toCameraSpace(translation, rotation, vector);
 //			std::cout << "Camera Space" << std::endl << pointInCameraSpace << std::endl;
 
-			Eigen::Matrix<T, 3, 1> homogeneousPixel = intrinsics.template cast<T>() * pointInCameraSpace;
+			bool invalid;
+			auto intrinsicsMatrix = getIntrinsicsMatrix(intrinsics, invalid);
+//			std::cout << intrinsicsMatrix << std::endl;
+
+			Eigen::Matrix<T, 3, 1> homogeneousPixel = intrinsicsMatrix * pointInCameraSpace;
 //			std::cout << "Homogeneous pixel" << std::endl << homogeneousPixel << std::endl;
 
-			Eigen::Matrix<T, 2, 1> pixel = perspectiveDivision(homogeneousPixel, flipped);
+			bool internalFlipped;
+			Eigen::Matrix<T, 2, 1> pixel = perspectiveDivision(homogeneousPixel, internalFlipped);
 //			std::cout << "Pixel" << std::endl << pixel << std::endl;
+			flipped = internalFlipped || invalid;
 			return pixel;
 		}
 
 		template Eigen::Matrix<double, 2, 1>
-		render<double>(const double *, const double *, const Eigen::Matrix<double, 3, 4> &, const double *, bool &);
+		render<double>(const double *, const double *, const double *, const double *, bool &);
 
-		template Eigen::Matrix<ceres::Jet<double, 9>, 2, 1>
-		render<ceres::Jet<double, 9>>(const ceres::Jet<double, 9> *, const ceres::Jet<double, 9> *,
-									  const Eigen::Matrix<double, 3, 4> &,
-									  const ceres::Jet<double, 9> *, bool &);
+		template Eigen::Matrix<ceres::Jet<double, 14>, 2, 1>
+		render<ceres::Jet<double, 14>>(const ceres::Jet<double, 14> *, const ceres::Jet<double, 14> *,
+									   const ceres::Jet<double, 14> *, const ceres::Jet<double, 14> *, bool &);
 
 		template<typename T>
 		Eigen::Matrix<T, 4, 4> getCameraRotationMatrix(const T *rotation) {
@@ -108,7 +116,7 @@ namespace providentia {
 		}
 
 		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-										   const Eigen::Matrix<double, 3, 4> &intrinsics,
+										   const std::vector<double> &intrinsics,
 										   const Eigen::Vector4d &vector,
 										   const cv::Vec3d &color, cv::Mat &image) {
 			bool flipped;
@@ -116,13 +124,13 @@ namespace providentia {
 		}
 
 		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-										   const Eigen::Matrix<double, 3, 4> &intrinsics,
+										   const std::vector<double> &intrinsics,
 										   const Eigen::Vector4d &vector,
 										   const cv::Vec3d &color, cv::Mat &image, bool &flipped) {
 			Eigen::Vector2i imageSize(image.cols, image.rows);
 
 			Eigen::Vector2d pointInImageSpace = render(
-				translation.data(), rotation.data(), intrinsics,
+				translation.data(), rotation.data(), intrinsics.data(),
 				vector.data(), flipped);
 
 			if (flipped) {
@@ -163,6 +171,36 @@ namespace providentia {
 
 		template<typename T>
 		Eigen::Matrix<T, 3, 4> getIntrinsicsMatrix(const T *intrinsics) {
+			bool invalid;
+			return getIntrinsicsMatrix(intrinsics, invalid);
+		}
+
+		template Eigen::Matrix<double, 3, 4> getIntrinsicsMatrix(const double *intrinsics);
+
+		template Eigen::Matrix<ceres::Jet<double, 14>, 3, 4>
+		getIntrinsicsMatrix(const ceres::Jet<double, 14> *intrinsics);
+
+		template<typename T>
+		Eigen::Matrix<T, 3, 4> getIntrinsicsMatrix(const T *intrinsics, bool &invalid) {
+			T zero = (T) 0;
+			invalid = intrinsics[0] < zero ||
+					  intrinsics[2] < zero;
+			invalid = false;
+			return getIntrinsicsMatrixFromConfig(new T[9]{
+				intrinsics[0], zero, intrinsics[1],
+				zero, intrinsics[2], intrinsics[3],
+//				zero, intrinsics[4], (T) 1
+				zero, zero, (T) 1
+			});
+		}
+
+		template Eigen::Matrix<double, 3, 4> getIntrinsicsMatrix(const double *intrinsics, bool &invalid);
+
+		template Eigen::Matrix<ceres::Jet<double, 14>, 3, 4>
+		getIntrinsicsMatrix(const ceres::Jet<double, 14> *intrinsics, bool &invalid);
+
+		template<typename T>
+		std::vector<T> getIntrinsicsFromRealSensor(const T *intrinsics) {
 			T zero = (T) 0;
 			T focalLength = intrinsics[0];
 
@@ -180,14 +218,17 @@ namespace providentia {
 
 			Eigen::Matrix<T, 2, 1> alpha = focalLength * m.cwiseInverse();
 
-			std::vector<T> values{
-				alpha(0, 0), skew, principalPoint(0, 0),
-				zero, alpha(1, 0), principalPoint(1, 0),
-				zero, zero, (T) 1
-			};
-
-			return getIntrinsicsMatrixFromConfig(values.data());
+			return
+				std::vector<T>
+					{
+						alpha(0, 0), principalPoint(0, 0), alpha(1, 0), principalPoint(1, 0), skew
+					};
 		}
+
+		template std::vector<double> getIntrinsicsFromRealSensor(const double *intrinsics);
+
+		template std::vector<ceres::Jet<double, 14>>
+		getIntrinsicsFromRealSensor(const ceres::Jet<double, 14> *intrinsics);
 
 		template<typename T>
 		Eigen::Matrix<T, 3, 4> getIntrinsicsMatrixFromConfig(const T *intrinsics) {
@@ -201,20 +242,25 @@ namespace providentia {
 			return matrix;
 		}
 
-		Eigen::Matrix<double, 3, 4> getBlenderCameraIntrinsics() {
+		template Eigen::Matrix<double, 3, 4> getIntrinsicsMatrixFromConfig(const double *intrinsics);
+
+		template Eigen::Matrix<ceres::Jet<double, 14>, 3, 4>
+		getIntrinsicsMatrixFromConfig(const ceres::Jet<double, 14> *intrinsics);
+
+		std::vector<double> getBlenderCameraIntrinsics() {
 			double pixelWidth = 32. / 1920.;
 			double principalX = 1920. / 2;
 			double principalY = 1200. / 2;
 			std::vector<double> intrinsics{
 				20, pixelWidth, pixelWidth, principalX, principalY, 0
 			};
-			return getIntrinsicsMatrix(intrinsics.data());
+			return getIntrinsicsFromRealSensor(intrinsics.data());
 		}
 
-		Eigen::Matrix<double, 3, 4> getS40NCamFarIntrinsics() {
-			return getIntrinsicsMatrixFromConfig<double>(new double[9]{
-				9023.482825, 0.000000, 1222.314303, 0.000000, 9014.504360, 557.541182, 0.000000, 0.000000, 1.000000
-			});
+		std::vector<double> getS40NCamFarIntrinsics() {
+			return std::vector<double>{
+				9023.482825, 1222.314303, 9014.504360, 557.541182, 0.000000
+			};
 		}
 
 	}

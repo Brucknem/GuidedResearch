@@ -62,6 +62,11 @@ namespace providentia {
 			std::vector<ceres::ResidualBlockId> rotationResiduals;
 
 			/**
+			 * The ids of the intrinsic parameter residual blocks.
+			 */
+			std::vector<ceres::ResidualBlockId> intrinsicsResiduals;
+
+			/**
 			 * The final optimization summary.
 			 */
 			ceres::Solver::Summary summary;
@@ -87,9 +92,14 @@ namespace providentia {
 			Eigen::Vector3d rotation;
 
 			/**
-			 * The intrinsics matrix of the pinhole camera model.
+			 * The initial [f_x, c_x, f_y, c_y, skew] intrinsics values of the pinhole camera model.
 			 */
-			Eigen::Matrix<double, 3, 4> intrinsics;
+			std::vector<double> initialIntrinsics;
+
+			/**
+			 * The current [f_x, c_x, f_y, c_y, skew] intrinsics values of the pinhole camera model.
+			 */
+			std::vector<double> intrinsics;
 
 			/**
 			 * A buffer for the known world worldObjects.
@@ -110,6 +120,16 @@ namespace providentia {
 			 * Flag if the optimization is finished, i.e. ceres is finished minimizing.
 			 */
 			bool optimizationFinished = true;
+
+			/**
+			 * Flag if the intrinsics have been guessed. This is required as a start for the optimization.
+			 */
+			bool intrinsicsGuessed = false;
+
+			/**
+			 * Flag if the intrinsics have been guessed. This is required as a start for the optimization.
+			 */
+			bool intrinsicsFixed = false;
 
 			/**
 			 * An additional scaling factor for the weight residuals.
@@ -234,7 +254,7 @@ namespace providentia {
 			 * @param problem The ceres problem.
 			 * @param blockIds The list of residual block ids to evaluate.
 			 *
-			 * @return The loss of the requested residualstatic s.
+			 * @return The loss of the requested residuals.
 			 */
 			static double evaluate(ceres::Problem &problem, const std::vector<ceres::ResidualBlockId> &blockIds);
 
@@ -336,7 +356,7 @@ namespace providentia {
 			 *
 			 * @param intrinsics The intrinsics of the pinhole camera model.
 			 */
-			explicit CameraPoseEstimation(Eigen::Matrix<double, 3, 4> intrinsics);
+			explicit CameraPoseEstimation();
 
 			/**
 			 * @destructor
@@ -379,16 +399,31 @@ namespace providentia {
 			void calculateInitialGuess();
 
 			/**
-			 * Set an initial guess for the camera rotation in world space.
-			 * @param translation The guess.
+			 * Brings a rotation vector in the range [-180, 180] for all elements.
 			 */
-			void guessRotation(const Eigen::Vector3d &rotation);
+			static Eigen::Vector3d clearRotation(const Eigen::Vector3d &rotation);
+
+			/**
+			 * @set
+			 */
+			void guessIntrinsics(const std::vector<double> &intrinsics);
 
 			/**
 			 * Set an initial guess for the camera translation in world space.
 			 * @param translation The guess.
 			 */
 			void guessTranslation(const Eigen::Vector3d &translation);
+
+			/**
+			 * Set an initial guess for the camera rotation in world space.
+			 * @param translation The guess.
+			 */
+			void guessRotation(const Eigen::Vector3d &rotation);
+
+			/**
+			 * Fixes the intrinsics.
+			 */
+			void fixIntrinsics(bool fixed);
 
 			/**
 			 * @get
@@ -398,7 +433,7 @@ namespace providentia {
 			/**
 			 * @get
 			 */
-			const Eigen::Vector3d &getRotation() const;
+			Eigen::Vector3d getRotation() const;
 
 			/**
 			 * @get
@@ -444,6 +479,11 @@ namespace providentia {
 			/**
 			 * @get
 			 */
+			const std::vector<double> &getIntrinsics() const;
+
+			/**
+			 * @get
+			 */
 			double getCorrespondencesLoss() const;
 
 			/**
@@ -462,6 +502,8 @@ namespace providentia {
 			double getTotalLoss() const;
 
 			std::vector<double> getLambdas();
+
+			void addIntrinsicsConstraints(ceres::Problem &problem);
 		};
 	}
 }
