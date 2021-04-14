@@ -92,5 +92,16 @@ namespace providentia {
 		bool ParametricPoint::hasExpectedPixel() const {
 			return isExpectedPixelSet;
 		}
+
+		ParametricPoint::ParametricPoint(ParametricPoint &other,
+										 const Eigen::Matrix<double, 2, 1> &expectedPixel) : ParametricPoint
+																								 (
+																									 other.origin,
+																									 other.axisA,
+																									 other.axisB,
+																									 0, 0
+																								 ) {
+			setExpectedPixel(expectedPixel);
+		}
 	}
 }

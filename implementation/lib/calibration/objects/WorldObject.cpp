@@ -11,6 +11,7 @@ namespace providentia {
 
 		void WorldObject::add(const ParametricPoint &point) {
 			points.emplace_back(point);
+			calculateCenterLine();
 		}
 
 		double WorldObject::getWeight() const {
@@ -54,6 +55,52 @@ namespace providentia {
 
 		int WorldObject::getNumPoints() const {
 			return (int) points.size();
+		}
+
+		std::vector<ParametricPoint> WorldObject::getPointsWithPixel() const {
+			std::vector<ParametricPoint> filtered;
+			for (const auto &point : points) {
+				if (point.hasExpectedPixel()) {
+					filtered.emplace_back(point);
+				}
+			}
+			return filtered;
+		}
+
+		void WorldObject::calculateCenterLine() {
+			centerLine.clear();
+			std::vector<ParametricPoint> filtered = getPointsWithPixel();
+			if (filtered.empty()) {
+				return;
+			}
+
+			std::sort(filtered.begin(), filtered.end(), [](ParametricPoint a, ParametricPoint b) {
+				return a.getExpectedPixel().y() < b.getExpectedPixel().y();
+			});
+
+			std::vector<Eigen::Vector2d> currentRow = {};
+			for (int i = 0; i < filtered.size(); i++) {
+				if (!currentRow.empty() && filtered[i].getExpectedPixel().y() != currentRow[0].y()) {
+					Eigen::Vector2d sum = {0, 0};
+					for (const auto &rowElement : currentRow) {
+						sum += rowElement;
+					}
+					sum /= currentRow.size();
+					centerLine.emplace_back(ParametricPoint(filtered[0], sum));
+					currentRow.clear();
+				}
+				currentRow.emplace_back(filtered[i].getExpectedPixel());
+			}
+			Eigen::Vector2d sum = {0, 0};
+			for (const auto &rowElement : currentRow) {
+				sum += rowElement;
+			}
+			sum /= currentRow.size();
+			centerLine.emplace_back(ParametricPoint(filtered[0], sum));
+		}
+
+		const std::vector<ParametricPoint> &WorldObject::getCenterLine() const {
+			return centerLine;
 		}
 
 	}

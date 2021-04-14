@@ -461,6 +461,7 @@ namespace providentia {
 			 */
 			double getTotalLoss() const;
 
+			std::vector<double> getLambdas();
 		};
 	}
 }

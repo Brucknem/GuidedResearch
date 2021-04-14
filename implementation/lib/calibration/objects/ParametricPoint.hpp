@@ -49,7 +49,7 @@ namespace providentia {
 			 */
 			bool isExpectedPixelSet = false;
 
-		protected:
+		public:
 			/**
 			 * @constructor
 			 *
@@ -63,7 +63,8 @@ namespace providentia {
 							const Eigen::Matrix<double, 3, 1> &axisB,
 							double lambda = 0, double mu = 0);
 
-		public:
+			ParametricPoint(ParametricPoint &other, const Eigen::Matrix<double, 2, 1> &expectedPixel);
+
 			/**
 			 * @destructor
 			 */

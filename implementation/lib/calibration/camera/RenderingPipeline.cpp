@@ -23,9 +23,22 @@ namespace providentia {
 		Eigen::Matrix<T, 2, 1>
 		render(const T *translation, const T *rotation, const Eigen::Matrix<double, 3, 4> &intrinsics, const T
 		*vector, bool &flipped) {
+//			Eigen::Matrix<T, 3, 1> translationVector{translation[0], translation[1], translation[2]};
+//			Eigen::Matrix<T, 3, 1> rotationVector{rotation[0], rotation[1], rotation[2]};
+//			Eigen::Matrix<T, 3, 1> vectorVector{vector[0], vector[1], vector[2]};
+
+//			std::cout << "Translation" << std::endl << translationVector << std::endl;
+//			std::cout << "Rotation" << std::endl << rotationVector << std::endl;
+//			std::cout << "Vector" << std::endl << vectorVector << std::endl;
+
 			Eigen::Matrix<T, 4, 1> pointInCameraSpace = toCameraSpace(translation, rotation, vector);
+//			std::cout << "Camera Space" << std::endl << pointInCameraSpace << std::endl;
+
 			Eigen::Matrix<T, 3, 1> homogeneousPixel = intrinsics.template cast<T>() * pointInCameraSpace;
+//			std::cout << "Homogeneous pixel" << std::endl << homogeneousPixel << std::endl;
+
 			Eigen::Matrix<T, 2, 1> pixel = perspectiveDivision(homogeneousPixel, flipped);
+//			std::cout << "Pixel" << std::endl << pixel << std::endl;
 			return pixel;
 		}
 

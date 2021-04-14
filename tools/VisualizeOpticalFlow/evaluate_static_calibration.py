@@ -324,12 +324,12 @@ def create_loss_compare_plots(df: pd.DataFrame):
         values = np.array([x_values, df[yaxis[0]], df[yaxis[1]], total_loss])
 
         conf = 1
-        values, conf = clean_values(values, total_loss, False)
+        # values, conf = clean_values(values, total_loss, False)
         # clustering_input = values[0].reshape(-1, 1)
         clustering_input = values[3].reshape(-1, 1)
         # clustering_input = values.transpose()
-        clustering = BayesianGaussianMixture(n_components=25, random_state=42).fit_predict(clustering_input)
-        # clustering = [0] * len(values[0])
+        # clustering = BayesianGaussianMixture(n_components=25, random_state=42).fit_predict(clustering_input)
+        clustering = [0] * len(values[0])
         labels, count = get_cluster_labels(clustering, 10)
 
         # p.yaxis[0].formatter.precision = 1

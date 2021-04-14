@@ -23,6 +23,8 @@ namespace providentia {
 			 */
 			std::vector<ParametricPoint> points;
 
+			std::vector<ParametricPoint> centerLine;
+
 			/**
 			 * An optional id.
 			 */
@@ -66,6 +68,18 @@ namespace providentia {
 			 * @get
 			 */
 			const std::vector<ParametricPoint> &getPoints() const;
+
+			/**
+			 * @get
+			 */
+			std::vector<ParametricPoint> getPointsWithPixel() const;
+
+			/**
+			 * @get
+			 */
+			void calculateCenterLine();
+
+			const std::vector<ParametricPoint> &getCenterLine() const;
 
 			/**
 			 * @get The mean of the points.

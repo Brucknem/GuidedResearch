@@ -7,6 +7,7 @@
 #include <utility>
 #include "ceres/autodiff_cost_function.h"
 #include <limits>
+#include <thread>
 
 namespace providentia {
 	namespace calibration {
@@ -64,6 +65,18 @@ namespace providentia {
 			evaluateWeightResiduals(problem);
 		}
 
+		std::vector<double> CameraPoseEstimation::getLambdas() {
+			std::vector<double> lambdas;
+			for (const auto &worldObject : worldObjects) {
+				std::cout << "World Object: " << worldObject.getId() << std::endl;
+				for (const auto &point : worldObject.getCenterLine()) {
+					std::cout << *point.getLambda() << " / " << worldObject.getHeight() << std::endl;
+					lambdas.emplace_back(*point.getLambda());
+				}
+			}
+			return lambdas;
+		}
+
 		void CameraPoseEstimation::estimate(bool logSummary) {
 			optimizationFinished = false;
 			foundValidSolution = false;
@@ -84,9 +97,10 @@ namespace providentia {
 					lambdaResidualScalingFactor = originalPenalize;
 					continue;
 				}
-				lambdaResidualScalingFactor = originalPenalize * 100000;
+				lambdaResidualScalingFactor = originalPenalize * 100;
 				solveProblem(logSummary);
 				lambdaResidualScalingFactor = originalPenalize;
+//				auto lambdas = getLambdas();
 				break;
 			}
 			foundValidSolution = i < maxTriesUntilAbort;
@@ -105,7 +119,12 @@ namespace providentia {
 //			options.max_num_consecutive_invalid_steps = 15;
 //			options.max_num_iterations = weights.size();
 			options.max_num_iterations = 1000;
-			options.num_threads = 12;
+//			options.num_threads = 1;
+			auto processorCount = std::thread::hardware_concurrency();
+			if (processorCount == 0) {
+				processorCount = 8;
+			}
+			options.num_threads = processorCount;
 			options.minimizer_progress_to_stdout = logSummary;
 			options.update_state_every_iteration = true;
 			return options;
@@ -133,11 +152,8 @@ namespace providentia {
 			weightResiduals.clear();
 			lambdaResiduals.clear();
 
-			for (const auto &worldObject : worldObjects) {
-				for (const auto &point : worldObject.getPoints()) {
-					if (!point.hasExpectedPixel()) {
-						continue;
-					}
+			for (auto &worldObject : worldObjects) {
+				for (const auto &point : worldObject.getCenterLine()) {
 					*point.getLambda() = 0;
 					*point.getMu() = 0;
 					weights.emplace_back(new double(1));

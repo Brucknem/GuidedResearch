@@ -65,7 +65,7 @@ public:
 	int rotationIndex = 0;
 	std::vector<double> rotationOptions{50.};
 
-	int runsPerScale = 1500;
+	int runsPerScale = 1000;
 
 	/**
 	 * The objects from the HD map.
@@ -247,7 +247,16 @@ protected:
 	void render() {
 		for (const auto &worldObject: objects) {
 			bool idShown = false;
-			for (const auto &point : worldObject.getPoints()) {
+			auto centerLine = worldObject.getCenterLine();
+			if (centerLine.empty()) {
+				for (const auto &point : worldObject.getPoints()) {
+					Eigen::Vector3d p = point.getPosition();
+					cv::Vec3d color = {0, 0, 1};
+					render(worldObject.getId(), p, color, !idShown);
+					idShown = true;
+				}
+			}
+			for (const auto &point : centerLine) {
 				Eigen::Vector3d p = point.getPosition();
 				cv::Vec3d color = {0, 0, 1};
 				if (point.hasExpectedPixel()) {

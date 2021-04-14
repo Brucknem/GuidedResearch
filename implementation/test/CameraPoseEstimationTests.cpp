@@ -59,6 +59,7 @@ namespace providentia {
 
 			void assertEstimation(bool log = false, double maxDifference = 1e-8) {
 				estimator->estimate(log);
+				estimator->getLambdas();
 				assertVectorsNearEqual(estimator->getTranslation(), translation, maxDifference);
 				assertVectorsNearEqual(estimator->getRotation(), rotation, maxDifference);
 
@@ -84,11 +85,17 @@ namespace providentia {
 				WorldObject post;
 				post.setHeight(height);
 				for (int i = 0; i < number; ++i) {
-					ParametricPoint point = providentia::calibration::ParametricPoint::onLine(origin, {0, 0, 1},
-																							  (height / number) * i);
-					point.setExpectedPixel(getPixel(point));
-					post.add(point);
+					for (int w = -4; w <= 4; w += 2) {
+						ParametricPoint point = providentia::calibration::ParametricPoint::onLine(origin, {0, 0, 1},
+																								  (height / number) *
+																								  i);
+						auto pixel = getPixel(point);
+						point.setExpectedPixel(pixel + Eigen::Vector2d{w, 0});
+						*point.getLambda() = 0;
+						post.add(point);
+					}
 				}
+				post.calculateCenterLine();
 				estimator->addWorldObject(post);
 			}
 		};

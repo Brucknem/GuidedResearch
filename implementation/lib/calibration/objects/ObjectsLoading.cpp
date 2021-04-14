@@ -44,7 +44,10 @@ namespace providentia {
 			std::string objectId = object["id"].as<std::string>();
 			worldObject.setId(objectId);
 			worldObject.setHeight(object["height"].as<double>());
-			const Eigen::Vector3d &worldPosition = object["position"].as<Eigen::Vector3d>();
+			std::string coordinateSystem = "mollweide";
+			coordinateSystem = "utm";
+			Eigen::Vector3d worldPosition = object[coordinateSystem + "_coord"].as<Eigen::Vector3d>();
+//			worldPosition = {worldPosition.y(), -worldPosition.x(), -worldPosition.z()};
 
 			bool hasPixels = false;
 			for (const auto imageObject : imageObjects) {
