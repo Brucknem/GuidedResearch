@@ -30,9 +30,13 @@ namespace providentia {
 				Eigen::Vector2d residual;
 				CorrespondenceResidual correspondenceResidual = {
 					point.getExpectedPixel(), point,
-					intrinsics,
 				};
 				correspondenceResidual(
+					&intrinsics[0],
+					&intrinsics[1],
+					&intrinsics[2],
+					&intrinsics[3],
+					&intrinsics[4],
 					&translation.x(), &translation.y(), &translation.z(),
 					&rotation.x(), &rotation.y(), &rotation.z(),
 					point.getLambda(), point.getMu(), new double(1), residual.data());
@@ -91,7 +95,7 @@ namespace providentia {
 
 			worldPosition << 4, 20, 5;
 			pixel = providentia::camera::render(translation.data(), rotation.data(),
-												intrinsics, worldPosition.data());
+												intrinsics.data(), worldPosition.data());
 			assertPointCorrespondenceResidual(worldPosition, pixel, {0, 0});
 
 			pixel << 50, 50;

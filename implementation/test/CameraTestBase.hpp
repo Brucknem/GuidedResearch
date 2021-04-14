@@ -44,7 +44,7 @@ namespace providentia {
 			/**
 			 * The itnrinsics of the pinhole camera model.
 			 */
-			Eigen::Matrix<double, 3, 4> intrinsics = providentia::camera::getBlenderCameraIntrinsics();
+			std::vector<double> intrinsics = providentia::camera::getBlenderCameraIntrinsics();
 
 			/**
 			 * Some [x, y, z] translation of the camera in world space.

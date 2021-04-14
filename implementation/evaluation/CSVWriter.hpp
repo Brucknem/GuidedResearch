@@ -48,6 +48,8 @@ namespace providentia {
 
 			CSVWriter &operator<<(const Eigen::Vector3d &val);
 
+			CSVWriter &operator<<(const std::vector<double> &val);
+
 			CSVWriter &operator<<(const providentia::evaluation::TrackerWrapper &val);
 
 			template<typename T>

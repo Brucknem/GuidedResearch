@@ -70,6 +70,13 @@ namespace providentia {
 			return *this;
 		}
 
+		CSVWriter &CSVWriter::operator<<(const std::vector<double> &val) {
+			for (const auto &v : val) {
+				*this << v;
+			}
+			return *this;
+		}
+
 		CSVWriter::CSVWriter(const boost::filesystem::path &filename, const std::string &separator) :
 			CSVWriter(filename.string(), separator) {}
 

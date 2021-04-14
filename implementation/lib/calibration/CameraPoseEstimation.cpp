@@ -12,16 +12,29 @@
 namespace providentia {
 	namespace calibration {
 
-		CameraPoseEstimation::CameraPoseEstimation(Eigen::Matrix<double, 3, 4> intrinsics) :
-			intrinsics(std::move(intrinsics)) {
-		}
+		CameraPoseEstimation::CameraPoseEstimation() = default;
 
 		const Eigen::Vector3d &CameraPoseEstimation::getTranslation() const {
 			return translation;
 		}
 
-		const Eigen::Vector3d &CameraPoseEstimation::getRotation() const {
-			return rotation;
+		Eigen::Vector3d CameraPoseEstimation::clearRotation(const Eigen::Vector3d &rotation) {
+			Eigen::Vector3d resultRotation = rotation;
+			for (int i = 0; i < 3; i++) {
+				while (resultRotation[i] < -180 || resultRotation[i] > 180) {
+					if (resultRotation[i] < -180) {
+						resultRotation[i] += 360;
+					}
+					if (resultRotation[i] > 180) {
+						resultRotation[i] -= 360;
+					}
+				}
+			}
+			return resultRotation;
+		}
+
+		Eigen::Vector3d CameraPoseEstimation::getRotation() const {
+			return clearRotation(rotation);
 		}
 
 		void CameraPoseEstimation::calculateInitialGuess() {
@@ -78,6 +91,9 @@ namespace providentia {
 		}
 
 		void CameraPoseEstimation::estimate(bool logSummary) {
+			if (!intrinsicsGuessed) {
+				std::cout << "No intrinsics guessed. Aborting!" << std::endl;
+			}
 			optimizationFinished = false;
 			foundValidSolution = false;
 			int i = 0;
@@ -87,17 +103,18 @@ namespace providentia {
 				double originalPenalize = lambdaResidualScalingFactor;
 				lambdaResidualScalingFactor = originalPenalize * 10;
 				solveProblem(logSummary);
-				if (lambdasLoss > 10) {
+				if (lambdasLoss > 5) {
 					// > 10 is an empirical number. Might be further investigated.
 					lambdaResidualScalingFactor = originalPenalize;
 					continue;
 				}
-				correspondencesLoss = log10(correspondencesLoss);
-				if (correspondencesLoss <= 1 || correspondencesLoss > correspondenceLossUpperBound) {
+//				log10(correspondencesLoss);
+//				std::cout << correspondencesLossScale << std::endl;
+				if (correspondencesLoss > correspondenceLossUpperBound) {
 					lambdaResidualScalingFactor = originalPenalize;
 					continue;
 				}
-				lambdaResidualScalingFactor = originalPenalize * 100;
+//				lambdaResidualScalingFactor = originalPenalize * 100;
 				solveProblem(logSummary);
 				lambdaResidualScalingFactor = originalPenalize;
 //				auto lambdas = getLambdas();
@@ -165,9 +182,10 @@ namespace providentia {
 			// +1.5 empirical knowledge. Might be further investigated.
 			// Better might be max(width) of all objects, i.e. max # of pixels per row over all objects.
 			// weightScale = max(width) * weight.size()
-			correspondenceLossUpperBound = log10(weights.size() * 2) + 1.5;
+			correspondenceLossUpperBound = weightResiduals.size();
 
 			addRotationConstraints(problem);
+			addIntrinsicsConstraints(problem);
 
 //			std::cout << "Residuals: " << problem.NumResidualBlocks() << std::endl;
 			return problem;
@@ -197,10 +215,14 @@ namespace providentia {
 			return problem.AddResidualBlock(
 				residuals::CorrespondenceResidual::create(
 					point.getExpectedPixel(),
-					point,
-					intrinsics
+					point
 				),
 				new ceres::HuberLoss(1.0),
+				&intrinsics[0],
+				&intrinsics[1],
+				&intrinsics[2],
+				&intrinsics[3],
+				&intrinsics[4],
 				&translation.x(),
 				&translation.y(),
 				&translation.z(),
@@ -211,6 +233,25 @@ namespace providentia {
 				point.getMu(),
 				weights[weights.size() - 1]
 			);
+		}
+
+		void CameraPoseEstimation::addIntrinsicsConstraints(ceres::Problem &problem) {
+			intrinsicsResiduals.clear();
+			double scale = 10;
+			double factor = 0.9;
+			if (intrinsicsFixed) {
+				factor = 1.;
+			}
+
+			for (int i = 0; i < 4; i++) {
+				intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
+					providentia::calibration::residuals::DistanceFromIntervalResidual::create(
+						initialIntrinsics[i] * factor,
+						initialIntrinsics[i] / factor),
+					getScaledHuberLoss(scale),
+					&intrinsics[i]
+				));
+			}
 		}
 
 		void CameraPoseEstimation::addRotationConstraints(ceres::Problem &problem) {
@@ -352,6 +393,20 @@ namespace providentia {
 
 		double CameraPoseEstimation::getTotalLoss() const {
 			return totalLoss;
+		}
+
+		const std::vector<double> &CameraPoseEstimation::getIntrinsics() const {
+			return intrinsics;
+		}
+
+		void CameraPoseEstimation::guessIntrinsics(const std::vector<double> &values) {
+			intrinsicsGuessed = true;
+			intrinsics = values;
+			initialIntrinsics = values;
+		}
+
+		void CameraPoseEstimation::fixIntrinsics(bool fixed) {
+			intrinsicsFixed = fixed;
 		}
 
 		std::string printVectorRow(Eigen::Vector3d vector) {

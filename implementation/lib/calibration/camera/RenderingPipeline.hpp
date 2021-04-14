@@ -21,7 +21,13 @@ namespace providentia {
 		 * @return The intrinsics camera matrix.
 		 */
 		template<typename T>
+		std::vector<T> getIntrinsicsFromRealSensor(const T *intrinsics);
+
+		template<typename T>
 		Eigen::Matrix<T, 3, 4> getIntrinsicsMatrix(const T *intrinsics);
+
+		template<typename T>
+		Eigen::Matrix<T, 3, 4> getIntrinsicsMatrix(const T *intrinsics, bool &invalid);
 
 		/**
 		 * Creates the camera intrinsic matrix.
@@ -40,14 +46,14 @@ namespace providentia {
 		 *
 		 * @return The intrinsics camera matrix.
 		 */
-		Eigen::Matrix<double, 3, 4> getBlenderCameraIntrinsics();
+		std::vector<double> getBlenderCameraIntrinsics();
 
 		/**
 		 * Creates the camera intrinsic matrix for the s40 n cam far camera.
 		 *
 		 * @return The intrinsics camera matrix.
 		 */
-		Eigen::Matrix<double, 3, 4> getS40NCamFarIntrinsics();
+		std::vector<double> getS40NCamFarIntrinsics();
 
 		/**
 		 * Divides a pixel in homogeneous coordinates by its z component.
@@ -101,13 +107,11 @@ namespace providentia {
 		 */
 		template<typename T>
 		Eigen::Matrix<T, 2, 1>
-		render(const T *translation, const T *rotation, const Eigen::Matrix<double, 3, 4> &intrinsics,
-			   const T *vector);
+		render(const T *translation, const T *rotation, const T *intrinsics, const T *vector);
 
 		template<typename T>
 		Eigen::Matrix<T, 2, 1>
-		render(const T *translation, const T *rotation, const Eigen::Matrix<double, 3, 4> &intrinsics,
-			   const T *vector, bool &flipped);
+		render(const T *translation, const T *rotation, const T *intrinsics, const T *vector, bool &flipped);
 
 		/**
 		 * Renders the given vector with the given color to the given image.
@@ -122,13 +126,13 @@ namespace providentia {
 		 */
 
 		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-										   const Eigen::Matrix<double, 3, 4> &intrinsics,
+										   const std::vector<double> &intrinsics,
 										   const Eigen::Vector4d &vector, const cv::Vec3d
 										   &color,
 										   cv::Mat &image, bool &flipped);
 
 		Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-										   const Eigen::Matrix<double, 3, 4> &intrinsics,
+										   const std::vector<double> &intrinsics,
 										   const Eigen::Vector4d &vector, const cv::Vec3d
 										   &color,
 										   cv::Mat &image);

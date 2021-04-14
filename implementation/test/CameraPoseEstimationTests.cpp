@@ -35,7 +35,7 @@ namespace providentia {
 			Eigen::Vector2d getPixel(Eigen::Vector3d vector) {
 				return providentia::camera::render(
 					translation.data(), rotation.data(),
-					intrinsics,
+					intrinsics.data(),
 					vector.data());
 			}
 
@@ -59,7 +59,7 @@ namespace providentia {
 
 			void assertEstimation(bool log = false, double maxDifference = 1e-8) {
 				estimator->estimate(log);
-				estimator->getLambdas();
+//				estimator->getLambdas();
 				assertVectorsNearEqual(estimator->getTranslation(), translation, maxDifference);
 				assertVectorsNearEqual(estimator->getRotation(), rotation, maxDifference);
 
@@ -104,7 +104,8 @@ namespace providentia {
 		 * Tests that the initial guess is 500m above the mean.
 		 */
 		TEST_F(CameraPoseEstimationTests, testCalculateInitialGuess) {
-			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(intrinsics);
+			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>();
+			estimator->guessIntrinsics(intrinsics);
 
 			addPointCorrespondence({0, 0, 9});
 			addPointCorrespondence({0, 0, -9});
@@ -125,7 +126,9 @@ namespace providentia {
 		 * Tests that the optimization converges to the expected extrinsic parameters.
 		 */
 		TEST_F(CameraPoseEstimationTests, testEstimationOnlyWorldPositions) {
-			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(intrinsics);
+			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>();
+			estimator->guessIntrinsics(intrinsics);
+			estimator->fixIntrinsics(true);
 			addSomePointCorrespondences();
 			assertEstimation();
 		}
@@ -134,8 +137,31 @@ namespace providentia {
 		/**
 		 * Tests that the optimization converges to the expected extrinsic parameters.
 		 */
+		TEST_F(CameraPoseEstimationTests, testRotationInPlusMinus180) {
+			assertVectorsNearEqual(
+				providentia::calibration::CameraPoseEstimation::clearRotation(
+					Eigen::Vector3d{720 + 270, -720 + 90, 12345}),
+				Eigen::Vector3d{-90, 90, 105});
+
+			assertVectorsNearEqual(
+				providentia::calibration::CameraPoseEstimation::clearRotation(
+					Eigen::Vector3d{180, 0, -180}),
+				Eigen::Vector3d{180, 0, -180});
+
+			assertVectorsNearEqual(
+				providentia::calibration::CameraPoseEstimation::clearRotation(
+					Eigen::Vector3d{90, 0, -90}),
+				Eigen::Vector3d{90, 0, -90});
+		}
+
+
+		/**
+		 * Tests that the optimization converges to the expected extrinsic parameters.
+		 */
 		TEST_F(CameraPoseEstimationTests, testEstimationOnlyLines) {
-			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(intrinsics);
+			estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>();
+			estimator->guessIntrinsics(intrinsics);
+			estimator->fixIntrinsics(true);
 
 			Eigen::Vector3d origin, axisA, axisB;
 			origin << 0, 0, 0;

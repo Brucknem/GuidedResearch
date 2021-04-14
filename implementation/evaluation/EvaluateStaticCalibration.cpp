@@ -26,7 +26,8 @@ public:
 	/**
 	 * The itnrinsics of the pinhole camera model.
 	 */
-	Eigen::Matrix<double, 3, 4> intrinsics;
+	std::vector<double> initialIntrinsics;
+	std::vector<double> intrinsics;
 	std::shared_ptr<providentia::calibration::CameraPoseEstimation> estimator;
 
 	/**
@@ -65,7 +66,7 @@ public:
 	int rotationIndex = 0;
 	std::vector<double> rotationOptions{50.};
 
-	int runsPerScale = 1000;
+	int runsPerScale = 250;
 
 	/**
 	 * The objects from the HD map.
@@ -93,15 +94,15 @@ public:
 		}
 		std::vector<std::string> rawIntrinsics;
 		boost::split(rawIntrinsics, vm["intrinsics"].as<std::string>(), [](char c) { return c == ','; });
-		if (rawIntrinsics.size() != 9) {
+		if (rawIntrinsics.size() != 5) {
 			std::cout << "Provide intrinsics as comma separated list in format \"f_x,0,c_x,0,f_y,c_y,0,skew,1\".";
 			exit(EXIT_FAILURE);
 		}
-		std::vector<double> intrinsicsCasted;
 		BOOST_FOREACH(std::string value, rawIntrinsics) {
-						intrinsicsCasted.emplace_back(boost::lexical_cast<double>(boost::trim_copy(value)));
+						intrinsics.emplace_back(boost::lexical_cast<double>(boost::trim_copy(value)));
 					};
-		intrinsics = providentia::camera::getIntrinsicsMatrixFromConfig(intrinsicsCasted.data());
+		initialIntrinsics = intrinsics;
+		std::cout << providentia::camera::getIntrinsicsMatrix(initialIntrinsics.data()) << std::endl;
 		pixelsFile = vm["pixels"].as<std::string>();
 //		initialRotation.z() = vm["z_init"].as<int>();
 		return vm;
@@ -145,6 +146,11 @@ public:
 								   << "Rotation [x]"
 								   << "Rotation [y]"
 								   << "Rotation [z]"
+								   << "Focal Length [u]"
+								   << "Principal Point [u]"
+								   << "Focal Length [v]"
+								   << "Principal Point [v]"
+								   << "Skew"
 								   << "Weights [Avg]"
 								   << "Weights [Min]"
 								   << "Weights [Max]"
@@ -158,7 +164,7 @@ public:
 		objectsFile = (boost::filesystem::path(inputResource).parent_path() / "objects.yaml").string();
 
 		objects = providentia::calibration::loadObjects(objectsFile, pixelsFile, imageSize);
-		estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>(intrinsics);
+		estimator = std::make_shared<providentia::calibration::CameraPoseEstimation>();
 		estimator->addWorldObjects(objects);
 		if (!dontRenderFinalFrame) {
 			cv::createTrackbar("Background", windowName, &trackbarBackground, 10);
@@ -302,6 +308,7 @@ protected:
 									   << estimator->getWeightsLoss()
 									   << translation
 									   << rotation
+									   << estimator->getIntrinsics()
 									   << sum_w / weights.size()
 									   << min_w
 									   << max_w
@@ -329,6 +336,7 @@ protected:
 		optimizationFinished = estimator->isEstimationFinished();
 		translation = estimator->getTranslation();
 		rotation = estimator->getRotation();
+		intrinsics = estimator->getIntrinsics();
 
 		if (optimizationFinished) {
 			writeToCSV();
@@ -346,6 +354,7 @@ protected:
 
 			estimator->clearWorldObjects();
 			estimator->addWorldObjects(objects);
+			estimator->guessIntrinsics(initialIntrinsics);
 //			estimator->guessRotation(initialRotation);
 //			estimator->guessTranslation(initialTranslation);
 
