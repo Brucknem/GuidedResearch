@@ -3,8 +3,6 @@
 //
 
 #include "FeatureMatchingBase.hpp"
-#include "BruteForceFeatureMatching.hpp"
-#include "FlannFeatureMatching.hpp"
 
 namespace providentia {
 	namespace stabilization {

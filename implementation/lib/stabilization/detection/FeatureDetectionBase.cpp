@@ -5,11 +5,6 @@
 #include "opencv2/features2d.hpp"
 #include <utility>
 #include "FeatureDetectionBase.hpp"
-#include "SIFTFeatureDetection.hpp"
-#include "SURFFeatureDetection.hpp"
-#include "ORBFeatureDetection.hpp"
-#include "FastFREAKFeatureDetection.hpp"
-#include "StarBRIEFFeatureDetection.hpp"
 
 namespace providentia {
 	namespace stabilization {

@@ -1,6 +1,5 @@
 #include <opencv2/cudawarping.hpp>
 #include <utility>
-#include "BackgroundSegmentionBase.hpp"
 #include "MOG2BackgroundSegmentation.hpp"
 #include "opencv2/cudaarithm.hpp"
 #include "opencv2/cudabgsegm.hpp"

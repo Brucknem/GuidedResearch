@@ -1,9 +1,6 @@
 #include "opencv2/imgproc/imgproc.hpp"
 
 #include "DynamicStabilizationBase.hpp"
-#include "SURFBFDynamicStabilization.hpp"
-#include "ORBBFDynamicStabilization.hpp"
-#include "FastFREAKBFDynamicStabilization.hpp"
 #include <opencv2/cudaarithm.hpp>
 
 namespace providentia {

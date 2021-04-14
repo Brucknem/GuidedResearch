@@ -2,9 +2,7 @@
 // Created by brucknem on 11.04.21.
 //
 
-#include "opencv2/cudabgsegm.hpp"
 #include "opencv2/cudaarithm.hpp"
-#include "MOG2BackgroundSegmentation.hpp"
 #include <utility>
 #include <opencv2/cudawarping.hpp>
 #include "BackgroundSegmentionBase.hpp"
