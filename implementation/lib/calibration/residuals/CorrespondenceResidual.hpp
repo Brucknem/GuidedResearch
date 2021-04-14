@@ -5,8 +5,9 @@
 #ifndef CAMERASTABILIZATION_CORRESPONDENCERESIDUAL_HPP
 #define CAMERASTABILIZATION_CORRESPONDENCERESIDUAL_HPP
 
-#include <eigen3/Eigen/src/Core/Matrix.h>
-#include "../objects/WorldObject.hpp"
+#include "Eigen/Dense"
+#include "ceres/ceres.h"
+#include "../objects/ParametricPoint.hpp"
 
 namespace providentia {
 	namespace calibration {
@@ -83,11 +84,5 @@ namespace providentia {
 		}
 	}
 }
-
-#include "Eigen/Dense"
-#include "ceres/ceres.h"
-#include "../camera/RenderingPipeline.hpp"
-#include "../objects/WorldObject.hpp"
-#include "../objects/ParametricPoint.hpp"
 
 #endif //CAMERASTABILIZATION_CORRESPONDENCERESIDUAL_HPP

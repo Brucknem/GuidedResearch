@@ -8,9 +8,6 @@
 #include "Eigen/Dense"
 #include "ceres/ceres.h"
 
-#include "../camera/RenderingPipeline.hpp"
-#include "../objects/WorldObject.hpp"
-
 namespace providentia {
 	namespace calibration {
 		namespace residuals {

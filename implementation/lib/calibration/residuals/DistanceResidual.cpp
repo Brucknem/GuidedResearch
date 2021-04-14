@@ -4,10 +4,6 @@
 
 #include "DistanceResidual.hpp"
 
-#include <utility>
-#include "glog/logging.h"
-#include "CorrespondenceResidual.hpp"
-
 namespace providentia {
 	namespace calibration {
 		namespace residuals {

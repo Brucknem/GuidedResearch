@@ -2,11 +2,8 @@
 // Created by brucknem on 11.04.21.
 //
 
-#include "glog/logging.h"
-#include <utility>
-#include "DistanceFromIntervalResidual.hpp"
 #include "CorrespondenceResidual.hpp"
-#include "../objects/ParametricPoint.hpp"
+#include "../camera/RenderingPipeline.hpp"
 
 namespace providentia {
 	namespace calibration {
