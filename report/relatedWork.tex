@@ -1,29 +1,19 @@
 \section{Related Work}
-There are many \ITS{} projects emerging, \eg{} Koster \etal{} at the \emph{Testfeld für Autonomes und vernetztes Fahren in Niedersachsen} \cite{koster2017testfeld}. See \eg{} this and that \dots
-Also the cooperative perception using infrastructure sensors is an emerging field \cite{arnold2020cooperative}.
+There are many ITS projects emerging \eg{} Koster \etal{} at the \emph{Testfeld für Autonomes und vernetztes Fahren in Niedersachsen} \cite{koster2017testfeld}. 
+Also cooperative perception using infrastructure sensors is an emerging field \cite{arnold2020cooperative}.
 
-None of these provide public information about their camera calibration and stabilization approaches.
+None of the teams - to the best of our knowledge - provide in depth public information about their camera stabilization and calibration approaches.
 
-Within the \TAADBW{} project one of the other projects provided information about their calibration techniques.
-They are too facing the problems of dynamic stabilization and static calibration.
-Among their test area near Karlsruhe, Germany they have built a system mostly consisting of cameras.
-Multiple optical camera sensors are attached to large poles with overlapping fields ov view \cite{fleck2018towards}.
+In the \TAADBW{} (TAADBW) project multiple optical camera sensors are attached to large poles with overlapping fields of view.
+They calibrate their cameras relative to a high-precision map and assume the calibration and the intrinsic camera parameters to be static during runtime. 
+The team relies on an manual a-priori selection of visual landmarks and perform calibration at system startup.  
+The team of the TAADBW estimate the extrinsic calibration with exact world position from the map by minimizing the squared distances between the visible landmarks and the respective projected objects.
+The large overlaps in the fields of view in their setup allow a global optimization strategy. 
+This is not feasible in our project due to the small overlaps in the fields of view between the cameras \cite{kraemmer2020providentia} and associating pixels within the multi-view setup is an inherently hard problem. 
 
-They too use a high-precision map to calibrate the cameras. 
-They differ by assuming the calibration to be static, whereas we present the foundations for an automated approach to self-calibration.
-Our approach differs that we are able to recalibrate at runtime, opposed to the a-priori approach they presented.
+Müller \etal{} \cite{laciMueller} present an approach based on a cooperative intelligent vehicle.
+The vehicle moves through the scene and passes cooperative awareness messages from the vehicle to the infrastructure. 
+This removes the need for overlapping fields of view completely and enables a fully automated and sensor-independent registration.
+The team calibrates a multitude of different sensor types to the world frame and recovers their extrinsic parameters. 
 
-The approach of using landmarks like lane markings and poles is similar to ours.
-They also do a manual selection of landmarks beforehand.
-
-The calibration procedure itself differs as they assume to have the exact world positions of their landmarks.
-We optimize for the world positions using the approximation of objects by their center lines. 
-A common approach in this field is to minimize the squared distances between objects in the camera stream and their real world objects projections.
-
-A drawback we face currently is that we only optimize the camera pose per pose, opposed to an global optimization strategy. 
-This is mostly due to small overlaps in the fields of view \cite{kraemmer2020providentia} between the cameras.
-Additionally we face the problem of data association within the multi-view setup. 
-Matching pixels over multiple views between the cameras is inherently hard problem \cite{agrawal2008censure},
-assigning samples along the center line of the objects to the exact corresponding pixel over multiple views is not feasible.
-
-Additionally solving the camera calibration problem to radar sensors has been solved previously by Schöller \etal{} within our \Providentia{}.
+Calibration between cameras and radar sensors has been solved previously by Schöller \etal{} within the \Providentia{}.
