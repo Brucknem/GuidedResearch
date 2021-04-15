@@ -1,8 +1,7 @@
 \section{Related Work}
-There are many ITS projects emerging \eg{} Koster \etal{} at the \emph{Testfeld für Autonomes und vernetztes Fahren in Niedersachsen} \cite{koster2017testfeld}. 
-Also cooperative perception using infrastructure sensors is an emerging field \cite{arnold2020cooperative}.
-
-None of the teams - to the best of our knowledge - provide in depth public information about their camera stabilization and calibration approaches.
+There are many ITS projects emerging recently  \cite{koster2017testfeld,arnold2020cooperative,arnoldCooperativePerception,agrawal2008censure}. 
+They propose novel approaches to the detection, tracking and traffic prediction problems that arise with the goal to provide additional environment information to human drivers and autonomous vehicles.
+Erdelean \etal{} \cite{erdelean2019catalogue} give a detailed overview over the existing projects up to the year 2019.
 
 In the \TAADBW{} (TAADBW) project multiple optical camera sensors are attached to large poles with overlapping fields of view.
 They calibrate their cameras relative to a high-precision map and assume the calibration and the intrinsic camera parameters to be static during runtime. 
@@ -17,3 +16,5 @@ This removes the need for overlapping fields of view completely and enables a fu
 The team calibrates a multitude of different sensor types to the world frame and recovers their extrinsic parameters. 
 
 Calibration between cameras and radar sensors has been solved previously by Schöller \etal{} within the \Providentia{}.
+
+% None of the teams - to the best of our knowledge - provide in depth public information about their camera stabilization and calibration approaches.
