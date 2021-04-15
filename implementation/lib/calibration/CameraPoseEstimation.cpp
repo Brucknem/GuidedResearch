@@ -99,26 +99,17 @@ namespace providentia {
 			foundValidSolution = false;
 			int i = 0;
 			for (; i < maxTriesUntilAbort; i++) {
+				resetParameters();
 				calculateInitialGuess();
 				solveProblem(logSummary);
+				if (lambdasLoss > 5 || rotationsLoss > 1e-6 || correspondencesLoss > correspondenceLossUpperBound ||
+					intrinsicsLoss > 5) {
+					continue;
+				}
 				double originalPenalize = lambdaResidualScalingFactor;
-				lambdaResidualScalingFactor = originalPenalize * 10;
-				solveProblem(logSummary);
-				if (lambdasLoss > 5 || rotationsLoss > 0.5) {
-					// > 10 is an empirical number. Might be further investigated.
-					lambdaResidualScalingFactor = originalPenalize;
-					continue;
-				}
-//				log10(correspondencesLoss);
-//				std::cout << correspondencesLossScale << std::endl;
-				if (correspondencesLoss > correspondenceLossUpperBound || rotationsLoss > 1e-6) {
-					lambdaResidualScalingFactor = originalPenalize;
-					continue;
-				}
-//				lambdaResidualScalingFactor = originalPenalize * 100;
+				lambdaResidualScalingFactor = originalPenalize * 100;
 				solveProblem(logSummary);
 				lambdaResidualScalingFactor = originalPenalize;
-//				auto lambdas = getLambdas();
 				break;
 			}
 			foundValidSolution = i < maxTriesUntilAbort;
@@ -136,7 +127,7 @@ namespace providentia {
 //			options.use_nonmonotonic_steps = true;
 //			options.max_num_consecutive_invalid_steps = 15;
 //			options.max_num_iterations = weights.size();
-			options.max_num_iterations = 1000;
+			options.max_num_iterations = 400;
 //			options.num_threads = 1;
 			auto processorCount = std::thread::hardware_concurrency();
 			if (processorCount == 0) {
@@ -160,6 +151,17 @@ namespace providentia {
 			);
 		}
 
+		void CameraPoseEstimation::resetParameters() {
+			intrinsics = initialIntrinsics;
+
+			for (auto &worldObject : worldObjects) {
+				for (const auto &point : worldObject.getCenterLine()) {
+					*point.getLambda() = 0;
+					*point.getMu() = 0;
+				}
+			}
+		}
+
 		ceres::Problem CameraPoseEstimation::createProblem() {
 			auto problem = ceres::Problem();
 			for (auto p : weights) {
@@ -173,17 +175,12 @@ namespace providentia {
 
 			for (auto &worldObject : worldObjects) {
 				for (const auto &point : worldObject.getCenterLine()) {
-					*point.getLambda() = 0;
-					*point.getMu() = 0;
 					weights.emplace_back(new double(1));
 					correspondenceResiduals.emplace_back(addCorrespondenceResidualBlock(problem, point));
 					lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, point, worldObject.getHeight()));
 					weightResiduals.emplace_back(addWeightResidualBlock(problem, weights[weights.size() - 1]));
 				}
 			}
-			// +1.5 empirical knowledge. Might be further investigated.
-			// Better might be max(width) of all objects, i.e. max # of pixels per row over all objects.
-			// weightScale = max(width) * weight.size()
 			correspondenceLossUpperBound = weightResiduals.size();
 
 			addRotationConstraints(problem);
@@ -247,17 +244,25 @@ namespace providentia {
 			intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
 				providentia::calibration::residuals::DistanceFromIntervalResidual::create(
 					initialIntrinsics[0] * factor,
-					initialIntrinsics[0] / factor),
+					initialIntrinsics[0] * (2 - factor)),
 				getScaledHuberLoss(scale),
 				&intrinsics[0]
 			));
 
-			for (int i = 1; i < 5; ++i) {
+			intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
+				providentia::calibration::residuals::DistanceResidual::create(
+					initialIntrinsics[1]
+				),
+				getScaledHuberLoss(1e52),
+				&intrinsics[1]
+			));
+
+			for (int i = 2; i < 5; ++i) {
 				intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
 					providentia::calibration::residuals::DistanceResidual::create(
 						initialIntrinsics[i]
 					),
-					getScaledHuberLoss(1e52),
+					getScaledHuberLoss(scale),
 					&intrinsics[i]
 				));
 			}

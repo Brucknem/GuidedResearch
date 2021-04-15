@@ -270,14 +270,14 @@ def add_cluster(p, cluster_label, x, mean, std, y_corr, y_lambda, yaxis, xaxis):
 
 
 def unit_from_axis(xaxis):
-    result = " ["
+    result = " ("
     if "Translation" in xaxis:
         result += "meter"
     elif "Rotation" in xaxis:
         result += "degree"
     else:
         result += "pixel"
-    result += "]"
+    result += ")"
     return result
 
 
@@ -297,7 +297,9 @@ def create_loss_compare_plot(i, foldername, values, xaxis, yaxis, title):
 
     plot_height = 1200
     output_file(get_output_filename(foldername, output_filename, 'html'))
-    p = figure(tools="pan,wheel_zoom,box_zoom,reset,undo,redo", plot_width=int(plot_height * 1.2),
+    tools = ""
+    # tools = "pan,wheel_zoom,box_zoom,reset,undo,redo"
+    p = figure(tools=tools, plot_width=int(plot_height * 1.2),
                plot_height=plot_height, y_range=(min(y_corr), max(y_corr)))
     p.extra_y_ranges = {yaxis[1]: Range1d(start=min(y_lambda), end=max(y_lambda))}
     p.add_layout(LinearAxis(y_range_name=yaxis[1]), 'right')
@@ -367,7 +369,7 @@ def create_loss_compare_plots(df: pd.DataFrame):
         size = len(df)
         total_inliers = len(values[0])
         inlier_fraction = total_inliers / len(df)
-        title = xaxis
+        title = sys.argv[2] + " - " + xaxis
         p, mean, std, mins, maxs = create_loss_compare_plot('All', foldername, values, xaxis, yaxis, title)
         result_data_rows.append({
             'X': xaxis,

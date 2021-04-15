@@ -173,7 +173,7 @@ namespace providentia {
 			/**
 			 * The number of retries in the optimization before the optimizer aborts optimization.
 			 */
-			int maxTriesUntilAbort = 15;
+			int maxTriesUntilAbort = 50;
 
 			/**
 			 * The final loss of the lambda residuals after optimization.
@@ -520,6 +520,8 @@ namespace providentia {
 			std::vector<double> getLambdas();
 
 			void addIntrinsicsConstraints(ceres::Problem &problem);
+
+			void resetParameters();
 		};
 	}
 }
