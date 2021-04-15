@@ -89,19 +89,64 @@ We thus conclude that the best solution is recovered the more the pixels fill th
 \subsubsection{Expectable Error Bounds}
 \label{sec:static_calibration_expectable_error}
 
+Due to measurement uncertainty in the camera sensors we expect some remaining error after pose estimation.
+To conclude a lower bound on this error we start from the optimized focal length $f_px$ in pixels and the sensor width $w_{mm}$ in millimeters and $w_{px}$ in pixels.
 
+The focal length in millimeters is given by 
+\begin{equation}
+  f_{mm} = f_{px} * \frac{w_{mm}}{w_{px}}
+\end{equation}
 
+We then calculate the field of view (FOV) in radians by 
+\begin{equation}
+  FOV_x = 2 * \arctan \left(\frac{f_{mm}}{2 * w_{mm}}\right)
+\end{equation} 
+Equivalent the $FOV_y$ with the height of the sensor $h_{mm}$.
 
+This brings us to a formulation for the angle spanned by each pixel
+\begin{equation}
+  \alpha_{px} = \frac{w_{px}}{FOV_x}
+\end{equation} 
 
+Using the pythagorean formula we can then calculate the uncertainty $u$ in meters of the camera as the spanned meters per pixel relative to the distance $d$ from the camera 
+\begin{equation}
+  u = \tan (\alpha_{px}) * d
+\end{equation}
 
+\begin{table}
+  \begin{center}
+    \begin{tabular}{ |c | c | c| c| c| c |}
+      \hline
+      Camera & $f_{px}$ & $FOV_x [^{\circ}]$ & $\alpha_{px}$ & $d [m]$ & $u [cm]$ \\
+      \hline
+      \camsf{4} & 8591 & 12.753 & $1.16e^{-4}$ & 200 & 2.32 \\
+      \camsf{4} & 8591 & 12.753 & $1.16e^{-4}$ & 650 & 7.54 \\
+      \hline
+      \camsn{4} & 2735 & 38.678 & $3.52e^{-4}$ & 25 & 0.88 \\
+      \camsn{4} & 2735 & 38.678 & $3.52e^{-4}$ & 450 & 15.82 \\
+      \hline
+      \camsf{5} & 8868 & 12.357 & $1.12e^{-4}$ & 200 & 2.22 \\
+      \camsf{5} & 8868 & 12.357 & $1.12e^{-4}$ & 650 & 7.30 \\
+      \hline
+      \camsn{5} & 2747 & 38.527 & $3.50e^{-4}$ & 25 & 0.88\\
+      \camsn{5} & 2747 & 38.527 & $3.50e^{-4}$ & 450 & 15.76 \\
+      \hline
+    \end{tabular}
+  \end{center}
+  \caption{
+    \label{tab:static_calibration_camera_uncertainty}
+  }
+\end{table}
 
+\autoref{tab:static_calibration_camera_uncertainty} displays the uncertainty for our cameras.
+It shows that the far cameras cannot distinguish between points that are $\sim 2.2 cm$ at the nearest visible distance from the camera ranging up to $\sim 7.54 cm$ at the farthest distance.
+The near cameras cannot distinguish between points that are $\sim 0.88 cm$ at the nearest visible distance from the camera ranging up to $\sim 15.82 cm$ at the farthest distance.
 
+This gives a lower bound for the uncertainty in the translational parameters of the camera.
+The camera translation cannot be more precise as the lowest uncertainty in the measurements.
+Nonetheless, in practice the error will sum up and the translation parameters will drift inevitable. 
 
-
-
-
-
-
+This concludes that objects near to the camera are more reliable to detect and to use for estimation.
 
 
 

@@ -8,7 +8,8 @@ import seaborn as sns
 from bokeh.io import show, output_file
 from bokeh.io import export_png, export_svg
 from bokeh.layouts import gridplot
-from bokeh.models import ColumnDataSource, Legend, LabelSet, Label, Whisker, Span, Range1d, LinearAxis
+from bokeh.models import ColumnDataSource, Legend, LabelSet, Label, Whisker, Span, Range1d, LinearAxis, \
+    BasicTickFormatter
 from bokeh.palettes import Turbo256, Turbo3, Turbo4
 from bokeh.plotting import figure
 from sklearn.covariance import EllipticEnvelope
@@ -51,14 +52,6 @@ def add_label(p, mean):
     labels = Label(x=mean[0], y=mean[1], text=str(mean[1]), y_offset=-34, x_offset=0, render_mode='canvas',
                    text_align='left', background_fill_color='white', background_fill_alpha=0.8)
     p.add_layout(labels)
-
-
-def add_spans(p, mean, std, color='black'):
-    for val in zip(
-            [mean, np.array(mean) - std, np.array(mean) + std],
-            [3, 2, 2]):
-        p.add_layout(
-            Span(location=val[0][0], dimension='height', line_color=color, line_dash='dashed', line_width=val[1]))
 
 
 def add_whisker(p, mean, std, label):
@@ -138,6 +131,11 @@ def setup_pairplots(df):
     columns.remove("Penalize Scale [Lambdas]")
     columns.remove("Penalize Scale [Rotation]")
     columns.remove("Loss [Rotations]")
+    columns.remove("Loss [Intrinsics]")
+    columns.remove("Focal Length [Ratio]")
+    columns.remove("Principal Point [u]")
+    columns.remove("Principal Point [v]")
+    columns.remove("Skew")
     columns.remove("Valid Solution")
     weight_columns = [x for x in columns if "Weights" in str(x)]
     for weight_column in weight_columns:
@@ -225,11 +223,13 @@ def clean_values(input_values, metric_values, invert):
             values = values[~mask]
         conf *= confidence
 
-    remove_distance = 40
+    remove_distance = 20
     if invert:
         remove_distance = 2
-    order = np.argsort(values[:, 0])
+    x = values[:, 0]
+    order = np.argsort(x)
     values = values[order[remove_distance: -remove_distance]]
+    x = values[:, 0]
 
     return np.transpose(values), conf
 
@@ -246,56 +246,81 @@ def get_cluster_labels(clustering, filter_size=0):
     return unique, count
 
 
-def add_cluster(p, cluster_label, values, yaxis):
-    maxs = [max(values[0]), max(values[1]), max(values[2])]
-    mean = np.mean(values, axis=1)
-    std = np.std(values, axis=1)
-    mins = [min(values[0]), min(values[1]), min(values[2])]
-
+def add_cluster(p, cluster_label, x, mean, std, y_corr, y_lambda, yaxis, xaxis):
     dot_size = 15
-    p.dot(x=values[0], y=values[1], size=dot_size, alpha=0.5, color='darkblue',
+    p.dot(x=x, y=y_corr, size=dot_size, alpha=0.5, color='darkblue',
           legend_label=str(cluster_label))
-    p.dot(x=values[0], y=values[2], size=dot_size, alpha=0.5, color='firebrick',
+    p.dot(x=x, y=y_lambda, size=dot_size, alpha=0.5, color='firebrick',
           legend_label=str(cluster_label),
           y_range_name=yaxis[1])
 
-    add_spans(p, mean, std)
-    return mean, std, mins, maxs
+    color = 'black'
+    p.add_layout(
+        Span(location=0, dimension='height', line_color=color, line_dash='dashed', line_width=3))
+    p.add_layout(
+        Span(location=0 - std, dimension='height', line_color=color, line_dash='dashed', line_width=2))
+    p.add_layout(
+        Span(location=0 + std, dimension='height', line_color=color, line_dash='dashed', line_width=2))
+
+    title = str(round(mean, 4)) + unit_from_axis(xaxis)
+    p.add_layout(Label(x=0, y=0, text=title, y_offset=40, x_offset=-len(title) * 5,
+                       render_mode='canvas',
+                       text_font=font, text_font_size=font_size, text_align='left',
+                       background_fill_color='lightgray', background_fill_alpha=1))
 
 
-def create_loss_compare_plot(i, foldername, cluster_values, xaxis, yaxis, title):
+def unit_from_axis(xaxis):
+    result = " ["
+    if "Translation" in xaxis:
+        result += "meter"
+    elif "Rotation" in xaxis:
+        result += "degree"
+    else:
+        result += "pixel"
+    result += "]"
+    return result
+
+
+def create_loss_compare_plot(i, foldername, values, xaxis, yaxis, title):
     output_filename = str(xaxis).strip().replace(" ", "") + "_vs_" + str(yaxis[0]).strip().replace(" ", "")
     output_filename += "_vs_" + str(yaxis[1]).strip().replace(" ", "")
     output_filename += "_cluster_" + str(i)
 
-    # plot_height = 600
+    mins = [min(values[i]) for i in range(len(values))]
+    maxs = [max(values[i]) for i in range(len(values))]
+
+    mean = [np.mean(values[i]) for i in range(len(values))]
+    std = [np.std(values[i]) for i in range(len(values))]
+    x_corr = values[0] - mean[0]
+    y_corr = values[1] - min(values[1])
+    y_lambda = values[2] - min(values[2])
+
+    plot_height = 1200
     output_file(get_output_filename(foldername, output_filename, 'html'))
-    p = figure(tools="", plot_width=int(plot_height * 1.2),
-               plot_height=plot_height, y_range=(min(cluster_values[1]), max(cluster_values[1])))
-    p.extra_y_ranges = {yaxis[1]: Range1d(start=min(cluster_values[2]), end=max(cluster_values[2]))}
+    p = figure(tools="pan,wheel_zoom,box_zoom,reset,undo,redo", plot_width=int(plot_height * 1.2),
+               plot_height=plot_height, y_range=(min(y_corr), max(y_corr)))
+    p.extra_y_ranges = {yaxis[1]: Range1d(start=min(y_lambda), end=max(y_lambda))}
     p.add_layout(LinearAxis(y_range_name=yaxis[1]), 'right')
 
-    mean, std, mins, maxs = add_cluster(p, i, cluster_values, yaxis)
-
-    x_range = (min(mins[0], mean[0] - std[0]), max(maxs[0], mean[0] + std[0]))
-    x_distance = x_range[1] - x_range[0]
-    p.x_range = Range1d(x_range[0] - 0.05 * x_distance, x_range[1] + 0.05 * x_distance)
+    ###########################################################################################################
+    add_cluster(p, i, x_corr, mean[0], std[0], y_corr, y_lambda, yaxis, xaxis)
+    ###########################################################################################################
 
     p.title.text = title
     p.legend.items = []
     p.xaxis.formatter.use_scientific = False
     # p.xaxis.formatter.precision = 10
-    p.xaxis.axis_label = xaxis + " ("
-    if "Translation" in xaxis:
-        p.xaxis.axis_label += "meter"
-    elif "Rotation" in xaxis:
-        p.xaxis.axis_label += "degree"
-    else:
-        p.xaxis.axis_label += "pixel"
-    p.xaxis.axis_label += ")"
+    p.xaxis.axis_label = "Deviation" + unit_from_axis(xaxis)
 
-    p.yaxis[0].axis_label = yaxis[0]
-    p.yaxis[1].axis_label = yaxis[1]
+    # p.xaxis.visible = False
+
+    p.yaxis[0].axis_label = yaxis[0] + " (Delta)"
+    p.yaxis[1].axis_label = yaxis[1] + " (Delta)"
+
+    p.xaxis.formatter = BasicTickFormatter(use_scientific=True, precision=0)
+    p.yaxis[0].formatter = BasicTickFormatter(use_scientific=True, precision=0)
+    p.yaxis[1].formatter = BasicTickFormatter(use_scientific=True, precision=0)
+
     # p.xaxis.major_label_orientation = math.pi / 4
     p.xaxis.major_label_orientation = math.pi / 6
 
@@ -320,8 +345,7 @@ def create_loss_compare_plots(df: pd.DataFrame):
         x_values = df[xaxis].to_numpy()
 
         total_loss = np.array(df["Loss"])
-        non_zero_rotation_loss = np.where(df["Loss [Rotations]"].to_numpy() < 1)
-
+        non_zero_rotation_loss = np.where(df["Valid Solution"].to_numpy() == 1)
         values = np.array([x_values[non_zero_rotation_loss],
                            df[yaxis[0]].to_numpy()[non_zero_rotation_loss],
                            df[yaxis[1]].to_numpy()[non_zero_rotation_loss],
@@ -329,7 +353,7 @@ def create_loss_compare_plots(df: pd.DataFrame):
                            ])
 
         conf = 1
-        # values, conf = clean_values(values, total_loss, False)
+        values, conf = clean_values(values, total_loss, False)
         # clustering_input = values[0].reshape(-1, 1)
         clustering_input = values[3].reshape(-1, 1)
         # clustering_input = values.transpose()
