@@ -193,9 +193,9 @@ namespace providentia {
 			auto intrinsics = providentia::camera::getBlenderCameraIntrinsics();
 
 			ASSERT_EQ(intrinsics[0], 1200);
-			ASSERT_EQ(intrinsics[2], 1200);
+			ASSERT_EQ(intrinsics[1], 1);
 
-			ASSERT_EQ(intrinsics[1], 960);
+			ASSERT_EQ(intrinsics[2], 960);
 			ASSERT_EQ(intrinsics[3], 600);
 
 			ASSERT_EQ(intrinsics[4], 0);

@@ -183,12 +183,11 @@ namespace providentia {
 		template<typename T>
 		Eigen::Matrix<T, 3, 4> getIntrinsicsMatrix(const T *intrinsics, bool &invalid) {
 			T zero = (T) 0;
-			invalid = intrinsics[0] < zero ||
-					  intrinsics[2] < zero;
+			invalid = intrinsics[0] < zero;
 			invalid = false;
 			return getIntrinsicsMatrixFromConfig(new T[9]{
-				intrinsics[0], zero, intrinsics[1],
-				zero, intrinsics[2], intrinsics[3],
+				intrinsics[0], zero, intrinsics[2],
+				zero, intrinsics[0] * intrinsics[1], intrinsics[3],
 //				zero, intrinsics[4], (T) 1
 				zero, zero, (T) 1
 			});
@@ -204,11 +203,6 @@ namespace providentia {
 			T zero = (T) 0;
 			T focalLength = intrinsics[0];
 
-			Eigen::Matrix<T, 2, 1> m = Eigen::Matrix<T, 2, 1>(
-				intrinsics[1],
-				intrinsics[2]
-			);
-
 			Eigen::Matrix<T, 2, 1> principalPoint = Eigen::Matrix<T, 2, 1>(
 				intrinsics[3],
 				intrinsics[4]
@@ -216,12 +210,12 @@ namespace providentia {
 
 			T skew = intrinsics[5];
 
-			Eigen::Matrix<T, 2, 1> alpha = focalLength * m.cwiseInverse();
+			T alpha = focalLength * (T) 1. / intrinsics[1];
 
 			return
 				std::vector<T>
 					{
-						alpha(0, 0), principalPoint(0, 0), alpha(1, 0), principalPoint(1, 0), skew
+						alpha, intrinsics[2], principalPoint(0, 0), principalPoint(1, 0), skew
 					};
 		}
 
@@ -252,14 +246,14 @@ namespace providentia {
 			double principalX = 1920. / 2;
 			double principalY = 1200. / 2;
 			std::vector<double> intrinsics{
-				20, pixelWidth, pixelWidth, principalX, principalY, 0
+				20, pixelWidth, 1, principalX, principalY, 0
 			};
 			return getIntrinsicsFromRealSensor(intrinsics.data());
 		}
 
 		std::vector<double> getS40NCamFarIntrinsics() {
 			return std::vector<double>{
-				9023.482825, 1222.314303, 9014.504360, 557.541182, 0.000000
+				9023.482825, 1., 1222.314303, 557.541182, 0.000000
 			};
 		}
 

@@ -15,9 +15,9 @@ namespace providentia {
 
 			template<typename T>
 			bool CorrespondenceResidual::operator()(
-				const T *fx,
+				const T *f,
+				const T *ratio,
 				const T *cx,
-				const T *fy,
 				const T *cy,
 				const T *skew,
 				const T *tx,
@@ -39,7 +39,7 @@ namespace providentia {
 				actualPixel = providentia::camera::render(
 					new T[3]{tx[0], ty[0], tz[0]},
 					new T[3]{rx[0], ry[0], rz[0]},
-					new T[5]{fx[0], cx[0], fy[0], cy[0], skew[0]},
+					new T[5]{f[0], ratio[0], cx[0], cy[0], skew[0]},
 					point.data(),
 					flipped
 				);

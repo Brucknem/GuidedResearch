@@ -54,6 +54,21 @@ To minimize the work an aiding system to mark pixels was implemented that output
 
 \paragraph{Relaxation of problem by line approximation}
 \label{sec:static_calibration_line_approximation}
+
+Approximating the objects by lines removes the need for exactly known 3D correspondences as usually needed in calibration problems. 
+Nonetheless it does not require to jointly estimate the full world position of the objects and camera pose jointly as in Bundle-Adjustment problems.
+%
+The assumptions we made are: 
+\begin{itemize}
+  \item Objects are symmetric around their directional heading axis.
+  \item Projected pixels of the objects are also symmetric around the projected directional axis.
+\end{itemize}
+
+We then take the mean over each row of pixels as the approximate pixel positions of the center line.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\paragraph{Calibration procedure}
 \begin{figure*}[!ht]
   \centering
   \begin{tabular}{cc}
@@ -66,82 +81,95 @@ To minimize the work an aiding system to mark pixels was implemented that output
   The rendered positions of the sampled points align with the pixels of the objects they are mapped to and the drawn mapping disappears as the distance approaches $0$.  }
   \label{fig:calibration}
   \end{figure*}
-Approximating the objects by lines removes the need for exactly known 3D correspondences as usually needed in calibration problems. 
-Nonetheless it does not require to jointly estimate the full world position of the objects and camera pose jointly as in Bundle-Adjustment problems.
-%
-The assumptions we made are: 
-\begin{itemize}
-  \item Objects are symmetric around their directional heading axis.
-  \item Pixels of the objects are also symmetric around the projected directional axis.
-  \item The pixels in the mapping is equally distributed around the directional axis as the deviations from tangential offset points cancel out then. 
-\end{itemize}
 
-This models that the objects collapse into their center line in 2D and 3D and that tangentially deviating points on the surface in one direction equally cancels out by the opposite point mirrored at the center line.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\paragraph{Calibration procedure}
-  
 Our camera is modelled using the pinhole camera model. 
 The pinhole projection from samples of the world objects to pixels is formulated as
 \begin{equation}
   \label{eq:static_calibration_reprojection}
   p_c = \pi \left(  
-    \begin{bmatrix}
-      R, T \\
-      0, 1
-    \end{bmatrix} *
+    % \begin{bmatrix}
+    %   R, T \\
+    %   0, 1
+    % \end{bmatrix} *
+    R * T *
     (o_c + \lambda_c * h_c)
   \right)
 \end{equation}
 \begin{equation}
-    \begin{bmatrix}
-      R, T \\
-      0, 1
-    \end{bmatrix} = 
-    \begin{bmatrix}
-      R, 0 \\
-      0, 1
-    \end{bmatrix} *
-    \begin{bmatrix}
-      0, T \\
-      0, 1
-    \end{bmatrix} =
-    R * T
+  \label{eq:static_calibration_intrinsic_parameters}
+  z * \pi(x) =   
+  \begin{bmatrix}
+    f_x,& 0,& c_x,& 0\\
+    0,& f_y,& c_y,& 0\\
+    0,& s,& 1 ,& 0
+  \end{bmatrix} * x 
 \end{equation}
+% \begin{equation}
+%   \begin{bmatrix}
+%     R, T \\
+%     0, 1
+%   \end{bmatrix} = 
+%   \begin{bmatrix}
+%     R, 0 \\
+%     0, 1
+%   \end{bmatrix} *
+%   \begin{bmatrix}
+%     0, T \\
+%     0, 1
+%   \end{bmatrix} =
+%   R * T
+% \end{equation}
 
 where $R$ is the cameras world rotation in Euler angles, $T$ is the cameras world translation and $\pi$ is the camera projection to image space based on the camera intrinsic parameters.
 
-The optimal value for $T,R$ is found, if it holds for all correspondences:
+The optimal value for $\pi,R,T$ is found, if it holds for all correspondences:
 \begin{equation}
   0 = p_c - \pi \left( R * T * (o_c + \lambda_c * h_c)\right) = p_c - \hat{p}_c
 \end{equation}
 
-This places constraints on the values $R, T$ can take and enables us to recover the camera pose only from the correspondences.
+This places constraints on the values $\pi,R,T$ can take and enables us to recover the camera pose and intrinsics only from the correspondences.
 
 We estimate the camera pose by minimizing a modified version of the least-squares reprojection error 
 \begin{equation}
   \label{eq:static_calibration_error}
-  \min_{T, R, \Lambda, W} E(P, S, T, R, \Lambda, W) 
+  \min_{T, R, \Lambda, W} E(P, S, \pi, T, R, \Lambda, W) 
 \end{equation}
 formulated as
 \begin{equation}
   \begin{split}
-  E(P, S, T, R, \Lambda, W ) =& 
+  E(P, S, \pi, T, R, \Lambda, W ) =& 
   \sum_{c \in C} 
-  \left\lVert 
+  \rho(\left\lVert 
     w_c * [ p_c - \hat{p}_c ]
-  \right\rVert_2^2 \\ 
+  \right\rVert^2) \\ 
   +& 
   \sum_{c \in C} 
-  \left\lVert 
-  penalize(\lambda_i, h_i)
-  \right\rVert_2^2 \\ 
+  \alpha * 
+  \rho(\left\lVert 
+  (1 - w_c)
+  \right\rVert^2) \\ 
   +& 
   \sum_{c \in C} 
-  \left\lVert 
-  \alpha * (1 - w_i)
-  \right\rVert_2^2 
+  \beta * 
+  \rho(\left\lVert 
+  \Delta(\lambda_c, 0, h_c)
+  \right\rVert^2) \\ 
+  +& 
+  \sum_{\pi_i \in \pi} 
+  \gamma *
+  \rho(\left\lVert 
+  \Delta (\pi_i, \pi_i * 0.9, \pi_i * 1.1)
+  \right\rVert^2) \\
+  +&
+  \delta * 
+  \rho(\left\lVert 
+  \Delta (R_x, 60, 110)
+  \right\rVert^2) \\
+  +&
+  \delta * 
+  \rho(\left\lVert 
+  \Delta (R_y, -10, 10)
+  \right\rVert^2 
 \end{split}
 \label{eq:reprojection_error}
 \end{equation}
@@ -151,10 +179,10 @@ This formulation allows the optimization over the line approximations of the obj
 The calculation of the exact position of $s_c \sim \lambda$ allows the optimizer to search the whole space of real numbers for $\lambda$.
 Nonetheless we penalize values for $\lambda$ that exceed the physical height of the object by 
 \begin{equation}
-    penalize(\lambda, h) =
+    \Delta (x, l, u) =
     \begin{cases}
-      \lambda - h,& \text{if } \lambda > h\\
-      \lambda,    & \text{if } \lambda < 0\\
+      x - u,& \text{if } x > u\\
+      x - l,& \text{if } x < l\\
       0,    & \text{else}
     \end{cases} 
 \end{equation}

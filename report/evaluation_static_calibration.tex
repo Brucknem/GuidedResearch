@@ -3,7 +3,7 @@
 \subsection{Static calibration}
 In the following we evaluate the implemented static calibration algorithm and assess the algorithmic and systematic errors.
 
-\subsubsection{Systematic Error}
+\subsubsection{Ensure no Systematic Error}
 
 \begin{figure*}[t]
     \centering
@@ -24,6 +24,67 @@ These $T, R$ values approximate the projection from the world objects to the pix
 
 Using a maps provider we assured that the resulting values are within reasonable ranges and that there are no systematic errors in the optimization.
 The results are displayed in \autoref{fig:google_maps}
+
+\subsubsection{Points needed for convergence}
+The correspondences build up a system of linear equations. 
+This system of equations is solvable if there exist a more or equal number of constraints on the parameters than there are degrees of freedoms in the system:
+\begin{equation}
+  \label{eq:static_calibration_reprojection_evaluation}
+  p_c = \pi \left(  
+    % \begin{bmatrix}
+    %   R, T \\
+    %   0, 1
+    % \end{bmatrix} *
+    R * T *
+    (o_c + \lambda_c * h_c)
+  \right), \forall c \in C
+\end{equation}
+This is the case if:
+\begin{equation}
+  \begin{split}
+  2 * \left\lvert C \right\rvert \quad \geq& \quad 5 + 3 + 3 + 1 * \left\lvert C \right\rvert \\
+  \left\lvert C \right\rvert \quad \geq& \quad 11 
+\end{split}
+\end{equation} 
+
+As each of the pixel per correspondence gives us two constraints and we optimize over the 5 intrinsic parameters (\autoref{eq:static_calibration_intrinsic_parameters}), the 3 extrinsic translation, 3 extrinsic rotation parameters and one $\lambda$ parameter per correspondence.
+We see that 11 points are enough to recover the pose.
+
+\subsubsection{Structure of points}
+The best result are shown when there are at least two correspondences per object.
+These correspondences should be the top and bottom most visible pixel of the object.
+If there exists only 1 or a low number of near pixels, the algorithm cannot precisely recover the camera pose, as it is free to move the correspondence along the center line of the object.
+The algorithm therefore cannot distinguish the solutions where the camera is placed low, thus projecting a high point of an object to a low pixel correspondence, 
+or if it should place the camera higher and lower the correspondences world position along the center line.
+
+We thus conclude that the best solution is recovered the more the pixels fill the whole object, and the more spread to the top and bottom of the object the correspondences are. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \subsubsection{Expectable Error Bounds}
 \label{sec:static_calibration_expectable_error}
@@ -62,67 +123,13 @@ The results are displayed in \autoref{fig:google_maps}
 
 
 
-\subsubsection{Algorithmic Error}
+\subsubsection{Expectable Deviations among Estimations}
 The proposed pose estimation algorithm is based on the minimization of the reprojection-error \autoref{eq:static_calibration_reprojection}.
 As with all optimization problems convergence is reached when the values that are optimized don't change anymore.
 
 The optimization jointly optimizes for the 6 camera parameters, 3 for the translation, 3 for the Euler angle rotation and one $\lambda$ parameter per correspondence.
 The resulting high-dimensional problem exceeds multiple minima, whereas each represents a configuration for the camera pose that well explains the dependency between pixels, world objects and the camera. 
 
-\paragraph{Remaining Correspondences Error}
-We derive a rough scale for the remaining loss over the correspondences and $\lambda$s, as only a small subset of solution are valid and represent the real camera pose.
-
-\begin{equation}
-  \label{eq:static_calibration_correspondence_error}
-  \begin{split}
-  E(P, S, T, R, \Lambda, W ) \simeq &
-  \sum_{c \in C} 
-  \left\lVert 
-     p_c - \pi(T * R * s_c) 
-  \right\rVert_2^2  \\
-  = & 
-  \sum_{c \in C} 
-  \left\lVert 
-     p_c - \hat{p}_c 
-  \right\rVert_2^2 
-  \end{split}
-\end{equation}
-where $p_c - \hat{p}_c$ is the remaining distance of actual pixel to the projected pixel.
-
-The projected $\hat{p}_c$ can only be along the center line of the object due to the approximation of objects as lines.
-The actual pixels $p_c$ will be evenly distributed around the center line, as we expect the objects to be roughly cylindrical (\autoref{sec:static_calibration_line_approximation}).
-
-This implies that for a valid camera pose the remaining distance $p_c - \hat{p}_c$ can be at most half of the pixel width $w_s$ of the object (the maximal pixel distance from the center line).
-
-It thus follows \autoref{eq:static_calibration_correspondence_error} 
-\begin{equation}
-  \label{eq:static_calibration_correspondence_error_scale}
-  \begin{split}
-  E(P, S, T, R, \Lambda, W ) \simeq  &
-  \sum_{c \in C} 
-  \left\lVert 
-     p_c - \hat{p}_c 
-  \right\rVert_2^2 \\
-  = & 
-  \sum_{o \in O} 
-  \sum_{c_o \in C_o} 
-  \left\lVert 
-     p_{c_o} - \hat{p}_{c_o} 
-  \right\rVert_2^2 \\
-  \leq &
-  \sum_{o \in O} \left\lvert C_o \right\rvert \frac{w_o}{2} 
-  \end{split}
-\end{equation}
-where $h_o$ is the pixel height of the object.
-
-This implies that an upper bound for the remaining error is only dependent on the number of all pixels of the objects and their respective width.
-We have empirically seen that $w_0$ in our case does not exceed 10 pixels, thus the remaining error cannot exceed 
-\begin{equation}
-  \sum_{o \in O} \left\lvert C_o \right\rvert \frac{10}{2} = 5 * \sum_{o \in O} \left\lvert C_o \right\rvert = 5 * \left\lvert C \right\rvert 
-\end{equation}
-This shows that the remaining error has to be roughly in the same scale as the number of pixels over all objects. 
-
-\paragraph{Expectable Deviations among Estimations}
 As stated previously the loss landscape does exhibit a multitude of local minima, thus the optimization procedure converges to different sets of parameters. 
 
 \begin{figure}[t]

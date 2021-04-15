@@ -76,6 +76,7 @@ namespace providentia {
 			evaluateLambdaResiduals(problem);
 			evaluateRotationResiduals(problem);
 			evaluateWeightResiduals(problem);
+			evaluateIntrinsicsResiduals(problem);
 		}
 
 		std::vector<double> CameraPoseEstimation::getLambdas() {
@@ -168,6 +169,7 @@ namespace providentia {
 			correspondenceResiduals.clear();
 			weightResiduals.clear();
 			lambdaResiduals.clear();
+			intrinsicsResiduals.clear();
 
 			for (auto &worldObject : worldObjects) {
 				for (const auto &point : worldObject.getCenterLine()) {
@@ -236,19 +238,26 @@ namespace providentia {
 		}
 
 		void CameraPoseEstimation::addIntrinsicsConstraints(ceres::Problem &problem) {
-			intrinsicsResiduals.clear();
 			double scale = 10;
 			double factor = 0.9;
 			if (intrinsicsFixed) {
 				factor = 1.;
 			}
 
-			for (int i = 0; i < 4; i++) {
+			intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
+				providentia::calibration::residuals::DistanceFromIntervalResidual::create(
+					initialIntrinsics[0] * factor,
+					initialIntrinsics[0] / factor),
+				getScaledHuberLoss(scale),
+				&intrinsics[0]
+			));
+
+			for (int i = 1; i < 5; ++i) {
 				intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
-					providentia::calibration::residuals::DistanceFromIntervalResidual::create(
-						initialIntrinsics[i] * factor,
-						initialIntrinsics[i] / factor),
-					getScaledHuberLoss(scale),
+					providentia::calibration::residuals::DistanceResidual::create(
+						initialIntrinsics[i]
+					),
+					getScaledHuberLoss(1e52),
 					&intrinsics[i]
 				));
 			}
@@ -371,6 +380,10 @@ namespace providentia {
 			rotationsLoss = evaluate(problem, rotationResiduals);
 		}
 
+		void CameraPoseEstimation::evaluateIntrinsicsResiduals(ceres::Problem &problem) {
+			intrinsicsLoss = evaluate(problem, intrinsicsResiduals);
+		}
+
 		bool CameraPoseEstimation::hasFoundValidSolution() const {
 			return foundValidSolution;
 		}
@@ -407,6 +420,10 @@ namespace providentia {
 
 		void CameraPoseEstimation::fixIntrinsics(bool fixed) {
 			intrinsicsFixed = fixed;
+		}
+
+		double CameraPoseEstimation::getIntrinsicsLoss() const {
+			return intrinsicsLoss;
 		}
 
 		std::string printVectorRow(Eigen::Vector3d vector) {

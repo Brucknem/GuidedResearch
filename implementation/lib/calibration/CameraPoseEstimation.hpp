@@ -92,12 +92,12 @@ namespace providentia {
 			Eigen::Vector3d rotation;
 
 			/**
-			 * The initial [f_x, c_x, f_y, c_y, skew] intrinsics values of the pinhole camera model.
+			 * The initial [f, ratio, c_x, c_y, skew] intrinsics values of the pinhole camera model.
 			 */
 			std::vector<double> initialIntrinsics;
 
 			/**
-			 * The current [f_x, c_x, f_y, c_y, skew] intrinsics values of the pinhole camera model.
+			 * The current [f_x, ratio, c_x, c_y, skew] intrinsics values of the pinhole camera model.
 			 */
 			std::vector<double> intrinsics;
 
@@ -194,6 +194,11 @@ namespace providentia {
 			 * The final loss of the weight residuals after optimization.
 			 */
 			double weightsLoss = 0;
+
+			/**
+			 * The final loss of the intrinsic parameter residuals after optimization.
+			 */
+			double intrinsicsLoss = 0;
 
 			/**
 			 * The final loss of all residuals after optimization.
@@ -293,6 +298,15 @@ namespace providentia {
 			 * @return The loss of the residuals.
 			 */
 			void evaluateRotationResiduals(ceres::Problem &problem);
+
+			/**
+			 * Evaluates the problem for the intrinsics residuals.
+			 *
+			 * @param problem The ceres problem.
+			 *
+			 * @return The loss of the residuals.
+			 */
+			void evaluateIntrinsicsResiduals(ceres::Problem &problem);
 
 			/**
 			 * Evaluates the problem for all residuals.
@@ -500,6 +514,8 @@ namespace providentia {
 			 * @get
 			 */
 			double getTotalLoss() const;
+
+			double getIntrinsicsLoss() const;
 
 			std::vector<double> getLambdas();
 

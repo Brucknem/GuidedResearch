@@ -138,6 +138,7 @@ public:
 								   << "Loss"
 								   << "Loss [Correspondences]"
 								   << "Loss [Lambdas]"
+								   << "Loss [Intrinsics]"
 								   << "Loss [Rotations]"
 								   << "Loss [Weights]"
 								   << "Translation [x]"
@@ -146,9 +147,9 @@ public:
 								   << "Rotation [x]"
 								   << "Rotation [y]"
 								   << "Rotation [z]"
-								   << "Focal Length [u]"
+								   << "Focal Length"
+								   << "Focal Length [Ratio]"
 								   << "Principal Point [u]"
-								   << "Focal Length [v]"
 								   << "Principal Point [v]"
 								   << "Skew"
 								   << "Weights [Avg]"
@@ -304,6 +305,7 @@ protected:
 									   << estimator->getTotalLoss()
 									   << estimator->getCorrespondencesLoss()
 									   << estimator->getLambdasLoss()
+									   << estimator->getIntrinsicsLoss()
 									   << estimator->getRotationsLoss()
 									   << estimator->getWeightsLoss()
 									   << translation
