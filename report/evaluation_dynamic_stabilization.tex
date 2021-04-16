@@ -29,7 +29,7 @@ The recordings are taken on a day with strong winds to ensure high jitter in the
 \label{sec:evaluation_dynamic_stabilization}
 We evaluate and compare three pipeline instances based on the SURF \cite{bay10.1007/11744023_32,opencv_library} feature detector (SURF), 
 ORB \cite{rublee6126544, opencv_library} feature detector (ORB) and FAST \cite{Ghahremani_2021,opencv_library} feature detector with FREAK \cite{alahi6247715,opencv_library} feature descriptors (FAST) 
-and present two metrics to evaluate the dynamic stabilization pipeline described in \autoref{sec:dynamic_stabilization_approach}.
+and present two measures to evaluate the dynamic stabilization pipeline described in \autoref{sec:dynamic_stabilization_approach}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -68,7 +68,7 @@ We see a car driving, indicated by the yellow patch, that remains as expected us
       \includegraphics[width=0.9\linewidth]{diagrams/optical_flow/damping_mean_pixel_shifts_after_dynamic_stabilization_s40_far.png}    
 \end{tabular}
     \caption{Top: 
-        Comparison of the three implemented dynamic stabilizers (SURF, ORB, FAST) and the original not stabilized video feed using optical flow as metric (lower is better).
+        Comparison of the three implemented dynamic stabilizers (SURF, ORB, FAST) and the original not stabilized video feed using optical flow as measure (lower is better).
         The graphs display the mean pixel shift at each frame. 
         Bottom: 
         The damping capabilities of the same three stabilizers (higher is better). 
@@ -97,16 +97,21 @@ We define a frame to be more stable if its MPD is lower than the MPD of the orig
 It shows that for SURF and ORB at least $88.9\%$ ranging up to $99.7\%$ of frames are more stable.
 For the FAST detector it shows that except for the \camsf{4} camera only between $67.2\%$ to $79.4\%$ of frames are more stable, whereas a value of $50\%$ would indicate that the other $50\%$ of frames are worse.  
 
-\paragraph{Problem of optical flow as a metric}
-\label{sec:dynamic_stabilization_evaluation_optical_flow_problem}
-Unfortunately, optical flow exhibits one major problem as a metric: 
-It cannot distinguish between dynamically moving objects and static scene.
-This especially introduces a problem when a jitter of the camera moves the pixels in the same direction as the vehicles path is pointing in image space.
-By this jitter the movement of the camera blurs the movement of the dynamic objects into the background and thus removes some of the real movement.
-This shows some frames after stabilization to be worse than before. 
-This should be taken with caution as the optical flow cannot detect the relative motion and thus is not a definite measure for the jitter.
-Nonetheless it gives a good hint at the overall stabilization capabilities and can become a measure together with the following measure of the path length of a pixel on a dynamic object. 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\paragraph{Problem of Optical Flow as a measure}
+\label{sec:dynamic_stabilization_evaluation_optical_flow_problem}
+Optical flow cannot distinguish between dynamically moving objects and static scene.
+This is especially a problem when a jitter of the camera moves the pixels in the opposite direction as the vehicles path is pointing in image space.
+This jitter blurs the movement of the dynamic objects into the background and thus removes some of the real movement.
+The dynamic stabilization then reintroduces the real movement of the vehicle, thus showing some frames after stabilization to be worse than before. 
+
+This should be taken with caution as the optical flow cannot detect the relative motion and thus is not a definite measure for the jitter.
+Nonetheless, it hints at the overall stabilization capabilities of the presented pipeline, but cannot give a direct explanation for single worse frames.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
