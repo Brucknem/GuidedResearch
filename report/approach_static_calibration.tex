@@ -127,7 +127,8 @@ This places constraints on the values $\pi,R,T$ can take and enables us to recov
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\paragraph{Error Formulation}
+\paragraph{Reprojection-Error Formulation}
+\label{sec:static_calibration_rerpojection_error}
 We solve the BA problem by minimizing a modified version of the least-squares reprojection-error $E$ formulated as
 
 \begin{equation}
@@ -166,7 +167,7 @@ We solve the BA problem by minimizing a modified version of the least-squares re
   \Delta (R_y, -10, 10)
   \right\rVert^2_2 
 \end{split}
-\label{eq:reprojection_error}
+\label{eq:static_calibration_rerpojection_error}
 \end{equation}
 
 where $P$ is the set of mapped pixels $\hat{p}_c$ in the image and $S$ is the set of mapped corresponding points $s_c$ from the PDs.  

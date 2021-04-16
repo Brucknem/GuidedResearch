@@ -1,11 +1,11 @@
 % !TEX root=./report.tex
 
-% \pagebreak
 \newpage
 
 \section{Appendix}
 \label{sec:appendix}
-To declutter the paper we moved some of the images here.
+To declutter the report we moved many of the plots in this section.
+Please see the next pages for the plots.
 
 \begin{figure*}[!ht]
   \centering
@@ -40,7 +40,6 @@ To declutter the paper we moved some of the images here.
     \end{figure*}
 
     
-\input{tables/percentages_of_better_frames.tex}
 
 
 
@@ -134,8 +133,6 @@ To declutter the paper we moved some of the images here.
   \label{fig:object_tracking_appendix_s50_s_near}
 \end{figure*}
 
-
-
 \begin{figure*}[!ht]
   \centering
   \begin{tabular}{cc}
@@ -147,14 +144,14 @@ To declutter the paper we moved some of the images here.
     
     \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s40_n_far/parameters.csv/Translation[z]_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} &
     \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s40_n_far/parameters.csv/Rotation[z]_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} \\
+
+    \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s40_n_far/parameters.csv/FocalLength_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} &
 \end{tabular}
 \caption{
   Left: The resulting translational parameters plotted against the remaining losses. 
   Right: The resulting rotational parameters plotted against the remaining losses.
-  The mean of the distributions is displayed as thick dashed line. The smaller dashed lines display the standard deviation $\sigma$.
-  The $\sigma$ of the translations does not exceed $2 * 10^{-4} m = 0.2 mm$.
-  For the translation $\sigma$ is at most $4 * 10^{-4} deg$.
-  }
+  Bottom: The resulting focal length  plotted against the remaining losses.
+   }
 \label{fig:static_calibration_algorithmic_error_s40_n_far}
 \end{figure*}
 
@@ -169,14 +166,14 @@ To declutter the paper we moved some of the images here.
     
     \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s40_n_near/parameters.csv/Translation[z]_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} &
     \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s40_n_near/parameters.csv/Rotation[z]_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} \\
+
+    \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s40_n_near/parameters.csv/FocalLength_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} &
 \end{tabular}
 \caption{
   Left: The resulting translational parameters plotted against the remaining losses. 
   Right: The resulting rotational parameters plotted against the remaining losses.
-  The mean of the distributions is displayed as thick dashed line. The smaller dashed lines display the standard deviation $\sigma$.
-  The $\sigma$ of the translations does not exceed $2 * 10^{-4} m = 0.2 mm$.
-  For the translation $\sigma$ is at most $4 * 10^{-4} deg$.
-  }
+  Bottom: The resulting focal length  plotted against the remaining losses.
+     }
 \label{fig:static_calibration_algorithmic_error_s40_n_near}
 \end{figure*}
 
@@ -191,14 +188,15 @@ To declutter the paper we moved some of the images here.
     
     \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s50_s_far/parameters.csv/Translation[z]_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} &
     \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s50_s_far/parameters.csv/Rotation[z]_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} \\
-\end{tabular}
+
+    \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s50_s_far/parameters.csv/FocalLength_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} &
+
+  \end{tabular}
 \caption{
   Left: The resulting translational parameters plotted against the remaining losses. 
   Right: The resulting rotational parameters plotted against the remaining losses.
-  The mean of the distributions is displayed as thick dashed line. The smaller dashed lines display the standard deviation $\sigma$.
-  The $\sigma$ of the translations does not exceed $2 * 10^{-4} m = 0.2 mm$.
-  For the translation $\sigma$ is at most $4 * 10^{-4} deg$.
-  }
+  Bottom: The resulting focal length  plotted against the remaining losses.
+    }
 \label{fig:static_calibration_algorithmic_error_s50_s_far}
 \end{figure*}
 
@@ -213,13 +211,13 @@ To declutter the paper we moved some of the images here.
     
     \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s50_s_near/parameters.csv/Translation[z]_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} &
     \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s50_s_near/parameters.csv/Rotation[z]_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} \\
+
+    \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s50_s_near/parameters.csv/FocalLength_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} &
 \end{tabular}
 \caption{
   Left: The resulting translational parameters plotted against the remaining losses. 
   Right: The resulting rotational parameters plotted against the remaining losses.
-  The mean of the distributions is displayed as thick dashed line. The smaller dashed lines display the standard deviation $\sigma$.
-  The $\sigma$ of the translations does not exceed $2 * 10^{-4} m = 0.2 mm$.
-  For the translation $\sigma$ is at most $4 * 10^{-4} deg$.
-  }
+  Bottom: The resulting focal length  plotted against the remaining losses.
+     }
 \label{fig:static_calibration_algorithmic_error_s50_s_near}
 \end{figure*}

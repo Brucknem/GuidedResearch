@@ -295,11 +295,11 @@ def create_loss_compare_plot(i, foldername, values, xaxis, yaxis, title):
     y_corr = values[1] - min(values[1])
     y_lambda = values[2] - min(values[2])
 
-    plot_height = 1200
+    plot_height = 600
     output_file(get_output_filename(foldername, output_filename, 'html'))
     tools = ""
     # tools = "pan,wheel_zoom,box_zoom,reset,undo,redo"
-    p = figure(tools=tools, plot_width=int(plot_height * 1.2),
+    p = figure(tools=tools, plot_width=int(plot_height * 1.5),
                plot_height=plot_height, y_range=(min(y_corr), max(y_corr)))
     p.extra_y_ranges = {yaxis[1]: Range1d(start=min(y_lambda), end=max(y_lambda))}
     p.add_layout(LinearAxis(y_range_name=yaxis[1]), 'right')
