@@ -18,7 +18,7 @@ This scheme will be affected by changing weather and lighting conditions as the 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Dynamic Stabilization}
-In the subfield of the dynamic stabilization we have until now implemented the visual feature based approach.
+% TODO
 
 \subsubsection{Warp Field Stabilization based on Optical Flow}
 We use the optical flow to measure the performance of the stabilizers as described in  \autoref{sec:evaluation_dynamic_stabilization_optical_flow}.
@@ -36,35 +36,24 @@ This approach can be used to fuse the feature detection, matching and warping st
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Static Calibration}
-For the static calibration there are several improvements possible.
+We present two major improvements that can be done to extend the presented static calibration approach.
 
-\subsubsection{IMU based sensor fusion}
-Previous by-hand calibrations have shown that an inertia measurement unit (IMU) can be used to initially find a camera pose, but the lack of performance and huge time needed makes this not feasible.
-This is just empirical knowledge, not backed up by research. 
-This should be looked into further.
-
-
-\subsubsection{Automatic detection of more landmarks after initial calibration}
-\label{sec:auto_detection_landmarks}
-Currently the detection and mapping of landmarks is done by hand using a watershed algorithm \cite{meyer1992color,opencv_library} based external tool.
-This tool relies on a by hand marking of landmarks as the markers used to find the segmentation.
-By applying template, color or gradient matching approaches the detection of the markers might be automated.
-This automated detection would speed up the mapping procedure. 
-
-\subsubsection{Automatic mapping of pixels to objects}
+\subsubsection{Fully Automatic Static Calibration}
 \label{sec:auto_mapping_landmarks}
-To establish the mapping of the correspondences a human has to look up the ids of the landmarks in the \HDmaps{}.
-After an initial calibration an image region based approach might be used to automate this mapping.
-This positions of the known objects from the \HDmaps{} can be projected into the camera image with the current camera pose.
-Starting from the resulting pixel locations one could search in a defined enclosing region to search for pixels that clearly correspond to the objects.
-This automatic detection of more landmarks could further improve the robustness an can be used to mitigate drift in the cameras.  
+We establish the mapping of the correspondences by hand, thus a human has to look up the ids of the landmarks in the HD maps and assign the respective pixels to them.
+After an initial calibration that requires human interaction, an image region based approach might be used to automate this mapping.
+One can project the known base origin points of the objects from the HD maps into the current frame.
+Starting from the projected pixel locations one could search in a defined enclosing region to find pixels that clearly correspond to the objects by applying template, color or gradient matching approaches.
+The automatic detection of landmarks enables the system to perform fully automatic static self calibration.
 
-\subsubsection{Machine learning based pose estimation}
-A machine learning based approach for the bundle adjustment problem we faced and the resulting camera pose estimation problem can be formulated.
-As Aravkin \etal \cite{students_t_bundle_adjustment} have shown a Student's-t distribution based approach can be used to estimate and robustify the procedure against outliers.
+\subsubsection{Machine learning based Bundle Adjustment}
+Aravkin \etal \cite{students_t_bundle_adjustment} have shown that the BA problem can be modelled on top of a Student's-t distribution. 
+The resulting statistical machine learning approach for the BA can be used to jointly estimate the camera parameters and world positions of objects, while at the same time being robust against outliers.
   
-\subsubsection{New HD map}
-The newer OpenDRIVE standards also provide the possibility to include lane markings.
-These lane markings are easily detectable and can then be used for the calibration procedure in conjunction with the object landmarks.
-This would greatly simplify the automatic detection and mapping procedures as described in Sec. \ref{sec:auto_detection_landmarks} and Sec. \ref{sec:auto_mapping_landmarks} as they are spatially more extend and thus easier to detect.
-Additionally with the color information, as the lane markings are always white (Germany) and yellow (USA) the detection is simplified a lot.
+\subsubsection{New High Definition Map}
+The newer OpenDRIVE standards also provides the possibility to include lane markings.
+These lane markings are easily detectable and can be used for the calibration procedure in conjunction with the object landmarks.
+This would greatly simplify the automatic detection and mapping procedures as described in \autoref{sec:auto_mapping_landmarks} and \autoref{sec:auto_mapping_landmarks} as they are spatially more extend and thus easier to detect.
+Furthermore, the lane markings are always white or yellow, which simplifies the detection.
+As shown in \autoref{sec:static_calibration_expectable_error} the static calibration is more precise the closer the correspondences are to the cameras. 
+As there exists far more lane markings than objects, and with the markings being evenly distributed over the road the static calibration would benefit from this additional information.
