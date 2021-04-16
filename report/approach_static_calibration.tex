@@ -66,6 +66,7 @@ This approximation allows for a joint optimization of their world positions and 
 
 We solve the BA problem by minimizing the reprojection-error over the PDs.
 We thus require a set $C$ of correspondences that map world points $s_c$ of the PDs to their respective pixel $p_c$. 
+\autoref{fig:static_calibration_calibration} displays an exemplary mapping from a HD map to the video feed.
 
 This mapping is currently done by human interaction and not fully automated. 
 We implemented an annotation tool to mark pixels that outputs a list of pixels that can easily be mapped to the list of objects.
@@ -74,116 +75,104 @@ We implemented an annotation tool to mark pixels that outputs a list of pixels t
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\paragraph{Calibration procedure}
+\paragraph{Calibration Procedure}
 \begin{figure*}[!ht]
   \centering
   \begin{tabular}{cc}
     \includegraphics[width=0.4\linewidth]{images/calibration/background_uncalibrated_with_mapping.png}    &  
     \includegraphics[width=0.4\linewidth]{images/calibration/background_calibrated.png}    
   \end{tabular}
-  \caption{Left: Sampled points of objects that are mapped to pixel locations (green) and sampled points without known corresponding pixels (red) rendered by a poorly calibrated camera model.
-  The mapping from the points to their expected pixels is drawn in cyan.
-  Right: The same sampled points after the calibration procedure.
-  The rendered positions of the sampled points align with the pixels of the objects they are mapped to and the drawn mapping disappears as the distance approaches $0$.  }
-  \label{fig:calibration}
-  \end{figure*}
+  \caption{
+    Left: Points of PDs mapped to pixel locations (green) and points without known corresponding pixels (red) rendered by a poorly calibrated camera model.
+    The mapping from the projected points to their expected pixels is drawn in light blue.
+    Right: The same points after the calibration procedure.
+    The rendered positions of the mapped points align with their respective pixels.
+    The drawn mapping disappears as the distances approach $0$.
+   }
+  \label{fig:static_calibration_calibration}
+\end{figure*}
+  
+We model our cameras using the pinhole camera model. 
+The projection from points $s_c~=~o_c~+~\lambda_c~*~h_c$ of the PDs world positions to pixels $p_c$ is formulated as
 
-Our camera is modelled using the pinhole camera model. 
-The pinhole projection from samples of the world objects to pixels is formulated as
 \begin{equation}
   \label{eq:static_calibration_reprojection}
-  p_c = \pi \left(  
-    % \begin{bmatrix}
-    %   R, T \\
-    %   0, 1
-    % \end{bmatrix} *
-    R * T *
-    (o_c + \lambda_c * h_c)
-  \right)
+  p_c = \pi \left( R * T * (o_c + \lambda_c * h_c) \right)
 \end{equation}
+
+where $R$ is the cameras world rotation in Euler angles, $T$ is the cameras world translation and $\pi$ is the pinhole projection to image space based on the camera intrinsic parameters.
+The pinhole projection $\pi$ is formulated as
+
 \begin{equation}
   \label{eq:static_calibration_intrinsic_parameters}
   z * \pi(x) =   
-  \begin{bmatrix}
+  \begin{pmatrix}
     f_x,& 0,& c_x,& 0\\
     0,& f_y,& c_y,& 0\\
     0,& s,& 1 ,& 0
-  \end{bmatrix} * x 
+  \end{pmatrix} * x 
 \end{equation}
-% \begin{equation}
-%   \begin{bmatrix}
-%     R, T \\
-%     0, 1
-%   \end{bmatrix} = 
-%   \begin{bmatrix}
-%     R, 0 \\
-%     0, 1
-%   \end{bmatrix} *
-%   \begin{bmatrix}
-%     0, T \\
-%     0, 1
-%   \end{bmatrix} =
-%   R * T
-% \end{equation}
 
-where $R$ is the cameras world rotation in Euler angles, $T$ is the cameras world translation and $\pi$ is the camera projection to image space based on the camera intrinsic parameters.
+where $x$ is an 3D input vector in homogeneous coordinates, $f_x, f_y$ are the focal lengths in pixels, $c_x, c_y$ is the principle point and $z$ is the homogeneous component used in the perspective division. 
 
-The optimal value for $\pi,R,T$ is found, if it holds for all correspondences:
+The optimal values for $\pi,R,T$ are found if for all correspondences the distance between the expected pixel $\hat{p}_c$ and the projected pixel $p_c$ is minimal and it holds for all $c$
 \begin{equation}
-  0 = p_c - \pi \left( R * T * (o_c + \lambda_c * h_c)\right) = p_c - \hat{p}_c
+  0 = \hat{p}_c - \pi \left( R * T * (o_c + \lambda_c * h_c)\right) = \hat{p}_c - p_c
 \end{equation}
 
-This places constraints on the values $\pi,R,T$ can take and enables us to recover the camera pose and intrinsics only from the correspondences.
+This places constraints on the values $\pi,R,T$ can take and enables us to recover the camera pose, the intrinsic parameters and the 1D approximate positions relative to the $\lambda$s only from the correspondences.
 
-We estimate the camera pose by minimizing a modified version of the least-squares reprojection error 
-\begin{equation}
-  \label{eq:static_calibration_error}
-  \min_{T, R, \Lambda, W} E(P, S, \pi, T, R, \Lambda, W) 
-\end{equation}
-formulated as
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\paragraph{Error Formulation}
+We solve the BA problem by minimizing a modified version of the least-squares reprojection-error $E$ formulated as
+
 \begin{equation}
   \begin{split}
-  E(P, S, \pi, T, R, \Lambda, W ) =& 
+  E(P, S, \pi, T, R, W ) =& 
   \sum_{c \in C} 
   \rho(\left\lVert 
-    w_c * [ p_c - \hat{p}_c ]
-  \right\rVert^2) \\ 
+    w_c * [ \hat{p}_c - p_c ]
+  \right\rVert^2_2) \\ 
   +& 
   \sum_{c \in C} 
   \alpha * 
   \rho(\left\lVert 
   (1 - w_c)
-  \right\rVert^2) \\ 
+  \right\rVert^2_2) \\ 
   +& 
   \sum_{c \in C} 
   \beta * 
   \rho(\left\lVert 
   \Delta(\lambda_c, 0, h_c)
-  \right\rVert^2) \\ 
+  \right\rVert^2_2) \\ 
   +& 
   \sum_{\pi_i \in \pi} 
   \gamma *
   \rho(\left\lVert 
   \Delta (\pi_i, \pi_i * 0.9, \pi_i * 1.1)
-  \right\rVert^2) \\
+  \right\rVert^2_2) \\
   +&
   \delta * 
   \rho(\left\lVert 
   \Delta (R_x, 60, 110)
-  \right\rVert^2) \\
+  \right\rVert^2_2) \\
   +&
   \delta * 
   \rho(\left\lVert 
   \Delta (R_y, -10, 10)
-  \right\rVert^2 
+  \right\rVert^2_2 
 \end{split}
 \label{eq:reprojection_error}
 \end{equation}
-where $P$ is the set of mapped pixels in the image, $S$ is the set of mapped corresponding sampled points from the objects and $\Lambda$ is the set of $\lambda$ values associated with the sampled points.
-This formulation allows the optimization over the line approximations of the objects and jointly optimizes for the camera parameters $T, R$ and the $\lambda \in \Lambda$ parameters of the line objects.
 
-The calculation of the exact position of $s_c \sim \lambda$ allows the optimizer to search the whole space of real numbers for $\lambda$.
-Nonetheless we penalize values for $\lambda$ that exceed the physical height of the object by 
+where $P$ is the set of mapped pixels $\hat{p}_c$ in the image and $S$ is the set of mapped corresponding points $s_c$ from the PDs.  
+The additional weights $w_c \in W$ are associated to the correspondences to downweight outliers and are enforced to stay near $1$.
+We use a robust loss function $\rho$ to further decrease the influence of outliers.
+
+We guide the algorithm to feasible solutions by penalizing $\lambda_c$ values that are negative or exceed the PDs height $h_c$ using the distance 
 \begin{equation}
     \Delta (x, l, u) =
     \begin{cases}
@@ -192,38 +181,33 @@ Nonetheless we penalize values for $\lambda$ that exceed the physical height of 
       0,    & \text{else}
     \end{cases} 
 \end{equation}
-This regularization enables a robust estimation procedure that can flexibly adjust to the missing exact world positions.
+from the interval $[l, u]$.
+
+We rely on a rough initialization for the values $\pi_i \in \pi$ and allow the optimizer to adjust the values within a $\pm 0.1$ interval around the initialization. 
+
+Finally, we constrain the $X$ axis rotation $R_x$ (Pitch) to be within the interval $[60, 110]$ degree and the $Y$ axis rotation $R_y$ (Roll) to be within the interval $[-10, 10]$ degree.
+
+The factors $\alpha, \beta, \gamma, \delta$ are used to explicitly scale the remaining losses of the terms, thus giving them different influence on the optimizer. 
+We saw empirically that good values for the factors are $\alpha = 1*10^{100}, \beta = 2, \gamma = 10, \delta = 50$.
 
 \paragraph{Initialization}
-In contrast to most pose estimation problems our approach drops the need for good initialization. 
-By regularization of the $\lambda$ values enough flexibility is given to optimize over an infinite space of values, 
-but enforces the solution of the $\lambda$ to lie within the interval of $\lambda \in [0, h]$.
+In contrast to most BA problems our approach drops the need for good initialization. 
+The regularization of the $\lambda$ values gives the optimizer enough flexibility to optimize over the infinite space of possible values, but enforces the values of the $\lambda$ to lie within the interval of $\lambda \in [0, h]$.
 
+The optimizer calculates its own initial guess
 \begin{equation}
-  \bar{s} = \frac{1}{\left\lvert C \right\rvert } \sum_{c \in C} o_c 
+  T_0 = T(\bar{s}_x, \bar{s}_y, \bar{s}_z + \bar{d}) 
 \end{equation}
-
+for the camera translation based on the mean 
 \begin{equation}
-  T_0 = \begin{pmatrix}
-    1, 0, 0,& \bar{s}_x \\   
-    0, 1, 0,& \bar{s}_y \\   
-    0, 0, 1,& \bar{s}_z + 1000 \\   
-    0, 0, 0,& 1   
-  \end{pmatrix}
+  \bar{s} = \frac{1}{\left\lvert C \right\rvert } \sum_{c \in C} o_c
 \end{equation}
+of the base origin points $o_c$ of the PDs and some distance $\bar{d}$ from the mean.
 
+The optimizer initializes the rotation  
 \begin{equation}
-  R_0 = \mathbb{I} ^ {4 \times 4}
+  R_0 = R(x, y, z)
 \end{equation}
+based on $x, y, z$ Euler angle values drawn from the uniform distribution $U(-35, 35)$.
 
-It is sufficient to initialize with $\lambda_c = 0$ for all correspondences.
-The camera rotation is defined to be zero with the camera facing in negative world $z$ axis.
-By placing the camera at some distance over the mean of the known object positions with zero rotation the optimization always converges to the desired minimum.
-
-% \begin{itemize}
-%   \item HD map based approach
-%   \item Optimization algorithm, reprojection error between map and video 
-%   \item Landmark extraction, mapping, pose estimation
-%   \item Watersheder for pixel marking
-%  translation can be  and initializing the camera at the some distance over the mean    
- % \end{itemize}
+It is sufficient to initialize $\lambda_c = 0$ for all correspondences.

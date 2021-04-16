@@ -73,6 +73,7 @@ We implemented the SURF \cite{bay10.1007/11744023_32} and ORB \cite{rublee612654
 We compare the detected features from the input frame with the features from the stable reference frame.
 A match is reported if the feature descriptors of two compared features surpass the Lowe's ratio test \cite{lowe10.1023/B:VISI.0000029664.99615.94} regarding some feature dependent metric \cite{kumar2014survey}.
 These feature matches establish a spatial relationship in pixel space between the two frames.
+\autoref{fig:dynamic_stabilization_feature_matching} displays an exemplary feature matching.
 
 We estimate a homographic transformation $H$ that maps the homogeneous pixel locations $(x_i, y_i, 1)^T$ of the input frame to the matched pixel locations $(x'_i, y'_i, 1)^T$ in the stable reference frame.
 We minimize the reprojection-error between the pixels so that for each match $i$ it holds
