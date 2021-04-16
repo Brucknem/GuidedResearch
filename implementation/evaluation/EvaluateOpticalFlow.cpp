@@ -25,11 +25,14 @@ private:
 	 */
 	std::vector<providentia::stabilization::DynamicStabilizationBase> stabilizers;
 	std::vector<std::string> stabilizerNames = {
-		"SURF", "ORB", "FAST"
+//		"SURF",
+//		"ORB",
+		"FAST"
 	};
 	std::vector<providentia::opticalflow::FarnebackDenseOpticalFlow> opticalFlows;
 
 	std::shared_ptr<::CSVWriter> csvWriter;
+	std::shared_ptr<::CSVWriter> timeWriter;
 	int frameId = -1;
 	bool withMask = false;
 	int padding = 10;
@@ -39,8 +42,8 @@ private:
 
 public:
 	explicit Setup() : VideoSetup() {
-		stabilizers.emplace_back(providentia::stabilization::SURFBFDynamicStabilization{});
-		stabilizers.emplace_back(providentia::stabilization::ORBBFDynamicStabilization{});
+//		stabilizers.emplace_back(providentia::stabilization::SURFBFDynamicStabilization{});
+//		stabilizers.emplace_back(providentia::stabilization::ORBBFDynamicStabilization{});
 		stabilizers.emplace_back(providentia::stabilization::FastFREAKBFDynamicStabilization{});
 
 		for (int i = 0; i <= stabilizers.size(); i++) {
@@ -58,8 +61,21 @@ public:
 		}
 
 		csvWriter = std::make_shared<::CSVWriter>(evaluationPath / (boost::filesystem::path(inputResource).filename()
-																		.string() + ".csv"));
-		*csvWriter << "Frame" << "Original" << "SURF" << "ORB" << "FAST" << newline;
+																		.string() + getNowSuffix() + ".csv"));
+
+		timeWriter = std::make_shared<::CSVWriter>(evaluationPath / (boost::filesystem::path(inputResource).filename()
+																		 .string() + "_times_" + getNowSuffix() +
+																	 ".csv"));
+		*csvWriter << "Frame" << "Original";
+		for (const auto &name : stabilizerNames) {
+			*csvWriter << name;
+		}
+		*csvWriter << newline;
+		*timeWriter << "Frame" << "Original";
+		for (const auto &name : stabilizerNames) {
+			*timeWriter << name;
+		}
+		*timeWriter << newline;
 	}
 
 	void calculateOpticalFlows() {
@@ -91,78 +107,83 @@ public:
 			::pad(::addText(frameCPU, "Frame: " + std::to_string(frameId), 2, 5, 5), padding)
 		};
 
+		*timeWriter << frameId << 0;
+
 		int i = 0;
 		for (auto &stabilizer :stabilizers) {
 			stabilizer.stabilize(frameGPU);
+			*timeWriter << stabilizer.getTotalMilliseconds();
+
 			frames.emplace_back(::pad(
 				::addRuntimeToFrame(cv::Mat(stabilizer.getStabilizedFrame()), stabilizerNames[i], stabilizer
 					.getTotalMilliseconds(), 2, 5, 5), padding)
 			);
 			i++;
 		}
+		*timeWriter << newline;
 
-		calculateOpticalFlows();
+//		calculateOpticalFlows();
 		cv::hconcat(frames, finalFrame);
-
-		frames.clear();
-		for (auto &opticalFlow : opticalFlows) {
-			frames.emplace_back(
-				::addText(opticalFlow.draw(),
-						  "Mean pixel shift: " + std::to_string(opticalFlow.getMagnitudeMean()), 2, 5, 5)
-			);
-		}
-
-		cv::hconcat(frames, bufferCPU);
-		finalFrame = ::vconcat({finalFrame, bufferCPU});
-
-		if (withMask) {
-			frames.clear();
-			frames.emplace_back(::cvtColor(stabilizers[0].getBackgroundMask(frameGPU.size()), cv::COLOR_GRAY2BGR));
-
-			for (auto &stabilizer :stabilizers) {
-				::pad(::cvtColor(stabilizer.getBackgroundMask(frameGPU.size()), cv::COLOR_GRAY2BGR), padding);
-			}
-			cv::hconcat(frames, bufferCPU);
-			finalFrame = ::vconcat({finalFrame, bufferCPU});
-		}
-
-		if (frameId < warmup) {
-			return;
-		}
-
-		double originalMagnitudeMean = opticalFlows[0].getMagnitudeMean();
-
-		*csvWriter << frameId;
-		bool write = false;
-		std::string frameName = "frame_" + std::to_string(frameId);
-
-		int flowNumber = 0;
-		for (auto &opticalFlow: opticalFlows) {
-			double currentMagnitudeMean = opticalFlow.getMagnitudeMean();
-			*csvWriter << currentMagnitudeMean;
-
-			if (originalMagnitudeMean - currentMagnitudeMean < 0) {
-				frameName += "_";
-				switch (flowNumber) {
-					case 1:
-						frameName += "surf";
-						break;
-					case 2:
-						frameName += "orb";
-						break;
-					case 3:
-						frameName += "fast";
-						break;
-					default:
-						break;
-				}
-				write = true;
-			}
-			flowNumber++;
-		}
-		if (write && writeBadFrames) {
-			cv::imwrite((evaluationPath / (frameName + ".png")).string(), finalFrame);
-		}
+//
+//		frames.clear();
+//		for (auto &opticalFlow : opticalFlows) {
+//			frames.emplace_back(
+//				::addText(opticalFlow.draw(),
+//						  "Mean pixel shift: " + std::to_string(opticalFlow.getMagnitudeMean()), 2, 5, 5)
+//			);
+//		}
+//
+//		cv::hconcat(frames, bufferCPU);
+//		finalFrame = ::vconcat({finalFrame, bufferCPU});
+//
+//		if (withMask) {
+//			frames.clear();
+//			frames.emplace_back(::cvtColor(stabilizers[0].getBackgroundMask(frameGPU.size()), cv::COLOR_GRAY2BGR));
+//
+//			for (auto &stabilizer :stabilizers) {
+//				::pad(::cvtColor(stabilizer.getBackgroundMask(frameGPU.size()), cv::COLOR_GRAY2BGR), padding);
+//			}
+//			cv::hconcat(frames, bufferCPU);
+//			finalFrame = ::vconcat({finalFrame, bufferCPU});
+//		}
+//
+//		if (frameId < warmup) {
+//			return;
+//		}
+//
+//		double originalMagnitudeMean = opticalFlows[0].getMagnitudeMean();
+//
+//		*csvWriter << frameId;
+//		bool write = false;
+//		std::string frameName = "frame_" + std::to_string(frameId);
+//
+//		int flowNumber = 0;
+//		for (auto &opticalFlow: opticalFlows) {
+//			double currentMagnitudeMean = opticalFlow.getMagnitudeMean();
+//			*csvWriter << currentMagnitudeMean;
+//
+//			if (originalMagnitudeMean - currentMagnitudeMean < 0) {
+//				frameName += "_";
+//				switch (flowNumber) {
+//					case 1:
+//						frameName += "surf";
+//						break;
+//					case 2:
+//						frameName += "orb";
+//						break;
+//					case 3:
+//						frameName += "fast";
+//						break;
+//					default:
+//						break;
+//				}
+//				write = true;
+//			}
+//			flowNumber++;
+//		}
+//		if (write && writeBadFrames) {
+//			cv::imwrite((evaluationPath / (frameName + ".png")).string(), finalFrame);
+//		}
 		*csvWriter << newline;
 	}
 };

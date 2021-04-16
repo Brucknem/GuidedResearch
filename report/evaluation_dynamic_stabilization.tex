@@ -36,6 +36,7 @@ and present two measures to evaluate the dynamic stabilization pipeline describe
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsubsection{Optical Flow}
+\label{sec:evaluation_dynamic_stabilization_optical_flow}
 \begin{figure*}[!ht]
     \centering
     \begin{tabular}{c}
@@ -64,8 +65,8 @@ We see a car driving, indicated by the yellow patch, that remains as expected us
 \begin{figure}[t]
     \centering
     \begin{tabular}{c}
-      \includegraphics[width=0.9\linewidth]{diagrams/optical_flow/mean_pixel_shifts_after_dynamic_stabilization_s40_far.png}    \\  
-      \includegraphics[width=0.9\linewidth]{diagrams/optical_flow/damping_mean_pixel_shifts_after_dynamic_stabilization_s40_far.png}    
+      \includegraphics[width=0.9\linewidth]{diagrams/optical_flow/s40_n_far_image_raw.mp4.csv/compare_of_mean_pixel_displacement/window_size_12.html.png}    \\  
+      \includegraphics[width=0.9\linewidth]{diagrams/optical_flow/s40_n_far_image_raw.mp4.csv/deltas_of_mean_pixel_displacement/window_size_12.html.png}    
 \end{tabular}
     \caption{Top: 
         Comparison of the three implemented dynamic stabilizers (SURF, ORB, FAST) and the original not stabilized video feed using optical flow as measure (lower is better).
@@ -84,7 +85,7 @@ It shows that the original frames have a MPD of up to $5$ pixels per frame. This
 The displacement is damped by all of the stabilizers by a mean of up to $4.5$ pixels, whereas the remaining displacement is due to the actually moving vehicles in the dynamic foreground.   
 
 \begin{figure}[!ht]
-      \includegraphics[width=\linewidth]{diagrams/optical_flow/stats.png}    
+      \includegraphics[width=\linewidth]{diagrams/optical_flow/stats.html.png}    
     \caption{
         Comparison of the percentages of more stable frames after dynamic stabilization per camera and stabilizer.
         A frame is classified as more stable if the MPD is lower than for the original video feed. 
@@ -168,4 +169,25 @@ This implies that much of the additional motion introduced by the environmental 
 
 We included plots for the tracked pixel locations and the comparison of the arc lengths for the other three cameras in the Appendix (\autoref{sec:appendix}).
 
-\subsubsection{Speed comparison}
+\subsubsection{Speed Comparison}
+\autoref{tab:dynamic_stabilization_speeds} compares the average time needed to stabilize a frame per stabilizer instance.
+It shows that, although the name, the FAST stabilizer is the slowest, followed by SURF and beaten by ORB.
+Nonetheless, all stabilizers run at more than 50 frames per second and are thus all realtime capable.
+
+\begin{table}
+    \begin{center}
+      \begin{tabular}{ | c | c | c | }
+        \hline
+        Stabilizer & Time $[ms]$ & $\sigma$ $[ms]$ \\
+        \hline
+        FAST & 18.649 & 2.102 \\
+        ORB  & 14.816 & 1.466 \\
+        SURF & 16.058 & 1.443 \\
+        \hline
+      \end{tabular}
+    \end{center}
+    \caption{
+        Comparison of the average milliseconds needed to stabilize the frame and the respective standard deviation in milliseconds per stabilizer instance.
+    }
+    \label{tab:dynamic_stabilization_speeds}
+  \end{table}

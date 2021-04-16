@@ -1,3 +1,4 @@
+from bokeh.io import export_png
 from bokeh.models import Legend
 from commons import *
 
@@ -68,6 +69,8 @@ def compare_of_mean_pixel_displacement(window_size):
     p.xaxis.axis_label = "Frame"
     p.yaxis.axis_label = "Mean pixel displacement [px]"
 
+    output_filename = get_output_filename(inspect.stack()[0].function, window_size)
+    export_png(p, filename=output_filename + ".png")
     show_or_save(p, display)
 
 
@@ -87,6 +90,8 @@ def deltas_of_mean_pixel_displacement(window_size):
     set_plot_settings(p)
     p.xaxis.axis_label = "Frame"
     p.yaxis.axis_label = "Mean pixel displacement [px]"
+    output_filename = get_output_filename(inspect.stack()[0].function, window_size)
+    export_png(p, filename=output_filename + ".png")
     show_or_save(p, display)
 
 

@@ -1,4 +1,5 @@
 from bokeh.core.property.dataspec import value
+from bokeh.io import export_png
 from bokeh.models import Legend, ColumnDataSource, FactorRange, LabelSet, NumeralTickFormatter
 from bokeh.transform import factor_cmap, dodge
 
@@ -68,6 +69,7 @@ def plot():
     set_plot_settings(p)
     p.yaxis.axis_label = "More stable frames"
     p.xgrid.grid_line_alpha = 0
+    export_png(p, filename=get_output_filename() + ".png")
     show_or_save(p, display)
 
 
