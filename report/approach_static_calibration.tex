@@ -1,72 +1,77 @@
 % !TEX root=./report.tex
 
-\subsection{Static calibration}
+\subsection{Static Calibration}
 \label{sec:static_calibration_approach}
 
-\ITS{} are inherently dependent on the calibration of the different sensors. 
-To track and predict traffic the system has to know the poses of the different sensors relative to some reference coordinate system.
-This enables the ITS to accurately measure the position of vehicles within the single sensor ranges and at the overlapping boundaries.
+ITS are inherently dependent on the calibration of the different sensors. 
+The system has to know the poses of the different sensors relative to some reference coordinate system to accurately measure the position of vehicles within the single sensor ranges and at the overlapping boundaries.
 
-Previous experiments have shown that a calibration process based on an IMU is not feasible in our case. 
-Instead we focus on a calibration procedure based on visual landmarks in the video feed.
-The landmarks are mapped to their partially known world positions from high definition road maps. 
+We propose a calibration procedure based on a Bundle Adjustment (BA) problem formulation.
+We map visual landmarks in the video feed to their partially known world positions from high definition road maps (HD maps).
+We recover the pose by jointly optimizing for the camera intrinsic and extrinsic parameters as well as the real world positions of the landmarks. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\paragraph{Retrive objects from the \HDmaps}
-In this work we focus on the permanent delineator objects that are easily visible in the video feeds.
+\paragraph{Retrieve Objects from High Definition Maps}
 
-The world position of the objects can be retrieved using the mathematical operations defined in the \OD{} standard.
+In our project we use HD maps in the \OD{} standard format.
+In this work we focus on the permanent delineator (PD) objects that are easily visible in the video feeds.
 
-This gives us the the base origin point $o~=~(x, y, z)^T$ of the object in the transverse mercator projection \cite{proj}. 
-The base origin point is the world position of the lower end of the object where it ends in the ground or another object.
+We extract the world position of the PDs using the mathematical operations defined in the \OD{} standard.
+This gives us the the base origin point $o~=~(x, y, z)^T$ of the PDs in the Universal Transverse Mercator (UTM) projection \cite{langley1998utm,proj}. 
+This point $o$ is the world position of the lower end of the PD where it touches the ground or another object.
+Additionally, we retrieve a directional heading axis $d~=~(x, y, z)^T$ and the height $h$ of the PD.
 
-Additionally we retrieve a directional heading axis $d~=~(x, y, z)^T$ and the height $h$ of the object.
+\paragraph{1D Approximation of Objects}
 
-These values enable us to approximate the real-world objects by sampling points $s \in S$ in world position along the center line of the object, where 
+In the original BA setting the optimization is done jointly over multiple cameras and observations, and the arising stereo vision problem is solved jointly for the 3D positions of the objects and the camera parameters.
+For this system of equations to be solvable it requires multiple cameras from different viewing angles and large overlapping fields of view between the cameras.
+
+In our project we have neither of requirements and calibrate each camera separately to the HD map.
+We relax the BA problem by the 1D approximation of the PDs
 \begin{equation}
 S = \{o + \lambda * d: \quad \lambda \in [0, h]\}
 \end{equation}
+where $S$ is the set of points along its central axis between its base at $\lambda = 0$ and its top at $\lambda = h$.
+This approximation allows for a joint optimization of their world positions and the camera intrinsic and extrinsic parameters.
+
+\autoref{sec:static_calibration_number_points} derives a minimal number of points for the resulting system of equations to be solvable.
+
+% The assumptions we made are: 
+% \begin{itemize}
+  % \item Objects are symmetric around their directional heading axis.
+  % \item Projected pixels of the objects are also symmetric around the projected directional axis.
+% \end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\paragraph{Mapping objects to pixels}
-
-To calibrate the camera we need to establish a mapping
-\begin{equation}
-  s_c \mapsto p_c \Leftrightarrow  {o_c, d_c, \lambda_c} \mapsto p_c
-\end{equation}
-from pixels $p_c~=~(u,v)^T \in P$ from the video stream to the corresponding sampled points $s_c$ from the object they belong to.
-
-This leaves us with a set $C$ of correspondences $\{p_c,s_c\}$.
-
-This mapping is currently done by human interaction and not fully automated. 
-To minimize the work an aiding system to mark pixels was implemented that outputs a list of pixels that can easily be mapped to the list of objects.
-
+\paragraph{Mapping Objects to Pixels}
 \begin{figure}[t]
   \begin{center}
   % \fbox{\rule{0pt}{2in} \rule{0.9\linewidth}{0pt}}
      \includegraphics[width=\linewidth]{images/hd_map_mapping.png}
   \end{center}
-     \caption{Left: The current camera frame. Right: A part of the \HDmaps{}. Cyan: The mapping $s_c \mapsto p_c$ from objects (right) to their corresponding pixels (left).}
-  \label{fig:hd_map_mapping}
+     \caption{
+       Left: The current camera frame. 
+       Right: A part of the HD map.
+       Light blue lines: An exemplary mapping $s_c \mapsto p_c$ from objects (right) to their corresponding pixels (left).
+       }
+  \label{fig:static_calibration_mapping}
   \end{figure}
 
+We solve the BA problem by minimizing the reprojection-error over the PDs.
+We thus require a set $C$ of correspondences that map world points $s_c$ of the PDs to their respective pixel $p_c$. 
+
+This mapping is currently done by human interaction and not fully automated. 
+We implemented an annotation tool to mark pixels that outputs a list of pixels that can easily be mapped to the list of objects.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\paragraph{Relaxation of problem by line approximation}
-\label{sec:static_calibration_line_approximation}
-
-Approximating the objects by lines removes the need for exactly known 3D correspondences as usually needed in calibration problems. 
-Nonetheless it does not require to jointly estimate the full world position of the objects and camera pose jointly as in Bundle-Adjustment problems.
-%
-The assumptions we made are: 
-\begin{itemize}
-  \item Objects are symmetric around their directional heading axis.
-  \item Projected pixels of the objects are also symmetric around the projected directional axis.
-\end{itemize}
-
-We then take the mean over each row of pixels as the approximate pixel positions of the center line.
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \paragraph{Calibration procedure}
