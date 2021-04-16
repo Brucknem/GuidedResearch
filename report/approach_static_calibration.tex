@@ -52,11 +52,11 @@ This approximation allows for a joint optimization of their world positions and 
 
 \paragraph{Mapping Objects to Pixels}
 \begin{figure}[t]
-  \begin{center}
-  % \fbox{\rule{0pt}{2in} \rule{0.9\linewidth}{0pt}}
-     \includegraphics[width=\linewidth]{images/hd_map_mapping.png}
-  \end{center}
-     \caption{
+  \centering
+  \begin{tabular}{c}
+     \includegraphics[width=0.95\linewidth]{images/hd_map_mapping.png}
+    \end{tabular}
+    \caption{
        Left: The current camera frame. 
        Right: A part of the HD map.
        Light blue lines: An exemplary mapping $s_c \mapsto p_c$ from objects (right) to their corresponding pixels (left).
@@ -66,7 +66,7 @@ This approximation allows for a joint optimization of their world positions and 
 
 We solve the BA problem by minimizing the reprojection-error over the PDs.
 We thus require a set $C$ of correspondences that map world points $s_c$ of the PDs to their respective pixel $p_c$. 
-\autoref{fig:static_calibration_calibration} displays an exemplary mapping from a HD map to the video feed.
+\autoref{fig:static_calibration_mapping} displays an exemplary mapping from a HD map to the video feed.
 
 This mapping is currently done by human interaction and not fully automated. 
 We implemented an annotation tool to mark pixels that outputs a list of pixels that can easily be mapped to the list of objects.
@@ -76,21 +76,21 @@ We implemented an annotation tool to mark pixels that outputs a list of pixels t
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \paragraph{Calibration Procedure}
-\begin{figure*}[!ht]
+\begin{figure}[t]
   \centering
-  \begin{tabular}{cc}
-    \includegraphics[width=0.4\linewidth]{images/calibration/background_uncalibrated_with_mapping.png}    &  
-    \includegraphics[width=0.4\linewidth]{images/calibration/background_calibrated.png}    
+  \begin{tabular}{c}
+    \includegraphics[width=0.95\linewidth]{images/calibration/background_uncalibrated_with_mapping.png}    \\
+    \includegraphics[width=0.95\linewidth]{images/calibration/background_calibrated.png}    
   \end{tabular}
   \caption{
-    Left: Points of PDs mapped to pixel locations (green) and points without known corresponding pixels (red) rendered by a poorly calibrated camera model.
+    Top: Points of PDs mapped to pixel locations (green) and points without known corresponding pixels (red) rendered by a poorly calibrated camera model.
     The mapping from the projected points to their expected pixels is drawn in light blue.
-    Right: The same points after the calibration procedure.
+    Bottom: The same points after the calibration procedure.
     The rendered positions of the mapped points align with their respective pixels.
     The drawn mapping disappears as the distances approach $0$.
    }
   \label{fig:static_calibration_calibration}
-\end{figure*}
+\end{figure}
   
 We model our cameras using the pinhole camera model. 
 The projection from points $s_c~=~o_c~+~\lambda_c~*~h_c$ of the PDs world positions to pixels $p_c$ is formulated as
@@ -120,7 +120,8 @@ The optimal values for $\pi,R,T$ are found if for all correspondences the distan
   0 = \hat{p}_c - \pi \left( R * T * (o_c + \lambda_c * h_c)\right) = \hat{p}_c - p_c
 \end{equation}
 
-This places constraints on the values $\pi,R,T$ can take and enables us to recover the camera pose, the intrinsic parameters and the 1D approximate positions relative to the $\lambda$s only from the correspondences.
+This places constraints on the values $\pi,R,T$ can take and enables us to recover the camera pose, the intrinsic parameters and the 1D approximate positions relative to the $\lambda$s only from the correspondences.\\
+\autoref{fig:static_calibration_calibration} displays rendering the PDs before and after calibration.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -208,6 +209,7 @@ The optimizer initializes the rotation
 \begin{equation}
   R_0 = R(x, y, z)
 \end{equation}
-based on $x, y, z$ Euler angle values drawn from the uniform distribution $U(-35, 35)$.
+based on $x, y, z$ Euler angle values drawn from the uniform distribution $U(-35, 35)$, where $R(0,0,0)$ is the camera facing in negative $Z$ direction onto the mean $\bar{s}$.
+This initialization ensures that all points lie in front of the camera and can be projected onto the image plane.
 
 It is sufficient to initialize $\lambda_c = 0$ for all correspondences.
