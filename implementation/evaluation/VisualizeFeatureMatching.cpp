@@ -44,9 +44,9 @@ public:
 //        referenceFrameDetector = std::make_shared<providentia::features::FastFREAKFeatureDetection>(detector);
 
 		matcher = std::make_shared<providentia::stabilization::matching::BruteForceFeatureMatching>(cv::NORM_L2);
-		matcher->setShouldUseFundamentalMatrix(false);
 		matcherWithoutFundamental = std::make_shared<providentia::stabilization::matching::BruteForceFeatureMatching>
 			(cv::NORM_L2);
+		matcherWithoutFundamental->setShouldUseFundamentalMatrix(false);
 //        matcher = std::make_shared<providentia::features::BruteForceFeatureMatching>(cv::NORM_HAMMING);
 //        matcher = std::make_shared<providentia::features::FlannFeatureMatching>(true);
 	}
@@ -58,21 +58,24 @@ public:
 		}
 
 		matcher->match(frameDetector, referenceFrameDetector);
-		matcherWithoutFundamental->match(frameDetector, referenceFrameDetector);
-		totalAlgorithmsDuration = frameDetector->getTotalMilliseconds() + matcher->getTotalMilliseconds() +
-								  matcherWithoutFundamental->getTotalMilliseconds();
+//		matcherWithoutFundamental->match(frameDetector, referenceFrameDetector);
+//		totalAlgorithmsDuration = frameDetector->getTotalMilliseconds() + matcher->getTotalMilliseconds() +
+//								  matcherWithoutFundamental->getTotalMilliseconds();
+//
+//		cv::vconcat(matcherWithoutFundamental->draw(), matcher->draw(), finalFrame);
 
-		cv::vconcat(matcherWithoutFundamental->draw(), matcher->draw(), finalFrame);
+		finalFrame = matcher->draw();
 	}
 
 	void specificAddMessages() override {
-		addRuntimeToFinalFrame("Feature detection", frameDetector->getTotalMilliseconds(), 5, 20);
-		addRuntimeToFinalFrame("Feature matching", matcher->getTotalMilliseconds(), 5, 40);
+//		addRuntimeToFinalFrame("Feature detection", frameDetector->getTotalMilliseconds(), 5, 20);
+//		addRuntimeToFinalFrame("Feature matching", matcher->getTotalMilliseconds(), 5, 40);
 	}
 };
 
 int main(int argc, char const *argv[]) {
 	Setup setup;
+	setup.setRenderingScaleFactor(1);
 	setup.mainLoop();
 	return 0;
 }

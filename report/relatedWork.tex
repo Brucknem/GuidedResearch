@@ -5,16 +5,17 @@ Erdelean \etal{} \cite{erdelean2019catalogue} give a detailed overview over the 
 
 In the \TAADBW{} (TAADBW) project multiple optical camera sensors are attached to large poles with overlapping fields of view.
 They calibrate their cameras relative to a high-precision map and assume the calibration and the intrinsic camera parameters to be static during runtime. 
-The team relies on an manual a-priori selection of visual landmarks and perform calibration at system startup.  
+The team relies on a manual a-priori selection of visual landmarks and perform calibration at system startup.  
 The team of the TAADBW estimate the extrinsic calibration with exact world position from the map by minimizing the squared distances between the visible landmarks and the respective projected objects.
 The large overlaps in the fields of view in their setup allow a global optimization strategy. 
 This is not feasible in our project due to the small overlaps in the fields of view between the cameras \cite{kraemmer2020providentia} and associating pixels within the multi-view setup is an inherently hard problem. 
 
 Müller \etal{} \cite{laciMueller} present an approach based on a cooperative intelligent vehicle.
-The vehicle moves through the scene and passes cooperative awareness messages from the vehicle to the infrastructure. 
+The vehicle moves through the scene and passes cooperative awareness messages containing positional information from the vehicle to the infrastructure. 
 This removes the need for overlapping fields of view completely and enables a fully automated and sensor-independent registration.
 The team calibrates a multitude of different sensor types to the world frame and recovers their extrinsic parameters. 
 
 Calibration between cameras and radar sensors has been solved previously by Schöller \etal{} within the \Providentia{}.
 
+An overview over the general structure of Bundle Adjustment problems as used in \autoref{sec:static_calibration_approach} is given by Triggs \etal{} in \cite{triggs10.1007/3-540-44480-7_21}.
 % None of the teams - to the best of our knowledge - provide in depth public information about their camera stabilization and calibration approaches.
