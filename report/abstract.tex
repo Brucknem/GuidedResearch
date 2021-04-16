@@ -10,9 +10,9 @@ First we propose an online vision-based framework to remove jitter from shaky ca
 We show that our approach based on visual features and an image space homographic transformation gives good stabilization results regarding the optical flow in the image. 
 By exemplary tracking objects and measuring their travelled pixel distance we show a substantial decrease of the jittery image motion. 
 
-Second we propose an online reprojection-error based algorithm to statically calibrate RBG-only cameras \wrt{} a high definition map and to mitigate drift of the intrinsic and extrinsic camera parameters over time.
+Second we propose an online Bundle Adjustment formulation based on the reprojection-error to statically calibrate RBG-only cameras \wrt{} a high definition map and to mitigate drift of the intrinsic and extrinsic camera parameters over time.
 By relaxing the minimization problem using a 1D-approximation of road signs we achieve high accuracy in the calibration of the cameras.
-We show the minimal number of needed correspondences between the video and the map, the structure they have to exceed and give a lower bound on the remaining calibration error. 
+We show the minimal number of needed correspondences between the video stream and the map, the structure they have to exceed and give a lower bound on the remaining calibration error. 
 
 \end{abstract}
 
@@ -20,10 +20,10 @@ We show the minimal number of needed correspondences between the video and the m
 \keywords{
     Intelligent Transportation Systems,
     Computer Vision,
-    Video stabilization,
-    Feature detection,
-    Feature matching,
-    Camera calibration,
+    Video Stabilization,
+    Feature Detection,
+    Feature Matching,
+    Camera Calibration,
     Bundle Adjustment,
     Reprojection-error,
     Optimization,
