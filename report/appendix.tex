@@ -24,17 +24,13 @@ Please see the next pages for the plots.
     \end{tabular}
     \caption{
         Left: 
-        Comparison of the three implemented dynamic stabilizers and the original not stabilized video feed using Optical Flow as metric (lower is better).
-        The stabilizers are based on the 
-        FAST \cite{Ghahremani_2021,opencv_library} feature detector with FREAK \cite{alahi6247715,opencv_library} feature descriptors,
-        SURF \cite{bay10.1007/11744023_32,opencv_library} feature detector and
-        ORB \cite{rublee6126544, opencv_library} feature detector.
-        The graphs display the mean pixel shift at each frame. 
+        The mean pixel shifts after stabilization with SURF, ORB and FAST compared to the original not stabilized video feed using optical flow as measure (lower is better).
         Right: 
-        The damping capabilities of the same three stabilizers (higher is better). 
-        The graphs approximate the removed jitter in the mean pixel shift between the original video and the stabilizer at each frame.\\
+        The damping of the mean pixel shifts of the same three stabilizers (higher is better). 
+        The graphs approximate the removed jitter in the mean pixel shift between the original video and the stabilizers at each frame.\\
         For visualization the values are filtered using the rolling mean over 12 frames. 
-        The light areas display the standard deviation within the window.
+        The light areas display the standard deviation within the window. \\
+        It shows that for each of the stabilizers the damping is substantial, removes most of the jitter introduced by environmental influences and leaves only wanted movement of vehicles in the dynamic foreground.
     }
     \label{fig:dynamic_stabilization_appendix}
     \end{figure*}
@@ -42,24 +38,24 @@ Please see the next pages for the plots.
     
 
 
-
 \begin{figure*}[!ht]
   \centering
   \begin{tabular}{cc}
     \includegraphics[width=0.45\linewidth]{diagrams/object_tracking/s40_n_far/frame.png}    &  
-    \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s40_n_far/arcs.png}    \\
+    \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s40_n_far/normalized_arc_lengths.html.png}    \\
 
     \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s40_n_far/black_pickup.png}    &  
     \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s40_n_far/white_car.png}    \\  
     \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s40_n_far/red_truck.png}   
   \end{tabular}
-  \caption{Left: 
-  The exemplary vehicles tracked through the video sequence of the camera \camsn{4}. 
-  Right:
-  The corresponding normalized arc lengths of the pixel path. 
-  The length is normalized by the original arc length, hence the 1.0 factor for the original video. 
-  As the jitter is removed, the pixels movement is lowered significantly as it does only move with the vehicle, not the camera.
-  This can be seen with around half of the path length remaining after stabilization for all stabilizers.
+  \caption{Top Left:
+  The tracked vehicles in the camera \camsf{4} marked by their bounding boxes. 
+  Top right: 
+  The normalized arc lengths representing the path of the tracked pixels through the image.
+  Bottom graphs:
+  The tracked pixel locations of the vehicles as they move through the scene for the original video feed and the stabilized ones.
+  The jittery motion of the camera can be clearly seen by the chaotic movement of the pixels.
+  After stabilization the pixels move much more smoothly through the images, whereas the remaining jitter is mostly due to inaccuracies in the tracking. 
   }
   \label{fig:object_tracking_appendix_s40_n_far}
 \end{figure*}
@@ -70,20 +66,20 @@ Please see the next pages for the plots.
   \centering
   \begin{tabular}{cc}
     \includegraphics[width=0.45\linewidth]{diagrams/object_tracking/s40_n_near/frame.png}    &  
-    \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s40_n_near/arcs.png}    \\
+    \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s40_n_near/normalized_arc_lengths.html.png}    \\
 
     \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s40_n_near/black_car.png}    &  
     \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s40_n_near/silver_car.png}    \\  
     \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s40_n_near/white_truck.png}   
   \end{tabular}
-  \caption{Left: 
-  The exemplary vehicles tracked through the video sequence of the camera \camsn{4}. 
-  Right:
-  The corresponding normalized arc lengths of the pixel path. 
-  The length is normalized by the original arc length, hence the 1.0 factor for the original video. 
-  As the jitter is removed, the pixels movement is lowered significantly as it does only move with the vehicle, not the camera.
-  This can be seen with around half of the path length remaining after stabilization for all stabilizers.
-  }
+  \caption{Top Left:
+  The tracked vehicles in the camera \camsn{4} marked by their bounding boxes. 
+  Top right: 
+  The normalized arc lengths representing the path of the tracked pixels through the image.
+  Bottom graphs:
+  The tracked pixel locations of the vehicles as they move through the scene for the original video feed and the stabilized ones.
+  It shows that the recording did not include much jitter and thus the paths are already relatively smooth.
+   }
   \label{fig:object_tracking_appendix_s40_n_near}
 \end{figure*}
 
@@ -93,42 +89,43 @@ Please see the next pages for the plots.
   \centering
   \begin{tabular}{cc}
     \includegraphics[width=0.45\linewidth]{diagrams/object_tracking/s50_s_far/frame.png}    &  
-    \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s50_s_far/arcs.png}    \\
+    \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s50_s_far/normalized_arc_lengths.html.png}    \\
 
     \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s50_s_far/silver_car.png}    &  
     \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s50_s_far/white_truck.png}    \\  
     \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s50_s_far/yellow_truck.png}   
   \end{tabular}
-  \caption{Left: 
-  The exemplary vehicles tracked through the video sequence of the camera \camsn{4}. 
-  Right:
-  The corresponding normalized arc lengths of the pixel path. 
-  The length is normalized by the original arc length, hence the 1.0 factor for the original video. 
-  As the jitter is removed, the pixels movement is lowered significantly as it does only move with the vehicle, not the camera.
-  This can be seen with around half of the path length remaining after stabilization for all stabilizers.
+  \caption{Top Left:
+  The tracked vehicles in the camera \camsf{5} marked by their bounding boxes. 
+  Top right: 
+  The normalized arc lengths representing the path of the tracked pixels through the image.
+  Bottom graphs:
+  The tracked pixel locations of the vehicles as they move through the scene for the original video feed and the stabilized ones.
+  The jittery motion of the camera can be clearly seen by the chaotic movement of the pixels.
+  After stabilization the pixels move much more smoothly through the images, whereas the remaining jitter is mostly due to inaccuracies in the tracking. 
+  The tracking of the silver car displays a lane change of the vehicle over two lanes.
+  The tracking of the yellow truck displays an outlier for FAST as it extended the path of the tracked pixel.
   }
   \label{fig:object_tracking_appendix_s50_s_far}
 \end{figure*}
-
-
 
 \begin{figure*}[!ht]
   \centering
   \begin{tabular}{cc}
     \includegraphics[width=0.45\linewidth]{diagrams/object_tracking/s50_s_near/frame.png}    &  
-    \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s50_s_near/arcs.png}    \\
+    \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s50_s_near/normalized_arc_lengths.html.png}    \\
 
     \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s50_s_near/red_truck.png}    &  
     \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s50_s_near/red_van.png}    \\  
     \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s50_s_near/yellow_truck.png}   
   \end{tabular}
-  \caption{Left: 
-  The exemplary vehicles tracked through the video sequence of the camera \camsn{4}. 
-  Right:
-  The corresponding normalized arc lengths of the pixel path. 
-  The length is normalized by the original arc length, hence the 1.0 factor for the original video. 
-  As the jitter is removed, the pixels movement is lowered significantly as it does only move with the vehicle, not the camera.
-  This can be seen with around half of the path length remaining after stabilization for all stabilizers.
+  \caption{Top Left:
+  The tracked vehicles in the camera \camsn{5} marked by their bounding boxes. 
+  Top right: 
+  The normalized arc lengths representing the path of the tracked pixels through the image.
+  Bottom graphs:
+  The tracked pixel locations of the vehicles as they move through the scene for the original video feed and the stabilized ones.
+  It shows that the recording did not include much jitter and thus the paths are already relatively smooth.
   }
   \label{fig:object_tracking_appendix_s50_s_near}
 \end{figure*}
@@ -148,6 +145,7 @@ Please see the next pages for the plots.
     \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s40_n_far/parameters.csv/FocalLength_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} &
 \end{tabular}
 \caption{
+  Camera: \camsf{4}.
   Left: The resulting translational parameters plotted against the remaining losses. 
   Right: The resulting rotational parameters plotted against the remaining losses.
   Bottom: The resulting focal length  plotted against the remaining losses.
@@ -170,6 +168,7 @@ Please see the next pages for the plots.
     \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s40_n_near/parameters.csv/FocalLength_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} &
 \end{tabular}
 \caption{
+  Camera: \camsn{4}.
   Left: The resulting translational parameters plotted against the remaining losses. 
   Right: The resulting rotational parameters plotted against the remaining losses.
   Bottom: The resulting focal length  plotted against the remaining losses.
@@ -193,6 +192,7 @@ Please see the next pages for the plots.
 
   \end{tabular}
 \caption{
+  Camera: \camsf{5}.
   Left: The resulting translational parameters plotted against the remaining losses. 
   Right: The resulting rotational parameters plotted against the remaining losses.
   Bottom: The resulting focal length  plotted against the remaining losses.
@@ -215,6 +215,7 @@ Please see the next pages for the plots.
     \includegraphics[width=0.45 \linewidth]{diagrams/calibration/s50_s_near/parameters.csv/FocalLength_vs_Loss[Correspondences]_vs_Loss[Lambdas]_cluster_All.png} &
 \end{tabular}
 \caption{
+  Camera: \camsn{5}.
   Left: The resulting translational parameters plotted against the remaining losses. 
   Right: The resulting rotational parameters plotted against the remaining losses.
   Bottom: The resulting focal length  plotted against the remaining losses.

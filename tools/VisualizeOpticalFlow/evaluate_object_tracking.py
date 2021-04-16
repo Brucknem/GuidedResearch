@@ -19,7 +19,7 @@ def get_output_filename(foldername, filename):
 def setup(foldername, filename, title):
     output_file(get_output_filename(foldername, filename + "_" + title))
 
-    p = figure(plot_width=plot_height, plot_height=plot_height, tools=tools)
+    p = figure(plot_width=plot_width, plot_height=plot_height, tools=tools)
     p.title.text = title + ' of ' + filename.replace('.csv', '') + ' [' + get_title_suffix() + ']'
 
     return p
