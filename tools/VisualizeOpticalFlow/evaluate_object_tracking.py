@@ -1,11 +1,13 @@
 import math
 import os
-from bokeh.models import ColumnDataSource, LabelSet, Whisker, FactorRange
+
+from bokeh.io import export_png
+from bokeh.models import ColumnDataSource, LabelSet, Whisker, FactorRange, NumeralTickFormatter
 from bokeh.transform import dodge
 
 from commons import *
 
-display = True
+display = False
 
 
 def get_output_filename(foldername, filename):
@@ -17,7 +19,7 @@ def get_output_filename(foldername, filename):
 def setup(foldername, filename, title):
     output_file(get_output_filename(foldername, filename + "_" + title))
 
-    p = figure(plot_width=plot_width, plot_height=plot_height, tools=tools)
+    p = figure(plot_width=plot_height, plot_height=plot_height, tools=tools)
     p.title.text = title + ' of ' + filename.replace('.csv', '') + ' [' + get_title_suffix() + ']'
 
     return p
@@ -59,6 +61,7 @@ def generate_xy_plots(df, foldername, filename, column_names):
     xy_plot.yaxis.axis_label = "Y [px]"
 
     set_plot_settings(xy_plot)
+    export_png(xy_plot, filename=get_output_filename(foldername, filename + "_" + "Tracking") + ".png")
     show_or_save(xy_plot, display)
 
 
@@ -68,7 +71,8 @@ def distances(values):
 
 def generate_curvature_plots(df, foldername, filename, column_names):
     title = "Normalized arc length"
-    output_file(get_output_filename(foldername, 'normalized_arc_lengths'))
+    output_filename = get_output_filename(foldername, 'normalized_arc_lengths')
+    output_file(output_filename)
     data = {
         'Vehicles': vehicles
     }
@@ -89,7 +93,7 @@ def generate_curvature_plots(df, foldername, filename, column_names):
     data_original = np.array(data["Original"])
     for stabilizer in column_names:
         data[stabilizer] = np.array(data[stabilizer]) / data_original
-        data[stabilizer + formatted_suffix] = [str(round(val, 2)) for val in data[stabilizer]]
+        data[stabilizer + formatted_suffix] = [str(round(val * 100, 2)) + "%" for val in data[stabilizer]]
 
     source = ColumnDataSource(data=data)
     p = figure(
@@ -98,8 +102,10 @@ def generate_curvature_plots(df, foldername, filename, column_names):
         plot_width=plot_width,
         plot_height=plot_height,
         tools=tools,
+        # tools="",
     )
     p.title.text = title + ' of ' + filename.replace('.csv', '') + ' [' + get_title_suffix() + ']'
+    p.yaxis.formatter = NumeralTickFormatter(format='0%')
 
     colors = get_colors(len(column_names))
     # colors = colors[]
@@ -117,6 +123,7 @@ def generate_curvature_plots(df, foldername, filename, column_names):
     set_plot_settings(p)
     p.xgrid.grid_line_alpha = 0
 
+    export_png(p, filename=output_filename + ".png")
     show_or_save(p, display)
 
 
@@ -125,7 +132,6 @@ window = 1
 df.dropna(how='all', axis=1, inplace=True)
 column_names = list(set([str(name).split(' [')[0] for name in df.columns]))
 vehicles = list(set(df["Vehicle"]))
-foldername = Path(filename).parent.name
 filename = Path(filename).name
 
 column_names.remove("Frame")
@@ -136,6 +142,6 @@ column_names = ["Original", *column_names]
 # column_names = ["Original", "FAST", "ORB", "SURF", "FAST (No skew)", "ORB (No skew)", "SURF (No skew)"]
 for vehicle in vehicles:
     df_vehicle = df[df["Vehicle"] == vehicle]
-    generate_xy_plots(df_vehicle, foldername, vehicle, column_names)
+    generate_xy_plots(df_vehicle, filename, vehicle, column_names)
 
-generate_curvature_plots(df, foldername, "tracking", column_names)
+generate_curvature_plots(df, filename, "tracking", column_names)

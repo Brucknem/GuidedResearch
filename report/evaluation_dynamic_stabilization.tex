@@ -43,7 +43,7 @@ and present two measures to evaluate the dynamic stabilization pipeline describe
     \end{tabular}
     \caption{
         From left to right: Original frame, stabilized using SURF, ORB and FAST.
-        The dense optical flow displaying the pixel displacement, the lighter the color the further the displacement. 
+        The dense optical flow displays the pixel displacement, the lighter the color the further the displacement. 
         The angle of displacement is color coded according to the HSV color circle.  
         In the original frame the violet background color indicates a jittery camera movement. 
         The car in the lower half is driving in the opposite direction as the camera jitters. 
@@ -103,7 +103,7 @@ For the FAST detector it shows that except for the \camsf{4} camera only between
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\paragraph{Problem of Optical Flow as a measure}
+\paragraph{Problem of Optical Flow as a Measure}
 \label{sec:dynamic_stabilization_evaluation_optical_flow_problem}
 Optical flow cannot distinguish between dynamically moving objects and static scene.
 This is especially a problem when a jitter of the camera moves the pixels in the opposite direction as the vehicles path is pointing in image space.
@@ -119,68 +119,51 @@ Nonetheless, it hints at the overall stabilization capabilities of the presented
 
 
 \subsubsection{Track features and calculate path smoothness}
-To overcome the problems of the optical flow as a measure of stability we randomly took three sample vehicles per camera and tracked their pixel locations over time.
-As the vehicles move the bounding box of the object is found using the Discriminative Correlation Filter With Channel and Spatial Reliability proposed by Lukezic \etal{} \cite{Lukezic_2017_CVPR,opencv_library}.
-The middle point of the bounding box is then written to disk and used as the predicted pixel location of the object.
+We randomly took three sample vehicles per camera and tracked their pixel locations over the sequence.
+As the vehicles move through the image the bounding box of the object is found using the \emph{Discriminative Correlation Filter With Channel and Spatial Reliability} proposed by Lukezic \etal{} \cite{Lukezic_2017_CVPR,opencv_library}.
+The center point of the bounding box is then written to disk and used as the predicted pixel location $p$ of the vehicle.
 
-We only track in the original frame to remove inaccuracies in the tracking and use the homographic transformation matrix from \autoref{eq:homographic_transformation} that stabilizes the frame.
+We only track in the original frame to remove inaccuracies in the tracking and use the homographic transformation matrix from \autoref{eq:dynamic_stabilization_homographic_transformation} that stabilizes the frame to also stabilize the bounding box.
 This gives us comparable results for the pixel locations. 
 
-To calculate the arc length we use the sum of distances between the middle point pixel locations over frames. 
-The middle point is formulated as 
-\begin{equation}
-    p = \begin{pmatrix}
-        x + 0.5 * w \\
-        y + 0.5 * h
-    \end{pmatrix}
-\end{equation}
-with $x$ being the $x$-coordinate of the top left corner of the bounding box, 
-$y$ being the $y$-coordinate of the top left corner of the bounding box, 
-$w$ being the width of the bounding box and
-$h$ being the height of the bounding box.
+We calculate the travelled distance of the pixel locations of the objects as they move through the image. 
+This distance is a direct measure for the jittery motion in the image as it introduces large jumps of the tracked positions, thus directly increasing the travelled distance.
 
-The arc length is described by
+The travelled distance is formulated as the arc length
 \begin{equation}
     arc(vehicle) = \sum_{n = 1}^{\left\lvert frames \right\rvert } \left\lVert 
         p_{i} - p_{i-1}
     \right\rVert _2
 \end{equation} 
-
-To get comparable results a normalization is performed by the arc length of the original video frame.
+based on the finite differences between consecutive tracked positions.
+To get comparable results a normalization 
 \begin{equation}
     narc_{stabilizer}(vehicle) = 
     \frac{arc_{stabilizer}(vehicle)}{arc_{original}(vehicle)}
 \end{equation} 
+is performed by the arc length of the original video frame.
 
-\autoref{fig:object_tracking_s40_n_far} displays the vehicles tracked in the video sequence taken from the camera \camsn{4}. 
-There is one red truck, a black pickup and a white car taken as a random sample.
-The tracking is performed als long as they are visible.
-
-As our dynamic stabilization algorithms remove environmental influences from the frames the pixels only move on the projected path of their vehicles.
-\autoref{fig:object_tracking_s40_n_far} displays that the arc lengths after stabilization remain at only a relative length of $0.5$ of the original length.
-This clearly indicates that with the same vehicle movement the tracked position is much more accurate.
+\autoref{fig:object_tracking_s40_n_far} displays the vehicles tracked in the video sequence taken from the camera \camsf{4}. 
+There is one red truck, a black pickup and a white car taken as random samples.
+The tracking is performed als long as the vehicles are visible.
+It shows that the travelled distances of the pixels after dynamic stabilization remain at between $43\%$ and $68.4\%$ compared to the original one.   
+This implies that much of the additional motion introduced by the environmental influences are removed and the remaining path displays the real projected path of the vehicle. 
 
 \begin{figure*}[!ht]
     \centering
     \begin{tabular}{cc}
       \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s40_n_far/frame_cropped.png}    &  
       \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s40_n_far/arcs.png}    
-\end{tabular}
+    \end{tabular}
     \caption{Left: 
     The exemplary vehicles tracked through the video sequence of the camera \camsn{4}. 
     Right:
     The corresponding normalized arc lengths of the pixel path. 
-    The length is normalized by the original arc length, hence the 1.0 factor for the original video. 
-    As the jitter is removed, the pixels movement is lowered significantly as it does only move with the vehicle, not the camera.
-    This can be seen with around half of the path length remaining after stabilization for all stabilizers.
+    The removed jitter is directly proportional to the decrease in the normalized arc lengths, as the pixel only follows the real vehicles movement.
     }
     \label{fig:object_tracking_s40_n_far}
 \end{figure*}
 
-The 
-\autoref{fig:object_tracking_appendix_s40_n_far}, 
-\autoref{fig:object_tracking_appendix_s40_n_near}, 
-\autoref{fig:object_tracking_appendix_s50_s_far} and 
-\autoref{fig:object_tracking_appendix_s50_s_near} in \autoref{sec:appendix} display the tracked pixel locations of three cars per camera.
+We included plots for the tracked pixel locations and the comparison of the arc lengths for the other three cameras in the Appendix (\autoref{sec:appendix}).
 
 \subsubsection{Speed comparison}

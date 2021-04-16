@@ -21,7 +21,7 @@ def get_title_suffix():
     return sys.argv[2]
 
 
-tools = "save,crosshair,pan,wheel_zoom,box_zoom,undo,redo,reset"
+tools = ""  # "save,crosshair,pan,wheel_zoom,box_zoom,undo,redo,reset"
 plot_width = 1600
 plot_height = 800
 formatted_suffix = "_formatted"

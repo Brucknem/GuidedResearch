@@ -79,7 +79,7 @@ We estimate a homographic transformation $H$ that maps the homogeneous pixel loc
 We minimize the reprojection-error between the pixels so that for each match $i$ it holds
 \begin{equation}
  z_i  * (x'_i, y'_i, 1)^T \sim H * (x_i, y_i, 1)^T
- \label{eq:homographic_transformation}
+ \label{eq:dynamic_stabilization_homographic_transformation}
 \end{equation}
 where $z_i$ is the homogeneous component used in the perspective division. 
 We use a RANSAC \cite{fischler1981random} based estimation procedure to robustify the minimization against outliers.
