@@ -9,20 +9,6 @@ In the following we evaluate the implemented static calibration algorithm and as
 
 \subsubsection{Ensure no Systematic Error}
 
-\begin{figure*}[t]
-    \centering
-    \begin{tabular}{cc}
-      \includegraphics[width=0.45 \linewidth]{images/calibration/google_maps_s40_n.png} &
-      \includegraphics[width=0.45 \linewidth]{images/calibration/google_maps_s50_s.png} 
-  \end{tabular}
-  \caption{Left: The positions of the cameras \camsn{4} (red) and \camsf{4} (blue) and their respective looking directions (green). 
-  Right: The positions of the cameras \camsn{5} (red) and \camsf{5} (blue) and their respective looking directions (green). 
-  The rotations of the cameras are in a reasonable range so that the cameras look along the highway as expected. 
-  All cameras, except the \camsf{5} camera, are within reasonable translational bounds around their real world location as \autoref{sec:static_calibration_expectable_error} shows.
-  }
-  \label{fig:static_calibration_google_maps}
-  \end{figure*}
-
 We solve the BA problem proposed in \autoref{sec:static_calibration_approach} by minimizing the reprojection-error as formulated in \autoref{eq:static_calibration_rerpojection_error}.
 The algorithm converges to a pair of optimal translation $T$ and rotation $R$ values for the camera pose.
 These $T, R$ values best describe the camera pose relative to the mapped objects as stated in \autoref{eq:static_calibration_reprojection}.
@@ -69,6 +55,21 @@ The algorithm therefore cannot distinguish solutions where it places the camera 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsubsection{Expectable Error Bounds}
+
+\begin{figure*}[t]
+  \centering
+  \begin{tabular}{cc}
+    \includegraphics[width=0.45 \linewidth]{images/calibration/google_maps_s40_n.png} &
+    \includegraphics[width=0.45 \linewidth]{images/calibration/google_maps_s50_s.png} 
+\end{tabular}
+\caption{Left: The positions of the cameras \camsn{4} (red) and \camsf{4} (blue) and their respective looking directions (green). 
+Right: The positions of the cameras \camsn{5} (red) and \camsf{5} (blue) and their respective looking directions (green). 
+The rotations of the cameras are in a reasonable range so that the cameras look along the highway as expected. 
+All cameras, except the \camsf{5} camera, are within reasonable translational bounds around their real world location as \autoref{sec:static_calibration_expectable_error} shows.
+}
+\label{fig:static_calibration_google_maps}
+\end{figure*}
+
 \label{sec:static_calibration_expectable_error}
 
 Due to measurement uncertainty in the camera sensors we expect some remaining error after pose estimation.

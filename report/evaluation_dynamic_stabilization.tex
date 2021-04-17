@@ -88,15 +88,15 @@ The displacement is damped by all of the stabilizers by a mean of up to $4.5$ pi
       \includegraphics[width=\linewidth]{diagrams/optical_flow/stats.html.png}    
     \caption{
         Comparison of the percentages of more stable frames after dynamic stabilization per camera and stabilizer.
-        A frame is classified as more stable if the MPD is lower than for the original video feed. 
+        A processed frame is classified as more stable if the MPD is lower than for the original frame. 
     }
     \label{fig:dynamic_stabilization}
 \end{figure}
 
 \autoref{fig:dynamic_stabilization} displays the percentage of frames that are more stable than the original frame.
 We define a frame to be more stable if its MPD is lower than the MPD of the original frame. 
-It shows that for SURF and ORB at least $88.9\%$ ranging up to $99.7\%$ of frames are more stable.
-For the FAST detector it shows that except for the \camsf{4} camera only between $67.2\%$ to $79.4\%$ of frames are more stable, whereas a value of $50\%$ does not directly indicate that the other $50\%$ of frames are worse as pointed out in \autoref{sec:dynamic_stabilization_evaluation_optical_flow_problem}.  
+It shows that all for all stabilization pipeline instances more than $86.6\%$ of frames are more stable, but SURF outperforms the other stabilizers with at least $95.6\%$ of frames being more stable.
+Nonetheless, the remaining percentages of frames do not necessarily imply the frames to be worse as \autoref{sec:dynamic_stabilization_evaluation_optical_flow_problem} states.
 
 We included plots for the MPD and the damping for the other three cameras in the Appendix (\autoref{sec:appendix}).
 
