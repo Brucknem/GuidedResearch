@@ -16,10 +16,10 @@ We assure the correctness and quantify the improvements resulting from the algor
     \label{fig:cameras_schema}
     \end{figure}
 
-We use video recordings from the four cameras mounted to the two gantry bridges internally named S40 and S50. The schematic camera setup is displayed in \autoref{fig:cameras_schema}.
+We use video recordings from the four cameras mounted to the two gantry bridges internally named S40 and S50. The schematic camera setup is displayed in \Cref{fig:cameras_schema}.
 
 The dataset consists of four recordings, each with of a length of $1495$ frames over $\sim 60$ seconds at $25$ frames per second.
-The recordings are taken on a day with strong winds to ensure high jitter in the video feed to optimally test the dynamic stabilization pipeline described in \autoref{sec:dynamic_stabilization_approach}. 
+The recordings are taken on a day with strong winds to ensure high jitter in the video feed to optimally test the dynamic stabilization pipeline described in \Cref{sec:dynamic_stabilization_approach}. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -58,9 +58,9 @@ It describes the apparent motion of image objects between two consecutive frames
 We use the dense optical flow estimation algorithm proposed by Farnebäck \cite{farnback10.1007/3-540-45103-X_50,opencv_library} to measure the displacement of each pixel between the frames. 
 We calculate the mean displacement over the whole frame to get a measure for the total motion in the image. 
 
-\autoref{fig:optical_flow_example} displays one frame of optical flow calculated pre and after stabilization.
+\Cref{fig:optical_flow_example} displays one frame of optical flow calculated pre and after stabilization.
 It qualitatively shows that the static background scene is dark in the stabilized frames which indicates a low optical flow and thus nearly no movement. 
-We see a car driving, indicated by the yellow patch, that remains as expected using SURF and ORB, but gets filtered out by FAST. This problem is described in \autoref{sec:dynamic_stabilization_evaluation_optical_flow_problem}.     
+We see a car driving, indicated by the yellow patch, that remains as expected using SURF and ORB, but gets filtered out by FAST. This problem is described in \Cref{sec:dynamic_stabilization_evaluation_optical_flow_problem}.     
 
 \begin{figure}[t]
     \centering
@@ -80,7 +80,7 @@ We see a car driving, indicated by the yellow patch, that remains as expected us
     \label{fig:dynamic_stabilization_s40_far}
 \end{figure}
 
-\autoref{fig:dynamic_stabilization_s40_far} displays the mean pixel displacement (MPD) per frame calculated as the mean of the lengths of the vectors in the optical flow field and the damping as the difference of the mean displacements over the original and stabilized frame.
+\Cref{fig:dynamic_stabilization_s40_far} displays the mean pixel displacement (MPD) per frame calculated as the mean of the lengths of the vectors in the optical flow field and the damping as the difference of the mean displacements over the original and stabilized frame.
 It shows that the original frames have a MPD of up to $5$ pixels per frame. This implies that on average every pixel on the dynamic scene and static background had moved by $5$ pixels per frame. 
 The displacement is damped by all of the stabilizers by a mean of up to $4.5$ pixels, whereas the remaining displacement is due to the actually moving vehicles in the dynamic foreground.   
 
@@ -93,12 +93,12 @@ The displacement is damped by all of the stabilizers by a mean of up to $4.5$ pi
     \label{fig:dynamic_stabilization}
 \end{figure}
 
-\autoref{fig:dynamic_stabilization} displays the percentage of frames that are more stable than the original frame.
+\Cref{fig:dynamic_stabilization} displays the percentage of frames that are more stable than the original frame.
 We define a frame to be more stable if its MPD is lower than the MPD of the original frame. 
 It shows that all for all stabilization pipeline instances more than $86.6\%$ of frames are more stable, but SURF outperforms the other stabilizers with at least $95.6\%$ of frames being more stable.
-Nonetheless, the remaining percentages of frames do not necessarily imply the frames to be worse as \autoref{sec:dynamic_stabilization_evaluation_optical_flow_problem} states.
+Nonetheless, the remaining percentages of frames do not necessarily imply the frames to be worse as \Cref{sec:dynamic_stabilization_evaluation_optical_flow_problem} states.
 
-We included plots for the MPD and the damping for the other three cameras in the Appendix (\autoref{sec:appendix}).
+We included plots for the MPD and the damping for the other three cameras in the Appendix (\Cref{sec:appendix}).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -126,7 +126,7 @@ We randomly took three sample vehicles per camera and tracked their pixel locati
 As the vehicles move through the image the bounding box of the object is found using the \emph{Discriminative Correlation Filter With Channel and Spatial Reliability} proposed by Lukezic \etal{} \cite{Lukezic_2017_CVPR,opencv_library}.
 The center point of the bounding box is then written to disk and used as the predicted pixel location $p$ of the vehicle.
 
-We only track in the original frame to remove inaccuracies in the tracking and use the homographic transformation matrix from \autoref{eq:dynamic_stabilization_homographic_transformation} that stabilizes the frame to also stabilize the bounding boxes.
+We only track in the original frame to remove inaccuracies in the tracking and use the homographic transformation matrix from \Cref{eq:dynamic_stabilization_homographic_transformation} that stabilizes the frame to also stabilize the bounding boxes.
 This gives us comparable results for the pixel locations. 
 
 We calculate the travelled distance of the pixel locations of the objects as they move through the image. 
@@ -146,7 +146,7 @@ To get comparable results a normalization
 \end{equation} 
 is performed by the arc length of the original video frame.
 
-\autoref{fig:object_tracking_s40_n_far} displays the vehicles tracked in the video sequence taken from the camera \camsf{4}. 
+\Cref{fig:object_tracking_s40_n_far} displays the vehicles tracked in the video sequence taken from the camera \camsf{4}. 
 There is one red truck, a black pickup and a white car taken as random samples.
 The tracking is performed als long as the vehicles are visible.
 It shows that the travelled distances of the pixels after dynamic stabilization remain at between $43\%$ and $68.4\%$ compared to the original one.   
@@ -167,10 +167,10 @@ This implies that much of the additional motion introduced by the environmental 
     \label{fig:object_tracking_s40_n_far}
 \end{figure*}
 
-We included plots for the tracked pixel locations and the comparison of the arc lengths for the other three cameras in the Appendix (\autoref{sec:appendix}).
+We included plots for the tracked pixel locations and the comparison of the arc lengths for the other three cameras in the Appendix (\Cref{sec:appendix}).
 
 \subsubsection{Speed Comparison}
-\autoref{tab:dynamic_stabilization_speeds} compares the average time needed to stabilize a frame per stabilizer instance.
+\Cref{tab:dynamic_stabilization_speeds} compares the average time needed to stabilize a frame per stabilizer instance.
 It shows that, although the name, the FAST stabilizer is the slowest, followed by SURF and beaten by ORB.
 Nonetheless, all stabilizers run at more than 50 frames per second and are thus all realtime capable.
 

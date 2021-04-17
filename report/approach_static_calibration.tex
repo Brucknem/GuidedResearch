@@ -37,7 +37,7 @@ S = \{o + \lambda * d: \quad \lambda \in [0, h]\}
 where $S$ is the set of points along its central axis between the base at $\lambda = 0$ and its top at $\lambda = h$.
 This approximation allows for a joint optimization of their world positions and the camera intrinsic and extrinsic parameters.
 
-\autoref{sec:static_calibration_number_points} derives a minimal number of points for the resulting system of equations to be solvable.
+\Cref{sec:static_calibration_number_points} derives a minimal number of points for the resulting system of equations to be solvable.
 
 % The assumptions we made are: 
 % \begin{itemize}
@@ -66,7 +66,7 @@ This approximation allows for a joint optimization of their world positions and 
 
 We solve the BA problem by minimizing the reprojection-error over the PDs.
 We thus require a set $C$ of correspondences that map world points $s_c$ of the PDs to their respective pixel $p_c$. 
-\autoref{fig:static_calibration_mapping} displays an exemplary mapping from a HD map to the video feed.
+\Cref{fig:static_calibration_mapping} displays an exemplary mapping from a HD map to the video feed.
 
 This mapping is currently done by human interaction and not fully automated. 
 We implemented an annotation tool to mark pixels that outputs a list of pixels that can easily be mapped to the list of objects.
@@ -121,7 +121,7 @@ The optimal values for $\pi,R,T$ are found if for all correspondences the distan
 \end{equation}
 
 This places constraints on the values $\pi,R,T$ can take and enables us to recover the camera pose, the intrinsic parameters and the 1D approximate positions relative to the $\lambda$s only from the correspondences.\\
-\autoref{fig:static_calibration_calibration} displays rendering the PDs before and after calibration.
+\Cref{fig:static_calibration_calibration} displays rendering the PDs before and after calibration.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

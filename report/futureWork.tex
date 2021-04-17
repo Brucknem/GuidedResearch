@@ -10,7 +10,7 @@ Only by night and if the static background is occluded the stabilization pipelin
 
 We implemented the solver for the BA problem to include human interaction when mapping from PDs to pixels.
 The mapping will be harder in bad weather and lighting conditions based on the worse visibility of the landmarks.
-We propose an automatic mapping scheme in \autoref{sec:auto_mapping_landmarks}.
+We propose an automatic mapping scheme in \Cref{sec:auto_mapping_landmarks}.
 This scheme will be affected by changing weather and lighting conditions as the detection of new landmarks is also based on the visibility of landmarks.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -21,7 +21,7 @@ This scheme will be affected by changing weather and lighting conditions as the 
 We present two major improvements that can be done to extend the presented dynamic stabilization approach.
 
 \subsubsection{Warp Field Stabilization based on Optical Flow}
-We use the optical flow to measure the performance of the stabilizers as described in  \autoref{sec:evaluation_dynamic_stabilization_optical_flow}.
+We use the optical flow to measure the performance of the stabilizers as described in  \Cref{sec:evaluation_dynamic_stabilization_optical_flow}.
 The optical flow is a 2D vector field where each vector is a displacement vector showing the movement of pixels between frames caused by movement of the objects or cameras.
 The image can be stabilized using the inverse vector field that also minimizes the reprojection error between frames.
 
@@ -53,7 +53,7 @@ The resulting statistical machine learning approach for the BA can be used to jo
 \subsubsection{New High Definition Map}
 The newer OpenDRIVE standards also provides the possibility to include lane markings.
 These lane markings are easily detectable and can be used for the calibration procedure in conjunction with the object landmarks.
-This would greatly simplify the automatic detection and mapping procedures as described in \autoref{sec:auto_mapping_landmarks} and \autoref{sec:auto_mapping_landmarks} as they are spatially more extend and thus easier to detect.
+This would greatly simplify the automatic detection and mapping procedures as described in \Cref{sec:auto_mapping_landmarks} and \Cref{sec:auto_mapping_landmarks} as they are spatially more extend and thus easier to detect.
 Furthermore, the lane markings are always white or yellow, which simplifies the detection.
-As shown in \autoref{sec:static_calibration_expectable_error} the static calibration is more precise the closer the correspondences are to the cameras. 
+As shown in \Cref{sec:static_calibration_expectable_error} the static calibration is more precise the closer the correspondences are to the cameras. 
 As there exists far more lane markings than objects, and with the markings being evenly distributed over the road the static calibration would benefit from this additional information.
