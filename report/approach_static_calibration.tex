@@ -69,7 +69,7 @@ We thus require a set $C$ of correspondences that map world points $s_c$ of the 
 \Cref{fig:static_calibration_mapping} displays an exemplary mapping from a HD map to the video feed.
 
 This mapping is currently done by human interaction and not fully automated. 
-We implemented an annotation tool to mark pixels that outputs a list of pixels that can easily be mapped to the list of objects.
+We implemented an annotation tool to mark and create a list of pixels that can easily be mapped to the list of objects.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -172,7 +172,7 @@ We solve the BA problem by minimizing a modified version of the least-squares re
 
 where $P$ is the set of mapped pixels $\hat{p}_c$ in the image and $S$ is the set of mapped corresponding points $s_c$ from the PDs.  
 The additional weights $w_c \in W$ are associated to the correspondences to downweight outliers and are enforced to stay near $1$.
-We use a robust loss function $\rho$ to further decrease the influence of outliers.
+We use a robust huber loss function $\rho$ to further decrease the influence of outliers.
 
 We guide the algorithm to feasible solutions by penalizing $\lambda_c$ values that are negative or exceed the PDs height $h_c$ using the distance 
 \begin{equation}

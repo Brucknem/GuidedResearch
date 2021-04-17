@@ -23,7 +23,7 @@ In this paper we propose two algorithms to solve distinct problems that arise fr
 
 The camera sensors used in the project are mounted to gantry bridges spanning over the highway.
 Environmental influences, \eg{} wind or vibrations from passing vehicles, bring the bridges into a swinging state that spreads onto the cameras. 
-This unwanted real world movement propagates into the video feeds output by the camera and introduces jittery motion in image space. 
+This unwanted real world movement propagates into the video feeds output by the cameras and introduces jittery motion in image space. 
 We assume the cameras to be mostly static, thus we only face disturbances within a small range around the resting position.
 Nonetheless, the small disturbances get amplified by the huge distances covered by the cameras and introduce substantial error.
 
@@ -33,7 +33,7 @@ To mitigate the noise added by the jittery motion we propose the pipeline displa
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\paragraph{Extract the Static Background}
+\paragraph{Extract Static Background}
 We stabilize the input frame by minimizing the reprojection-error between the video frame and the reference frame, thus aligning the images.
 This alignment is based on the matching of features between the frames, whereas we do not align the moving vehicles, but only the static non-moving background, \eg{} the road, poles, guardrails and bridges.
 We assume that the background does not move in the real world, thus aligning it during image warping ensures that the scene stays static and only the vehicles real movement is kept.
@@ -60,9 +60,9 @@ the \emph{Improved Adaptive Gaussian Mixture Model for Background Subtraction} p
 
 We search the static background for pixel locations that are prominent and depict specific patterns that are unique and can easily be compared.
 The detected features describe the location based on different metrics, \eg{} the local image gradient, oriented histograms or haar-like features \cite{stork2001pattern}.
-Kumar \etal{} \cite{kumar2014survey} give an in depth description of a multitude of feature detectors and descriptors.
+Kumar \etal{} \cite{kumar2014survey} give in depth descriptions of a multitude of feature detectors and descriptors.
 
-We implemented the SURF \cite{bay10.1007/11744023_32} and ORB \cite{rublee6126544} feature detectors and descriptors and the Fast \cite{Ghahremani_2021} feature detector with FREAK \cite{alahi6247715} feature descriptors. The algorithmic implementation is taken from the OpenCV library \cite{opencv_library}. 
+We implemented the SURF \cite{bay10.1007/11744023_32} and ORB \cite{rublee6126544} feature detectors and descriptors and the Fast \cite{Ghahremani_2021} feature detector with FREAK \cite{alahi6247715} feature descriptors. The algorithmic implementation is included in the OpenCV library \cite{opencv_library}. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -98,7 +98,7 @@ The alignment minimizes the motion of the static background scene and leaves onl
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\paragraph{Foreground/Background Segmentation Upate}
+\paragraph{Upate of Background Segmentation}
 We use the stabilized frame to update the segmentation of the foreground and background.
 We assume the motion between frames to be relatively small, thus we use the segmentation of the stabilized frame for the next frame.
 This reduces the search space for the feature detectors and prohibits matches between static scene and dynamic foreground objects. 

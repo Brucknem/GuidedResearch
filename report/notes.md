@@ -12,7 +12,7 @@ https://thesisguide.org/2014/10/13/thesis-architecture/
   - [ ] Inter camera calibration becomes worse over time
 - [ ] Contributions to solve these problems
   - [ ] Dynamic stabilization
-    - [ ] Vision based, digital image stabilization approach
+    - [ ] vision-based, digital image stabilization approach
     - [ ] Feature matching and homographic transformation
   - [ ] Static calibration
     - [ ] HD map based approach
@@ -34,7 +34,7 @@ https://thesisguide.org/2014/10/13/thesis-architecture/
 
 # Approach
 - [ ] Dynamic stabilization
-  - [ ] Vision based, digital image stabilization approach
+  - [ ] vision-based, digital image stabilization approach
   - [ ] Feature detection
   - [ ] Feature matching
   - [ ] Homographic transformation

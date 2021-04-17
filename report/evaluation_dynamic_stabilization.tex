@@ -80,7 +80,7 @@ We see a car driving, indicated by the yellow patch, that remains as expected us
     \label{fig:dynamic_stabilization_s40_far}
 \end{figure}
 
-\Cref{fig:dynamic_stabilization_s40_far} displays the mean pixel displacement (MPD) per frame calculated as the mean of the lengths of the vectors in the optical flow field and the damping as the difference of the mean displacements over the original and stabilized frame.
+\Cref{fig:dynamic_stabilization_s40_far} displays the mean pixel displacement (MPD) per frame calculated as the mean of the lengths of the vectors in the optical flow field and the damping as the difference of the MPD of the original and stabilized frames.
 It shows that the original frames have a MPD of up to $5$ pixels per frame. This implies that on average every pixel on the dynamic scene and static background had moved by $5$ pixels per frame. 
 The displacement is damped by all of the stabilizers by a mean of up to $4.5$ pixels, whereas the remaining displacement is due to the actually moving vehicles in the dynamic foreground.   
 
@@ -191,3 +191,5 @@ Nonetheless, all stabilizers run at more than 50 frames per second and are thus 
     }
     \label{tab:dynamic_stabilization_speeds}
   \end{table}
+
+  \newpage
