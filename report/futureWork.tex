@@ -3,10 +3,10 @@
 \section{Future Work}
 The project leaves us with the opportunity to continue the research in multiple directions.
 
-\subsection{Test on different weather/lighting conditions}
+\subsection{Varying Weather and Lighting Conditions}
 We tested and evaluated the implementations on recordings with good weather and lighting conditions, thus a next step is to test the implementations in bad weather and lighting conditions, \eg by night, rain and snow.
-From out current perspective the feature based dynamic stabilization approach will not suffer in performance as the detected features only depend on features in the image space. 
-Only by night and if the static background is occluded the stabilization pipeline will fail.
+From out current perspective the feature based dynamic stabilization approach will suffer in performance as the homography estimation depend on features in the image space. 
+By night and if the static background is occluded the stabilization pipeline will fail, although in these cases the complete RGB image will be unusable at all.
 
 We implemented the solver for the BA problem to include human interaction when mapping from PDs to pixels.
 The mapping will be harder in bad weather and lighting conditions based on the worse visibility of the landmarks.
@@ -26,9 +26,9 @@ The optical flow is a 2D vector field where each vector is a displacement vector
 The image can be stabilized using the inverse vector field that also minimizes the reprojection error between frames.
 
 \subsubsection{Deep Learning based Dynamic Stabilization}
-The ongoing success of deep learning based approaches in computer vision, especially with convolutional neural networks (CNN), a self-learning stabilization procedure might be developed.
-The CNN expects the current input and reference frame and outputs the homographic transform or the warped frame. 
-This might speed up the pipeline and inherently adds a measure for the uncertainty of the results by modelling the probability of a homographic transformation.
+Based on the ongoing success of deep learning approaches in computer vision, especially of convolutional neural networks (CNN), a self-learning stabilization procedure might be developed.
+The CNN expects the current input and reference frame and outputs the homographic transformation or the warped frame. 
+This might speed up the pipeline and inherently adds a measure for the uncertainty of the results by modelling the probability of the homographic transformation.
 This approach can be used to fuse the feature detection, matching and warping steps into one joint step that is learned by the CNN from labeled data.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -40,7 +40,7 @@ We present two major improvements that can be done to extend the presented stati
 
 \subsubsection{Fully Automatic Static Calibration}
 \label{sec:auto_mapping_landmarks}
-We establish the mapping of the correspondences by hand, thus a human has to look up the ids of the landmarks in the HD maps and assign the respective pixels to them.
+We establish the mapping of the correspondences by hand, thus a human has to look up the ids of the landmarks in the HD maps and assign them to their respective pixels.
 After an initial calibration that requires human interaction, an image region based approach might be used to automate this mapping.
 One can project the known base origin points of the objects from the HD maps into the current frame.
 Starting from the projected pixel locations one could search in a defined enclosing region to find pixels that clearly correspond to the objects by applying template, color or gradient matching approaches.
@@ -51,9 +51,9 @@ Aravkin \etal \cite{students_t_bundle_adjustment} have shown that the BA problem
 The resulting statistical machine learning approach for the BA can be used to jointly estimate the camera parameters and world positions of objects, while at the same time being robust against outliers.
   
 \subsubsection{New High Definition Map}
-The newer OpenDRIVE standards also provides the possibility to include lane markings.
+The newer OpenDRIVE standard also provides the possibility to include lane markings.
 These lane markings are easily detectable and can be used for the calibration procedure in conjunction with the object landmarks.
-This would greatly simplify the automatic detection and mapping procedures as described in \Cref{sec:auto_mapping_landmarks} and \Cref{sec:auto_mapping_landmarks} as they are spatially more extend and thus easier to detect.
-Furthermore, the lane markings are always white or yellow, which simplifies the detection.
+This would greatly simplify the automatic detection and mapping procedures as described in \Cref{sec:auto_mapping_landmarks} as they are spatially more extend and thus easier to detect.
+Furthermore, the lane markings are always white or yellow which simplifies the detection.
 As shown in \Cref{sec:static_calibration_expectable_error} the static calibration is more precise the closer the correspondences are to the cameras. 
 As there exists far more lane markings than objects, and with the markings being evenly distributed over the road the static calibration would benefit from this additional information.

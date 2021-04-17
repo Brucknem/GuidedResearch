@@ -137,7 +137,7 @@ This implies that the precision of the rotation is at least in the range of $1.1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsubsection{Estimation of the Algorithmic Error}
+\subsubsection{Estimation of Algorithmic Error Bounds}
 We solve the BA problem proposed in \Cref{sec:static_calibration_approach} by minimizing the reprojection-error as formulated in \Cref{eq:static_calibration_rerpojection_error}.
 The optimization jointly optimizes for the 5 intrinsic parameters, 3 extrinsic translation parameters, 3 extrinsic rotation parameters and one $\lambda_c$ parameter per correspondence.
 Convergence is reached when the gradient of the optimized parameters is zero and the found solution is a minimum.
@@ -161,12 +161,14 @@ The resulting high-dimensional problem contains a multitude of local minima, whe
   Left: The resulting translational parameters plotted against the remaining losses. 
   Right: The resulting rotational parameters plotted against the remaining losses.
   Bottom: The resulting focal length  plotted against the remaining losses.
+  For visualization only the relative remaining losses are plotted, as the absolute values have no valuable meaning.
   }
 \label{fig:static_calibration_algorithmic_error}
 \end{figure}
 
 \Cref{fig:static_calibration_algorithmic_error} displays the resulting parameters for the camera \camsf{4}.
-We plot each of the parameters against the scale of the remaining loss of the correspondences and the $\lambda_c$.
+We plot each of the parameters against the remaining loss of the correspondences and the $\lambda_c$. 
+For visualization only the relative remaining losses are plotted, as the absolute values have no valuable meaning.
 The translation parameters are in meters and relative to the UTM projection \cite{langley1998utm}.
 The rotation parameters are in degrees of Euler angles. The focal length is given in pixels.
 

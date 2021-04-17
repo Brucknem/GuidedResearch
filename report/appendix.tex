@@ -54,7 +54,7 @@ Please see the next pages for the plots.
   The normalized arc lengths representing the path of the tracked pixels through the image.
   Bottom graphs:
   The tracked pixel locations of the vehicles as they move through the scene for the original video feed and the stabilized ones.
-  The jittery motion of the camera can be clearly seen by the chaotic movement of the pixels.
+  The jittery motion of the camera can be clearly seen by the chaotic movement of the pixels in the original sequence.
   After stabilization the pixels move much more smoothly through the images, whereas the remaining jitter is mostly due to inaccuracies in the tracking. 
   }
   \label{fig:object_tracking_appendix_s40_n_far}
@@ -78,7 +78,7 @@ Please see the next pages for the plots.
   The normalized arc lengths representing the path of the tracked pixels through the image.
   Bottom graphs:
   The tracked pixel locations of the vehicles as they move through the scene for the original video feed and the stabilized ones.
-  It shows that the recording did not include much jitter and thus the paths are already relatively smooth.
+  It shows that the recording did not include much jitter and thus the paths are already relatively smooth, but smoothed further after stabilization.
    }
   \label{fig:object_tracking_appendix_s40_n_near}
 \end{figure*}
@@ -101,7 +101,7 @@ Please see the next pages for the plots.
   The normalized arc lengths representing the path of the tracked pixels through the image.
   Bottom graphs:
   The tracked pixel locations of the vehicles as they move through the scene for the original video feed and the stabilized ones.
-  The jittery motion of the camera can be clearly seen by the chaotic movement of the pixels.
+  The jittery motion of the camera can be clearly seen by the chaotic movement of the pixels in the original sequence.
   After stabilization the pixels move much more smoothly through the images, whereas the remaining jitter is mostly due to inaccuracies in the tracking. 
   The tracking of the silver car displays a lane change of the vehicle over two lanes.
   The tracking of the yellow truck displays an outlier for FAST as it extended the path of the tracked pixel.
@@ -125,7 +125,7 @@ Please see the next pages for the plots.
   The normalized arc lengths representing the path of the tracked pixels through the image.
   Bottom graphs:
   The tracked pixel locations of the vehicles as they move through the scene for the original video feed and the stabilized ones.
-  It shows that the recording did not include much jitter and thus the paths are already relatively smooth.
+  It shows that the recording did not include much jitter and thus the paths are already relatively smooth, but smoothed further after stabilization.
   }
   \label{fig:object_tracking_appendix_s50_s_near}
 \end{figure*}
@@ -149,6 +149,7 @@ Please see the next pages for the plots.
   Left: The resulting translational parameters plotted against the remaining losses. 
   Right: The resulting rotational parameters plotted against the remaining losses.
   Bottom: The resulting focal length  plotted against the remaining losses.
+  For visualization only the relative remaining losses are plotted, as the absolute values have no valuable meaning.
    }
 \label{fig:static_calibration_algorithmic_error_s40_n_far}
 \end{figure*}
@@ -172,6 +173,7 @@ Please see the next pages for the plots.
   Left: The resulting translational parameters plotted against the remaining losses. 
   Right: The resulting rotational parameters plotted against the remaining losses.
   Bottom: The resulting focal length  plotted against the remaining losses.
+  For visualization only the relative remaining losses are plotted, as the absolute values have no valuable meaning.
      }
 \label{fig:static_calibration_algorithmic_error_s40_n_near}
 \end{figure*}
@@ -196,6 +198,7 @@ Please see the next pages for the plots.
   Left: The resulting translational parameters plotted against the remaining losses. 
   Right: The resulting rotational parameters plotted against the remaining losses.
   Bottom: The resulting focal length  plotted against the remaining losses.
+  For visualization only the relative remaining losses are plotted, as the absolute values have no valuable meaning.
     }
 \label{fig:static_calibration_algorithmic_error_s50_s_far}
 \end{figure*}
@@ -219,6 +222,7 @@ Please see the next pages for the plots.
   Left: The resulting translational parameters plotted against the remaining losses. 
   Right: The resulting rotational parameters plotted against the remaining losses.
   Bottom: The resulting focal length  plotted against the remaining losses.
+  For visualization only the relative remaining losses are plotted, as the absolute values have no valuable meaning.
      }
 \label{fig:static_calibration_algorithmic_error_s50_s_near}
 \end{figure*}
