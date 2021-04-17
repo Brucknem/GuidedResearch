@@ -166,7 +166,7 @@ The resulting high-dimensional problem contains a multitude of local minima, whe
 \label{fig:static_calibration_algorithmic_error}
 \end{figure}
 
-\Cref{fig:static_calibration_algorithmic_error} displays the resulting parameters for the camera \camsf{4}.
+\Cref{fig:static_calibration_algorithmic_error} displays the resulting parameters for the camera \camsf{4} recorded over 250 runs.
 We plot each of the parameters against the remaining loss of the correspondences and the $\lambda_c$. 
 For visualization only the relative remaining losses are plotted, as the absolute values have no valuable meaning.
 The translation parameters are in meters and relative to the UTM projection \cite{langley1998utm}.
@@ -176,6 +176,4 @@ The plots show that the standard deviation $\sigma_T$ of the translations does n
 This implies that compared to the uncertainty introduced by the measurements (\Cref{sec:static_calibration_expectable_error}) the algorithmic error can be neglected.   
 
 We evaluate the algorithmic error for the remaining cameras in the Appendix (\Cref{sec:appendix}). 
-The results are the same as expected.
-
-% \subsubsection{Minimal number of correspondences}
+The results are the same as expected and the distribution of the datapoints of the parameters and losses is dependent on the mapping and the viewed scene of the camera, thus the visible structures are arbitrary. 
