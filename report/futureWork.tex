@@ -20,12 +20,12 @@ This scheme will be affected by changing weather and lighting conditions as the 
 \subsection{Dynamic Stabilization}
 We present two major improvements that can be done to extend the presented dynamic stabilization approach.
 
-\subsubsection{Warp Field Stabilization based on Optical Flow}
+\subsubsection{Warp Field Stabilization Based on Optical Flow}
 We use the optical flow to measure the performance of the stabilizers as described in  \Cref{sec:evaluation_dynamic_stabilization_optical_flow}.
 The optical flow is a 2D vector field where each vector is a displacement vector showing the movement of pixels between frames caused by movement of the objects or cameras.
 The image can be stabilized using the inverse vector field that also minimizes the reprojection error between frames.
 
-\subsubsection{Deep Learning based Dynamic Stabilization}
+\subsubsection{Deep Learning Based Dynamic Stabilization}
 Based on the ongoing success of deep learning approaches in computer vision, especially of convolutional neural networks (CNN), a self-learning stabilization procedure might be developed.
 The CNN expects the current input and reference frame and outputs the homographic transformation or the warped frame. 
 This might speed up the pipeline and inherently adds a measure for the uncertainty of the results by modelling the probability of the homographic transformation.
@@ -38,6 +38,13 @@ This approach can be used to fuse the feature detection, matching and warping st
 \subsection{Static Calibration}
 We present two major improvements that can be done to extend the presented static calibration approach.
 
+\subsubsection{Robustness Against Outliers}
+BA problems are inherently prone to outliers, as they greatly impact the shape of the reprojection-error loss landscape. 
+To use the presented system in practice a RANSAC \cite{fischler1981random} or similar sample consensus based approach needs to be implemented.
+By evaluating the calibration multiple times with different subsets of correspondences a stable sample consensus can be found in asymptotically all runs.
+This will greatly impact the robustness of the calibration procedure against outliers, as they can be filtered out automatically by the algorithm.  
+
+
 \subsubsection{Fully Automatic Static Calibration}
 \label{sec:auto_mapping_landmarks}
 We establish the mapping of the correspondences by hand, thus a human has to look up the ids of the landmarks in the HD maps and assign them to their respective pixels.
@@ -46,7 +53,7 @@ One can project the known base origin points of the objects from the HD maps int
 Starting from the projected pixel locations one could search in a defined enclosing region to find pixels that clearly correspond to the objects by applying template, color or gradient matching approaches.
 The automatic detection of landmarks enables the system to perform fully automatic static self calibration.
 
-\subsubsection{Machine Learning based Bundle Adjustment}
+\subsubsection{Machine Learning Based Bundle Adjustment}
 Aravkin \etal \cite{students_t_bundle_adjustment} have shown that the BA problem can be modelled on top of a Student's-t distribution. 
 The resulting statistical machine learning approach for the BA can be used to jointly estimate the camera parameters and world positions of objects, while at the same time being robust against outliers.
   
