@@ -29,7 +29,7 @@ The recordings are taken on a day with strong winds to ensure high jitter in the
 \label{sec:evaluation_dynamic_stabilization}
 We evaluate and compare three pipeline instances based on the SURF \cite{bay10.1007/11744023_32,opencv_library} feature detector (SURF), 
 ORB \cite{rublee6126544, opencv_library} feature detector (ORB) and FAST \cite{Ghahremani_2021,opencv_library} feature detector with FREAK \cite{alahi6247715,opencv_library} feature descriptors (FAST) 
-and present two measures to evaluate the dynamic stabilization pipeline described in \autoref{sec:dynamic_stabilization_approach}.
+and present two measures to evaluate the dynamic stabilization pipelines.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -44,10 +44,10 @@ and present two measures to evaluate the dynamic stabilization pipeline describe
     \end{tabular}
     \caption{
         From left to right: Original frame, stabilized using SURF, ORB and FAST.
-        The dense optical flow displays the pixel displacement, the lighter the color the further the displacement. 
+        The dense optical flow displays the pixel displacement, the lighter the color the farther the displacement. 
         The angle of displacement is color coded according to the HSV color circle.  
         In the original frame the violet background color indicates a jittery camera movement. 
-        The car in the lower half is driving in the opposite direction as the camera jitters. 
+        The car in the lower half is driving in the opposite direction as the camera jitters, indicated by the yellow patch. 
     }
     \label{fig:optical_flow_example}
 \end{figure*}
@@ -56,7 +56,7 @@ The optical flow is a 2D vector field where each vector is a displacement vector
 It describes the apparent motion of image objects between two consecutive frames. 
 
 We use the dense optical flow estimation algorithm proposed by Farnebäck \cite{farnback10.1007/3-540-45103-X_50,opencv_library} to measure the displacement of each pixel between the frames. 
-We calculate the mean displacement over the whole image to get the overall displacement. 
+We calculate the mean displacement over the whole frame to get a measure for the total motion in the image. 
 
 \autoref{fig:optical_flow_example} displays one frame of optical flow calculated pre and after stabilization.
 It qualitatively shows that the static background scene is dark in the stabilized frames which indicates a low optical flow and thus nearly no movement. 
@@ -126,11 +126,11 @@ We randomly took three sample vehicles per camera and tracked their pixel locati
 As the vehicles move through the image the bounding box of the object is found using the \emph{Discriminative Correlation Filter With Channel and Spatial Reliability} proposed by Lukezic \etal{} \cite{Lukezic_2017_CVPR,opencv_library}.
 The center point of the bounding box is then written to disk and used as the predicted pixel location $p$ of the vehicle.
 
-We only track in the original frame to remove inaccuracies in the tracking and use the homographic transformation matrix from \autoref{eq:dynamic_stabilization_homographic_transformation} that stabilizes the frame to also stabilize the bounding box.
+We only track in the original frame to remove inaccuracies in the tracking and use the homographic transformation matrix from \autoref{eq:dynamic_stabilization_homographic_transformation} that stabilizes the frame to also stabilize the bounding boxes.
 This gives us comparable results for the pixel locations. 
 
 We calculate the travelled distance of the pixel locations of the objects as they move through the image. 
-This distance is a direct measure for the jittery motion in the image as it introduces large jumps of the tracked positions, thus directly increasing the travelled distance.
+This distance is a direct measure for the jittery motion in the image as the motion introduces large jumps of the tracked positions, thus directly increasing the travelled distance.
 
 The travelled distance is formulated as the arc length
 \begin{equation}
@@ -150,7 +150,7 @@ is performed by the arc length of the original video frame.
 There is one red truck, a black pickup and a white car taken as random samples.
 The tracking is performed als long as the vehicles are visible.
 It shows that the travelled distances of the pixels after dynamic stabilization remain at between $43\%$ and $68.4\%$ compared to the original one.   
-This implies that much of the additional motion introduced by the environmental influences are removed and the remaining path displays the real projected path of the vehicle. 
+This implies that much of the additional motion introduced by the environmental influences is removed and the remaining path displays the real projected path of the vehicle. 
 
 \begin{figure*}[!ht]
     \centering
@@ -159,10 +159,10 @@ This implies that much of the additional motion introduced by the environmental 
       \includegraphics[width=0.475\linewidth]{diagrams/object_tracking/s40_n_far/normalized_arc_lengths.html.png}    
     \end{tabular}
     \caption{Left: 
-    The exemplary vehicles tracked through the video sequence of the camera \camsn{4}. 
+    The exemplary vehicles tracked through the video sequence of the camera \camsn{4} and their bounding boxes. 
     Right:
     The corresponding normalized arc lengths of the pixel path. 
-    The removed jitter is directly proportional to the decrease in the normalized arc lengths, as the pixel only follows the real vehicles movement.
+    The removed jitter is directly proportional to the decrease in the normalized arc lengths, as the tracked pixels only follow the real vehicles movements after stabilization.
     }
     \label{fig:object_tracking_s40_n_far}
 \end{figure*}
