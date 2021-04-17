@@ -7,11 +7,10 @@ In this paper we proposed two main improvements on the vision based tracking sys
 We first presented a pipeline to dynamically stabilize jittery motion in the video streams of RGB cameras mounted to gantry bridges along a highway.
 We applied a homographic transformation in image space based on the matching of visual features between the current and a stable reference frame.
 We have shown that the stabilization substantially (up to $99.8\%$) improves the stability of the frames regarding the remaining mean pixel displacement.
-By tracking vehicles through the video sequence we have shown that the remaining length of the pixels path after stabilization is as low as $43\%$ of the not stabilized one.
-This implies that $57\%$ of the motion was noisy jitter that is removed after stabilization.
-Finally, we have shown that the dynamic stabilization pipeline is easily realtime capable with at most $18.649$ milliseconds per frame.
+By tracking vehicles through the video sequence we have shown that the remaining length of the pixels path after stabilization is lowered by up to $57\%$ compared to the not stabilized one and thus the jittery motion of the camera is compensated significantly after stabilization.
+Finally, we have shown that the dynamic stabilization pipeline is easily realtime capable with at least $50$ processed frames per second.
 
-We secondly presented the formulation of a single camera RGB-only Bundle Adjustment problem that is minimized using the reprojection-error.
+We secondly presented the formulation of a single camera RGB-only Bundle Adjustment problem that is minimized using the reprojection-error to statically calibrate the camera setup to the reference system.
 We recover the cameras pose by jointly optimizing for the cameras intrinsic and extrinsic parameters as well as the real world position of viewed correspondences to a high definition map.
 We checked our results for the absence of systematic errors, gave a lower bound on the number of correspondences needed for convergence and the structure the correspondences have to exceed.
 We evaluated the expectable error after pose estimation that arises from measurement uncertainties and imprecisions in the HD map and have shown that the deviations among the minima found by the optimization strategy are neglectable.
