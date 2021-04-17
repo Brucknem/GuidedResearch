@@ -125,7 +125,11 @@ of the camera as the spanned meters per pixel relative to the distance $d$ from 
 It shows that the far cameras cannot distinguish between points that are $\sim 2.2 cm$ at the nearest visible distance from the camera ranging up to $\sim 7.54 cm$ at the farthest distance.
 The near cameras cannot distinguish between points that are $\sim 0.88 cm$ at the nearest visible distance from the camera ranging up to $\sim 15.82 cm$ at the farthest distance.
 
-The highest possible achievable precision for the translational parameters of the camera is bound by the uncertainty in the measurements, as a misplacement of the camera can only be detected if it is farther than the sensor uncertainty.
+Additionally to the sensor uncertainties we are facing uncertainties in the HD maps.
+The positions of the used PDs are only precise within $1cm - 3cm$. 
+This data uncertainty adds up with the measurement uncertainty introduced by the cameras.
+
+The highest possible achievable precision for the translational parameters of the camera is bound by the uncertainty in the measurements and HD maps, as a misplacement of the camera can only be detected if it is farther than the uncertainty of the sensors and HD maps.
 Nonetheless, in practice the imprecision will sum up and the translation parameters will drift inevitable. 
 This implies that objects in close distance to the camera are more reliable when estimating the translation.
 
