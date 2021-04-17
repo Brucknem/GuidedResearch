@@ -20,8 +20,8 @@ In our project we use HD maps in the \OD{} standard format.
 In this work we focus on the permanent delineator (PD) objects that are easily visible in the video feeds.
 
 We extract the world position of the PDs using the mathematical operations defined in the \OD{} standard.
-This gives us the the base origin point $o~=~(x, y, z)^T$ of the PDs in the Universal Transverse Mercator (UTM) projection \cite{langley1998utm,proj}. 
-This point $o$ is the world position of the lower end of the PD where it touches the ground or another object.
+This gives us the base origin point $o~=~(x, y, z)^T$ of the PDs in the Universal Transverse Mercator (UTM) projection \cite{langley1998utm,proj}. 
+The point $o$ is the real world position of the lower end of the PD where it touches the ground or another object.
 Additionally, we retrieve a directional heading axis $d~=~(x, y, z)^T$ and the height $h$ of the PD.
 
 \paragraph{1D Approximation of Objects}
@@ -29,12 +29,12 @@ Additionally, we retrieve a directional heading axis $d~=~(x, y, z)^T$ and the h
 In the original BA setting the optimization is done jointly over multiple cameras and observations, and the arising stereo vision problem is solved jointly for the 3D positions of the objects and the camera parameters.
 For this system of equations to be solvable it requires multiple cameras from different viewing angles and large overlapping fields of view between the cameras.
 
-In our project we have neither of requirements and calibrate each camera separately to the HD map.
-We relax the BA problem by the 1D approximation of the PDs
+In our project we have neither of the requirements and thus calibrate each camera separately to the HD map.
+We relax the BA problem by the 1D line approximation of the PDs
 \begin{equation}
 S = \{o + \lambda * d: \quad \lambda \in [0, h]\}
 \end{equation}
-where $S$ is the set of points along its central axis between its base at $\lambda = 0$ and its top at $\lambda = h$.
+where $S$ is the set of points along its central axis between the base at $\lambda = 0$ and its top at $\lambda = h$.
 This approximation allows for a joint optimization of their world positions and the camera intrinsic and extrinsic parameters.
 
 \autoref{sec:static_calibration_number_points} derives a minimal number of points for the resulting system of equations to be solvable.
@@ -113,7 +113,7 @@ The pinhole projection $\pi$ is formulated as
   \end{pmatrix} * x 
 \end{equation}
 
-where $x$ is an 3D input vector in homogeneous coordinates, $f_x, f_y$ are the focal lengths in pixels, $c_x, c_y$ is the principle point and $z$ is the homogeneous component used in the perspective division. 
+where $x$ is an 3D input vector in homogeneous coordinates, $f_x, f_y$ are the focal lengths in pixels, $c_x, c_y$ is the principle point, $s$ is the skew parameter and $z$ is the homogeneous component used in the perspective division. 
 
 The optimal values for $\pi,R,T$ are found if for all correspondences the distance between the expected pixel $\hat{p}_c$ and the projected pixel $p_c$ is minimal and it holds for all $c$
 \begin{equation}
@@ -187,7 +187,7 @@ from the interval $[l, u]$.
 
 We rely on a rough initialization for the values $\pi_i \in \pi$ and allow the optimizer to adjust the values within a $\pm 0.1$ interval around the initialization. 
 
-Finally, we constrain the $X$ axis rotation $R_x$ (Pitch) to be within the interval $[60, 110]$ degree and the $Y$ axis rotation $R_y$ (Roll) to be within the interval $[-10, 10]$ degree.
+Finally, we constrain the $X$ axis rotation $R_x$ (Pitch) to be within the interval $[60, 110]$ degree and the $Y$ axis rotation $R_y$ (Roll) to be within the interval $[-10, 10]$ degree, meaning that the camera has to be roughly in level and face horizontally.
 
 The factors $\alpha, \beta, \gamma, \delta$ are used to explicitly scale the remaining losses of the terms, thus giving them different influence on the optimizer. 
 We saw empirically that good values for the factors are $\alpha = 1*10^{100}, \beta = 2, \gamma = 10, \delta = 50$.

@@ -16,14 +16,14 @@ In this paper we propose two algorithms to solve distinct problems that arise fr
       The frames are segmented into the foreground and background to extract the static scene.
       On the static scene visual features are detected and the feature descriptors are matched.
       We use the homographic transformation minimizing the reprojection-error based on the matching to warp the video frame.
-      The stabilized frame is used to update the background segmentation mask and the pipeline repeats.
+      The stabilized frame is used to update the background segmentation mask.
        }
    \label{fig:dynamic_stabilization_algorithm}
 \end{figure}
 
-The camera sensors used in the project are mounted onto gantry bridges spanning the highway.
+The camera sensors used in the project are mounted to gantry bridges spanning over the highway.
 Environmental influences, \eg{} wind or vibrations from passing vehicles, bring the bridges into a swinging state that spreads onto the cameras. 
-This unwanted real world movement propagates to the video feeds output by the camera and introduces jittery motion in image space. 
+This unwanted real world movement propagates into the video feeds output by the camera and introduces jittery motion in image space. 
 We assume the cameras to be mostly static, thus we only face disturbances within a small range around the resting position.
 Nonetheless, the small disturbances get amplified by the huge distances covered by the cameras and introduce substantial error.
 
@@ -37,15 +37,14 @@ To mitigate the noise added by the jittery motion we propose the pipeline displa
 We stabilize the input frame by minimizing the reprojection-error between the video frame and the reference frame, thus aligning the images.
 This alignment is based on the matching of features between the frames, whereas we do not align the moving vehicles, but only the static non-moving background, \eg{} the road, poles, guardrails and bridges.
 We assume that the background does not move in the real world, thus aligning it during image warping ensures that the scene stays static and only the vehicles real movement is kept.
-
-Hence, we mask the input frame and the stable reference frame using a background segmentation based on
+Hence, we extract the static background from the input frame and the stable reference frame using a background segmentation based on
 the \emph{Improved Adaptive Gaussian Mixture Model for Background Subtraction} proposed by Zoran Zivkovic \etal{} \cite{zivkovic10.5555/1018428.1020644,zivkovic10.1016/j.patrec.2005.11.005,opencv_library}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\paragraph{Feature detection}
+\paragraph{Feature Detection}
 \begin{figure}[t]
    \begin{center}
       \includegraphics[width=\linewidth]{images/feature_matching.png}
@@ -59,9 +58,9 @@ the \emph{Improved Adaptive Gaussian Mixture Model for Background Subtraction} p
    \label{fig:dynamic_stabilization_feature_matching}
 \end{figure}
 
-We search the image for pixel locations that are prominent and depict specific patterns that are unique and can easily be compared.
+We search the static background for pixel locations that are prominent and depict specific patterns that are unique and can easily be compared.
 The detected features describe the location based on different metrics, \eg{} the local image gradient, oriented histograms or haar-like features \cite{stork2001pattern}.
-Kumar \etal{} \cite{kumar2014survey} describe a multitude of variations of feature detectors and descriptors.
+Kumar \etal{} \cite{kumar2014survey} give an in depth description of a multitude of feature detectors and descriptors.
 
 We implemented the SURF \cite{bay10.1007/11744023_32} and ORB \cite{rublee6126544} feature detectors and descriptors and the Fast \cite{Ghahremani_2021} feature detector with FREAK \cite{alahi6247715} feature descriptors. The algorithmic implementation is taken from the OpenCV library \cite{opencv_library}. 
 
@@ -69,7 +68,7 @@ We implemented the SURF \cite{bay10.1007/11744023_32} and ORB \cite{rublee612654
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\paragraph{Feature matching}
+\paragraph{Feature Matching}
 We compare the detected features from the input frame with the features from the stable reference frame.
 A match is reported if the feature descriptors of two compared features surpass the Lowe's ratio test \cite{lowe10.1023/B:VISI.0000029664.99615.94} regarding some feature dependent metric \cite{kumar2014survey}.
 These feature matches establish a spatial relationship in pixel space between the two frames.
@@ -84,23 +83,23 @@ We minimize the reprojection-error between the pixels so that for each match $i$
 where $z_i$ is the homogeneous component used in the perspective division. 
 We use a RANSAC \cite{fischler1981random} based estimation procedure to robustify the minimization against outliers.
 
-The implementation is included in the OpenCV library \cite{opencv_library}.
+The algorithmic implementation is included in the OpenCV library \cite{opencv_library}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\paragraph{Image alignment}
+\paragraph{Image Alignment}
 We use the found homographic transformation to warp the whole input frame, thus aligning the background of the frames.
-As the keyframe is stable and does not change over time the current video frame is now also stabilized.
+As the keyframe is stable and does not change over time the current video frame is also stabilized.
 The alignment minimizes the motion of the static background scene and leaves only the real expected movement of the vehicles.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\paragraph{Foreground/Background segmentation upate}
+\paragraph{Foreground/Background Segmentation Upate}
 We use the stabilized frame to update the segmentation of the foreground and background.
 We assume the motion between frames to be relatively small, thus we use the segmentation of the stabilized frame for the next frame.
 This reduces the search space for the feature detectors and prohibits matches between static scene and dynamic foreground objects. 
-Hence, the algorithm is robustified and speed up.
+% Hence, the algorithm is robustified and speed up.
