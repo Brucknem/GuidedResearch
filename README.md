@@ -1,6 +1,6 @@
 # Automated Camera Stabilization and Calibration for Intelligent Transportation Systems
 I have successfully finished my Guided Research within the [PROVIDENTIA](https://www.bmvi.de/SharedDocs/DE/Artikel/DG/AVF-projekte/providentia-plusplus.html) project during the winter term of 2020/2021.  
-The report is included in this repository, and the implementation is linked.
+The [report](https://github.com/Brucknem/GuidedResearch/blob/main/report/report.pdf) is included in this repository, and the implementation is linked.
 
 ***
 
