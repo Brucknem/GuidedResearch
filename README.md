@@ -26,7 +26,7 @@ The aim of this Master’s thesis is to investigate the feasibility to automatic
 
 ## Implementation
 - [Dynamic Stabilization](https://github.com/Brucknem/DynamicStabilization)
-- [Static Calibration](https://github.com/Brucknem/DynamicStabilization)
+- [Static Calibration](https://github.com/Brucknem/StaticCalibration)
 
 ***
 
