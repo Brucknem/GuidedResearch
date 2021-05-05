@@ -97,7 +97,7 @@ The projection from points $s_c~=~o_c~+~\lambda_c~*~h_c$ of the PDs world positi
 
 \begin{equation}
   \label{eq:static_calibration_reprojection}
-  p_c = \pi \left( R * T * (o_c + \lambda_c * h_c) \right)
+  p_c = \pi \left( R * T * (o_c + \lambda_c * d_c) \right)
 \end{equation}
 
 where $R$ is the cameras world rotation in Euler angles, $T$ is the cameras world translation and $\pi$ is the pinhole projection to image space based on the camera intrinsic parameters.
@@ -117,7 +117,7 @@ where $x$ is an 3D input vector in homogeneous coordinates, $f_x, f_y$ are the f
 
 The optimal values for $\pi,R,T$ are found if for all correspondences the distance between the expected pixel $\hat{p}_c$ and the projected pixel $p_c$ is minimal and it holds for all $c$
 \begin{equation}
-  0 = \hat{p}_c - \pi \left( R * T * (o_c + \lambda_c * h_c)\right) = \hat{p}_c - p_c
+  0 = \hat{p}_c - \pi \left( R * T * (o_c + \lambda_c * d_c)\right) = \hat{p}_c - p_c
 \end{equation}
 
 This places constraints on the values $\pi,R,T$ can take and enables us to recover the camera pose, the intrinsic parameters and the 1D approximate positions relative to the $\lambda$s only from the correspondences.\\
