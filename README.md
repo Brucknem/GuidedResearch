@@ -31,33 +31,3 @@ The aim of this Master’s thesis is to investigate the feasibility to automatic
 ***
 
 ## [Literature](https://github.com/Brucknem/StaticCalibration)
-
-***
-
-# Dependencies
-
-## External Dependencies
-
-These dependencies have to be installed on your system. Follow their instructions on how to install them. 
-
-- [CUDA](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html) - You have to install CUDA and the Nvidia drivers according to your GPU.
-
-There is no way to automate this proces as it is dependend on your system.
-
-***
-
-- [CMake](https://cmake.org/) - For building the libraries
-- [Ceres Solver](http://ceres-solver.org/) - The non-linear solver for the static calibration
-- [OpenCV](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html) - With CUDA support for the dynamic stabilization
-
-To facilitate the setup of CMake, Ceres and OpenCV you can use the [setup script](../main/setup_ceres_opencv.sh). This should install all necessary dependencies and pull & compile the libraries from source. 
-This might be outdated by now. If compile errors arise, the CMake output is a good start to debug.
-
-- [Boost](https://www.boost.org/)
-
-## Internal Dependencies
-
-These dependencies are pulled by CMake when the project is built. You `do not` have to install them manually.
-
-- [GoogleTest](https://github.com/google/googletest)
-- [YAML-CPP](https://github.com/jbeder/yaml-cpp.git)
